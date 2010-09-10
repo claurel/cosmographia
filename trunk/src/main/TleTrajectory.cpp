@@ -67,8 +67,6 @@ TleTrajectory::TleTrajectory(tle_t* tle) :
     calendarDate.setTimeScale(TimeScale_UTC);
 
     m_epoch = calendarDate.toTDBSec();
-
-    VESTA_LOG("epoch: %s %16f diff: %f", calendarDate.toString().c_str(), calendarDate.toTAIJD(), (m_tle->epoch - calendarDate.toTDBJD()) * 86400.0);
 }
 
 

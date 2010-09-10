@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
 //
-// Eigen is free software; you can redistribute it and/or
+// Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
@@ -97,8 +97,8 @@ ChebyshevPolyTrajectory::state(double tdbSec) const
     // TODO: We can reduce numerical errors by summing high order terms first; should
     // find out if this matters enough to be worth the trouble.
     double* granuleCoeffs = m_coeffs + granuleIndex * (m_degree + 1) * 3;
-    Vector3d position = Map<MatrixXd>(granuleCoeffs, m_degree + 1, 3) * Map<MatrixXd>(x, m_degree + 1, 1);
-    Vector3d velocity = Map<MatrixXd>(granuleCoeffs, m_degree + 1, 3) * Map<MatrixXd>(v, m_degree + 1, 1);
+    Vector3d position = Map<MatrixXd>(granuleCoeffs, m_degree + 1, 3).transpose() * Map<MatrixXd>(x, m_degree + 1, 1);
+    Vector3d velocity = Map<MatrixXd>(granuleCoeffs, m_degree + 1, 3).transpose() * Map<MatrixXd>(v, m_degree + 1, 1);
 
     return StateVector(position, velocity);
 }

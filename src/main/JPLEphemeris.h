@@ -15,34 +15,43 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _CHEBYSHEV_POLY_TRAJECTORY_H_
-#define _CHEBYSHEV_POLY_TRAJECTORY_H_
+#ifndef _JPL_EPHEMERIS_H_
+#define _JPL_EPHEMERIS_H_
 
-#include <vesta/Trajectory.h>
+#include "ChebyshevPolyTrajectory.h"
+#include <string>
 
 
-class ChebyshevPolyTrajectory : public vesta::Trajectory
+class JPLEphemeris
 {
 public:
-    ChebyshevPolyTrajectory(const double coeffs[],
-                            double degree,
-                            double granuleCount,
-                            double startTimeTdbSec,
-                            double granuleLengthSec);
+    JPLEphemeris();
+    ~JPLEphemeris();
 
-    ~ChebyshevPolyTrajectory();
+    enum JplObjectId
+    {
+        Mercury = 0,
+        Venus = 1,
+        EarthMoonBarycenter = 2,
+        Mars = 3,
+        Jupiter = 4,
+        Saturn = 5,
+        Uranus = 6,
+        Neptune = 7,
+        Pluto = 8,
+        Moon = 9,
+        Sun = 10,
+        Earth = 11,
+        ObjectCount = 12,
+    };
 
-    virtual vesta::StateVector state(double tdbSec) const;
-    virtual double boundingSphereRadius() const;
+    ChebyshevPolyTrajectory* trajectory(JplObjectId id) const;
+    void setTrajectory(JplObjectId id, ChebyshevPolyTrajectory* trajectory);
 
-    static const unsigned int MaxChebyshevDegree = 32;
+    static JPLEphemeris* load(const std::string& filename);
 
 private:
-    double* m_coeffs;
-    unsigned int m_degree;
-    unsigned int m_granuleCount;
-    double m_startTime;
-    double m_granuleLength;
+    vesta::counted_ptr<ChebyshevPolyTrajectory> m_trajectories[int(ObjectCount)];
 };
 
-#endif // _CHEBYSHEV_POLY_TRAJECTORY_H_
+#endif // _JPL_EPHEMERIS_H_

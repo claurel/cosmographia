@@ -34,6 +34,10 @@ public:
 
     virtual vesta::StateVector state(double tdbSec) const;
     virtual double boundingSphereRadius() const;
+    virtual bool isPeriodic() const;
+    virtual double period() const;
+
+    void setPeriod(double period);
 
     static const unsigned int MaxChebyshevDegree = 32;
 
@@ -43,6 +47,7 @@ private:
     unsigned int m_granuleCount;
     double m_startTime;
     double m_granuleLength;
+    double m_period;
 };
 
 #endif // _CHEBYSHEV_POLY_TRAJECTORY_H_

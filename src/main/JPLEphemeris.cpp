@@ -197,6 +197,13 @@ JPLEphemeris::load(const string& filename)
     double startSec = daysToSeconds(startJd - vesta::J2000);
     double secsPerRecord = daysToSeconds(daysPerRecord);
 
+    const double orbitalPeriods[] =
+    {
+        0.24085, 0.61520, 1.0000, 1.8808, 11.863, 29.447, 84.017, 164.79, 248.02,
+        0.0, // Sun (aperiodic orbit about barycenter),
+        27.32158 / 365.25, 27.32158 / 365.25 // Earth and Moon about Earth-Moon barycenter
+    };
+
     for (unsigned int objectIndex = 0; objectIndex < JplEph_ObjectCount - 1; ++objectIndex)
     {
         ChebyshevPolyTrajectory* trajectory =
@@ -205,6 +212,7 @@ JPLEphemeris::load(const string& filename)
                                             coeffInfo[objectIndex].granuleCount * recordCount,
                                             startSec,
                                             secsPerRecord / coeffInfo[objectIndex].granuleCount);
+        trajectory->setPeriod(daysToSeconds(orbitalPeriods[objectIndex] * 365.25));
         eph->setTrajectory(JplObjectId(objectIndex), trajectory);
     }
 

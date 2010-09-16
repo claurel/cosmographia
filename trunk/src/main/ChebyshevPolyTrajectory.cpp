@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "ChebyshevPolyTrajectory.h"
+#include <vesta/Debug.h>
 #include <algorithm>
 
 using namespace vesta;
@@ -42,12 +43,16 @@ ChebyshevPolyTrajectory::ChebyshevPolyTrajectory(const double coeffs[],
     m_degree(degree),
     m_granuleCount(granuleCount),
     m_startTime(startTimeTdbSec),
-    m_granuleLength(granuleLengthSec)
+    m_granuleLength(granuleLengthSec),
+    m_period(0.0)
 {
     // assert(degree <= MaxChebyshevDegree);
     unsigned int coeffCount = (degree + 1) * granuleCount * 3;
     m_coeffs = new double[coeffCount];
     copy(coeffs, coeffs + coeffCount, m_coeffs);
+
+    setStartTime(startTimeTdbSec);
+    setEndTime(startTimeTdbSec + granuleCount * granuleLengthSec);
 }
 
 
@@ -100,12 +105,33 @@ ChebyshevPolyTrajectory::state(double tdbSec) const
     Vector3d position = Map<MatrixXd>(granuleCoeffs, m_degree + 1, 3).transpose() * Map<MatrixXd>(x, m_degree + 1, 1);
     Vector3d velocity = Map<MatrixXd>(granuleCoeffs, m_degree + 1, 3).transpose() * Map<MatrixXd>(v, m_degree + 1, 1);
 
-    return StateVector(position, velocity);
+    return StateVector(position, velocity * (2.0 / m_granuleLength));
 }
 
 
 double
 ChebyshevPolyTrajectory::boundingSphereRadius() const
 {
-    return 0.0;
+    return 1.0e10;
+}
+
+
+bool
+ChebyshevPolyTrajectory::isPeriodic() const
+{
+    return m_period != 0.0;
+}
+
+
+double
+ChebyshevPolyTrajectory::period() const
+{
+    return m_period;
+}
+
+
+void
+ChebyshevPolyTrajectory::setPeriod(double period)
+{
+    m_period = period;
 }

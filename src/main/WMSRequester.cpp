@@ -32,15 +32,13 @@ using namespace std;
 
 
 WMSRequester::WMSRequester(QObject* parent) :
-    QObject(parent),
-    m_networkManager(NULL)
+    QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
     QNetworkDiskCache* cache = new QNetworkDiskCache(this);
     cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
     m_networkManager->setCache(cache);
     qDebug() << "cache location: " << cache->cacheDirectory();
-
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processTile(QNetworkReply*)));
 }
 
@@ -52,58 +50,55 @@ WMSRequester::~WMSRequester()
 
 QString
 WMSRequester::createWmsUrl(const QString& requestUrlBase,
-                           const QString& layer,
-                           const QString& style,
                            const LatLongBoundingBox& box,
                            unsigned int tileWidth,
                            unsigned int tileHeight) const
 {
-    //QString requestBase = "http://wms.jpl.nasa.gov/wms.cgi?request=GetMap";
-    //QString layer = "BMNG";
-    QString format = "image/jpeg";
-    //QString style = "Nov";
-    QString srs = "EPSG:4326";
-
     QString urlString = requestUrlBase;
-    urlString += "&layers=" + layer;
-    urlString += "&srs=" + srs;
-    urlString += "&format=" + format;
-    urlString += "&styles=" + style;
     urlString += "&width=" + QString::number(tileWidth) + "&height=" + QString::number(tileHeight);
-    //urlString += "&bbox=" + QString::number(box.west) + "," + QString::number(box.south) + "," + QString::number(box.east) + "," + QString::number(box.north);
-    urlString += QString("&bbox=%1,%2,%3,%4").arg(box.west).arg(box.south).arg(box.east).arg(box.north);
+    urlString += QString("&bbox=%1,%2,%3,%4").arg(box.west,  0, 'f', 6).
+                                              arg(box.south, 0, 'f', 6).
+                                              arg(box.east,  0, 'f', 6).
+                                              arg(box.north, 0, 'f', 6);
 
     return urlString;
 }
 
 
 void
-WMSRequester::retrieveTile(const QString& requestUrl,
-                           const QString& layer,
-                           const QString& style,
-                           unsigned int level, unsigned int x, unsigned int y, unsigned int tileSize)
+WMSRequester::retrieveTile(const QString& tileName,
+                           const QString& surface,
+                           const QRectF& tileRect,
+                           unsigned int tileSize)
 {
-    unsigned int levelHeight = (1 << level) * tileSize;
-    unsigned int levelWidth = levelHeight * 2;
+    if (!m_surfaces.contains(surface))
+    {
+        // Surface not defined
+        return;
+    }
 
-    unsigned int nativeWmsLevelWidth = 86400;
-    unsigned int wmsTileWidth = 480;
-    unsigned int wmsTileHeight = 480;
+    QString fileName = tileFileName(tileName, surface);
+    QFileInfo fileInfo(fileName);
+    if (fileInfo.exists())
+    {
+        QImage image(fileName);
+        emit imageCompleted(tileName, image);
+        return;
+    }
 
-    double tileExtent = 180.0 / double(1 << level);
-    LatLongBoundingBox tile;
-    tile.west = -180.0 + x * tileExtent;
-    tile.south = -90.0 + y * tileExtent;
-    tile.east = tile.west + tileExtent;
-    tile.north = tile.south + tileExtent;
+    LatLongBoundingBox tileBox(tileRect.x(),
+                               tileRect.y(),
+                               tileRect.x() + tileRect.width(),
+                               tileRect.y() + tileRect.height());
+    SurfaceProperties surfaceProps = m_surfaces[surface];
+    unsigned int wmsTileWidth = surfaceProps.tileWidth;
+    unsigned int wmsTileHeight = surfaceProps.tileHeight;
+    LatLongBoundingBox topLeft = surfaceProps.topLeft;
 
-    LatLongBoundingBox topLeft;
-    topLeft.west = -180.0;
-    topLeft.south = -166.0;
-    topLeft.east = 76.0;
-    topLeft.north = 90.0;
+    double tileLongExtent = tileBox.east  - tileBox.west;
+    double tileLatExtent  = tileBox.north - tileBox.south;
 
-    double requestedResolution = 360.0 / levelWidth;
+    double requestedResolution = tileLongExtent / double(tileSize);
     double baseWmsResolution = (topLeft.east - topLeft.west) / double(wmsTileWidth);
 
     unsigned int wmsLevel = 0;
@@ -112,63 +107,54 @@ WMSRequester::retrieveTile(const QString& requestUrl,
         wmsLevel++;
     }
 
-    //qDebug() << "retrieveTile: " << wmsLevel << ", " << tile.west << "," << tile.south << "," << tile.east << "," << tile.north;
-
-    double wmsTileLonExtent = (topLeft.east - topLeft.west) / (1 << wmsLevel);
+    double wmsTileLongExtent = (topLeft.east - topLeft.west) / (1 << wmsLevel);
     double wmsTileLatExtent = (topLeft.north - topLeft.south) / (1 << wmsLevel);
-    topLeft.east = topLeft.west + wmsTileLonExtent;
+    topLeft.east = topLeft.west + wmsTileLongExtent;
     topLeft.south = topLeft.north - wmsTileLatExtent;
 
-    int westIndex  = int(floor((tile.west  - topLeft.west) / wmsTileLonExtent));
-    int southIndex = int(floor((tile.south - topLeft.south) / wmsTileLatExtent));
-    int eastIndex  = int(ceil((tile.east  - topLeft.west) / wmsTileLonExtent));
-    int northIndex = int(ceil((tile.north - topLeft.south) / wmsTileLatExtent));
+    int westIndex  = int(floor((tileBox.west  - topLeft.west) / wmsTileLongExtent));
+    int southIndex = int(floor((tileBox.south - topLeft.south) / wmsTileLatExtent));
+    int eastIndex  = int(ceil((tileBox.east  - topLeft.west) / wmsTileLongExtent));
+    int northIndex = int(ceil((tileBox.north - topLeft.south) / wmsTileLatExtent));
 
     TileAssembly* tileAssembly = new TileAssembly;
-    tileAssembly->tileImage = QImage(tileSize, tileSize, QImage::Format_RGB888);
+    tileAssembly->tileImage;
     tileAssembly->requestCount = 0;
-    tileAssembly->layer = layer;
-    tileAssembly->style = style;
-    tileAssembly->address.level = level;
-    tileAssembly->address.x = x;
-    tileAssembly->address.y = y;
+    tileAssembly->tileName = tileName;
+    tileAssembly->surfaceName = surface;
+    tileAssembly->tileWidth = tileSize;
+    tileAssembly->tileHeight = tileSize;
 
     for (int lat = southIndex; lat < northIndex; ++lat)
     {
         for (int lon = westIndex; lon < eastIndex; ++lon)
         {
             LatLongBoundingBox bbox;
-            bbox.west  = topLeft.west + lon * wmsTileLonExtent;
+            bbox.west  = topLeft.west + lon * wmsTileLongExtent;
             bbox.south = topLeft.south + lat * wmsTileLatExtent;
-            bbox.east = bbox.west + wmsTileLonExtent;
+            bbox.east = bbox.west + wmsTileLongExtent;
             bbox.north = bbox.south + wmsTileLatExtent;
 
-            QString urlString = createWmsUrl(requestUrl, layer, style, bbox, 480, 480);
+            QString urlString = createWmsUrl(surfaceProps.requestUrl, bbox, surfaceProps.tileWidth, surfaceProps.tileHeight);
             qDebug() << urlString;
 
             QUrl url(urlString);
             QNetworkRequest request(url);
-            //QNetworkCacheMetaData metadata = m_networkManager->cache()->metaData(url);
-            //qDebug() << "metadata: " << metadata.attributes() << ", " << metadata.expirationDate().toString();
             request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
             QNetworkReply* reply = m_networkManager->get(request);
 
             TileBuildOperation op;
             op.tile = tileAssembly;
-            op.subrect = QRectF(float(tileSize * (bbox.west - tile.west) / tileExtent),
-                                -float(tileSize * (bbox.north - tile.north) / tileExtent),
-                                tileSize * wmsTileLonExtent / tileExtent, tileSize * wmsTileLatExtent / tileExtent);
+            op.subrect = QRectF(float(tileSize * (bbox.west - tileBox.west) / tileLongExtent),
+                                -float(tileSize * (bbox.north - tileBox.north) / tileLatExtent),
+                                tileSize * wmsTileLongExtent / tileLongExtent, tileSize * wmsTileLatExtent / tileLatExtent);
+            m_mutex.lock();
             m_pendingTiles[reply] = op;
+            m_mutex.unlock();
 
             tileAssembly->requestCount++;
         }
     }
-
-    // Pattern example:
-    // request=GetMap&layers=BMNG&srs=EPSG:4326&format=image/jpeg&styles=Dec_nb&width=480&height=480&bbox=-180,-166,76,90]
-    // request=GetMap&layers=BMNG&srs=EPSG:4326&format=image/jpeg&styles=Dec_nb&width=480&height=480&bbox=-180,-38,-52,90]
-    // ...
-    // request=GetMap&layers=BMNG&srs=EPSG:4326&format=image/jpeg&styles=Dec_nb&width=480&height=480&bbox=-180,88,-178,90]
 }
 
 
@@ -190,53 +176,122 @@ WMSRequester::processTile(QNetworkReply* reply)
         QImageReader imageReader(reply);
         QImage image = imageReader.read();
 
-        qDebug() << "image from cache?" << fromCache << ", size: " << image.size();
-        if (m_pendingTiles.contains(reply))
+        if (image.isNull())
         {
-            TileBuildOperation op = m_pendingTiles.value(reply);
+            qDebug() << "Received bad image: " << reply->header(QNetworkRequest::LocationHeader);
+        }
+        else
+        {
+            QMutexLocker locker(&m_mutex);
+
+            TileBuildOperation op = m_pendingTiles.take(reply);
             TileAssembly* tileAssembly = op.tile;
 
-            QPainter painter(&tileAssembly->tileImage);
-            painter.drawImage(op.subrect, image);
-            painter.end();
-            m_pendingTiles.remove(reply);
-
-            tileAssembly->requestCount--;
-            qDebug() << tileAssembly->requestCount << " remaining";
-            if (tileAssembly->requestCount == 0)
+            if (tileAssembly)
             {
-                QString imageName = tileFileName(tileAssembly->layer, tileAssembly->style, tileAssembly->address);
-                QFileInfo fileInfo(imageName);
-                QDir tileDir = fileInfo.dir();
-                if (!tileDir.exists())
+                if (tileAssembly->tileImage.isNull())
                 {
-                    tileDir.mkpath(tileDir.absolutePath());
+                     tileAssembly->tileImage = QImage(tileAssembly->tileWidth, tileAssembly->tileHeight, QImage::Format_RGB888);
                 }
 
-                bool ok = tileAssembly->tileImage.save(imageName);
-                if (!ok)
-                {
-                    qDebug() << "Failed writing to " << imageName;
-                }
+                QPainter painter(&tileAssembly->tileImage);
+                painter.drawImage(op.subrect, image);
+                painter.end();
 
-                emit imageCompleted(tileAssembly->tileImage);
-                delete tileAssembly;
+                tileAssembly->requestCount--;
+                if (tileAssembly->requestCount == 0)
+                {
+                    QString imageName = tileFileName(tileAssembly->tileName, tileAssembly->surfaceName);
+                    QFileInfo fileInfo(imageName);
+                    QDir tileDir = fileInfo.dir();
+                    if (!tileDir.exists())
+                    {
+                        tileDir.mkpath(tileDir.absolutePath());
+                    }
+
+                    bool ok = tileAssembly->tileImage.save(imageName);
+                    if (!ok)
+                    {
+                        qDebug() << "Failed writing to " << imageName;
+                    }
+
+                    emit imageCompleted(tileAssembly->tileName, tileAssembly->tileImage.rgbSwapped());
+                    delete tileAssembly;
+                }
             }
         }
     }
     else
     {
-        // Oops... error
+        qDebug() << "Network error: " << reply->errorString();
     }
 
     //delete reply;
 }
 
 
+void
+WMSRequester::addSurfaceDefinition(const QString& name,
+                                   const QString& requestBase,
+                                   const LatLongBoundingBox& topLeftBox,
+                                   unsigned int tileWidth, unsigned int tileHeight)
+{
+    SurfaceProperties surface;
+    surface.requestUrl = requestBase;
+    surface.tileWidth = tileWidth;
+    surface.tileHeight = tileHeight;
+    surface.topLeft = topLeftBox;
+    m_surfaces[name] = surface;
+}
+
+
 QString
-WMSRequester::tileFileName(const QString& layer, const QString& style, const TileAddress& address)
+WMSRequester::tileFileName(const QString& tileName, const QString& surfaceName)
 {
     QString cacheDirName = QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/wms_tiles";
-    return QString("%1/%2_%3/tile_%4_%5_%6.png").arg(cacheDirName).arg(layer).arg(style).
-                                                 arg(address.level).arg(address.y).arg(address.x);
+    return QString("%1/%2/%3.png").arg(cacheDirName).arg(surfaceName).arg(tileName);
+}
+
+
+// The names should all have the form:
+//   wms:LAYERNAME:LEVEL:X:Y
+// For example, wms:earth-bmng:3:7:1
+WMSRequester::TileAddress
+WMSRequester::parseTileName(const QString& tileName)
+{
+    QString baseName = tileName;
+    baseName = baseName.remove("wms:");
+    QStringList nameParts = baseName.split(",");
+    bool nameOk = false;
+
+    QString surfaceName;
+    int level = 0;
+    int x = 0;
+    int y = 0;
+
+    if (nameParts.size() == 4)
+    {
+        surfaceName = nameParts[0];
+        bool layerOk = false;
+        bool xOk = false;
+        bool yOk = false;
+
+        level = nameParts[1].toInt(&layerOk);
+        x = nameParts[2].toInt(&xOk);
+        y = nameParts[3].toInt(&yOk);
+
+        nameOk = layerOk && xOk && yOk && level >= 0 && x >= 0 && y >= 0;
+    }
+
+    TileAddress address;
+    address.valid = nameOk;
+    if (address.valid)
+    {
+        address.surface = surfaceName;
+        address.level = level;
+        address.x = x;
+        address.y = y;
+    }
+
+    return address;
 }

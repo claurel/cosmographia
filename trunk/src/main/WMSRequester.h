@@ -21,17 +21,33 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QImage>
+#include <QMutex>
 
 class WMSRequester : public QObject
 {
     Q_OBJECT
 
 public:
-    WMSRequester(QObject* parent = NULL);
+    WMSRequester(QObject* parent);
     ~WMSRequester();
 
     struct LatLongBoundingBox
     {
+        LatLongBoundingBox() :
+            west(0.0), south(0.0), east(0.0), north(0.0)
+        {
+        }
+
+        LatLongBoundingBox(double _west, double _south, double _east, double _north) :
+            west(_west), south(_south), east(_east), north(_north)
+        {
+        }
+
+        QRectF toRect()
+        {
+            return QRectF(float(west), float(south), float(east - west), float(north - south));
+        }
+
         double west;
         double south;
         double east;
@@ -50,6 +66,8 @@ public:
 
     struct TileAddress
     {
+        bool valid;
+        QString surface;
         unsigned int level;
         unsigned int x;
         unsigned int y;
@@ -57,42 +75,61 @@ public:
 
     struct TileAssembly
     {
+        QString tileName;
+        QString surfaceName;
         QImage tileImage;
+        unsigned int tileWidth;
+        unsigned int tileHeight;
         int requestCount;
-        QString layer;
-        QString style;
         TileAddress address;
+    };
+
+    struct SurfaceProperties
+    {
+        QString requestUrl;
+        unsigned int tileWidth;
+        unsigned int tileHeight;
+        LatLongBoundingBox topLeft;
     };
 
     struct TileBuildOperation
     {
+        TileBuildOperation() : tile(NULL), subrect() {}
         TileAssembly* tile;
         QRectF subrect;
     };
 
-    QString createWmsUrl(const QString& requestUrl,
-                         const QString& layer,
-                         const QString& style,
-                         const LatLongBoundingBox& box,
-                         unsigned int tileWidth,
-                         unsigned int tileHeight) const;
-    void retrieveTile(const QString& requestUrl,
-                      const QString& layer,
-                      const QString& style,
-                      unsigned int level, unsigned int x, unsigned int y, unsigned int tileSize);
+    void addSurfaceDefinition(const QString& name,
+                              const QString& requestBase,
+                              const LatLongBoundingBox& topLeftBox,
+                              unsigned int tileWidth, unsigned int tileHeight);
 
-signals:
-    void imageCompleted(const QImage& image);
+    static TileAddress parseTileName(const QString& tileName);
+
+public slots:
+    void retrieveTile(const QString& tileName,
+                      const QString& surface,
+                      const QRectF& tileRect,
+                      unsigned int tileSize);
 
 private slots:
     void processTile(QNetworkReply* reply);
 
+signals:
+    void imageCompleted(const QString& tileName, const QImage& image);
+
 private:
-    QString tileFileName(const QString& layer, const QString& style, const TileAddress& address);
+    QString tileFileName(const QString& tileName, const QString& surfaceName);
+    QString createWmsUrl(const QString& requestUrl,
+                         const LatLongBoundingBox& box,
+                         unsigned int tileWidth,
+                         unsigned int tileHeight) const;
 
 private:
     QNetworkAccessManager* m_networkManager;
     QHash<QNetworkReply*, TileBuildOperation> m_pendingTiles;
+    QHash<QString, SurfaceProperties> m_surfaces;
+    QMutex m_mutex;
 };
 
 #endif // _WMS_REQUESTER_H_

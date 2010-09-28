@@ -18,6 +18,7 @@
 #ifndef _WMS_REQUESTER_H_
 #define _WMS_REQUESTER_H_
 
+#include <vesta/TextureMap.h>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QImage>
@@ -82,6 +83,7 @@ public:
         unsigned int tileHeight;
         int requestCount;
         TileAddress address;
+        vesta::TextureMap* texture;
     };
 
     struct SurfaceProperties
@@ -95,8 +97,24 @@ public:
     struct TileBuildOperation
     {
         TileBuildOperation() : tile(NULL), subrect() {}
+        TileBuildOperation(const TileBuildOperation& other) :
+            tile(other.tile),
+            subrect(other.subrect),
+            urlString(other.urlString)
+        {
+        }
+
+        TileBuildOperation& operator=(const TileBuildOperation& other)
+        {
+            tile = other.tile;
+            subrect = other.subrect;
+            urlString = other.urlString;
+            return *this;
+        }
+
         TileAssembly* tile;
         QRectF subrect;
+        QString urlString;
     };
 
     void addSurfaceDefinition(const QString& name,
@@ -106,11 +124,14 @@ public:
 
     static TileAddress parseTileName(const QString& tileName);
 
+    unsigned int pendingTileCount() const;
+
 public slots:
     void retrieveTile(const QString& tileName,
                       const QString& surface,
                       const QRectF& tileRect,
-                      unsigned int tileSize);
+                      unsigned int tileSize,
+                      vesta::TextureMap* texture);
 
 private slots:
     void processTile(QNetworkReply* reply);
@@ -124,12 +145,15 @@ private:
                          const LatLongBoundingBox& box,
                          unsigned int tileWidth,
                          unsigned int tileHeight) const;
+    void requestTile(const TileBuildOperation& op);
 
 private:
     QNetworkAccessManager* m_networkManager;
-    QHash<QNetworkReply*, TileBuildOperation> m_pendingTiles;
+    QList<TileBuildOperation> m_queuedTiles;
+    QHash<QNetworkReply*, TileBuildOperation> m_requestedTiles;
     QHash<QString, SurfaceProperties> m_surfaces;
     QMutex m_mutex;
+    int m_dispatchedRequestCount;
 };
 
 #endif // _WMS_REQUESTER_H_

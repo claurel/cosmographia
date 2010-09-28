@@ -73,8 +73,8 @@ AsynchronousTextureLoader::AsynchronousTextureLoader(QObject* parent) :
             this, SLOT(queueTexture(vesta::TextureMap*, const QImage&)));
 
     m_wmsHandler = new WMSRequester(NULL);
-    connect(this, SIGNAL(wmsTileRequested(const QString&, const QString&, const QRectF&, unsigned int)),
-            m_wmsHandler, SLOT(retrieveTile(const QString&, const QString&, const QRectF&, unsigned int)));
+    connect(this, SIGNAL(wmsTileRequested(const QString&, const QString&, const QRectF&, unsigned int, vesta::TextureMap*)),
+            m_wmsHandler, SLOT(retrieveTile(const QString&, const QString&, const QRectF&, unsigned int, vesta::TextureMap*)));
     connect(m_wmsHandler, SIGNAL(imageCompleted(const QString&, const QImage&)),
             this, SLOT(queueTexture(const QString&, const QImage&)));
 
@@ -103,8 +103,6 @@ AsynchronousTextureLoader::handleMakeResident(TextureMap* texture)
 {
     QString textureName = texture->name().c_str();
 
-    qDebug() << "handleMakeResident: " << textureName;
-
     // Treat texture names beginning with the string "wms:" as Web Map Server tile requests
     // The names should all have the form:
     //   wms:LAYERNAME:LEVEL:X:Y
@@ -118,7 +116,6 @@ AsynchronousTextureLoader::handleMakeResident(TextureMap* texture)
             QString baseName = textureName.remove("wms:");
             WMSRequester::TileAddress tileAddress = WMSRequester::parseTileName(textureName);
 
-            qDebug() << "wms tile " << tileAddress.level << ", " << tileAddress.x << ", " << tileAddress.y;
             if (tileAddress.valid && tileAddress.level < 13)
             {
                 double tileExtent = 180.0 / double(1 << tileAddress.level);
@@ -130,7 +127,7 @@ AsynchronousTextureLoader::handleMakeResident(TextureMap* texture)
 
                 QString tileName = baseName;
                 m_textureTable[tileName] = texture;
-                emit wmsTileRequested(tileName, tileAddress.surface, tileBox.toRect(), 512);
+                emit wmsTileRequested(tileName, tileAddress.surface, tileBox.toRect(), 512, texture);
             }
         }
     }

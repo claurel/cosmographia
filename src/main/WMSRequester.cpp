@@ -30,9 +30,12 @@
 
 using namespace std;
 
+const static int MaxOutstandingNetworkRequests = 12;
+
 
 WMSRequester::WMSRequester(QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    m_dispatchedRequestCount(0)
 {
     m_networkManager = new QNetworkAccessManager(this);
     QNetworkDiskCache* cache = new QNetworkDiskCache(this);
@@ -69,7 +72,8 @@ void
 WMSRequester::retrieveTile(const QString& tileName,
                            const QString& surface,
                            const QRectF& tileRect,
-                           unsigned int tileSize)
+                           unsigned int tileSize,
+                           vesta::TextureMap* texture)
 {
     if (!m_surfaces.contains(surface))
     {
@@ -124,6 +128,7 @@ WMSRequester::retrieveTile(const QString& tileName,
     tileAssembly->surfaceName = surface;
     tileAssembly->tileWidth = tileSize;
     tileAssembly->tileHeight = tileSize;
+    tileAssembly->texture = texture;
 
     for (int lat = southIndex; lat < northIndex; ++lat)
     {
@@ -136,25 +141,52 @@ WMSRequester::retrieveTile(const QString& tileName,
             bbox.north = bbox.south + wmsTileLatExtent;
 
             QString urlString = createWmsUrl(surfaceProps.requestUrl, bbox, surfaceProps.tileWidth, surfaceProps.tileHeight);
-            qDebug() << urlString;
-
-            QUrl url(urlString);
-            QNetworkRequest request(url);
-            request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
-            QNetworkReply* reply = m_networkManager->get(request);
 
             TileBuildOperation op;
             op.tile = tileAssembly;
             op.subrect = QRectF(float(tileSize * (bbox.west - tileBox.west) / tileLongExtent),
                                 -float(tileSize * (bbox.north - tileBox.north) / tileLatExtent),
                                 tileSize * wmsTileLongExtent / tileLongExtent, tileSize * wmsTileLatExtent / tileLatExtent);
-            m_mutex.lock();
-            m_pendingTiles[reply] = op;
-            m_mutex.unlock();
+            op.urlString = urlString;
+            op.tile->requestCount++;
 
-            tileAssembly->requestCount++;
+            if (m_dispatchedRequestCount < MaxOutstandingNetworkRequests)
+            {
+                requestTile(op);
+            }
+            else
+            {
+                QMutexLocker locker(&m_mutex);
+                m_queuedTiles.append(op);
+            }
         }
     }
+}
+
+
+void
+WMSRequester::requestTile(const TileBuildOperation& op)
+{
+    //qDebug() << "requesting: " << op.urlString;
+
+    QUrl url(op.urlString);
+    QNetworkCacheMetaData cacheData = m_networkManager->cache()->metaData(url);
+    QNetworkRequest request(url);
+    if (cacheData.isValid())
+    {
+        request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysCache);
+    }
+    else
+    {
+        request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
+    }
+
+    QNetworkReply* reply = m_networkManager->get(request);
+
+    m_mutex.lock();
+    m_dispatchedRequestCount++;
+    m_requestedTiles[reply] = op;
+    m_mutex.unlock();
 }
 
 
@@ -167,6 +199,8 @@ WMSRequester::processTile(QNetworkReply* reply)
     // Check redirection target
     QVariant redirectionTargetUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     // see CS001432 on how to handle this
+
+    --m_dispatchedRequestCount;
 
     // no error received?
     if (reply->error() == QNetworkReply::NoError)
@@ -184,7 +218,9 @@ WMSRequester::processTile(QNetworkReply* reply)
         {
             QMutexLocker locker(&m_mutex);
 
-            TileBuildOperation op = m_pendingTiles.take(reply);
+            TileBuildOperation op = m_requestedTiles.take(reply);
+
+            //bool wasCached = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute).toBool();
             TileAssembly* tileAssembly = op.tile;
 
             if (tileAssembly)
@@ -226,7 +262,53 @@ WMSRequester::processTile(QNetworkReply* reply)
         qDebug() << "Network error: " << reply->errorString();
     }
 
-    //delete reply;
+    reply->deleteLater();
+
+    while (m_dispatchedRequestCount < MaxOutstandingNetworkRequests)
+    {
+        int tileIndex = -1;
+        vesta::v_uint64 mostRecent = 0;
+        TileBuildOperation op;
+        {
+            QMutexLocker locker(&m_mutex);
+            for (int i = 0; i < m_queuedTiles.size(); ++i)
+            {
+                if (m_queuedTiles[i].tile->texture->lastUsed() > mostRecent)
+                {
+                    tileIndex = i;
+                    mostRecent = m_queuedTiles[i].tile->texture->lastUsed();
+                }
+            }
+
+            if (tileIndex >= 0)
+            {
+                op = m_queuedTiles.takeAt(tileIndex);
+
+                // Tiles that haven't been accessed in the last cullLag frames are remove
+                const unsigned int cullLag = 100;
+                if (mostRecent >= cullLag)
+                {
+                    vesta::v_uint64 cullBefore = mostRecent - cullLag;
+                    for (int i = m_queuedTiles.size() - 1; i >= 0; --i)
+                    {
+                        if (m_queuedTiles[i].tile->texture->lastUsed() < cullBefore)
+                        {
+                            m_queuedTiles.removeAt(i);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (tileIndex >= 0)
+        {
+            requestTile(op);
+        }
+        else
+        {
+            break;
+        }
+    }
 }
 
 
@@ -294,4 +376,11 @@ WMSRequester::parseTileName(const QString& tileName)
     }
 
     return address;
+}
+
+
+unsigned int
+WMSRequester::pendingTileCount() const
+{
+    return (unsigned int) (m_dispatchedRequestCount + m_queuedTiles.size());
 }

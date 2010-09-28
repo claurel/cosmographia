@@ -46,7 +46,8 @@ signals:
     void wmsTileRequested(const QString& tileName,
                           const QString& surface,
                           const QRectF& tileBox,
-                          unsigned int tileSize);
+                          unsigned int tileSize,
+                          vesta::TextureMap* texture);
 
 private:
     struct ReadyTexture

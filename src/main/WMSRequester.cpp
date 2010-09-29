@@ -225,13 +225,30 @@ WMSRequester::processTile(QNetworkReply* reply)
 
             if (tileAssembly)
             {
+                bool firstOp = false;
                 if (tileAssembly->tileImage.isNull())
                 {
                      tileAssembly->tileImage = QImage(tileAssembly->tileWidth, tileAssembly->tileHeight, QImage::Format_RGB888);
+                     firstOp = true;
                 }
 
                 QPainter painter(&tileAssembly->tileImage);
-                painter.drawImage(op.subrect, image);
+
+                // Clear the background to white before the first operation
+                if (firstOp)
+                {
+                    painter.fillRect(QRectF(0.0f, 0.0f, tileAssembly->tileImage.width(), tileAssembly->tileImage.height()), Qt::white);
+                }
+
+                painter.setRenderHints(QPainter::SmoothPixmapTransform, true);
+
+                // A hack to work around some drawing problems that left occasional gaps
+                // in tiles. There's either a bug in Qt's painter class, or some trouble
+                // with roundoff errors. Increasing the rectangle size very slightly
+                // eliminates the gaps.
+                QRectF r(op.subrect);
+                r.setSize(QSizeF(r.width() * 1.0001f, r.height() * 1.0001f));
+                painter.drawImage(r, image);
                 painter.end();
 
                 tileAssembly->requestCount--;
@@ -285,7 +302,7 @@ WMSRequester::processTile(QNetworkReply* reply)
                 op = m_queuedTiles.takeAt(tileIndex);
 
                 // Tiles that haven't been accessed in the last cullLag frames are remove
-                const unsigned int cullLag = 100;
+                const unsigned int cullLag = 60;
                 if (mostRecent >= cullLag)
                 {
                     vesta::v_uint64 cullBefore = mostRecent - cullLag;
@@ -293,6 +310,9 @@ WMSRequester::processTile(QNetworkReply* reply)
                     {
                         if (m_queuedTiles[i].tile->texture->lastUsed() < cullBefore)
                         {
+                            // Set status to unitialized so that loading will be retried if the tile
+                            // comes into view later.
+                            m_queuedTiles[i].tile->texture->setStatus(vesta::TextureMap::Uninitialized);
                             m_queuedTiles.removeAt(i);
                         }
                     }

@@ -15,6 +15,7 @@
 #include <QFileInfo>
 #include <QImage>
 #include <QStringList>
+#include <QThread>
 #include <QDebug>
 
 using namespace vesta;
@@ -55,21 +56,27 @@ static bool SetTextureImage(TextureMap* texture, const DataChunk* ddsFileContent
 }
 
 
-/** Create a new texture loader. The texture loading thread will not start running until
-  * the first call to makeResident()
+/** Construct a new NetworkTextureLoader.
   */
-AsynchronousTextureLoader::AsynchronousTextureLoader(QObject* parent) :
+NetworkTextureLoader::NetworkTextureLoader(QObject* parent, bool asynchronous) :
     QObject(parent),
-    m_loaderThread(NULL),
+    m_localImageLoader(NULL),
     m_wmsHandler(NULL),
-    m_wmsThread(NULL),
-    m_totalMemoryUsage(0)
+    m_imageLoadThread(NULL),
+    m_totalMemoryUsage(0),
+    m_textureMemoryLimit(150)
 {
-    m_loaderThread = new ImageLoaderThread();
-
-    connect(m_loaderThread, SIGNAL(ddsTextureReady(vesta::TextureMap*, vesta::DataChunk*)),
+    // Construct an ImageLoader and WMSRequester object. Both of these will can in a separate thread
+    // so that reading images from disk and decompressing them won't cause the frame rate to stutter.
+    // Loading of textures over the network happens in QNetworkAccessManager threads, *not* the disk
+    // load/decompression thread.
+    //
+    // For synchronization, NetworkTextureLoader relies on Qt's queued signals.
+    m_localImageLoader = new ImageLoader();
+    connect(this, SIGNAL(localTextureRequested(vesta::TextureMap*)), m_localImageLoader, SLOT(loadTexture(vesta::TextureMap*)));
+    connect(m_localImageLoader, SIGNAL(ddsTextureLoaded(vesta::TextureMap*, vesta::DataChunk*)),
             this, SLOT(queueTexture(vesta::TextureMap*, vesta::DataChunk*)));
-    connect(m_loaderThread, SIGNAL(textureReady(vesta::TextureMap*, const QImage&)),
+    connect(m_localImageLoader, SIGNAL(textureLoaded(vesta::TextureMap*, const QImage&)),
             this, SLOT(queueTexture(vesta::TextureMap*, const QImage&)));
 
     m_wmsHandler = new WMSRequester(NULL);
@@ -78,30 +85,35 @@ AsynchronousTextureLoader::AsynchronousTextureLoader(QObject* parent) :
     connect(m_wmsHandler, SIGNAL(imageCompleted(const QString&, const QImage&)),
             this, SLOT(queueTexture(const QString&, const QImage&)));
 
-    m_wmsThread = new QThread();
-    m_wmsHandler->moveToThread(m_wmsThread);
-    m_wmsThread->start();
+    if (asynchronous)
+    {
+        m_imageLoadThread = new QThread();
+        m_wmsHandler->moveToThread(m_imageLoadThread);
+        m_localImageLoader->moveToThread(m_imageLoadThread);
+        m_imageLoadThread->start();
+    }
 }
 
 
-/** Destroy a texture loader and halt the texture loading thread.
+/** Destroy the texture loader and stop all running threads
+  * used for loading images.
   */
-AsynchronousTextureLoader::~AsynchronousTextureLoader()
+NetworkTextureLoader::~NetworkTextureLoader()
 {
-    //m_textureQueue->deleteLater();
-    delete m_loaderThread;
-    delete m_wmsThread;
+    delete m_imageLoadThread;
 }
 
 
-/** Implementation of TextureLoader::makeResident(). Since this TextureLoader is
-  * asynchronous, it makeResident returns immediately, and the texture will generally
-  * not be available immediately.
+/** Implementation of TextureLoader::makeResident(). The method returns immediately,
+  * but the texture will not actually be loaded until the worker thread has completed
+  * loading and decompressing the image file.
   */
 bool
-AsynchronousTextureLoader::handleMakeResident(TextureMap* texture)
+NetworkTextureLoader::handleMakeResident(TextureMap* texture)
 {
     QString textureName = texture->name().c_str();
+
+    texture->setStatus(TextureMap::Loading);
 
     // Treat texture names beginning with the string "wms:" as Web Map Server tile requests
     // The names should all have the form:
@@ -109,8 +121,6 @@ AsynchronousTextureLoader::handleMakeResident(TextureMap* texture)
     // For example, wms:earth-bmng:3:7:1
     if (textureName.startsWith("wms:"))
     {
-        texture->setStatus(TextureMap::Loading);
-
         if (m_wmsHandler)
         {
             QString baseName = textureName.remove("wms:");
@@ -133,103 +143,106 @@ AsynchronousTextureLoader::handleMakeResident(TextureMap* texture)
     }
     else
     {
-        m_loaderThread->addTexture(texture);
+        emit localTextureRequested(texture);
     }
 
     return true;
 }
 
 
-/** Halt the texture loading thread.
+/** Stop the image loading thread.
   */
 void
-AsynchronousTextureLoader::stop()
+NetworkTextureLoader::stop()
 {
-    m_loaderThread->abort();
-    m_wmsThread->quit();
-}
-
-
-void
-AsynchronousTextureLoader::evictTextures()
-{
-    // Using hardcoded limits here:
-    //   Cleanup textures when the memory usage reaches 150 megs
-    //   Eliminate textures until only 100 megs is in use
-    //   Don't evict textures used within the last 5 frames
-    unsigned int meg = 1024*1024;
-    if (m_totalMemoryUsage > 150*meg)
+    if (m_imageLoadThread)
     {
-        m_totalMemoryUsage = TextureMapLoader::evictTextures(100*meg, frameCount() - 5);
-        qDebug() << "Memory usage after eviction: " << textureMemoryUsed() / double(meg) << ", frame count: " << frameCount();
+        m_imageLoadThread->quit();
     }
 }
 
 
-/** Create GL objects for all textures that have been loaded. This must be called
-  * in a thread in which the GL context is current. Normally, it will be called in
-  * the display method before scene rendering.
+/** Apply the texture eviction policy to reduce the amount of memory
+  * consumed by textures:
+  *
+  * Evict textures when the total memory usage is textureMemoryLimit MB. When
+  * evicting, eliminate enough textures to get down to 2/3 the memory limit.
+  * Don't evict very recently used textures. "Recently" here means within the
+  * last 8 frames.
   */
 void
-AsynchronousTextureLoader::processReadyTextures()
+NetworkTextureLoader::evictTextures()
 {
-    foreach (ReadyTexture r, m_readyTextures)
+    const unsigned int meg = 1024*1024;
+    const unsigned int limit = m_textureMemoryLimit * meg;
+    const unsigned int targetFootprint = limit * 2 / 3;
+
+    if (m_totalMemoryUsage > limit)
+    {
+        m_totalMemoryUsage = TextureMapLoader::evictTextures(targetFootprint, frameCount() - 8);
+        qDebug() << "Evicted textures, frame: " << frameCount();
+    }
+}
+
+
+/** Create GL resources for all loaded textures. This method must be called from
+  * thread in which a GL context is current (such as the display thread.)
+  */
+void
+NetworkTextureLoader::realizeLoadedTextures()
+{
+    foreach (LoadedTexture t, m_loadedTextures)
     {
         bool ok = false;
-        if (r.ddsImage)
+        if (t.ddsImage)
         {
-            ok = SetTextureImage(r.texture, r.ddsImage);
-            delete r.ddsImage;
+            ok = SetTextureImage(t.texture, t.ddsImage);
+            delete t.ddsImage;
         }
         else
         {
-            ok = SetTextureImage(r.texture, r.texImage);
+            ok = SetTextureImage(t.texture, t.texImage);
         }
 
         if (!ok)
         {
-            r.texture->setStatus(TextureMap::LoadingFailed);
+            t.texture->setStatus(TextureMap::LoadingFailed);
         }
         else
         {
-            m_totalMemoryUsage += r.texture->memoryUsage();
-
-            // Report memory usage
-            //double meg = 1024.0 * 1024.0;
-            //qDebug() << "Texture: " << r.texture->name().c_str() << ", memory used: " << double(m_totalMemoryUsage) / meg << " MB";
-
+            m_totalMemoryUsage += t.texture->memoryUsage();
         }
     }
 
-    m_readyTextures.clear();
+    m_loadedTextures.clear();
 }
 
 
 void
-AsynchronousTextureLoader::queueTexture(vesta::TextureMap* texture, const QImage& image)
+NetworkTextureLoader::queueTexture(vesta::TextureMap* texture, const QImage& image)
 {
-    ReadyTexture r;
-    r.texture = texture;
-    r.texImage = image;
-    r.ddsImage = NULL;
+    LoadedTexture t;
+    t.texture = texture;
+    t.texImage = image;
+    t.ddsImage = NULL;
 
-    m_readyTextures << r;
+    m_loadedTextures << t;
 }
 
 
 void
-AsynchronousTextureLoader::queueTexture(vesta::TextureMap* texture, vesta::DataChunk* ddsData)
+NetworkTextureLoader::queueTexture(vesta::TextureMap* texture, vesta::DataChunk* ddsData)
 {
-    ReadyTexture r;
-    r.texture = texture;
-    r.ddsImage = ddsData;
+    LoadedTexture t;
+    t.texture = texture;
+    t.ddsImage = ddsData;
 
-    m_readyTextures << r;
+    m_loadedTextures << t;
 }
 
 
 void
-AsynchronousTextureLoader::queueTexture(const QString& textureName, const QImage& image)
+NetworkTextureLoader::queueTexture(const QString& textureName, const QImage& image)
 {
     TextureMap* texture = m_textureTable.take(textureName);
     if (texture)

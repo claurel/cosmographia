@@ -1,34 +1,36 @@
-/*
- * $Revision: 316 $ $Date: 2010-06-29 20:40:02 -0700 (Tue, 29 Jun 2010) $
- *
- * Copyright by Astos Solutions GmbH, Germany
- *
- * This file is published under the Astos Solutions Free Public License.
- * For details on copyright and terms of use see
- * http://www.astos.de/Astos_Solutions_Free_Public_License.html
- */
+// Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
+//
+// Cosmographia is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// Cosmographia is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _ASYNCHRONOUS_TEXTURE_LOADER_H_
-#define _ASYNCHRONOUS_TEXTURE_LOADER_H_
+#ifndef _NETWORK_TEXTURE_LOADER_H_
+#define _NETWORK_TEXTURE_LOADER_H_
 
 #include "WMSRequester.h"
 #include <vesta/TextureMapLoader.h>
 #include <vesta/DataChunk.h>
 
-class ImageLoaderThread;
+class ImageLoader;
 
-
-// TextureMapLoader implementation that uses Qt to load an image file
-// from disk.
-class AsynchronousTextureLoader : public QObject, public vesta::TextureMapLoader
+class NetworkTextureLoader : public QObject, public vesta::TextureMapLoader
 {
 Q_OBJECT
 public:
-    AsynchronousTextureLoader(QObject* parent);
-    ~AsynchronousTextureLoader();
+    NetworkTextureLoader(QObject* parent, bool asynchronous = true);
+    ~NetworkTextureLoader();
 
     bool handleMakeResident(vesta::TextureMap* texture);
-    void processReadyTextures();
+    void realizeLoadedTextures();
     void stop();
     void evictTextures();
 
@@ -36,6 +38,13 @@ public:
     {
         return m_wmsHandler;
     }
+
+    unsigned int textureMemoryLimit() const
+    {
+        return m_textureMemoryLimit;
+    }
+
+    void setTextureMemoryLimit(unsigned int megs);
 
 public slots:
     void queueTexture(vesta::TextureMap* texture, const QImage& image);
@@ -48,11 +57,12 @@ signals:
                           const QRectF& tileBox,
                           unsigned int tileSize,
                           vesta::TextureMap* texture);
+    void localTextureRequested(vesta::TextureMap* texture);
 
 private:
-    struct ReadyTexture
+    struct LoadedTexture
     {
-        ReadyTexture() :
+        LoadedTexture() :
             ddsImage(NULL),
             texture(NULL)
         {
@@ -66,13 +76,14 @@ private:
     };
 
 private:
-    QList<ReadyTexture> m_readyTextures;
+    QList<LoadedTexture> m_loadedTextures;
     QHash<QString, vesta::TextureMap*> m_textureTable;
-    ImageLoaderThread* m_loaderThread;
+    ImageLoader* m_localImageLoader;
     WMSRequester* m_wmsHandler;
-    QThread* m_wmsThread;
+    QThread* m_imageLoadThread;
     unsigned int m_totalMemoryUsage;
+    unsigned int m_textureMemoryLimit;
 };
 
-#endif // _ASYNCHRONOUS_TEXTURE_LOADER_H_
+#endif // _NETWORK_TEXTURE_LOADER_H_
 

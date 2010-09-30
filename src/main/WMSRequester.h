@@ -1,19 +1,20 @@
-// This file is part of Cosmographia.
-//
 // Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
 //
-// Cosmographia is free software; you can redistribute it and/or
+// This file is a part of qtvesta, a set of classes for using
+// the VESTA library with the Qt framework.
+//
+// qtvesta is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
 //
-// Cosmographia is distributed in the hope that it will be useful,
+// qtvesta is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
+// License along with qtvesta. If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef _WMS_REQUESTER_H_
 #define _WMS_REQUESTER_H_

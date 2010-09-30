@@ -1,19 +1,20 @@
-// This file is part of Cosmographia.
-//
 // Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
 //
-// Cosmographia is free software; you can redistribute it and/or
+// This file is a part of qtvesta, a set of classes for using
+// the VESTA library with the Qt framework.
+//
+// qtvesta is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
 //
-// Cosmographia is distributed in the hope that it will be useful,
+// qtvesta is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
+// License along with qtvesta. If not, see <http://www.gnu.org/licenses/>.
 
 #include "WMSRequester.h"
 #include <QNetworkDiskCache>
@@ -30,9 +31,45 @@
 
 using namespace std;
 
+// Maximum number of requests for the QNetworkAccessManager. The WMSRequester
+// class will take care of managing the other pending requests itself.
 const static int MaxOutstandingNetworkRequests = 12;
 
 
+/** WMSRequester handles retrieving map tiles from a Web Map Server and converting
+  * them to a form that can be easily used with VESTA's WorldGeometry class. The
+  * tiles are converted to a power-of-two sizes that can be used by any GPU.
+  *
+  * WorldGeometry expects a 'pyramid' of map tiles to cover the globe. The top
+  * level of the pyramid is a 2x1 grid of tiles. Lower levels contain 4x2, 8x4, ...
+  * tiles. A WMS server can deliver tiles that work with this scheme, but JPL's
+  * OnEarth server is often overloaded. Tiles can only be retrieved reliably from
+  * OnEarth when using a restricted set of requests described by GetTileService:
+  *
+  * http://onearth.jpl.nasa.gov/tiled.html
+  *
+  * The tiles available through TiledPattern accesses is more limited, and they do
+  * not generally work well with WorldGeometry. The WMSRequester takes care of
+  * assembling multiple tiles from a WMS server into tiles for WorldGeometry. The
+  * WorldGeometry tiles are constructed with one or more blits, which may or may
+  * not also scale the image.
+  *
+  * A request to make a texture tile resident spawns one or more server requests.
+  * As image tiles come back from the WMS server, they are blitted to a QImage. When
+  * then final tile is received, WMSRequester emits an imageCompleted signal that
+  * the tile is ready to be converted to a texture.
+  *
+  * Requests are sent directly to Qt's NetworkAccessManager until a limit is reached.
+  * At that point requests are added to a queued tiles list. While the
+  * NetworkAccessManager does handle queuing itself (restricting the maximum
+  * number of simultaneous HTTP connections to 6), we need more control over the
+  * queue:
+  *    - Currently visible tiles should have priority, and are moved to the front
+  *      of the queue.
+  *    - If the user moves the camera quickly over the surface of a planet, huge
+  *      number of requests may be queued. We occasionally trim queue, removing
+  *      requests for tiles that haven't been visible for some time.
+  */
 WMSRequester::WMSRequester(QObject* parent) :
     QObject(parent),
     m_dispatchedRequestCount(0)
@@ -41,7 +78,6 @@ WMSRequester::WMSRequester(QObject* parent) :
     QNetworkDiskCache* cache = new QNetworkDiskCache(this);
     cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
     m_networkManager->setCache(cache);
-    qDebug() << "cache location: " << cache->cacheDirectory();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processTile(QNetworkReply*)));
 }
 
@@ -51,6 +87,10 @@ WMSRequester::~WMSRequester()
 }
 
 
+/** Create the URL for a WMS request. Most of the parameters are included in the
+  * requestUrlBase. This method only adds parameters for the bounding box and
+  * tile size.
+  */
 QString
 WMSRequester::createWmsUrl(const QString& requestUrlBase,
                            const LatLongBoundingBox& box,
@@ -68,6 +108,9 @@ WMSRequester::createWmsUrl(const QString& requestUrlBase,
 }
 
 
+/** Retrieve the named tile from the WMS server. A tileCompleted signal will
+  * be emitted when the tile is ready.
+  */
 void
 WMSRequester::retrieveTile(const QString& tileName,
                            const QString& surface,
@@ -167,9 +210,12 @@ WMSRequester::retrieveTile(const QString& tileName,
 void
 WMSRequester::requestTile(const TileBuildOperation& op)
 {
-    //qDebug() << "requesting: " << op.urlString;
-
     QUrl url(op.urlString);
+
+    // Testing the 'SourceIsFromCache' attribute of replies from the OnEarth server
+    // seems to indicate that the tiles are not being cached. However, tiles are still
+    // appearing in the cache directory. The following code attempts to force using
+    // the cache, but may not be effective.
     QNetworkCacheMetaData cacheData = m_networkManager->cache()->metaData(url);
     QNetworkRequest request(url);
     if (cacheData.isValid())
@@ -190,6 +236,7 @@ WMSRequester::requestTile(const TileBuildOperation& op)
 }
 
 
+// Private slot to take care of processing a WMS tile delivered over the network.
 void
 WMSRequester::processTile(QNetworkReply* reply)
 {
@@ -220,7 +267,6 @@ WMSRequester::processTile(QNetworkReply* reply)
 
             TileBuildOperation op = m_requestedTiles.take(reply);
 
-            //bool wasCached = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute).toBool();
             TileAssembly* tileAssembly = op.tile;
 
             if (tileAssembly)
@@ -281,6 +327,9 @@ WMSRequester::processTile(QNetworkReply* reply)
 
     reply->deleteLater();
 
+    // If there are queued tiled requests and not too many active WMS server connections,
+    // then make some more network requests. Prioritize requests for textures tiles that
+    // are currently visible.
     while (m_dispatchedRequestCount < MaxOutstandingNetworkRequests)
     {
         int tileIndex = -1;
@@ -288,6 +337,8 @@ WMSRequester::processTile(QNetworkReply* reply)
         TileBuildOperation op;
         {
             QMutexLocker locker(&m_mutex);
+
+            // Request a WMS tile for the most recently used texture tile
             for (int i = 0; i < m_queuedTiles.size(); ++i)
             {
                 if (m_queuedTiles[i].tile->texture->lastUsed() > mostRecent)
@@ -301,6 +352,12 @@ WMSRequester::processTile(QNetworkReply* reply)
             {
                 op = m_queuedTiles.takeAt(tileIndex);
 
+                // Trim the queue by removing requests for tiles that haven't been visible
+                // for a while. This will happen when the user moves the camera quickly over
+                // the surface of a planet. We want to load tiles for the location that the
+                // user is looking at now, not the places that they zoomed past quickly on
+                // the way there.
+                //
                 // Tiles that haven't been accessed in the last cullLag frames are remove
                 const unsigned int cullLag = 60;
                 if (mostRecent >= cullLag)
@@ -399,6 +456,11 @@ WMSRequester::parseTileName(const QString& tileName)
 }
 
 
+/** Get the number of tiles in the queue. The count includes both active
+  * and queued requests. Since different texture tiles may use the same
+  * WMS tiles, the count will generally be larger (often by a factor of
+  * four or more) than the number of texture tiles.
+  */
 unsigned int
 WMSRequester::pendingTileCount() const
 {

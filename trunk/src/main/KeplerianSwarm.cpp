@@ -61,9 +61,9 @@ static const char* SwarmVertexShaderSource =
 "\n"
 "    float M = M0 + time * nu;                                                \n"
 "    float E = M;                                                             \n"
-"    for (int i = 0; i < 3; i += 1)                                           \n"
+"    for (int i = 0; i < 4; i += 1)                                           \n"
 "        E = M + ecc * sin(E);                                                \n"
-"    vec3 position = vec3(sma * (cos(E) - ecc), sma * (sin(E) * (1.0 - ecc * ecc)), 0.0);\n"
+"    vec3 position = vec3(sma * (cos(E) - ecc), sma * (sin(E) * sqrt(1.0 - ecc * ecc)), 0.0);\n"
 "\n"
 "    // Rotate by quaternion q                                                \n"
 "    vec3 a = cross(q.xyz, position) + q.w * position;                        \n"
@@ -87,6 +87,7 @@ KeplerianSwarm::KeplerianSwarm() :
     m_boundingRadius(0.0f),
     m_color(Spectrum(1.0f, 1.0f, 1.0f)),
     m_opacity(1.0f),
+    m_pointSize(1.0f),
     m_shaderCompiled(false)
 {
     setClippingPolicy(PreventClipping);
@@ -122,11 +123,7 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
 
         if (m_swarmShader.isValid())
         {
-            if (GLEW_ARB_multisample)
-            {
-               // glDisable(GL_MULTISAMPLE_ARB);
-            }
-            glPointSize(1.0f);
+            glPointSize(m_pointSize);
 
             rc.bindVertexBuffer(VertexSpec::PositionNormalTex, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
 
@@ -140,17 +137,9 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
             m_swarmShader->setConstant("color", Vector4f(m_color.red(), m_color.green(), m_color.blue(), m_opacity));
 
             rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::Points, m_objects.size()));
-            rc.unbindVertexArray();
-            if (m_vertexBuffer->vbo())
-            {
-                m_vertexBuffer->vbo()->unbind();
-            }
+            rc.unbindVertexBuffer();
 
             rc.disableCustomShader();
-            if (GLEW_ARB_multisample)
-            {
-                //glEnable(GL_MULTISAMPLE_ARB);
-            }
         }
     }
     else
@@ -205,7 +194,7 @@ KeplerianSwarm::addObject(const OrbitalElements& elements)
 
     m_objects.push_back(k);
 
-    m_boundingRadius = max(m_boundingRadius, k.sma);
+    m_boundingRadius = max(m_boundingRadius, float(k.sma * (1.0 + elements.eccentricity)));
 }
 
 

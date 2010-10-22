@@ -74,6 +74,16 @@ public:
         m_epoch = epoch;
     }
 
+    float pointSize() const
+    {
+        return m_pointSize;
+    }
+
+    void setPointSize(float pointSize)
+    {
+        m_pointSize = pointSize;
+    }
+
     void addObject(const OrbitalElements& elements);
     void clear();
 
@@ -96,6 +106,7 @@ private:
     float m_boundingRadius;
     Spectrum m_color;
     float m_opacity;
+    float m_pointSize;
 
     // These are only mutable because render() is const; need to
     // change this.

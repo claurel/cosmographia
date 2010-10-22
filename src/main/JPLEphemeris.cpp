@@ -200,8 +200,9 @@ JPLEphemeris::load(const string& filename)
     const double orbitalPeriods[] =
     {
         0.24085, 0.61520, 1.0000, 1.8808, 11.863, 29.447, 84.017, 164.79, 248.02,
-        0.0, // Sun (aperiodic orbit about barycenter),
-        27.32158 / 365.25, 27.32158 / 365.25 // Earth and Moon about Earth-Moon barycenter
+        27.32158 / 365.25, // Moon, about Earth-Moon barycenter
+        0.0,
+        27.32158 / 365.25 // Earth, about Earth-Moon barycenter
     };
 
     for (unsigned int objectIndex = 0; objectIndex < JplEph_ObjectCount - 1; ++objectIndex)

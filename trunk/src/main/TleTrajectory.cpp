@@ -115,8 +115,7 @@ TleTrajectory::boundingSphereRadius() const
     const double muEarth = 3.986004418e5;
 
     // Derive the semimajor axis from the mean motion
-    double period = daysToSeconds(1.0 / m_tle->xno);
-    double sma = pow((muEarth * period * period) / (4.0 * PI * PI), 1.0 / 3.0);
+    double sma = pow((muEarth * pow(period(), 2.0)) / (4.0 * PI * PI), 1.0 / 3.0);
 
     // Compute the bounding radius from the semimajor axis and
     // eccentricity, allowing a generous 10% slack since the orbital elements

@@ -18,6 +18,8 @@
 #include <QtGui>
 
 #include "UniverseView.h"
+#include "UniverseCatalog.h"
+#include "UniverseLoader.h"
 #include "Cosmographia.h"
 #include "QVideoEncoder.h"
 #include <vesta/GregorianDate.h>
@@ -28,16 +30,22 @@
 #include <vesta/InertialFrame.h>
 #include <vesta/RotationModel.h>
 #include <vesta/KeplerianTrajectory.h>
+#include <vesta/FixedPointTrajectory.h>
+#include <vesta/WorldGeometry.h>
 #include <vesta/Units.h>
 #include <qjson/parser.h>
 #include <algorithm>
 
 using namespace vesta;
+using namespace Eigen;
 
 
 Cosmographia::Cosmographia() :
+    m_catalog(NULL),
+    m_view3d(NULL),
     m_fullScreenAction(NULL)
 {
+    m_catalog = new UniverseCatalog();
     m_view3d = new UniverseView();
     setCentralWidget(m_view3d);
 
@@ -299,6 +307,15 @@ Cosmographia::Cosmographia() :
     setCursor(QCursor(Qt::CrossCursor));
 
     loadSettings();
+
+    Matrix3d m = InertialFrame::equatorJ2000()->orientation().toRotationMatrix();
+    std::cout << m.format(8) << std::endl;
+
+    Vector3d pole = m * Vector3d::UnitZ();
+    double obl = acos(pole.z());
+    Vector3d equinox = m * Vector3d::UnitY();
+    double eq = acos(equinox.y());
+    std::cout << "pole: " << radiansToArcsec(obl) << ", equinox: " << radiansToArcsec(eq) << std::endl;
 }
 
 
@@ -469,192 +486,6 @@ Cosmographia::recordVideo()
 }
 
 
-static double doubleValue(QVariant v, double defaultValue = 0.0)
-{
-    bool ok = false;
-    double value = v.toDouble(&ok);
-    if (ok)
-    {
-        return value;
-    }
-    else
-    {
-        return defaultValue;
-    }
-}
-
-vesta::Trajectory* loadFixedTrajectory(const QVariantMap& info)
-{
-    qDebug() << "Trajectory: " << info.value("type").toString();
-    return NULL;
-}
-
-
-vesta::Trajectory* loadKeplerianTrajectory(const QVariantMap& info)
-{
-    qDebug() << "Trajectory: " << info.value("type").toString();
-
-    double sma = doubleValue(info.value("semiMajorAxis"), 0.0);
-    if (sma <= 0.0)
-    {
-        qDebug() << "Invalid semimajor axis given for Keplerian orbit.";
-        return NULL;
-    }
-
-    double period = doubleValue(info.value("period"), 0.0);
-    if (period <= 0.0)
-    {
-        qDebug() << "Invalid period given for Keplerian orbit.";
-        return NULL;
-    }
-
-    OrbitalElements elements;
-    elements.eccentricity = doubleValue(info.value("eccentricity"));
-    elements.inclination = toRadians(doubleValue(info.value("eccentricity")));
-    elements.meanMotion = toRadians(360.0) / daysToSeconds(period);
-    elements.longitudeOfAscendingNode = toRadians(doubleValue(info.value("ascendingNode")));
-    elements.argumentOfPeriapsis = toRadians(doubleValue(info.value("argumentOfPeriapsis")));
-    elements.meanAnomalyAtEpoch = toRadians(doubleValue(info.value("meanAnomaly")));
-
-    KeplerianTrajectory* trajectory = new KeplerianTrajectory(elements);
-}
-
-
-vesta::Trajectory* loadTrajectory(const QVariantMap& map)
-{
-    QVariant typeData = map.value("type");
-    if (typeData.type() != QVariant::String)
-    {
-        qDebug() << "Trajectory definition is missing type.";
-    }
-
-    QString type = typeData.toString();
-    if (type == "Fixed")
-    {
-        return loadFixedTrajectory(map);
-    }
-    else if (type == "Keplerian")
-    {
-        return loadKeplerianTrajectory(map);
-    }
-    else
-    {
-        qDebug() << "Unknown trajectory type " << type;
-    }
-
-    return NULL;
-}
-
-
-vesta::RotationModel* loadFixedRotationModel(const QVariantMap& map)
-{
-    qDebug() << "RotationModel: " << map.value("type").toString();
-    return NULL;
-}
-
-
-vesta::RotationModel* loadUniformRotationModel(const QVariantMap& map)
-{
-    qDebug() << "RotationModel: " << map.value("type").toString();
-    return NULL;
-}
-
-
-vesta::RotationModel* loadRotationModel(const QVariantMap& map)
-{
-    QVariant typeVar = map.value("type");
-    if (typeVar.type() != QVariant::String)
-    {
-        qDebug() << "RotationModel definition is missing type.";
-    }
-
-    QString type = typeVar.toString();
-    if (type == "Fixed")
-    {
-        return loadFixedRotationModel(map);
-    }
-    else if (type == "Uniform")
-    {
-        return loadUniformRotationModel(map);
-    }
-    else
-    {
-        qDebug() << "Unknown rotation model type " << type;
-    }
-
-    return NULL;
-}
-
-
-vesta::InertialFrame* loadInertialFrame(const QString& name)
-{
-    qDebug() << "Inertial Frame: " << name;
-    return NULL;
-}
-
-
-vesta::Arc* loadArc(const QVariantMap& map)
-{
-    vesta::Arc* arc = new vesta::Arc();
-
-    QVariant centerData = map.value("center");
-    QVariant trajectoryData = map.value("trajectory");
-    QVariant rotationModelData = map.value("rotationModel");
-    QVariant trajectoryFrameData = map.value("trajectoryFrame");
-    QVariant bodyFrameData = map.value("bodyFrame");
-
-    if (centerData.type() == QVariant::String)
-    {
-    }
-
-    if (trajectoryData.type() == QVariant::Map)
-    {
-        Trajectory* trajectory = loadTrajectory(trajectoryData.toMap());
-        if (trajectory)
-        {
-            arc->setTrajectory(trajectory);
-        }
-    }
-
-    if (rotationModelData.type() == QVariant::Map)
-    {
-        RotationModel* rotationModel = loadRotationModel(rotationModelData.toMap());
-        if (rotationModel)
-        {
-            arc->setRotationModel(rotationModel);
-        }
-    }
-
-    if (trajectoryFrameData.type() == QVariant::String)
-    {
-        // Inertial frame name
-        InertialFrame* frame = loadInertialFrame(trajectoryFrameData.toString());
-        if (frame)
-        {
-            arc->setTrajectoryFrame(frame);
-        }
-    }
-    else if (trajectoryFrameData.type() == QVariant::Map)
-    {
-    }
-
-    if (bodyFrameData.type() == QVariant::String)
-    {
-        // Inertial frame name
-        InertialFrame* frame = loadInertialFrame(bodyFrameData.toString());
-        if (frame)
-        {
-            arc->setTrajectoryFrame(frame);
-        }
-    }
-    else if (bodyFrameData.type() == QVariant::Map)
-    {
-    }
-
-    return arc;
-}
-
-
 void
 Cosmographia::loadSolarSystem()
 {
@@ -688,42 +519,15 @@ Cosmographia::loadSolarSystem()
             return;
         }
 
-        qDebug() << contents["name"];
-
-        if (!contents.contains("bodies"))
+        UniverseLoader loader;
+        QStringList bodyNames = loader.loadSolarSystem(contents, m_catalog, m_view3d->textureLoader());
+        foreach (QString name, bodyNames)
         {
-            qDebug() << "No bodies defined.";
-            return;
-        }
-
-        if (contents["bodies"].type() != QVariant::List)
-        {
-            qDebug() << "Bodies is not a list.";
-            return;
-        }
-        QVariantList bodies = contents["bodies"].toList();
-
-        foreach (QVariant body, bodies)
-        {
-            if (body.type() != QVariant::Map)
+            Entity* e = m_catalog->find(name);
+            if (e)
             {
-                qDebug() << "Invalid item in bodies list.";
-            }
-            else
-            {
-                QVariantMap bodyInfo = body.toMap();
-                vesta::Body* body = new vesta::Body();
-
-                vesta::Arc* arc = loadArc(bodyInfo);
-                if (!arc)
-                {
-                    delete body;
-                }
-                else
-                {
-                    body->chronology()->addArc(arc);
-                }
-                qDebug() << "Body: " << bodyInfo["name"].toString();
+                qDebug() << "Adding: " << name;
+                m_view3d->replaceEntity(e);
             }
         }
     }

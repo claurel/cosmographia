@@ -42,6 +42,8 @@ public:
         return m_errorMessage;
     }
 
+    QVariant nextSscObject();
+
 private:
     QVariant readValue();
     QVariant readArray();

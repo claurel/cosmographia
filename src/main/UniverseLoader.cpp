@@ -28,6 +28,7 @@
 #include <vesta/FixedPointTrajectory.h>
 #include <vesta/WorldGeometry.h>
 #include <vesta/ArrowGeometry.h>
+#include <vesta/MeshGeometry.h>
 #include <vesta/Units.h>
 #include <QDebug>
 
@@ -385,8 +386,18 @@ vesta::Arc* loadArc(const QVariantMap& map,
     QVariant trajectoryFrameData = map.value("trajectoryFrame");
     QVariant bodyFrameData = map.value("bodyFrame");
 
+    arc->setDuration(daysToSeconds(100 * 365.25));
+
     if (centerData.type() == QVariant::String)
     {
+        QString centerName = centerData.toString();
+        arc->setCenter(catalog->find(centerName));
+    }
+    else
+    {
+        qDebug() << "Missing center for object.";
+        delete arc;
+        return NULL;
     }
 
     if (trajectoryData.type() == QVariant::Map)
@@ -447,6 +458,27 @@ vesta::Arc* loadArc(const QVariantMap& map,
 }
 
 
+static MeshGeometry*
+loadMeshFile(const QString& fileName, TextureMapLoader* textureLoader)
+{
+    MeshGeometry* meshGeometry = MeshGeometry::loadFromFile(fileName.toUtf8().data(), textureLoader);
+    if (!meshGeometry)
+    {
+        //QMessageBox::warning(NULL, "Missing mesh file", QString("Error opening mesh file %1.").arg(fileName));
+    }
+    else
+    {
+        // Optimize the mesh. The optimizations can be expensive for large meshes, but they can dramatically
+        // improve rendering performance. The best solution is to use mesh files that are already optimized, but
+        // the average model loaded off the web benefits from some preprocessing at load time.
+        meshGeometry->mergeSubmeshes();
+        meshGeometry->uniquifyVertices();
+    }
+
+    return meshGeometry;
+}
+
+
 static WorldGeometry*
 loadGlobeGeometry(const QVariantMap& map,
                   TextureMapLoader* textureLoader)
@@ -472,13 +504,13 @@ loadGlobeGeometry(const QVariantMap& map,
     WorldGeometry* world = new WorldGeometry();
     world->setEllipsoid(radii.cast<float>() * 2.0f);
 
+    TextureProperties props;
+    props.addressS = TextureProperties::Wrap;
+    props.addressT = TextureProperties::Clamp;
+
     if (map.contains("baseMap"))
     {
         QString baseMapName = map.value("baseMap").toString();
-        TextureProperties props;
-        props.addressS = TextureProperties::Wrap;
-        props.addressT = TextureProperties::Clamp;
-
         if (textureLoader)
         {
             TextureMap* tex = textureLoader->loadTexture(baseMapName.toUtf8().data(), props);
@@ -486,7 +518,44 @@ loadGlobeGeometry(const QVariantMap& map,
         }
     }
 
+    if (map.contains("normalMap"))
+    {
+        TextureProperties normalMapProps;
+        normalMapProps.addressS = TextureProperties::Wrap;
+        normalMapProps.addressT = TextureProperties::Clamp;
+        normalMapProps.usage = TextureProperties::CompressedNormalMap;
+
+        QString normalMapBase = map.value("normalMap").toString();
+        if (textureLoader)
+        {
+            TextureMap* normalTex = textureLoader->loadTexture(normalMapBase.toUtf8().data(), normalMapProps);
+            world->setNormalMap(normalTex);
+        }
+    }
+
     return world;
+}
+
+
+static MeshGeometry*
+loadMeshGeometry(const QVariantMap& map,
+                 TextureMapLoader* textureLoader)
+{
+    MeshGeometry* mesh = NULL;
+
+    double radius = doubleValue(map.value("size"), 1.0);
+
+    if (map.contains("source"))
+    {
+        QString sourceName = map.value("source").toString();
+        mesh = loadMeshFile(sourceName, textureLoader);
+        if (mesh)
+        {
+            mesh->setMeshScale(radius / mesh->boundingSphereRadius());
+        }
+    }
+
+    return mesh;
 }
 
 
@@ -521,6 +590,10 @@ loadGeometry(const QVariantMap& map,
     if (type == "Globe")
     {
         geometry = loadGlobeGeometry(map, textureLoader);
+    }
+    else if (type == "Mesh")
+    {
+        geometry = loadMeshGeometry(map, textureLoader);
     }
     else if (type == "Axes")
     {
@@ -587,10 +660,6 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
 
             vesta::Arc* arc = loadArc(bodyInfo, catalog);
 
-            QString centerName = bodyInfo.value("center").toString();
-
-            arc->setCenter(catalog->find(centerName));
-            arc->setDuration(daysToSeconds(100 * 365.25));
             if (!arc)
             {
                 delete body;
@@ -600,6 +669,8 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                 body->chronology()->addArc(arc);
             }
 
+            // Visible property
+            body->setVisible(bodyInfo.value("visible", true).toBool());
             QString bodyName = bodyInfo["name"].toString();
             body->setName(bodyName.toUtf8().data());
 

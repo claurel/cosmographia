@@ -1,0 +1,72 @@
+/*
+ * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ *
+ * Copyright by Astos Solutions GmbH, Germany
+ *
+ * this file is published under the Astos Solutions Free Public License
+ * For details on copyright and terms of use see 
+ * http://www.astos.de/Astos_Solutions_Free_Public_License.html
+ */
+
+#include "ArrowVisualizer.h"
+#include "ArrowGeometry.h"
+#include <cassert>
+
+using namespace vesta;
+using namespace Eigen;
+
+
+/** Create a new arrow visualizer. The color of the arrow is white by
+  * default.
+  */
+ArrowVisualizer::ArrowVisualizer(double size) :
+    Visualizer(NULL)
+{
+    ArrowGeometry* geometry = new ArrowGeometry(0.9f, 0.01f, 0.1f, 0.02f);
+    geometry->setScale(size);
+    geometry->setVisibleArrows(ArrowGeometry::XAxis);
+    setGeometry(geometry);
+
+    geometry->setArrowColor(0, Spectrum(1.0f, 1.0f, 1.0f));
+}
+
+
+ArrowVisualizer::~ArrowVisualizer()
+{
+}
+
+
+Quaterniond
+ArrowVisualizer::orientation(const Entity* parent, double t) const
+{
+    // The subclass computes the direction
+    Vector3d targetDirection = direction(parent, t);
+
+    Quaterniond rotation = Quaterniond::Identity();
+
+    // The arrow geometry points in the +x direction, so calculate the rotation
+    // required to make the arrow point in target direction
+    rotation.setFromTwoVectors(Vector3d::UnitX(), targetDirection);
+
+    return rotation;
+}
+
+
+Spectrum
+ArrowVisualizer::color() const
+{
+    ArrowGeometry* arrow = dynamic_cast<ArrowGeometry*>(geometry());
+    assert(arrow != NULL);
+    return arrow->arrowColor(0);
+}
+
+
+void
+ArrowVisualizer::setColor(const Spectrum& color)
+{
+    ArrowGeometry* arrow = dynamic_cast<ArrowGeometry*>(geometry());
+    assert(arrow != NULL);
+    arrow->setArrowColor(0, color);
+}
+
+

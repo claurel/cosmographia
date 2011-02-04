@@ -30,6 +30,7 @@ using namespace std;
 
 CatalogParser::CatalogParser(QIODevice* in) :
     m_scanner(NULL),
+    m_hasError(false),
     m_topLevel(true)
 {
     m_scanner = new Scanner(in);
@@ -162,7 +163,7 @@ CatalogParser::readArray()
 {
     QVariantList array;
     bool ok = true;
-    bool done = true;
+    bool done = false;
 
     if (m_scanner->currentToken() != Scanner::OpenSquareBracket)
     {
@@ -214,7 +215,7 @@ CatalogParser::readTable()
 {
     QVariantMap table;
     bool ok = true;
-    bool done = true;
+    bool done = false;
 
     if (m_scanner->currentToken() != Scanner::OpenBrace)
     {
@@ -234,7 +235,7 @@ CatalogParser::readTable()
         else
         {
             QString key;
-            if (m_scanner->readNext() == Scanner::Identifier)
+            if (m_scanner->currentToken() == Scanner::Identifier)
             {
                 key = m_scanner->stringValue();
             }

@@ -43,6 +43,109 @@ CatalogParser::~CatalogParser()
 }
 
 
+/** Load an SSC (Solar System Catalog) object as a QVariant. An SSC object
+  * has some properties that are specified outside of the table block. These
+  * are:
+  *    - the disposition (Add, Modify, Replace)
+  *    - the object type (Body, AltSurface, or Location)
+  *    - the object name
+  *    - the parent object name
+  *
+  * These properties are stored in the QVariantMap as string properties with
+  * the keys _disposition, _type, _name, and _parent.
+  *
+  * This method returns a QVariant with type Invalid if an object was not
+  * read successfully. This can occur because of a parsing error or because
+  * the end of file was reached.
+  */
+QVariant
+CatalogParser::nextSscObject()
+{
+    QString disposition = "Add";
+    QString type = "Body";
+
+    QVariant v = nextValue();
+
+    if (v.type() == QVariant::Invalid && atEnd())
+    {
+        // If we're at the end of the file, return
+        // an empty value, but don't set an error.
+        return QVariant();
+    }
+
+    // Parse the disposition (optional, defaults to "Add")
+    if (v.type() == QVariant::ByteArray)
+    {
+        QString s = v.toString();
+        if (s == "Add" || s == "Modify" || s == "Replace")
+        {
+            disposition = s;
+            v = nextValue();
+        }
+    }
+
+    // Parse the object type (optional, defaults to "Body")
+    if (v.type() == QVariant::ByteArray)
+    {
+        QString s = v.toString();
+        if (s == "Body" || s == "Location" || s == "AltSurface")
+        {
+            type = s;
+            v = nextValue();
+        }
+    }
+
+    // Parse the name (required)
+    if (v.type() == QVariant::ByteArray)
+    {
+        if (!error())
+        {
+            setError(QString("Unknown object type %1").arg(v.toString()));
+        }
+        return QVariant();
+    }
+    else if (v.type() != QVariant::String)
+    {
+        if (!error())
+        {
+            setError("Object name expected in catalog file.");
+        }
+        return QVariant();
+    }
+    QString name = v.toString();
+
+    // Parse the parent name (required)
+    v = nextValue();
+    if (v.type() != QVariant::String)
+    {
+        if (!error())
+        {
+            setError("Object parent name expected in catalog file.");
+        }
+        return QVariant();
+    }
+    QString parentName = v.toString();
+
+    v = nextValue();
+    if (v.type() != QVariant::Map)
+    {
+        if (!error())
+        {
+            setError("Object property table expected.");
+        }
+        return QVariant();
+    }
+
+    QVariantMap map = v.toMap();
+    map["_disposition"] = disposition;
+    map["_type"] = type;
+    map["_name"] = name;
+    map["_parent"] = parentName;
+
+    return map;
+}
+
+
 /** Read the next value and store the result in a variant. The value will
   * have one of the following types:
   *    double
@@ -69,7 +172,8 @@ CatalogParser::~CatalogParser()
   * Here, Body is actually a type tag, but parsing is simplified if we treat it as
   * a value.
   */
-QVariant CatalogParser::nextValue()
+QVariant
+CatalogParser::nextValue()
 {
     if (m_hasError)
     {

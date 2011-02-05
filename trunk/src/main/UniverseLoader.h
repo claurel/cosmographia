@@ -20,7 +20,9 @@
 
 #include "UniverseCatalog.h"
 #include <vesta/Entity.h>
+#include <vesta/Trajectory.h>
 #include <vesta/TextureMapLoader.h>
+#include <vesta/Frame.h>
 #include <QVariant>
 #include <QStringList>
 
@@ -32,10 +34,24 @@ public:
     ~UniverseLoader();
 
     QStringList loadSolarSystem(const QVariantMap& contents,
-                                UniverseCatalog* catalog,
-                                vesta::TextureMapLoader* textureLoader);
+                                UniverseCatalog* catalog);
+
+    void setTextureLoader(vesta::TextureMapLoader* textureLoader);
+    void addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory);
+    void removeBuiltinOrbit(const QString& name);
 
 private:
+    vesta::Geometry* loadGeometry(const QVariantMap& map);
+    vesta::Arc* loadArc(const QVariantMap& map,
+                        const UniverseCatalog* catalog);
+    vesta::Frame* loadFrame(const QVariantMap& map,
+                            const UniverseCatalog* catalog);
+    vesta::Trajectory* loadTrajectory(const QVariantMap& map);
+    vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);
+
+private:
+    QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
+    vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
 };
 
 #endif // _UNIVERSE_LOADER_H_

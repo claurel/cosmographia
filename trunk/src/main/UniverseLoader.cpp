@@ -176,7 +176,8 @@ vesta::Trajectory* loadFixedTrajectory(const QVariantMap& info)
 }
 
 
-vesta::Trajectory* loadKeplerianTrajectory(const QVariantMap& info)
+vesta::Trajectory*
+loadKeplerianTrajectory(const QVariantMap& info)
 {
     double sma = doubleValue(info.value("semiMajorAxis"), 0.0);
     if (sma <= 0.0)
@@ -207,12 +208,13 @@ vesta::Trajectory* loadKeplerianTrajectory(const QVariantMap& info)
 }
 
 
-vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info)
+vesta::Trajectory*
+UniverseLoader::loadBuiltinTrajectory(const QVariantMap& info)
 {
     if (info.contains("name"))
     {
         QString name = info.value("name").toString();
-        return NULL;
+        return m_builtinOrbits[name].ptr();
     }
     else
     {
@@ -222,7 +224,8 @@ vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info)
 }
 
 
-vesta::Trajectory* loadTrajectory(const QVariantMap& map)
+vesta::Trajectory*
+UniverseLoader::loadTrajectory(const QVariantMap& map)
 {
     QVariant typeData = map.value("type");
     if (typeData.type() != QVariant::String)
@@ -252,7 +255,8 @@ vesta::Trajectory* loadTrajectory(const QVariantMap& map)
 }
 
 
-vesta::RotationModel* loadFixedRotationModel(const QVariantMap& map)
+vesta::RotationModel*
+loadFixedRotationModel(const QVariantMap& map)
 {
     qDebug() << "RotationModel: " << map.value("type").toString();
     return NULL;
@@ -352,8 +356,9 @@ vesta::Frame* loadBodyFixedFrame(const QVariantMap& map,
 }
 
 
-vesta::Frame* loadFrame(const QVariantMap& map,
-                        const UniverseCatalog* catalog)
+vesta::Frame*
+UniverseLoader::loadFrame(const QVariantMap& map,
+                          const UniverseCatalog* catalog)
 {
     QVariant typeVar = map.value("type");
     if (typeVar.type() != QVariant::String)
@@ -375,8 +380,9 @@ vesta::Frame* loadFrame(const QVariantMap& map,
 }
 
 
-vesta::Arc* loadArc(const QVariantMap& map,
-                    const UniverseCatalog* catalog)
+vesta::Arc*
+UniverseLoader::loadArc(const QVariantMap& map,
+                        const UniverseCatalog* catalog)
 {
     vesta::Arc* arc = new vesta::Arc();
 
@@ -570,9 +576,8 @@ loadAxesGeometry(const QVariantMap& map)
 }
 
 
-static vesta::Geometry*
-loadGeometry(const QVariantMap& map,
-             TextureMapLoader* textureLoader)
+vesta::Geometry*
+UniverseLoader::loadGeometry(const QVariantMap& map)
 {
     Geometry* geometry = NULL;
 
@@ -589,11 +594,11 @@ loadGeometry(const QVariantMap& map,
 
     if (type == "Globe")
     {
-        geometry = loadGlobeGeometry(map, textureLoader);
+        geometry = loadGlobeGeometry(map, m_textureLoader.ptr());
     }
     else if (type == "Mesh")
     {
-        geometry = loadMeshGeometry(map, textureLoader);
+        geometry = loadMeshGeometry(map, m_textureLoader.ptr());
     }
     else if (type == "Axes")
     {
@@ -610,8 +615,7 @@ loadGeometry(const QVariantMap& map,
 
 QStringList
 UniverseLoader::loadSolarSystem(const QVariantMap& contents,
-                                UniverseCatalog* catalog,
-                                TextureMapLoader* textureLoader)
+                                UniverseCatalog* catalog)
 {
     qDebug() << contents["name"];
 
@@ -646,7 +650,7 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                 QVariant geometryValue = bodyInfo.value("geometry");
                 if (geometryValue.type() == QVariant::Map)
                 {
-                    vesta::Geometry* geometry = loadGeometry(geometryValue.toMap(), textureLoader);
+                    vesta::Geometry* geometry = loadGeometry(geometryValue.toMap());
                     if (geometry)
                     {
                         body->setGeometry(geometry);
@@ -680,4 +684,25 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
     }
 
     return bodyNames;
+}
+
+
+void
+UniverseLoader::addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory)
+{
+    m_builtinOrbits[name] = trajectory;
+}
+
+
+void
+UniverseLoader::removeBuiltinOrbit(const QString& name)
+{
+    m_builtinOrbits.remove(name);
+}
+
+
+void
+UniverseLoader::setTextureLoader(vesta::TextureMapLoader *textureLoader)
+{
+    m_textureLoader = textureLoader;
 }

@@ -35,7 +35,7 @@ using namespace std;
   * \param granuleLengthSec the time span covered by each granule
   */
 ChebyshevPolyTrajectory::ChebyshevPolyTrajectory(const double coeffs[],
-                                                 double degree,
+                                                 unsigned int degree,
                                                  double granuleCount,
                                                  double startTimeTdbSec,
                                                  double granuleLengthSec) :
@@ -44,7 +44,8 @@ ChebyshevPolyTrajectory::ChebyshevPolyTrajectory(const double coeffs[],
     m_granuleCount(granuleCount),
     m_startTime(startTimeTdbSec),
     m_granuleLength(granuleLengthSec),
-    m_period(0.0)
+    m_period(0.0),
+    m_boundingRadius(0.0)
 {
     // assert(degree <= MaxChebyshevDegree);
     unsigned int coeffCount = (degree + 1) * granuleCount * 3;
@@ -53,6 +54,21 @@ ChebyshevPolyTrajectory::ChebyshevPolyTrajectory(const double coeffs[],
 
     setStartTime(startTimeTdbSec);
     setEndTime(startTimeTdbSec + granuleCount * granuleLengthSec);
+
+    // Calculate a conservative estimate for the bounding radius (i.e. size of a sphere
+    // large enough to contain the trajectory.)
+    for (unsigned int granule = 0; granule < granuleCount; ++granule)
+    {
+        const double* granuleCoeffs = m_coeffs + granule * (degree + 1) * 3;
+        Vector3d x0(granuleCoeffs[0], granuleCoeffs[1], granuleCoeffs[2]);
+        Vector3d ext = Vector3d::Zero();
+        for (unsigned int i = 1; i <= degree; ++i)
+        {
+            ext += Vector3d(granuleCoeffs[i * 3 + 0], granuleCoeffs[i * 3 + 1], granuleCoeffs[i * 3 + 2]).cwise().abs();
+        }
+
+        m_boundingRadius = max(m_boundingRadius, (x0 + ext).norm());
+    }
 }
 
 

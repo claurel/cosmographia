@@ -30,6 +30,7 @@ namespace vesta
 
 class GLShaderProgram;
 class VertexBuffer;
+class VertexSpec;
 
 class KeplerianSwarm : public Geometry
 {
@@ -84,7 +85,7 @@ public:
         m_pointSize = pointSize;
     }
 
-    void addObject(const OrbitalElements& elements);
+    void addObject(const OrbitalElements& elements, double discoveryTime);
     void clear();
 
 private:
@@ -98,8 +99,10 @@ private:
         float qx;
         float qy;
         float qz;
+        float discoveryDate;
     };
 
+    VertexSpec* m_vertexSpec;
     std::vector<KeplerianObject> m_objects;
 
     double m_epoch;

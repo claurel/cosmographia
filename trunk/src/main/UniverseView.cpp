@@ -460,12 +460,6 @@ private:
 };
 
 
-static double JDtoSeconds(double jd)
-{
-    return daysToSeconds(jd - vesta::J2000);
-}
-
-
 static void SafeRelease(Object* obj)
 {
     if (obj)
@@ -714,7 +708,7 @@ void UniverseView::initializeGL()
     labelPlanet(m_universe->findFirst("Saturn"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
     labelPlanet(m_universe->findFirst("Uranus"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
     labelPlanet(m_universe->findFirst("Neptune"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Pluto"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
+    //labelPlanet(m_universe->findFirst("Pluto"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
 }
 
 
@@ -1647,7 +1641,7 @@ void UniverseView::initializeUniverse()
     m_universe->addEntity(createPlanet("Saturn",  sun, g_jplEph->trajectory(JPLEphemeris::Saturn),  defaultRotation, 58232.0));
     m_universe->addEntity(createPlanet("Uranus",  sun, g_jplEph->trajectory(JPLEphemeris::Uranus),  defaultRotation, 25362.0));
     m_universe->addEntity(createPlanet("Neptune", sun, g_jplEph->trajectory(JPLEphemeris::Neptune), defaultRotation, 24622));
-    m_universe->addEntity(createPlanet("Pluto",   sun, g_jplEph->trajectory(JPLEphemeris::Pluto),   defaultRotation, 1195));
+    //m_universe->addEntity(createPlanet("Pluto",   sun, g_jplEph->trajectory(JPLEphemeris::Pluto),   defaultRotation, 1195));
 
     //TextureMap* tex = loadTexture(EarthTextureSource, PlanetTextureProperties());
     //LocalTiledMap* tiledMap = new LocalTiledMap(m_textureLoader.ptr(), "/Users/chrislaurel/dev/maps/jmiiearth/level%1/tx_%2_%3.dds", true, 1024);
@@ -1705,7 +1699,7 @@ void UniverseView::initializeUniverse()
     }
 
     // Create the main asteroid belt
-    if (1)
+    if (0)
     {
         Body* mainBelt = CreateAsteroidGroup(sun, "Main Belt Asteroids");
         Body* hildaFamily = CreateAsteroidGroup(sun, "Hilda Asteroids");
@@ -2497,6 +2491,5 @@ UniverseView::replaceEntity(Entity* entity)
     m_universe->addEntity(entity);
 
     labelPlanet(entity, m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    qDebug() << "Body: " << entity->name().c_str() << ", " << entity->position(m_simulationTime).norm();
 }
 

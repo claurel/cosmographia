@@ -44,12 +44,15 @@ using namespace std;
 // normal.z   : qx
 // texcoord.s : qy
 // texcoord.t : qz
+
 //
 // Where (qw, qx, qy, qz) is a quaternion giving the orientation of the orbital
 // plane.
 
 static const char* SwarmVertexShaderSource =
 "uniform float time;              \n"
+"uniform vec4 color;              \n"
+"varying vec4 pointColor;         \n"
 "\n"
 "void main()                      \n"
 "{                                \n"
@@ -69,20 +72,26 @@ static const char* SwarmVertexShaderSource =
 "    vec3 a = cross(q.xyz, position) + q.w * position;                        \n"
 "    position = cross(a, -q.xyz) + dot(q.xyz, position) * q.xyz + q.w * a;    \n"
 "\n"
+"    float t = time - gl_MultiTexCoord0.z;                                    \n"
+"    if (t < 0.0)                                                             \n"
+"        pointColor = vec4(0.0, 0.0, 0.0, 0.0);                               \n"
+"    else                                                                     \n"
+"        pointColor = mix(vec4(1.0, 1.0, 1.0, 1.0), color, min(t / (86400.0 * 50.0), 1.0));  \n"
 "    gl_Position = gl_ModelViewProjectionMatrix * vec4(position, 1.0);        \n"
 "}                                                                            \n"
 ;
 
 static const char* SwarmFragmentShaderSource =
-"uniform vec4 color;                             \n"
+"varying vec4 pointColor;                        \n"
 "void main()                                     \n"
 "{                                               \n"
-"    gl_FragColor = color;                       \n"
+"    gl_FragColor = pointColor;                  \n"
 "}                                               \n"
 ;
 
 
 KeplerianSwarm::KeplerianSwarm() :
+    m_vertexSpec(NULL),
     m_epoch(vesta::J2000),
     m_boundingRadius(0.0f),
     m_color(Spectrum(1.0f, 1.0f, 1.0f)),
@@ -91,6 +100,14 @@ KeplerianSwarm::KeplerianSwarm() :
     m_shaderCompiled(false)
 {
     setClippingPolicy(PreventClipping);
+
+    VertexAttribute posNormTexAttributes[] = {
+        VertexAttribute(VertexAttribute::Position,     VertexAttribute::Float3),
+        VertexAttribute(VertexAttribute::Normal,       VertexAttribute::Float3),
+        VertexAttribute(VertexAttribute::TextureCoord, VertexAttribute::Float3),
+    };
+
+    m_vertexSpec = new VertexSpec(3, posNormTexAttributes);
 }
 
 
@@ -125,7 +142,8 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
         {
             glPointSize(m_pointSize);
 
-            rc.bindVertexBuffer(VertexSpec::PositionNormalTex, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
+            //rc.bindVertexBuffer(VertexSpec::PositionNormalTex, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
+            rc.bindVertexBuffer(*m_vertexSpec, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
 
             Material material;
             material.setOpacity(m_opacity);
@@ -172,7 +190,7 @@ KeplerianSwarm::nearPlaneDistance(const Eigen::Vector3f& cameraPosition) const
 
 
 void
-KeplerianSwarm::addObject(const OrbitalElements& elements)
+KeplerianSwarm::addObject(const OrbitalElements& elements, double discoveryTime)
 {
     Quaterniond orbitOrientation = OrbitalElements::orbitOrientation(elements.inclination,
                                                                      elements.longitudeOfAscendingNode,
@@ -191,6 +209,7 @@ KeplerianSwarm::addObject(const OrbitalElements& elements)
     k.qx = float(orbitOrientation.x());
     k.qy = float(orbitOrientation.y());
     k.qz = float(orbitOrientation.z());
+    k.discoveryDate = discoveryTime - m_epoch;
 
     m_objects.push_back(k);
 

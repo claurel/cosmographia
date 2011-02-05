@@ -113,7 +113,13 @@ NetworkTextureLoader::NetworkTextureLoader(QObject* parent, bool asynchronous) :
   */
 NetworkTextureLoader::~NetworkTextureLoader()
 {
-    delete m_imageLoadThread;
+    if (m_imageLoadThread)
+    {
+        m_imageLoadThread->exit();
+        m_imageLoadThread->deleteLater();
+    }
+    m_wmsHandler->deleteLater();
+    m_localImageLoader->deleteLater();
 }
 
 

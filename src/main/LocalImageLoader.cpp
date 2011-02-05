@@ -39,12 +39,19 @@ LocalImageLoader::loadTexture(TextureMap* texture)
     if (texture)
     {
         QString textureName(texture->name().c_str());
+
+        QFileInfo info(texture->name().c_str());
+        if (!info.exists())
+        {
+            textureName = QString("models/") + textureName;
+        }
+
         qDebug() << "loadTexture: " << textureName;
 
-        if (QFileInfo(texture->name().c_str()).suffix() == "dds")
+        if (info.suffix() == "dds")
         {
             // Handle DDS textures
-            QFile ddsFile(texture->name().c_str());
+            QFile ddsFile(textureName);
             ddsFile.open(QIODevice::ReadOnly);
             QByteArray data = ddsFile.readAll();
 
@@ -60,7 +67,7 @@ LocalImageLoader::loadTexture(TextureMap* texture)
         else
         {
             // Let Qt handle all file formats other than DDS
-            QImage image(QString(texture->name().c_str()));
+            QImage image(textureName);
             if (!image.isNull())
             {
                 emit textureLoaded(texture, image);

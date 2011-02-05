@@ -92,6 +92,11 @@ public:
         return m_universe;
     }
 
+    vesta::TextureMapLoader* textureLoader() const
+    {
+        return m_textureLoader.ptr();
+    }
+
     void replaceEntity(vesta::Entity* entity);
 
     enum LabelMode

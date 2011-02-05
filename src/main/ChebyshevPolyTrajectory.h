@@ -25,7 +25,7 @@ class ChebyshevPolyTrajectory : public vesta::Trajectory
 {
 public:
     ChebyshevPolyTrajectory(const double coeffs[],
-                            double degree,
+                            unsigned int degree,
                             double granuleCount,
                             double startTimeTdbSec,
                             double granuleLengthSec);
@@ -48,6 +48,7 @@ private:
     double m_startTime;
     double m_granuleLength;
     double m_period;
+    double m_boundingRadius;
 };
 
 #endif // _CHEBYSHEV_POLY_TRAJECTORY_H_

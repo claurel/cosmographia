@@ -22,6 +22,9 @@
 #include "UniverseLoader.h"
 #include "Cosmographia.h"
 #include "QVideoEncoder.h"
+#include "JPLEphemeris.h"
+#include "compatibility/CatalogParser.h"
+#include "compatibility/TransformCatalog.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -34,6 +37,7 @@
 #include <vesta/WorldGeometry.h>
 #include <vesta/Units.h>
 #include <qjson/parser.h>
+#include <qjson/serializer.h>
 #include <algorithm>
 
 using namespace vesta;
@@ -43,10 +47,13 @@ using namespace Eigen;
 Cosmographia::Cosmographia() :
     m_catalog(NULL),
     m_view3d(NULL),
+    m_loader(NULL),
     m_fullScreenAction(NULL)
 {
     m_catalog = new UniverseCatalog();
     m_view3d = new UniverseView();
+    m_loader = new UniverseLoader();
+
     setCentralWidget(m_view3d);
 
     setWindowTitle(tr("Cosmographia"));
@@ -325,6 +332,33 @@ Cosmographia::~Cosmographia()
 }
 
 
+/** Perform once-per-run initialization, such as loading planetary ephemerides.
+  */
+void
+Cosmographia::initialize()
+{
+    // Set up builtin orbits
+    JPLEphemeris* eph = JPLEphemeris::load("de406_1800-2100.dat");
+    if (eph)
+    {
+        m_loader->addBuiltinOrbit("Sun",     eph->trajectory(JPLEphemeris::Sun));
+        m_loader->addBuiltinOrbit("Mercury", eph->trajectory(JPLEphemeris::Mercury));
+        m_loader->addBuiltinOrbit("Venus",   eph->trajectory(JPLEphemeris::Venus));
+        m_loader->addBuiltinOrbit("EMB",     eph->trajectory(JPLEphemeris::EarthMoonBarycenter));
+        m_loader->addBuiltinOrbit("Mars",    eph->trajectory(JPLEphemeris::Mars));
+        m_loader->addBuiltinOrbit("Jupiter", eph->trajectory(JPLEphemeris::Jupiter));
+        m_loader->addBuiltinOrbit("Saturn",  eph->trajectory(JPLEphemeris::Saturn));
+        m_loader->addBuiltinOrbit("Uranus",  eph->trajectory(JPLEphemeris::Uranus));
+        m_loader->addBuiltinOrbit("Neptune", eph->trajectory(JPLEphemeris::Neptune));
+        m_loader->addBuiltinOrbit("Pluto",   eph->trajectory(JPLEphemeris::Pluto));
+        m_loader->addBuiltinOrbit("Moon",    eph->trajectory(JPLEphemeris::Moon));
+    }
+
+    // Set up the texture loader
+    m_loader->setTextureLoader(m_view3d->textureLoader());
+}
+
+
 void
 Cosmographia::faster()
 {
@@ -490,11 +524,9 @@ void
 Cosmographia::loadSolarSystem()
 {
     QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
-    QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json)");
+    QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json *.ssc)");
     if (!solarSystemFileName.isEmpty())
     {
-        QJson::Parser parser;
-
         QFile solarSystemFile(solarSystemFileName);
         if (!solarSystemFile.open(QIODevice::ReadOnly))
         {
@@ -502,32 +534,51 @@ Cosmographia::loadSolarSystem()
             return;
         }
 
-        bool parseOk = false;
-        QVariant result = parser.parse(&solarSystemFile, &parseOk);
-        if (!parseOk)
+        if (solarSystemFileName.toLower().endsWith(".json"))
         {
-            QMessageBox::warning(this,
-                                 tr("Solar System File Error"),
-                                 QString("Line %1: %2").arg(parser.errorLine()).arg(parser.errorString()));
-            return;
-        }
+            QJson::Parser parser;
 
-        QVariantMap contents = result.toMap();
-        if (contents.empty())
-        {
-            qDebug() << "Solar system file is empty.";
-            return;
-        }
-
-        UniverseLoader loader;
-        QStringList bodyNames = loader.loadSolarSystem(contents, m_catalog, m_view3d->textureLoader());
-        foreach (QString name, bodyNames)
-        {
-            Entity* e = m_catalog->find(name);
-            if (e)
+            bool parseOk = false;
+            QVariant result = parser.parse(&solarSystemFile, &parseOk);
+            if (!parseOk)
             {
-                qDebug() << "Adding: " << name;
-                m_view3d->replaceEntity(e);
+                QMessageBox::warning(this,
+                                     tr("Solar System File Error"),
+                                     QString("Line %1: %2").arg(parser.errorLine()).arg(parser.errorString()));
+                return;
+            }
+
+            QVariantMap contents = result.toMap();
+            if (contents.empty())
+            {
+                qDebug() << "Solar system file is empty.";
+                return;
+            }
+
+            QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+            foreach (QString name, bodyNames)
+            {
+                Entity* e = m_catalog->find(name);
+                if (e)
+                {
+                    qDebug() << "Adding: " << name;
+                    m_view3d->replaceEntity(e);
+                }
+            }
+        }
+        else if (solarSystemFileName.toLower().endsWith(".ssc"))
+        {
+            CatalogParser parser(&solarSystemFile);
+            QVariant obj = parser.nextSscObject();
+            while (obj.type() == QVariant::Map)
+            {
+                QJson::Serializer serializer;
+                qDebug() << serializer.serialize(obj);
+
+                QVariantMap map = obj.toMap();
+                TransformSscObject(&map);
+                qDebug() << "Converted: " << serializer.serialize(map);
+                obj = parser.nextSscObject();
             }
         }
     }

@@ -23,6 +23,7 @@
 
 class UniverseView;
 class UniverseCatalog;
+class UniverseLoader;
 
 class Cosmographia : public QMainWindow
 {
@@ -31,6 +32,8 @@ class Cosmographia : public QMainWindow
 public:
     Cosmographia();
     ~Cosmographia();
+
+    void initialize();
 
 public slots:
     void faster();
@@ -56,6 +59,7 @@ private:
 private:
     UniverseCatalog *m_catalog;
     UniverseView *m_view3d;
+    UniverseLoader *m_loader;
 
     QAction* m_fullScreenAction;
 };

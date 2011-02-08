@@ -534,6 +534,8 @@ Cosmographia::loadSolarSystem()
             return;
         }
 
+        m_loader->setDataSearchPath(QFileInfo(solarSystemFile).absolutePath());
+
         if (solarSystemFileName.toLower().endsWith(".json"))
         {
             QJson::Parser parser;

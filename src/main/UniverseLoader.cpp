@@ -151,11 +151,14 @@ LoadXYZVTrajectory(const QString& fileName)
             }
         }
 
-        double tdbSec = daysToSeconds(jd - vesta::J2000);
-        InterpolatedStateTrajectory::TimeState state;
-        state.tsec = tdbSec;
-        state.state = StateVector(position, velocity);
-        states.push_back(state);
+        if (!done)
+        {
+            double tdbSec = daysToSeconds(jd - vesta::J2000);
+            InterpolatedStateTrajectory::TimeState state;
+            state.tsec = tdbSec;
+            state.state = StateVector(position, velocity);
+            states.push_back(state);
+        }
     }
 
     if (!ok)
@@ -211,16 +214,19 @@ LoadXYZTrajectory(const QString& fileName)
             }
         }
 
-        double tdbSec = daysToSeconds(jd - vesta::J2000);
-        InterpolatedStateTrajectory::TimePosition record;
-        record.tsec = tdbSec;
-        record.position = position;
-        positions.push_back(record);
+        if (!done)
+        {
+            double tdbSec = daysToSeconds(jd - vesta::J2000);
+            InterpolatedStateTrajectory::TimePosition record;
+            record.tsec = tdbSec;
+            record.position = position;
+            positions.push_back(record);
+        }
     }
 
     if (!ok)
     {
-        qDebug() << "Error in xyzv trajectory file, record " << positions.size();
+        qDebug() << "Error in xyz trajectory file, record " << positions.size();
         return NULL;
     }
     else
@@ -394,7 +400,6 @@ UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
         else if (name.toLower().endsWith(".xyz"))
         {
             return LoadXYZTrajectory(fileName);
-            return NULL;
         }
         else
         {

@@ -16,29 +16,6 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "InterpolatedStateTrajectory.h"
-
-using namespace vesta;
-using namespace Eigen;
-
-
-// This file is part of Cosmographia.
-//
-// Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
-//
-// Cosmographia is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 2 of the License, or (at your option) any later version.
-//
-// Cosmographia is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
-
-#include "InterpolatedStateTrajectory.h"
 #include <algorithm>
 #include <cassert>
 
@@ -47,7 +24,7 @@ using namespace Eigen;
 using namespace std;
 
 
-// A weak ordering on time/state records used for binary search by
+// A weak ordering on time/orientation records used for binary search by
 // time.
 class TimeStateOrdering
 {
@@ -163,7 +140,10 @@ estimateVelocity(const InterpolatedStateTrajectory::TimePositionList& positions,
     }
 }
 
-/** Calculate the state vector at the specified time (seconds since J2000 TDB)
+/** Calculate the state vector at the specified time (seconds since J2000 TDB).
+  *
+  * The input time is clamped to so that it lies within the range between
+  * the first and last record.
   */
 StateVector
 InterpolatedStateTrajectory::state(double tdbSec) const
@@ -227,7 +207,6 @@ InterpolatedStateTrajectory::state(double tdbSec) const
             StateVector s = cubicHermitInterpolate(s0.position, v0 * h, s1.position, v1 * h, t);
             return StateVector(s.position(), s.velocity() / h);
         }
-
     }
     else
     {

@@ -523,7 +523,10 @@ Cosmographia::recordVideo()
 void
 Cosmographia::loadSolarSystem()
 {
+    QSettings settings;
     QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
+    defaultFileName = settings.value("SolarSystemDir", defaultFileName).toString();
+
     QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json *.ssc)");
     if (!solarSystemFileName.isEmpty())
     {
@@ -583,5 +586,7 @@ Cosmographia::loadSolarSystem()
                 obj = parser.nextSscObject();
             }
         }
+
+        settings.setValue("SolarSystemDir", solarSystemFileName);
     }
 }

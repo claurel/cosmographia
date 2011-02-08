@@ -191,6 +191,11 @@ Scanner::readNext()
                 state = EndTokenState;
                 m_currentTokenType = CloseSquareBracket;
             }
+            else if (m_nextChar == EndOfFile)
+            {
+                state = EndTokenState;
+                m_currentTokenType = EndToken;
+            }
             else
             {
                 state = EndTokenState;

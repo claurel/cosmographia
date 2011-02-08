@@ -40,6 +40,8 @@ public:
     void addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory);
     void removeBuiltinOrbit(const QString& name);
 
+    void setDataSearchPath(const QString& path);
+
 private:
     vesta::Geometry* loadGeometry(const QVariantMap& map);
     vesta::Arc* loadArc(const QVariantMap& map,
@@ -48,10 +50,12 @@ private:
                             const UniverseCatalog* catalog);
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);
     vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);
+    vesta::Trajectory* loadInterpolatedStatesTrajectory(const QVariantMap& info);
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
     vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
+    QString m_dataSearchPath;
 };
 
 #endif // _UNIVERSE_LOADER_H_

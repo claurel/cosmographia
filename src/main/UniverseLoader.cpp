@@ -16,6 +16,9 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "UniverseLoader.h"
+#include "InterpolatedStateTrajectory.h"
+#include "compatibility/Scanner.h"
+#include <vesta/Units.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
 #include <vesta/Trajectory.h>
@@ -30,6 +33,7 @@
 #include <vesta/ArrowGeometry.h>
 #include <vesta/MeshGeometry.h>
 #include <vesta/Units.h>
+#include <QFile>
 #include <QDebug>
 
 using namespace vesta;
@@ -74,8 +78,95 @@ private:
 };
 
 
+static bool readNextDouble(Scanner* scanner, double* value)
+{
+    if (scanner->readNext() == Scanner::Double || scanner->currentToken() == Scanner::Integer)
+    {
+        *value = scanner->doubleValue();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
-UniverseLoader::UniverseLoader()
+
+static bool readNextVector3(Scanner* scanner, Vector3d* value)
+{
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    if (readNextDouble(scanner, &x) && readNextDouble(scanner, &y) && readNextDouble(scanner, &z))
+    {
+        *value = Vector3d(x, y, z);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+InterpolatedStateTrajectory*
+LoadXYZVTrajectory(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Unable to open trajectory file " << fileName;
+        return NULL;
+    }
+
+    InterpolatedStateTrajectory::TimeStateList states;
+
+    Scanner scanner(&file);
+    bool ok = true;
+    bool done = false;
+    while (!done)
+    {
+        double jd = 0.0;
+        Vector3d position = Vector3d::Zero();
+        Vector3d velocity = Vector3d::Zero();
+        if (!readNextDouble(&scanner, &jd))
+        {
+            done = true;
+            if (!scanner.atEnd())
+            {
+                ok = false;
+            }
+        }
+        else
+        {
+            if (!readNextVector3(&scanner, &position) || !readNextVector3(&scanner, &velocity))
+            {
+                ok = false;
+                done = true;
+            }
+        }
+
+        double tdbSec = daysToSeconds(jd - vesta::J2000);
+        InterpolatedStateTrajectory::TimeState state;
+        state.tsec = tdbSec;
+        state.state = StateVector(position, velocity);
+        states.push_back(state);
+    }
+
+    if (!ok)
+    {
+        qDebug() << "Error in xyzv trajectory file, record " << states.size();
+        return NULL;
+    }
+    else
+    {
+        return new InterpolatedStateTrajectory(states);
+    }
+}
+
+
+UniverseLoader::UniverseLoader() :
+    m_dataSearchPath(".")
 {
 }
 
@@ -91,7 +182,6 @@ static double doubleValue(QVariant v, double defaultValue = 0.0)
     double value = v.toDouble(&ok);
     if (ok)
     {
-        qDebug() << "value: " << value;
         return value;
     }
     else
@@ -225,6 +315,37 @@ UniverseLoader::loadBuiltinTrajectory(const QVariantMap& info)
 
 
 vesta::Trajectory*
+UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
+{
+    if (info.contains("source"))
+    {
+        QString name = info.value("source").toString();
+
+        QString fileName = m_dataSearchPath + "/" + name;
+        if (name.toLower().endsWith(".xyzv"))
+        {
+            return LoadXYZVTrajectory(fileName);
+        }
+        else if (name.toLower().endsWith(".xyz"))
+        {
+            qDebug() << ".xyz sampled trajectories not supported.";
+            return NULL;
+        }
+        else
+        {
+            qDebug() << "Unknown sampled trajectory format.";
+            return NULL;
+        }
+    }
+    else
+    {
+        qDebug() << "No source file specified for sampled trajectory.";
+        return NULL;
+    }
+}
+
+
+vesta::Trajectory*
 UniverseLoader::loadTrajectory(const QVariantMap& map)
 {
     QVariant typeData = map.value("type");
@@ -245,6 +366,10 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     else if (type == "Builtin")
     {
         return loadBuiltinTrajectory(map);
+    }
+    else if (type == "InterpolatedStates")
+    {
+        return loadInterpolatedStatesTrajectory(map);
     }
     else
     {
@@ -705,4 +830,11 @@ void
 UniverseLoader::setTextureLoader(vesta::TextureMapLoader *textureLoader)
 {
     m_textureLoader = textureLoader;
+}
+
+
+void
+UniverseLoader::setDataSearchPath(const QString& path)
+{
+    m_dataSearchPath = path;
 }

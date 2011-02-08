@@ -24,9 +24,17 @@
 
 
 /** An InterpolatedStateTrajectory computes state vectors by interpolating
-  * between entries in a table of time/state vector pairs. Cu
+  * between entries in a table of time/state vector pairs or time/position
+  * pairs with estimated velocities. Because the records are time-tagged,
+  * they need not be evenly spaced in time.
   *
   * Currently, the interpolation method is always cubic Hermite.
+  *
+  * Note that providing velocities greatly improves the accuracy of the
+  * interpolated approximation with respect to the original trajectory. When
+  * available, velocities should be given; if memory is constrained, it is
+  * better accuracy can be achieved by reducing the number of records by
+  * half rather than using postions instead of state vectors.
   */
 class InterpolatedStateTrajectory : public vesta::Trajectory
 {
@@ -39,7 +47,15 @@ public:
     };
     typedef std::vector<TimeState, Eigen::aligned_allocator<TimeState> > TimeStateList;
 
+    struct TimePosition
+    {
+        double tsec;
+        Eigen::Vector3d position;
+    };
+    typedef std::vector<TimePosition> TimePositionList;
+
     InterpolatedStateTrajectory(const TimeStateList& states);
+    InterpolatedStateTrajectory(const TimePositionList& positions);
     ~InterpolatedStateTrajectory();
 
     virtual vesta::StateVector state(double tdbSec) const;
@@ -53,6 +69,7 @@ private:
     double m_period;
     double m_boundingRadius;
     TimeStateList m_states;
+    TimePositionList m_positions;
 };
 
 #endif // _INTERPOLATED_STATE_TRAJECTORY_H_

@@ -109,6 +109,11 @@ static bool readNextVector3(Scanner* scanner, Vector3d* value)
 }
 
 
+/** Load a list of time/state vector records from a file. The values
+  * are stored in ASCII format with newline terminated hash comments
+  * allowed. Dates are given as TDB Julian dates, positions are
+  * in units of kilometers, and velocities are km/sec.
+  */
 InterpolatedStateTrajectory*
 LoadXYZVTrajectory(const QString& fileName)
 {
@@ -161,6 +166,66 @@ LoadXYZVTrajectory(const QString& fileName)
     else
     {
         return new InterpolatedStateTrajectory(states);
+    }
+}
+
+
+/** Load a list of time/position records from a file. The values
+  * are stored in ASCII format with newline terminated hash comments
+  * allowed. Dates are given as TDB Julian dates and positions are
+  * in units of kilometers.
+  */
+InterpolatedStateTrajectory*
+LoadXYZTrajectory(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Unable to open trajectory file " << fileName;
+        return NULL;
+    }
+
+    InterpolatedStateTrajectory::TimePositionList positions;
+
+    Scanner scanner(&file);
+    bool ok = true;
+    bool done = false;
+    while (!done)
+    {
+        double jd = 0.0;
+        Vector3d position = Vector3d::Zero();
+        if (!readNextDouble(&scanner, &jd))
+        {
+            done = true;
+            if (!scanner.atEnd())
+            {
+                ok = false;
+            }
+        }
+        else
+        {
+            if (!readNextVector3(&scanner, &position))
+            {
+                ok = false;
+                done = true;
+            }
+        }
+
+        double tdbSec = daysToSeconds(jd - vesta::J2000);
+        InterpolatedStateTrajectory::TimePosition record;
+        record.tsec = tdbSec;
+        record.position = position;
+        positions.push_back(record);
+    }
+
+    if (!ok)
+    {
+        qDebug() << "Error in xyzv trajectory file, record " << positions.size();
+        return NULL;
+    }
+    else
+    {
+        return new InterpolatedStateTrajectory(positions);
     }
 }
 
@@ -328,7 +393,7 @@ UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
         }
         else if (name.toLower().endsWith(".xyz"))
         {
-            qDebug() << ".xyz sampled trajectories not supported.";
+            return LoadXYZTrajectory(fileName);
             return NULL;
         }
         else

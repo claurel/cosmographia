@@ -128,7 +128,7 @@ ChebyshevPolyTrajectory::state(double tdbSec) const
 double
 ChebyshevPolyTrajectory::boundingSphereRadius() const
 {
-    return 1.0e10;
+    return m_boundingRadius;
 }
 
 

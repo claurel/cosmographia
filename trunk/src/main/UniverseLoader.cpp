@@ -18,6 +18,7 @@
 #include "UniverseLoader.h"
 #include "InterpolatedStateTrajectory.h"
 #include "InterpolatedRotation.h"
+#include "TwoVectorFrame.h"
 #include "compatibility/Scanner.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
@@ -668,6 +669,212 @@ vesta::Frame* loadBodyFixedFrame(const QVariantMap& map,
 }
 
 
+static bool parseAxisLabel(const QString& label, TwoVectorFrame::Axis* axis)
+{
+    bool validLabel = true;
+
+    QString lcLabel = label.toLower();
+    if (lcLabel == "x" || lcLabel == "+x")
+    {
+        *axis = TwoVectorFrame::PositiveX;
+    }
+    else if (lcLabel == "y" || lcLabel == "+y")
+    {
+        *axis = TwoVectorFrame::PositiveY;
+    }
+    else if (lcLabel == "z" || lcLabel == "+z")
+    {
+        *axis = TwoVectorFrame::PositiveZ;
+    }
+    else if (lcLabel == "-x")
+    {
+        *axis = TwoVectorFrame::NegativeX;
+    }
+    else if (lcLabel == "-y")
+    {
+        *axis = TwoVectorFrame::NegativeY;
+    }
+    else if (lcLabel == "-z")
+    {
+        *axis = TwoVectorFrame::NegativeZ;
+    }
+    else
+    {
+        validLabel = false;
+    }
+
+    return validLabel;
+}
+
+
+TwoVectorFrameDirection*
+loadRelativePosition(const QVariantMap& map,
+                     const UniverseCatalog* catalog)
+{
+    QVariant observerVar = map.value("observer");
+    QVariant targetVar = map.value("target");
+
+    if (observerVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing observer for RelativePosition direction";
+        return NULL;
+    }
+
+    if (targetVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing target for RelativePosition direction";
+        return NULL;
+    }
+
+    Entity* observer = catalog->find(observerVar.toString());
+    if (!observer)
+    {
+        qDebug() << "Observer body " << observerVar.toString() << " for RelativePosition direction not found";
+        return NULL;
+    }
+
+    Entity* target = catalog->find(targetVar.toString());
+    if (!target)
+    {
+        qDebug() << "Target body " << targetVar.toString() << " for RelativePosition direction not found";
+        return NULL;
+    }
+
+    return new RelativePositionVector(observer, target);
+}
+
+
+TwoVectorFrameDirection*
+loadRelativeVelocity(const QVariantMap& map,
+                     const UniverseCatalog* catalog)
+{
+    QVariant observerVar = map.value("observer");
+    QVariant targetVar = map.value("target");
+
+    if (observerVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing observer for RelativeVelocity direction";
+        return NULL;
+    }
+
+    if (targetVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing target for RelativeVelocity direction";
+        return NULL;
+    }
+
+    Entity* observer = catalog->find(observerVar.toString());
+    if (!observer)
+    {
+        qDebug() << "Observer body " << observerVar.toString() << " for RelativeVelocity direction not found";
+        return NULL;
+    }
+
+    Entity* target = catalog->find(targetVar.toString());
+    if (!target)
+    {
+        qDebug() << "Target body " << targetVar.toString() << " for RelativeVelocity direction not found";
+        return NULL;
+    }
+
+    return new RelativeVelocityVector(observer, target);
+}
+
+
+TwoVectorFrameDirection*
+loadFrameVector(const QVariantMap& map,
+                const UniverseCatalog* catalog)
+{
+    QVariant typeVar = map.value("type");
+    if (typeVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing type for TwoVector frame direction.";
+        return NULL;
+    }
+
+    QVariant type = typeVar.toString();
+    if (type == "RelativePosition")
+    {
+        return loadRelativePosition(map, catalog);
+    }
+    else if (type == "RelativeVelocity")
+    {
+        return loadRelativeVelocity(map, catalog);
+    }
+    else
+    {
+        qDebug() << "Unknoown TwoVector frame direction type " << type;
+        return NULL;
+    }
+}
+
+
+vesta::Frame* loadTwoVectorFrame(const QVariantMap& map,
+                                 const UniverseCatalog* catalog)
+{
+    QVariant primaryVar = map.value("primary");
+    QVariant primaryAxisVar = map.value("primaryAxis");
+    QVariant secondaryVar = map.value("secondary");
+    QVariant secondaryAxisVar = map.value("secondaryAxis");
+
+    if (primaryVar.type() != QVariant::Map)
+    {
+        qDebug() << "Invalid or missing primary direction in TwoVector frame";
+        return NULL;
+    }
+
+    if (secondaryVar.type() != QVariant::Map)
+    {
+        qDebug() << "Invalid or missing secondary direction in TwoVector frame";
+        return NULL;
+    }
+
+    if (primaryAxisVar.type() != QVariant::String)
+    {
+        qDebug() << "Invalid or missing primary axis in TwoVector frame";
+        return NULL;
+    }
+
+    if (secondaryAxisVar.type() != QVariant::String)
+    {
+        qDebug() << "Invalid or missing secondary axis in TwoVector frame";
+        return NULL;
+    }
+
+    TwoVectorFrame::Axis primaryAxis = TwoVectorFrame::PositiveX;
+    TwoVectorFrame::Axis secondaryAxis = TwoVectorFrame::PositiveX;
+    if (!parseAxisLabel(primaryAxisVar.toString(), &primaryAxis))
+    {
+        qDebug() << "Invalid label " << primaryAxisVar.toString() << " for primary axis in TwoVector frame";
+        return NULL;
+    }
+
+    if (!parseAxisLabel(secondaryAxisVar.toString(), &secondaryAxis))
+    {
+        qDebug() << "Invalid label " << secondaryAxisVar.toString() << " for secondary axis in TwoVector frame";
+        return NULL;
+    }
+
+    if (!TwoVectorFrame::orthogonalAxes(primaryAxis, secondaryAxis))
+    {
+        qDebug() << "Bad two vector frame. Primary and secondary axes must be orthogonal";
+        return NULL;
+    }
+
+    TwoVectorFrameDirection* primaryDir = loadFrameVector(primaryVar.toMap(), catalog);
+    TwoVectorFrameDirection* secondaryDir = loadFrameVector(secondaryVar.toMap(), catalog);
+
+    if (primaryDir && secondaryDir)
+    {
+        return new TwoVectorFrame(primaryDir, primaryAxis, secondaryDir, secondaryAxis);
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+
 vesta::Frame*
 UniverseLoader::loadFrame(const QVariantMap& map,
                           const UniverseCatalog* catalog)
@@ -682,6 +889,10 @@ UniverseLoader::loadFrame(const QVariantMap& map,
     if (type == "BodyFixed")
     {
         return loadBodyFixedFrame(map, catalog);
+    }
+    else if (type == "TwoVector")
+    {
+        return loadTwoVectorFrame(map, catalog);
     }
     else
     {

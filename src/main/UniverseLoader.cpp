@@ -17,6 +17,7 @@
 
 #include "UniverseLoader.h"
 #include "InterpolatedStateTrajectory.h"
+#include "InterpolatedRotation.h"
 #include "compatibility/Scanner.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
@@ -100,6 +101,27 @@ static bool readNextVector3(Scanner* scanner, Vector3d* value)
     if (readNextDouble(scanner, &x) && readNextDouble(scanner, &y) && readNextDouble(scanner, &z))
     {
         *value = Vector3d(x, y, z);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+static bool readNextQuaternion(Scanner* scanner, Quaterniond* value)
+{
+    double w = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    if (readNextDouble(scanner, &w) &&
+        readNextDouble(scanner, &x) &&
+        readNextDouble(scanner, &y) &&
+        readNextDouble(scanner, &z))
+    {
+        *value = Quaterniond(w, x, y, z);
         return true;
     }
     else
@@ -232,6 +254,70 @@ LoadXYZTrajectory(const QString& fileName)
     else
     {
         return new InterpolatedStateTrajectory(positions);
+    }
+}
+
+
+/** Load a list of time/quaternion records from a file. The values
+  * are stored in ASCII format with newline terminated hash comments
+  * allowed. Dates are given as TDB Julian dates and orientations are
+  * given as quaternions with components ordered w, x, y, z (i.e. the
+  * real part of the quaternion is before the imaginary parts.)
+  */
+InterpolatedRotation*
+LoadInterpolatedRotation(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Unable to open trajectory file " << fileName;
+        return NULL;
+    }
+
+    InterpolatedRotation::TimeOrientationList orientations;
+
+    Scanner scanner(&file);
+    bool ok = true;
+    bool done = false;
+    while (!done)
+    {
+        double jd = 0.0;
+        Quaterniond q = Quaterniond::Identity();
+        if (!readNextDouble(&scanner, &jd))
+        {
+            done = true;
+            if (!scanner.atEnd())
+            {
+                ok = false;
+            }
+        }
+        else
+        {
+            if (!readNextQuaternion(&scanner, &q))
+            {
+                ok = false;
+                done = true;
+            }
+        }
+
+        if (!done)
+        {
+            double tdbSec = daysToSeconds(jd - vesta::J2000);
+            InterpolatedRotation::TimeOrientation record;
+            record.tsec = tdbSec;
+            record.orientation = q;
+            orientations.push_back(record);
+        }
+    }
+
+    if (!ok)
+    {
+        qDebug() << "Error in .q orientation file, record " << orientations.size();
+        return NULL;
+    }
+    else
+    {
+        return new InterpolatedRotation(orientations);
     }
 }
 
@@ -476,7 +562,34 @@ vesta::RotationModel* loadUniformRotationModel(const QVariantMap& map)
 }
 
 
-vesta::RotationModel* loadRotationModel(const QVariantMap& map)
+vesta::RotationModel*
+UniverseLoader::loadInterpolatedRotationModel(const QVariantMap& info)
+{
+    if (info.contains("source"))
+    {
+        QString name = info.value("source").toString();
+
+        QString fileName = m_dataSearchPath + "/" + name;
+        if (name.toLower().endsWith(".q"))
+        {
+            return LoadInterpolatedRotation(fileName);
+        }
+        else
+        {
+            qDebug() << "Unknown interpolated rotation format.";
+            return NULL;
+        }
+    }
+    else
+    {
+        qDebug() << "No source file specified for interpolated rotation.";
+        return NULL;
+    }
+}
+
+
+vesta::RotationModel*
+UniverseLoader::loadRotationModel(const QVariantMap& map)
 {
     QVariant typeVar = map.value("type");
     if (typeVar.type() != QVariant::String)
@@ -492,6 +605,10 @@ vesta::RotationModel* loadRotationModel(const QVariantMap& map)
     else if (type == "Uniform")
     {
         return loadUniformRotationModel(map);
+    }
+    else if (type == "Interpolated")
+    {
+        return loadInterpolatedRotationModel(map);
     }
     else
     {

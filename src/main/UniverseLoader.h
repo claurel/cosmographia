@@ -20,9 +20,10 @@
 
 #include "UniverseCatalog.h"
 #include <vesta/Entity.h>
-#include <vesta/Trajectory.h>
-#include <vesta/TextureMapLoader.h>
 #include <vesta/Frame.h>
+#include <vesta/Trajectory.h>
+#include <vesta/RotationModel.h>
+#include <vesta/TextureMapLoader.h>
 #include <QVariant>
 #include <QStringList>
 
@@ -51,6 +52,9 @@ private:
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);
     vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadInterpolatedStatesTrajectory(const QVariantMap& info);
+
+    vesta::RotationModel* loadRotationModel(const QVariantMap& info);
+    vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;

@@ -140,6 +140,7 @@ estimateVelocity(const InterpolatedStateTrajectory::TimePositionList& positions,
     }
 }
 
+
 /** Calculate the state vector at the specified time (seconds since J2000 TDB).
   *
   * The input time is clamped to so that it lies within the range between

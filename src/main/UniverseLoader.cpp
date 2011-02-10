@@ -34,6 +34,7 @@
 #include <vesta/WorldGeometry.h>
 #include <vesta/ArrowGeometry.h>
 #include <vesta/MeshGeometry.h>
+#include <vesta/AxesVisualizer.h>
 #include <vesta/Units.h>
 #include <QFile>
 #include <QDebug>
@@ -545,7 +546,8 @@ loadFixedRotationModel(const QVariantMap& map)
 }
 
 
-vesta::RotationModel* loadUniformRotationModel(const QVariantMap& map)
+vesta::RotationModel*
+loadUniformRotationModel(const QVariantMap& map)
 {
     qDebug() << "RotationModel: " << map.value("type").toString();
 
@@ -1136,6 +1138,78 @@ UniverseLoader::loadGeometry(const QVariantMap& map)
 }
 
 
+Visualizer*
+loadBodyAxesVisualizer(const QVariantMap& map)
+{
+    bool ok = false;
+    double size = map.value("size", 1.0).toDouble(&ok);
+    if (!ok)
+    {
+        qDebug() << "Bad size given for BodyAxes visualizer";
+        return NULL;
+    }
+    else
+    {
+        return new AxesVisualizer(AxesVisualizer::BodyAxes, size);
+    }
+}
+
+
+Visualizer*
+loadFrameAxesVisualizer(const QVariantMap& map)
+{
+    bool ok = false;
+    double size = map.value("size", 1.0).toDouble(&ok);
+    if (!ok)
+    {
+        qDebug() << "Bad size given for FrameAxes visualizer";
+        return NULL;
+    }
+    else
+    {
+        AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::FrameAxes, size);
+        axes->arrows()->setOpacity(0.3f);
+        return axes;
+    }
+}
+
+
+Visualizer*
+UniverseLoader::loadVisualizer(const QVariantMap& map,
+                               const UniverseCatalog* catalog)
+{
+    QVariant styleVar = map.value("style");
+    if (styleVar.type() != QVariant::Map)
+    {
+        qDebug() << "Missing visualizer style.";
+        return NULL;
+    }
+
+    QVariantMap style = styleVar.toMap();
+    QVariant typeVar = style.value("type");
+    if (typeVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing type for visualizer style.";
+        return NULL;
+    }
+
+    QString type = typeVar.toString();
+    if (type == "BodyAxes")
+    {
+        return loadBodyAxesVisualizer(style);
+    }
+    else if (type == "FrameAxes")
+    {
+        return loadFrameAxesVisualizer(style);
+    }
+    else
+    {
+        qDebug() << "Unknown visualizer type " << type;
+        return NULL;
+    }
+}
+
+
 QStringList
 UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                                 UniverseCatalog* catalog)
@@ -1144,65 +1218,107 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
 
     QStringList bodyNames;
 
-    if (!contents.contains("bodies"))
+    if (!contents.contains("items"))
     {
-        qDebug() << "No bodies defined.";
+        qDebug() << "No items defined.";
         return bodyNames;
     }
 
-    if (contents["bodies"].type() != QVariant::List)
+    if (contents["items"].type() != QVariant::List)
     {
-        qDebug() << "Bodies is not a list.";
+        qDebug() << "items is not a list.";
         return bodyNames;
     }
-    QVariantList bodies = contents["bodies"].toList();
+    QVariantList items = contents["items"].toList();
 
-    foreach (QVariant body, bodies)
+    foreach (QVariant itemVar, items)
     {
-        if (body.type() != QVariant::Map)
+        if (itemVar.type() != QVariant::Map)
         {
             qDebug() << "Invalid item in bodies list.";
         }
         else
         {
-            QVariantMap bodyInfo = body.toMap();
-            vesta::Body* body = new vesta::Body();
+            QVariantMap item = itemVar.toMap();
 
-            if (bodyInfo.contains("geometry"))
+            QString type = item.value("type").toString();
+            if (type == "body" || type.isEmpty())
             {
-                QVariant geometryValue = bodyInfo.value("geometry");
-                if (geometryValue.type() == QVariant::Map)
+                vesta::Body* body = new vesta::Body();
+
+                QString bodyName = item.value("name").toString();
+                body->setName(bodyName.toUtf8().data());
+
+                // Add the body to the catalog now so that it may be referenced by
+                // frames.
+                catalog->addBody(bodyName, body);
+
+                if (item.contains("geometry"))
                 {
-                    vesta::Geometry* geometry = loadGeometry(geometryValue.toMap());
-                    if (geometry)
+                    QVariant geometryValue = item.value("geometry");
+                    if (geometryValue.type() == QVariant::Map)
                     {
-                        body->setGeometry(geometry);
+                        vesta::Geometry* geometry = loadGeometry(geometryValue.toMap());
+                        if (geometry)
+                        {
+                            body->setGeometry(geometry);
+                        }
                     }
+                    else
+                    {
+                        qDebug() << "Invalid geometry for body.";
+                    }
+                }
+
+                vesta::Arc* arc = loadArc(item, catalog);
+
+                if (!arc)
+                {
+                    delete body;
                 }
                 else
                 {
-                    qDebug() << "Invalid geometry for body.";
+                    body->chronology()->addArc(arc);
+                }
+
+                // Visible property
+                body->setVisible(item.value("visible", true).toBool());
+
+                bodyNames << bodyName;
+            }
+            else if (type == "Visualizer")
+            {
+                QVariant tagVar = item.value("tag");
+                QVariant bodyVar = item.value("body");
+
+                if (tagVar.type() != QVariant::String)
+                {
+                    qDebug() << "Bad or missing tag for visualizer";
+                }
+                else if (bodyVar.type() != QVariant::String)
+                {
+                    qDebug() << "Bad or missing body name for visualizer";
+                }
+                else
+                {
+                    QString tag = tagVar.toString();
+                    QString bodyName = bodyVar.toString();
+
+                    Entity* body = catalog->find(bodyName);
+                    if (body == NULL)
+                    {
+                        qDebug() << "Can't find body " << bodyName << " for visualizer.";
+                    }
+                    else
+                    {
+                        Visualizer* visualizer = loadVisualizer(item, catalog);
+                        if (visualizer)
+                        {
+                            body->setVisualizer(tag.toUtf8().data(), visualizer);
+                        }
+                    }
                 }
             }
-
-            vesta::Arc* arc = loadArc(bodyInfo, catalog);
-
-            if (!arc)
-            {
-                delete body;
-            }
-            else
-            {
-                body->chronology()->addArc(arc);
-            }
-
-            // Visible property
-            body->setVisible(bodyInfo.value("visible", true).toBool());
-            QString bodyName = bodyInfo["name"].toString();
-            body->setName(bodyName.toUtf8().data());
-
-            catalog->addBody(bodyName, body);
-            bodyNames << bodyName;
         }
     }
 

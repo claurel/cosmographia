@@ -25,6 +25,8 @@
 #include "ChebyshevPolyTrajectory.h"
 #include "JPLEphemeris.h"
 #include "KeplerianSwarm.h"
+#include "WMSTiledMap.h"
+#include "MultiWMSTiledMap.h"
 
 #include "QVideoEncoder.h"
 
@@ -374,89 +376,6 @@ private:
     QString m_tileNamePattern;
     bool m_flipped;
     unsigned int m_levelCount;
-};
-
-
-// LocalTiledMap loads texture tiles from a Web Map Server
-class WMSTiledMap : public HierarchicalTiledMap
-{
-public:
-    WMSTiledMap(TextureMapLoader* loader, const QString& layerName, unsigned int tileSize, unsigned int levelCount) :
-        HierarchicalTiledMap(loader, tileSize),
-        m_levelCount(levelCount)
-    {
-        m_tileNamePattern = QString("wms:") + layerName + ",%1,%2,%3";
-    }
-
-    virtual string tileResourceIdentifier(unsigned int level, unsigned int column, unsigned int row)
-    {
-        QString s = m_tileNamePattern.arg(level).arg(column).arg(row);
-        return string(s.toUtf8().data());
-    }
-
-    virtual bool isValidTileAddress(unsigned int level, unsigned int column, unsigned int row)
-    {
-        return level < m_levelCount && column < (1u << (level + 1)) && row < (1u << level);
-    }
-
-    virtual bool tileResourceExists(const std::string& /* resourceId */)
-    {
-        return true;//level < levelCount;
-    }
-
-private:
-    QString m_tileNamePattern;
-    unsigned int m_levelCount;
-};
-
-
-// LocalTiledMap loads texture tiles from a Web Map Server
-class MultiWMSTiledMap : public HierarchicalTiledMap
-{
-public:
-    MultiWMSTiledMap(TextureMapLoader* loader,
-                const QString& baseLayerName,
-                unsigned int baseLayerLevelCount,
-                const QString& detailLayerName,
-                unsigned int detailLayerLevelCount,
-                unsigned int tileSize) :
-        HierarchicalTiledMap(loader, tileSize),
-        m_baseLayerLevelCount(baseLayerLevelCount),
-        m_detailLayerLevelCount(detailLayerLevelCount)
-    {
-        m_baseTileNamePattern = QString("wms:") + baseLayerName + ",%1,%2,%3";
-        m_detailTileNamePattern = QString("wms:") + detailLayerName + ",%1,%2,%3";
-    }
-
-    virtual string tileResourceIdentifier(unsigned int level, unsigned int column, unsigned int row)
-    {
-        QString s;
-        if (level < m_baseLayerLevelCount)
-        {
-            s = m_baseTileNamePattern.arg(level).arg(column).arg(row);
-        }
-        else
-        {
-            s = m_detailTileNamePattern.arg(level).arg(column).arg(row);
-        }
-        return string(s.toUtf8().data());
-    }
-
-    virtual bool isValidTileAddress(unsigned int level, unsigned int column, unsigned int row)
-    {
-        return level < max(m_baseLayerLevelCount, m_detailLayerLevelCount) && column < (1u << (level + 1)) && row < (1u << level);
-    }
-
-    virtual bool tileResourceExists(const std::string& /* resourceId */)
-    {
-        return true;//level < levelCount;
-    }
-
-private:
-    QString m_baseTileNamePattern;
-    QString m_detailTileNamePattern;
-    unsigned int m_baseLayerLevelCount;
-    unsigned int m_detailLayerLevelCount;
 };
 
 

@@ -24,6 +24,7 @@
 #include <vesta/Trajectory.h>
 #include <vesta/RotationModel.h>
 #include <vesta/TextureMapLoader.h>
+#include <vesta/Visualizer.h>
 #include <QVariant>
 #include <QStringList>
 
@@ -55,6 +56,9 @@ private:
 
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);
+
+    vesta::Visualizer* loadVisualizer(const QVariantMap& info,
+                                      const UniverseCatalog* catalog);
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;

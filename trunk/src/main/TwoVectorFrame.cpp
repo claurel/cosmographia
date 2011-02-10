@@ -17,6 +17,7 @@
 
 #include "TwoVectorFrame.h"
 #include <vesta/Debug.h>
+#include <Eigen/LU>
 
 using namespace vesta;
 using namespace Eigen;
@@ -43,7 +44,7 @@ TwoVectorFrame::TwoVectorFrame(TwoVectorFrameDirection *primary, Axis primaryAxi
     {
         VESTA_LOG("Invalid two vector frame: null direction");
     }
-    else if (orthogonalAxes(primaryAxis, secondaryAxis))
+    else if (!orthogonalAxes(primaryAxis, secondaryAxis))
     {
         VESTA_LOG("Invalid two vector frame: primary and secondary axes aren't orthogonal");
     }
@@ -114,18 +115,17 @@ Quaterniond TwoVectorFrame::orientation(double tdbSec) const
         // axis2 is whatever axis is not axis0 or axis1
         int axis2 = 3 - (axis0 + axis1);
 
+
         Matrix3d m;
+        m.col(axis0) = v0;
+        m.col(axis1) = v2.cross(v0);
         if (rightHanded)
         {
-            m.row(axis0) = v0;
-            m.row(axis1) = v2.cross(v0);
-            m.row(axis2) = v2;
+            m.col(axis2) = v2;
         }
         else
         {
-            m.row(axis0) = v0;
-            m.row(axis1) = v2.cross(v0);
-            m.row(axis2) = -v2;
+            m.col(axis2) = -v2;
         }
 
         return Quaterniond(m);
@@ -199,7 +199,7 @@ RelativeVelocityVector::direction(double tdbSec) const
 {
     if (m_observer.isValid() && m_target.isValid())
     {
-        return m_target->state(tdbSec).velocity() - m_target->state(tdbSec).position();
+        return m_target->state(tdbSec).velocity() - m_observer->state(tdbSec).velocity();
     }
     else
     {

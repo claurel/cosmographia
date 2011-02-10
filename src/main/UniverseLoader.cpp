@@ -19,6 +19,8 @@
 #include "InterpolatedStateTrajectory.h"
 #include "InterpolatedRotation.h"
 #include "TwoVectorFrame.h"
+#include "WMSTiledMap.h"
+#include "MultiWMSTiledMap.h"
 #include "compatibility/Scanner.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
@@ -989,6 +991,52 @@ UniverseLoader::loadArc(const QVariantMap& map,
 }
 
 
+static TiledMap*
+loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
+{
+    QString type = map.value("type").toString();
+    if (type == "wms")
+    {
+        QVariant layerVar = map.value("layer");
+        QVariant levelCountVar = map.value("levelCount");
+        QVariant tileSizeVar = map.value("tileSize");
+
+        if (layerVar.type() != QVariant::String)
+        {
+            qDebug() << "Bad or missing layer name for WMS tiled texture";
+            return NULL;
+        }
+
+        if (!levelCountVar.canConvert(QVariant::Int))
+        {
+            qDebug() << "Bad or missing level count for WMS tiled texture";
+            return NULL;
+        }
+
+        if (!tileSizeVar.canConvert(QVariant::Int))
+        {
+            qDebug() << "Bad or missing tileSize for WMS tiled texture";
+            return NULL;
+        }
+
+        QString layer = layerVar.toString();
+        int levelCount = levelCountVar.toInt();
+        int tileSize = tileSizeVar.toInt();
+
+        // Enforce some limits on tile size and level count
+        levelCount = std::max(1, std::min(16, levelCount));
+        tileSize = std::max(128, std::min(8192, tileSize));
+
+        return new WMSTiledMap(textureLoader, layer, tileSize, levelCount);
+    }
+    else
+    {
+        qDebug() << "Unknown tiled map type.";
+        return NULL;
+    }
+}
+
+
 static MeshGeometry*
 loadMeshFile(const QString& fileName, TextureMapLoader* textureLoader)
 {
@@ -1039,13 +1087,22 @@ loadGlobeGeometry(const QVariantMap& map,
     props.addressS = TextureProperties::Wrap;
     props.addressT = TextureProperties::Clamp;
 
-    if (map.contains("baseMap"))
+    QVariant baseMapVar = map.value("baseMap");
+    if (baseMapVar.type() == QVariant::String)
     {
-        QString baseMapName = map.value("baseMap").toString();
+        QString baseMapName = baseMapVar.toString();
         if (textureLoader)
         {
             TextureMap* tex = textureLoader->loadTexture(baseMapName.toUtf8().data(), props);
             world->setBaseMap(tex);
+        }
+    }
+    else if (baseMapVar.type() == QVariant::Map)
+    {
+        TiledMap* tiledMap = loadTiledMap(baseMapVar.toMap(), textureLoader);
+        if (tiledMap)
+        {
+            world->setBaseMap(tiledMap);
         }
     }
 

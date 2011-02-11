@@ -1,5 +1,5 @@
 /*
- * $Revision: 522 $ $Date: 2010-10-05 19:41:48 -0700 (Tue, 05 Oct 2010) $
+ * $Revision: 562 $ $Date: 2011-02-11 12:18:04 -0800 (Fri, 11 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -20,6 +20,9 @@ namespace vesta
 
 class Arc;
 
+/** A Chronology represents a sequence of time contiguous arcs. Each
+  * VESTA entity has a single chronology.
+  */
 class Chronology : public Object
 {
 public:
@@ -70,11 +73,15 @@ public:
 
     /** Return true if is between the beginning and ending times of this
       * chronology. The test is beginning <= t <= ending.
+      *
+      * \param t time in seconds since J2000 TDB
       */
     bool includesTime(double t) const
     {
         return !m_arcSequence.empty() && t >= beginning() && t <= ending();
     }
+
+    void clearArcs();
 
 private:
     std::vector<counted_ptr<Arc> > m_arcSequence;

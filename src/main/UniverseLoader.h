@@ -43,9 +43,11 @@ public:
     void removeBuiltinOrbit(const QString& name);
 
     void setDataSearchPath(const QString& path);
+    void setTextureSearchPath(const QString& path);
 
 private:
     vesta::Geometry* loadGeometry(const QVariantMap& map);
+    vesta::Geometry* loadGlobeGeometry(const QVariantMap& map);
     vesta::Arc* loadArc(const QVariantMap& map,
                         const UniverseCatalog* catalog);
     vesta::Frame* loadFrame(const QVariantMap& map,
@@ -61,9 +63,14 @@ private:
                                       const UniverseCatalog* catalog);
 
 private:
+    QString dataFileName(const QString& fileName);
+    QString textureFileName(const QString& fileName);
+
+private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
     vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
     QString m_dataSearchPath;
+    QString m_textureSearchPath;
 };
 
 #endif // _UNIVERSE_LOADER_H_

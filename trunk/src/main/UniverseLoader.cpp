@@ -34,6 +34,8 @@
 #include <vesta/KeplerianTrajectory.h>
 #include <vesta/FixedPointTrajectory.h>
 #include <vesta/WorldGeometry.h>
+#include <vesta/Atmosphere.h>
+#include <vesta/DataChunk.h>
 #include <vesta/ArrowGeometry.h>
 #include <vesta/MeshGeometry.h>
 #include <vesta/AxesVisualizer.h>
@@ -413,8 +415,6 @@ static double durationValue(QVariant v, double defaultValue = 0.0)
 
 vesta::Trajectory* loadFixedTrajectory(const QVariantMap& info)
 {
-    qDebug() << "Trajectory: " << info.value("type").toString();
-
     bool ok = false;
     Vector3d position = vec3Value(info.value("position"), &ok);
     if (!ok)
@@ -482,7 +482,7 @@ UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
     {
         QString name = info.value("source").toString();
 
-        QString fileName = m_dataSearchPath + "/" + name;
+        QString fileName = dataFileName(name);
         if (name.toLower().endsWith(".xyzv"))
         {
             return LoadXYZVTrajectory(fileName);
@@ -541,9 +541,8 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
 
 
 vesta::RotationModel*
-loadFixedRotationModel(const QVariantMap& map)
+loadFixedRotationModel(const QVariantMap& /* map */)
 {
-    qDebug() << "RotationModel: " << map.value("type").toString();
     return NULL;
 }
 
@@ -551,8 +550,6 @@ loadFixedRotationModel(const QVariantMap& map)
 vesta::RotationModel*
 loadUniformRotationModel(const QVariantMap& map)
 {
-    qDebug() << "RotationModel: " << map.value("type").toString();
-
     double inclination   = angleValue(map.value("inclination"));
     double ascendingNode = angleValue(map.value("ascendingNode"));
     double meridianAngle = angleValue(map.value("meridianAngle"));
@@ -574,7 +571,7 @@ UniverseLoader::loadInterpolatedRotationModel(const QVariantMap& info)
     {
         QString name = info.value("source").toString();
 
-        QString fileName = m_dataSearchPath + "/" + name;
+        QString fileName = dataFileName(name);
         if (name.toLower().endsWith(".q"))
         {
             return LoadInterpolatedRotation(fileName);
@@ -1058,9 +1055,8 @@ loadMeshFile(const QString& fileName, TextureMapLoader* textureLoader)
 }
 
 
-static WorldGeometry*
-loadGlobeGeometry(const QVariantMap& map,
-                  TextureMapLoader* textureLoader)
+Geometry*
+UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
 {
     Vector3d radii = Vector3d::Zero();
 
@@ -1091,15 +1087,15 @@ loadGlobeGeometry(const QVariantMap& map,
     if (baseMapVar.type() == QVariant::String)
     {
         QString baseMapName = baseMapVar.toString();
-        if (textureLoader)
+        if (m_textureLoader.isValid())
         {
-            TextureMap* tex = textureLoader->loadTexture(baseMapName.toUtf8().data(), props);
+            TextureMap* tex = m_textureLoader->loadTexture(textureFileName(baseMapName).toUtf8().data(), props);
             world->setBaseMap(tex);
         }
     }
     else if (baseMapVar.type() == QVariant::Map)
     {
-        TiledMap* tiledMap = loadTiledMap(baseMapVar.toMap(), textureLoader);
+        TiledMap* tiledMap = loadTiledMap(baseMapVar.toMap(), m_textureLoader.ptr());
         if (tiledMap)
         {
             world->setBaseMap(tiledMap);
@@ -1114,10 +1110,51 @@ loadGlobeGeometry(const QVariantMap& map,
         normalMapProps.usage = TextureProperties::CompressedNormalMap;
 
         QString normalMapBase = map.value("normalMap").toString();
-        if (textureLoader)
+        if (m_textureLoader.isValid())
         {
-            TextureMap* normalTex = textureLoader->loadTexture(normalMapBase.toUtf8().data(), normalMapProps);
+            TextureMap* normalTex = m_textureLoader->loadTexture(textureFileName(normalMapBase).toUtf8().data(), normalMapProps);
             world->setNormalMap(normalTex);
+        }
+    }
+
+    QVariant emissiveVar = map.value("emissive");
+    if (emissiveVar.type() == QVariant::Bool)
+    {
+        world->setEmissive(emissiveVar.toBool());
+    }
+
+    QVariant cloudMapVar = map.value("cloudMap");
+    if (cloudMapVar.type() == QVariant::String)
+    {
+        TextureProperties cloudMapProps;
+        cloudMapProps.addressS = TextureProperties::Wrap;
+        cloudMapProps.addressT = TextureProperties::Clamp;
+
+        QString cloudMapBase = cloudMapVar.toString();
+        if (m_textureLoader.isValid())
+        {
+            TextureMap* cloudTex = m_textureLoader->loadTexture(textureFileName(cloudMapBase).toUtf8().data(), cloudMapProps);
+            world->setCloudMap(cloudTex);
+            world->setCloudAltitude(6.0f);
+        }
+    }
+
+    QVariant atmosphereVar = map.value("atmosphere");
+    if (atmosphereVar.type() == QVariant::String)
+    {
+        QString fileName = textureFileName(atmosphereVar.toString());
+        QFile atmFile(fileName);
+        if (atmFile.open(QIODevice::ReadOnly))
+        {
+            QByteArray data = atmFile.readAll();
+            DataChunk chunk(data.data(), data.size());
+            Atmosphere* atm = Atmosphere::LoadAtmScat(&chunk);
+            if (atm)
+            {
+                atm->generateTextures();
+                atm->addRef();
+                world->setAtmosphere(atm);
+            }
         }
     }
 
@@ -1176,7 +1213,7 @@ UniverseLoader::loadGeometry(const QVariantMap& map)
 
     if (type == "Globe")
     {
-        geometry = loadGlobeGeometry(map, m_textureLoader.ptr());
+        geometry = loadGlobeGeometry(map);
     }
     else if (type == "Mesh")
     {
@@ -1301,10 +1338,21 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
             QString type = item.value("type").toString();
             if (type == "body" || type.isEmpty())
             {
-                vesta::Body* body = new vesta::Body();
-
                 QString bodyName = item.value("name").toString();
-                body->setName(bodyName.toUtf8().data());
+
+                vesta::Body* body = dynamic_cast<Body*>(catalog->find(bodyName));
+                if (body == NULL)
+                {
+                    body = new vesta::Body();
+                    body->setName(bodyName.toUtf8().data());
+                }
+                else
+                {
+                    body->setLightSource(NULL);
+                    body->setGeometry(NULL);
+                    body->setVisible(true);
+                    body->chronology()->clearArcs();
+                }
 
                 // Add the body to the catalog now so that it may be referenced by
                 // frames.
@@ -1408,4 +1456,25 @@ void
 UniverseLoader::setDataSearchPath(const QString& path)
 {
     m_dataSearchPath = path;
+}
+
+
+void
+UniverseLoader::setTextureSearchPath(const QString& path)
+{
+    m_textureSearchPath = path;
+}
+
+
+QString
+UniverseLoader::dataFileName(const QString& fileName)
+{
+    return m_dataSearchPath + "/" + fileName;
+}
+
+
+QString
+UniverseLoader::textureFileName(const QString& fileName)
+{
+    return m_textureSearchPath + "/" + fileName;
 }

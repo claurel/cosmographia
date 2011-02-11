@@ -537,7 +537,9 @@ Cosmographia::loadSolarSystem()
             return;
         }
 
-        m_loader->setDataSearchPath(QFileInfo(solarSystemFile).absolutePath());
+        QString path = QFileInfo(solarSystemFile).absolutePath();
+        m_loader->setDataSearchPath(path);
+        m_loader->setTextureSearchPath(path);
 
         if (solarSystemFileName.toLower().endsWith(".json"))
         {

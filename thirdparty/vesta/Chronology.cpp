@@ -1,5 +1,5 @@
 /*
- * $Revision: 522 $ $Date: 2010-10-05 19:41:48 -0700 (Tue, 05 Oct 2010) $
+ * $Revision: 562 $ $Date: 2011-02-11 12:18:04 -0800 (Fri, 11 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -27,10 +27,24 @@ Chronology::~Chronology()
 }
 
 
-/** Set the starting time of this chronology.
-  * @param t time in seconds since J2000 TDB
+/** Remove all arcs from the chronology. The beginning of the chronology
+  * is reset to time 0 (J2000.0) and the duration to zero.
   */
-void Chronology::setBeginning(double t)
+void
+Chronology::clearArcs()
+{
+    m_beginning = 0.0;
+    m_duration = 0.0;
+    m_arcSequence.clear();
+}
+
+
+/** Set the starting time of this chronology.
+  *
+  * \param t time in seconds since J2000 TDB
+  */
+void
+Chronology::setBeginning(double t)
 {
     m_beginning = t;
 }

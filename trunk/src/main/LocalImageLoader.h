@@ -38,6 +38,7 @@ public:
 
 public slots:
     void loadTexture(vesta::TextureMap* texture);
+    void setSearchPath(const QString& path);
 
 signals:
     /** This signal is emitted when a texture is successfully loaded.
@@ -51,6 +52,9 @@ signals:
     /** This signal is emitted when texture loading fails for any reason.
       */
     void textureLoadFailed(vesta::TextureMap* texture);
+
+private:
+    QString m_searchPath;
 };
 
 #endif // _LOCAL_IMAGE_LOADER_H_

@@ -23,6 +23,7 @@
 #include "Cosmographia.h"
 #include "QVideoEncoder.h"
 #include "JPLEphemeris.h"
+#include "NetworkTextureLoader.h"
 #include "compatibility/CatalogParser.h"
 #include "compatibility/TransformCatalog.h"
 #include <vesta/GregorianDate.h>
@@ -540,6 +541,13 @@ Cosmographia::loadSolarSystem()
         QString path = QFileInfo(solarSystemFile).absolutePath();
         m_loader->setDataSearchPath(path);
         m_loader->setTextureSearchPath(path);
+        m_loader->setModelSearchPath(path);
+
+        NetworkTextureLoader* textureLoader = dynamic_cast<NetworkTextureLoader*>(m_loader->textureLoader());
+        if (textureLoader)
+        {
+            textureLoader->setLocalSearchPatch(path);
+        }
 
         if (solarSystemFileName.toLower().endsWith(".json"))
         {

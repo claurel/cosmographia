@@ -38,16 +38,24 @@ public:
     QStringList loadSolarSystem(const QVariantMap& contents,
                                 UniverseCatalog* catalog);
 
+    vesta::TextureMapLoader* textureLoader() const
+    {
+        return m_textureLoader.ptr();
+    }
+
     void setTextureLoader(vesta::TextureMapLoader* textureLoader);
     void addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory);
     void removeBuiltinOrbit(const QString& name);
 
     void setDataSearchPath(const QString& path);
     void setTextureSearchPath(const QString& path);
+    void setModelSearchPath(const QString& path);
 
 private:
     vesta::Geometry* loadGeometry(const QVariantMap& map);
     vesta::Geometry* loadGlobeGeometry(const QVariantMap& map);
+    vesta::Geometry* loadMeshGeometry(const QVariantMap& map);
+
     vesta::Arc* loadArc(const QVariantMap& map,
                         const UniverseCatalog* catalog);
     vesta::Frame* loadFrame(const QVariantMap& map,
@@ -66,12 +74,15 @@ private:
 private:
     QString dataFileName(const QString& fileName);
     QString textureFileName(const QString& fileName);
+    QString modelFileName(const QString& fileName);
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
     vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
+    QMap<QString, vesta::counted_ptr<vesta::Geometry> > m_modelCache;
     QString m_dataSearchPath;
     QString m_textureSearchPath;
+    QString m_modelSearchPath;
 };
 
 #endif // _UNIVERSE_LOADER_H_

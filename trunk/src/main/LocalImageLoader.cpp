@@ -43,7 +43,7 @@ LocalImageLoader::loadTexture(TextureMap* texture)
         QFileInfo info(texture->name().c_str());
         if (!info.exists())
         {
-            textureName = QString("models/") + textureName;
+            textureName = m_searchPath + "/" + textureName;
         }
 
         qDebug() << "loadTexture: " << textureName;
@@ -78,4 +78,11 @@ LocalImageLoader::loadTexture(TextureMap* texture)
             }
         }
     }
+}
+
+
+void
+LocalImageLoader::setSearchPath(const QString& path)
+{
+    m_searchPath = path;
 }

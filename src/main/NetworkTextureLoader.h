@@ -49,6 +49,8 @@ public:
 
     void setTextureMemoryLimit(unsigned int megs);
 
+    void setLocalSearchPatch(const QString& path);
+
 public slots:
     void queueTexture(vesta::TextureMap* texture, const QImage& image);
     void queueTexture(vesta::TextureMap* texture, vesta::DataChunk* ddsData);

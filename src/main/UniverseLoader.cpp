@@ -1205,9 +1205,8 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
 }
 
 
-static MeshGeometry*
-loadMeshGeometry(const QVariantMap& map,
-                 TextureMapLoader* textureLoader)
+Geometry*
+UniverseLoader::loadMeshGeometry(const QVariantMap& map)
 {
     MeshGeometry* mesh = NULL;
 
@@ -1216,7 +1215,7 @@ loadMeshGeometry(const QVariantMap& map,
     if (map.contains("source"))
     {
         QString sourceName = map.value("source").toString();
-        mesh = loadMeshFile(sourceName, textureLoader);
+        mesh = loadMeshFile(modelFileName(sourceName), m_textureLoader.ptr());
         if (mesh)
         {
             mesh->setMeshScale(radius / mesh->boundingSphereRadius());
@@ -1260,7 +1259,7 @@ UniverseLoader::loadGeometry(const QVariantMap& map)
     }
     else if (type == "Mesh")
     {
-        geometry = loadMeshGeometry(map, m_textureLoader.ptr());
+        geometry = loadMeshGeometry(map);
     }
     else if (type == "Axes")
     {
@@ -1509,6 +1508,13 @@ UniverseLoader::setTextureSearchPath(const QString& path)
 }
 
 
+void
+UniverseLoader::setModelSearchPath(const QString& path)
+{
+    m_modelSearchPath = path;
+}
+
+
 QString
 UniverseLoader::dataFileName(const QString& fileName)
 {
@@ -1520,4 +1526,11 @@ QString
 UniverseLoader::textureFileName(const QString& fileName)
 {
     return m_textureSearchPath + "/" + fileName;
+}
+
+
+QString
+UniverseLoader::modelFileName(const QString& fileName)
+{
+    return m_modelSearchPath + "/" + fileName;
 }

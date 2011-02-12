@@ -276,3 +276,13 @@ NetworkTextureLoader::reportTextureLoadFailure(vesta::TextureMap* texture)
 {
     texture->setStatus(TextureMap::LoadingFailed);
 }
+
+
+void
+NetworkTextureLoader::setLocalSearchPatch(const QString& path)
+{
+    if (m_localImageLoader)
+    {
+        m_localImageLoader->setSearchPath(path);
+    }
+}

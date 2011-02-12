@@ -619,6 +619,7 @@ void UniverseView::initializeGL()
     }
 
     labelPlanet(m_universe->findFirst("Sun"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
+#if 0
     labelPlanet(m_universe->findFirst("Mercury"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
     labelPlanet(m_universe->findFirst("Venus"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
     labelPlanet(m_universe->findFirst("Earth"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
@@ -628,6 +629,7 @@ void UniverseView::initializeGL()
     labelPlanet(m_universe->findFirst("Uranus"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
     labelPlanet(m_universe->findFirst("Neptune"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
     //labelPlanet(m_universe->findFirst("Pluto"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
+#endif
 }
 
 
@@ -650,6 +652,7 @@ UniverseView::initNetwork()
 
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(tleDataReceived(QNetworkReply*)));
 
+#if 0
     for (unsigned int i = 0; i < sizeof(s_TLESets) / sizeof(s_TLESets[0]); ++i)
     {
         const TLESet& tleSet = s_TLESets[i];
@@ -658,6 +661,7 @@ UniverseView::initNetwork()
         request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
         QNetworkReply* reply = m_networkManager->get(request);
     }
+#endif
 
     WMSRequester* wms = m_textureLoader->wmsHandler();
     wms->addSurfaceDefinition("bmng-jan-nb",
@@ -1255,6 +1259,7 @@ loadMeshFile(const string& fileName, TextureMapLoader* textureLoader)
 }
 
 
+#if 0
 static Body*
 createComponentBody(const string& name, Entity* parent, double startTime, double duration)
 {
@@ -1272,6 +1277,7 @@ createComponentBody(const string& name, Entity* parent, double startTime, double
 
     return body;
 }
+#endif
 
 
 /** Create a new planet
@@ -1295,6 +1301,7 @@ static Body* createPlanet(const QString& name,
 }
 
 
+#if 0
 /** Create a new planet
   * @param rotationPeriod rotation period in hours
   */
@@ -1321,6 +1328,7 @@ static Body* createPlanet(const QString& name,
 
     return body;
 }
+#endif
 
 
 TextureMap*
@@ -1509,6 +1517,7 @@ void UniverseView::initializeUniverse()
 
     m_universe->addEntity(sun);
 
+#if 0
     Body* earth = createPlanet("Earth", sun, 23.934);
     {
         // Create a Keplerian orbit for the Earth
@@ -1545,6 +1554,7 @@ void UniverseView::initializeUniverse()
     //WMSTiledMap* tiledMoonMap = new WMSTiledMap(m_textureLoader.ptr(), "wms:moon-lo,%1,%2,%3", 512, 10);
     //WMSTiledMap* tiledMoonMap = new WMSTiledMap(m_textureLoader.ptr(), "wms:moon-clementine", 512, 6);
     //moonSphere->setBaseMap(tiledMoonMap);
+#endif
 
     /*
     TextureProperties compNormalMapProps = PlanetTextureProperties();
@@ -1553,13 +1563,13 @@ void UniverseView::initializeUniverse()
     */
 
     UniformRotationModel* defaultRotation = new UniformRotationModel(Vector3d::UnitZ(), toRadians(360.0) / 86400.0, 0.0, 0.0);
-    m_universe->addEntity(createPlanet("Mercury", sun, g_jplEph->trajectory(JPLEphemeris::Mercury), defaultRotation, 2439.7));
-    m_universe->addEntity(createPlanet("Venus",   sun, g_jplEph->trajectory(JPLEphemeris::Venus),   defaultRotation, 6051.8));
-    m_universe->addEntity(createPlanet("Mars",    sun, g_jplEph->trajectory(JPLEphemeris::Mars),    defaultRotation, 3389.5 / 3389));
-    m_universe->addEntity(createPlanet("Jupiter", sun, g_jplEph->trajectory(JPLEphemeris::Jupiter), defaultRotation, 69911.0));
-    m_universe->addEntity(createPlanet("Saturn",  sun, g_jplEph->trajectory(JPLEphemeris::Saturn),  defaultRotation, 58232.0));
-    m_universe->addEntity(createPlanet("Uranus",  sun, g_jplEph->trajectory(JPLEphemeris::Uranus),  defaultRotation, 25362.0));
-    m_universe->addEntity(createPlanet("Neptune", sun, g_jplEph->trajectory(JPLEphemeris::Neptune), defaultRotation, 24622));
+    //m_universe->addEntity(createPlanet("Mercury", sun, g_jplEph->trajectory(JPLEphemeris::Mercury), defaultRotation, 2439.7));
+    //m_universe->addEntity(createPlanet("Venus",   sun, g_jplEph->trajectory(JPLEphemeris::Venus),   defaultRotation, 6051.8));
+    //m_universe->addEntity(createPlanet("Mars",    sun, g_jplEph->trajectory(JPLEphemeris::Mars),    defaultRotation, 3389.5 / 3389));
+    //m_universe->addEntity(createPlanet("Jupiter", sun, g_jplEph->trajectory(JPLEphemeris::Jupiter), defaultRotation, 69911.0));
+    //m_universe->addEntity(createPlanet("Saturn",  sun, g_jplEph->trajectory(JPLEphemeris::Saturn),  defaultRotation, 58232.0));
+    //m_universe->addEntity(createPlanet("Uranus",  sun, g_jplEph->trajectory(JPLEphemeris::Uranus),  defaultRotation, 25362.0));
+    //m_universe->addEntity(createPlanet("Neptune", sun, g_jplEph->trajectory(JPLEphemeris::Neptune), defaultRotation, 24622));
     //m_universe->addEntity(createPlanet("Pluto",   sun, g_jplEph->trajectory(JPLEphemeris::Pluto),   defaultRotation, 1195));
 
     //TextureMap* tex = loadTexture(EarthTextureSource, PlanetTextureProperties());
@@ -1569,7 +1579,8 @@ void UniverseView::initializeUniverse()
     setPlanetMap("Mars", new WMSTiledMap(m_textureLoader.ptr(), "mars-mdim-moc_na", 512, 10));
     //setPlanetMap("Mars", new WMSTiledMap(m_textureLoader.ptr(), "mars-viking", 512, 6));
 
-    m_observer = new Observer(earth);
+    Entity* center = new Entity();
+    m_observer = new Observer(center);
     m_observer->addRef();
     m_observer->setPosition(Vector3d(0.0, 0.0, 1.0e9));
 

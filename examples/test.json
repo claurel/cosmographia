@@ -1,0 +1,136 @@
+{
+     "version": "1.0",
+     "name": "Miscellaneous Tests",
+
+     "items" :
+     [
+        {
+          "name" : "Ceres",
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 413832000,
+              "eccentricity" : 0.079834,
+              "period" : 1680.5,
+              "inclination" : 10.585,
+              "ascendingNode" : 80.399,
+              "argumentOfPeriapsis" : 72.825,
+              "meanAnomaly" : 27.448
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.3781,
+              "inclination" : 31.0
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 500, 500, 480 ],
+              "baseMap" : "../textures/moon.dds"
+          }
+
+        },
+
+        {
+          "name" : "Test Point",
+          "center" : "Ceres",
+          "trajectoryFrame" : 
+          {
+              "type" : "BodyFixed",
+              "body" : "Ceres"
+          },
+          "trajectory" :
+          {
+              "type" : "FixedPoint",
+              "position" : [ 1000, 0.0, 300.0 ]
+          }
+        },
+
+        {
+          "type" : "Visualizer",
+          "tag" : "body axes",
+          "body" : "Ceres",
+          "style" :
+          {
+            "type" : "BodyAxes",
+            "size" : 900
+          }
+        },
+
+        {
+          "name" : "Cassini",
+          "center" : "Ceres",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "cassini-solstice.xyzv"
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 10.0,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "CubeSat",
+          "center" : "Ceres",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "Po-s_0.xyz"
+          },
+
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "x",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "CubeSat",
+                  "target" : "Ceres"
+              },
+              "secondaryAxis" : "-y",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "CubeSat",
+                  "target" : "Ceres"
+              }
+          },
+          "rotationModel" :
+          {
+              "type" : "Interpolated",
+              "source" : "Qatt_1.q"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 1.0,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "type" : "Visualizer",
+          "tag" : "frame axes",
+          "body" : "CubeSat",
+          "style" :
+          {
+            "type" : "FrameAxes",
+            "size" : 2.0
+          }
+        }
+
+    ]
+}

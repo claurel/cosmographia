@@ -1,0 +1,47 @@
+{
+     "version": "1.0",
+     "name": "NanoSail-D",
+
+     "items" :
+     [
+        {
+          "name" : "NanoSail-D",
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE",
+              "name" : "FASTSAT-HSV01",
+              "line1" : "1 90027U 0        11039.51529623 +.00033056 +00000-0 +45552-2 0 00277",
+              "line2" : "2 90027 071.9716 322.8473 0017765 140.4752 219.7749 14.77960777002982",
+              "source" : "http://www.n2yo.com/satellite/?s=90027"
+          },
+
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "x",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "NanoSail-D",
+                  "target" : "Earth"
+              },
+              "secondaryAxis" : "-y",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "NanoSail-D",
+                  "target" : "Earth"
+              }
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 1.0,
+              "source" : "models/jason.obj"
+          }
+        }
+    ]
+}

@@ -1,0 +1,61 @@
+{
+     "version": "1.0",
+     "name": "CubeSat",
+
+     "items" :
+     [
+        {
+          "name" : "CubeSat",
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "Po-s_0.xyz"
+          },
+
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "x",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "CubeSat",
+                  "target" : "Earth"
+              },
+              "secondaryAxis" : "-y",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "CubeSat",
+                  "target" : "Earth"
+              }
+          },
+          "rotationModel" :
+          {
+              "type" : "Interpolated",
+              "source" : "Qatt_1.q"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 1.0,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "type" : "Visualizer",
+          "tag" : "frame axes",
+          "body" : "CubeSat",
+          "style" :
+          {
+            "type" : "FrameAxes",
+            "size" : 2.0
+          }
+        }
+
+    ]
+}

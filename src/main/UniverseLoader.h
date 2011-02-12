@@ -55,6 +55,7 @@ private:
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);
     vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadInterpolatedStatesTrajectory(const QVariantMap& info);
+    vesta::Trajectory* loadTleTrajectory(const QVariantMap& info);
 
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);

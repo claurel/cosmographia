@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "UniverseLoader.h"
+#include "TleTrajectory.h"
 #include "InterpolatedStateTrajectory.h"
 #include "InterpolatedRotation.h"
 #include "TwoVectorFrame.h"
@@ -506,6 +507,44 @@ UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
 
 
 vesta::Trajectory*
+UniverseLoader::loadTleTrajectory(const QVariantMap& info)
+{
+    QVariant nameVar = info.value("name");
+    QVariant line1Var = info.value("line1");
+    QVariant line2Var = info.value("line2");
+    QVariant sourceVar = info.value("source");
+
+    if (nameVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing name for TLE trajectory";
+        return NULL;
+    }
+
+    if (line1Var.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing first line (line1) for TLE trajectory";
+        return NULL;
+    }
+
+    if (line2Var.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing second line (line2) for TLE trajectory";
+        return NULL;
+    }
+
+    TleTrajectory* tleTrajectory = TleTrajectory::Create(line1Var.toString().toAscii().data(),
+                                                         line2Var.toString().toAscii().data());
+    if (!tleTrajectory)
+    {
+        qDebug() << "Invalid TLE data for " << nameVar.toString();
+        return NULL;
+    }
+
+    return tleTrajectory;
+}
+
+
+vesta::Trajectory*
 UniverseLoader::loadTrajectory(const QVariantMap& map)
 {
     QVariant typeData = map.value("type");
@@ -530,6 +569,10 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     else if (type == "InterpolatedStates")
     {
         return loadInterpolatedStatesTrajectory(map);
+    }
+    else if (type == "TLE")
+    {
+        return loadTleTrajectory(map);
     }
     else
     {

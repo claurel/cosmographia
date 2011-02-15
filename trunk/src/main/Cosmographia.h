@@ -36,6 +36,7 @@ public:
     void initialize();
 
 public slots:
+    void setTime();
     void faster();
     void slower();
     void faster2();

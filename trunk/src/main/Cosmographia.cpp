@@ -40,6 +40,9 @@
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
 #include <algorithm>
+#include <QDateTimeEdit>
+#include <QBoxLayout>
+#include <QDialogButtonBox>
 
 using namespace vesta;
 using namespace Eigen;
@@ -77,6 +80,10 @@ Cosmographia::Cosmographia() :
 
     /*** Time Menu ***/
     QMenu* timeMenu = new QMenu("&Time", this);
+    QAction* setTimeAction = new QAction("Set &time...", timeMenu);
+    setTimeAction->setShortcut(QKeySequence("Ctrl+T"));
+    timeMenu->addAction(setTimeAction);
+    timeMenu->addSeparator();
     QAction* pauseAction = new QAction("&Pause", timeMenu);
     pauseAction->setCheckable(true);
     pauseAction->setShortcut(Qt::Key_Space);
@@ -106,6 +113,7 @@ Cosmographia::Cosmographia() :
     timeMenu->addAction(nowAction);
     this->menuBar()->addMenu(timeMenu);
 
+    connect(setTimeAction, SIGNAL(triggered()),     this,     SLOT(setTime()));
     connect(pauseAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setPaused(bool)));
     connect(fasterAction,  SIGNAL(triggered()),     this,     SLOT(faster()));
     connect(slowerAction,  SIGNAL(triggered()),     this,     SLOT(slower()));
@@ -273,10 +281,10 @@ Cosmographia::Cosmographia() :
     graphicsMenu->addAction(milkyWayAction);
     QAction* asteroidsAction = new QAction("As&teroids", graphicsMenu);
     asteroidsAction->setCheckable(true);
-    asteroidsAction->setShortcut(QKeySequence("Ctrl+T"));
+    asteroidsAction->setShortcut(QKeySequence("Ctrl+Shift+T"));
     graphicsMenu->addAction(asteroidsAction);
     QAction* highlightAsteroidsAction = new QAction("Highlight asteroid family", graphicsMenu);
-    highlightAsteroidsAction->setShortcut(QKeySequence("Ctrl+Shift+T"));
+    highlightAsteroidsAction->setShortcut(QKeySequence("Ctrl+Alt+T"));
     graphicsMenu->addAction(highlightAsteroidsAction);
     graphicsMenu->addSeparator();
     m_fullScreenAction = new QAction("Full Screen", graphicsMenu);
@@ -357,6 +365,57 @@ Cosmographia::initialize()
 
     // Set up the texture loader
     m_loader->setTextureLoader(m_view3d->textureLoader());
+}
+
+
+static QDateTime
+vestaDateToQtDate(const GregorianDate& date)
+{
+    return QDateTime(QDate(date.year(), date.month(), date.day()),
+                     QTime(date.hour(), date.minute(), date.second(), date.usec() / 1000),
+                     Qt::UTC);
+}
+
+
+static GregorianDate
+qtDateToVestaDate(const QDateTime& d)
+{
+    return GregorianDate(d.date().year(), d.date().month(), d.date().day(),
+                         d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
+                         TimeScale_TDB);
+}
+
+
+void
+Cosmographia::setTime()
+{
+    QDialog timeDialog;
+    timeDialog.setWindowTitle("Set Time and Date");
+    QDateTimeEdit* timeEdit = new QDateTimeEdit(&timeDialog);
+
+    QVBoxLayout* vbox = new QVBoxLayout(&timeDialog);
+    timeDialog.setLayout(vbox);
+
+    QHBoxLayout* hbox = new QHBoxLayout(&timeDialog);
+    hbox->addWidget(new QLabel("Enter date: ", &timeDialog));
+    hbox->addWidget(timeEdit);
+
+    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &timeDialog);
+    vbox->addItem(hbox);
+    vbox->addWidget(buttons);
+
+    connect(buttons, SIGNAL(accepted()), &timeDialog, SLOT(accept()));
+    connect(buttons, SIGNAL(rejected()), &timeDialog, SLOT(reject()));
+
+    double tsec = m_view3d->simulationTime();
+    GregorianDate simDate = GregorianDate::TDBDateFromTDBSec(tsec);
+    timeEdit->setDateTime(vestaDateToQtDate(simDate));
+
+    if (timeDialog.exec() == QDialog::Accepted)
+    {
+        QDateTime newDate = timeEdit->dateTime();
+        m_view3d->setSimulationTime(qtDateToVestaDate(newDate).toTDBSec());
+    }
 }
 
 
@@ -532,13 +591,14 @@ Cosmographia::loadSolarSystem()
     if (!solarSystemFileName.isEmpty())
     {
         QFile solarSystemFile(solarSystemFileName);
+        QString path = QFileInfo(solarSystemFile).absolutePath();
+
         if (!solarSystemFile.open(QIODevice::ReadOnly))
         {
             QMessageBox::warning(this, tr("Solar System File Error"), tr("Could not open file."));
             return;
         }
 
-        QString path = QFileInfo(solarSystemFile).absolutePath();
         m_loader->setDataSearchPath(path);
         m_loader->setTextureSearchPath(path);
         m_loader->setModelSearchPath(path);
@@ -583,6 +643,12 @@ Cosmographia::loadSolarSystem()
         }
         else if (solarSystemFileName.toLower().endsWith(".ssc"))
         {
+            m_loader->setDataSearchPath(path);
+            m_loader->setTextureSearchPath(path);
+            m_loader->setModelSearchPath(path);
+
+            QVariantList items;
+
             CatalogParser parser(&solarSystemFile);
             QVariant obj = parser.nextSscObject();
             while (obj.type() == QVariant::Map)
@@ -593,7 +659,27 @@ Cosmographia::loadSolarSystem()
                 QVariantMap map = obj.toMap();
                 TransformSscObject(&map);
                 qDebug() << "Converted: " << serializer.serialize(map);
+
+                QString fullName = map.value("_parent").toString() + "/" + map.value("name").toString();
+                map.insert("name", fullName);
+                items << map;
+
                 obj = parser.nextSscObject();
+            }
+
+            QVariantMap contents;
+            contents.insert("name", "solarSystemFileName");
+            contents.insert("items", items);
+
+            QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+            foreach (QString name, bodyNames)
+            {
+                Entity* e = m_catalog->find(name);
+                if (e)
+                {
+                    qDebug() << "Adding: " << name;
+                    m_view3d->replaceEntity(e);
+                }
             }
         }
 

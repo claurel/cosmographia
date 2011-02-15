@@ -32,6 +32,7 @@
 #include <vesta/BodyFixedFrame.h>
 #include <vesta/RotationModel.h>
 #include <vesta/UniformRotationModel.h>
+#include <vesta/FixedRotationModel.h>
 #include <vesta/KeplerianTrajectory.h>
 #include <vesta/FixedPointTrajectory.h>
 #include <vesta/WorldGeometry.h>
@@ -41,6 +42,8 @@
 #include <vesta/MeshGeometry.h>
 #include <vesta/AxesVisualizer.h>
 #include <vesta/Units.h>
+#include <vesta/GregorianDate.h>
+#include <QDateTime>
 #include <QFile>
 #include <QDebug>
 
@@ -384,6 +387,37 @@ static Vector3d vec3Value(QVariant v, bool* ok)
 }
 
 
+static Quaterniond quaternionValue(QVariant v, bool* ok)
+{
+    Quaterniond result = Quaterniond::Identity();
+    bool loadOk = false;
+
+    if (v.type() == QVariant::List)
+    {
+        QVariantList list = v.toList();
+        if (list.length() == 4)
+        {
+            if (list.at(0).canConvert(QVariant::Double) &&
+                list.at(1).canConvert(QVariant::Double) &&
+                list.at(2).canConvert(QVariant::Double) &&
+                list.at(3).canConvert(QVariant::Double))
+            {
+                result = Quaterniond(list.at(0).toDouble(), list.at(1).toDouble(), list.at(2).toDouble(), list.at(3).toDouble());
+                loadOk = true;
+            }
+        }
+    }
+
+    if (ok)
+    {
+        *ok = loadOk;
+    }
+
+    return result;
+}
+
+
+
 static double angleValue(QVariant v, double defaultValue = 0.0)
 {
     bool ok = false;
@@ -411,6 +445,44 @@ static double durationValue(QVariant v, double defaultValue = 0.0)
     {
         return defaultValue;
     }
+}
+
+
+// Parse a date value. This can be either a double precision Julian date
+// or an ISO 8601 date string with an optional time system suffix.
+static double dateValue(QVariant v, bool* ok)
+{
+    double tsec = 0.0;
+
+    if (v.type() == QVariant::String)
+    {
+        QString dateString = v.toString();
+        QDateTime d = QDateTime::fromString(dateString);
+        if (d.isValid())
+        {
+            *ok = true;
+            GregorianDate date(d.date().year(), d.date().month(), d.date().day(),
+                               d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
+                               TimeScale_TDB);
+            tsec = date.toTDBSec();
+        }
+        else
+        {
+            *ok = false;
+        }
+    }
+    else if (v.type() == QVariant::Double || v.type() == QVariant::Int)
+    {
+        *ok = true;
+        double jd = v.toDouble();
+        tsec = daysToSeconds(jd - vesta::J2000);
+    }
+    else
+    {
+        *ok = false;
+    }
+
+    return tsec;
 }
 
 
@@ -584,8 +656,24 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
 
 
 vesta::RotationModel*
-loadFixedRotationModel(const QVariantMap& /* map */)
+loadFixedRotationModel(const QVariantMap& map)
 {
+    QVariant quatVar = map.value("quaternion");
+    if (quatVar.isValid())
+    {
+        bool ok = false;
+        Quaterniond q = quaternionValue(quatVar, &ok);
+        if (!ok)
+        {
+            qDebug() << "Invalid quaternion given for FixedRotation";
+            return NULL;
+        }
+        else
+        {
+            return new FixedRotationModel(q);
+        }
+    }
+
     return NULL;
 }
 
@@ -1210,7 +1298,14 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
 {
     MeshGeometry* mesh = NULL;
 
+    // We permit two methods of scaling the mesh:
+    //    1. Specifying the size will scale the mesh to fit in a sphere of that size
+    //    2. Specifying scale will apply a scaling factor
+    //
+    // scale overrides size when it's present. If neither size nor scale is given, a default
+    // size of 1.0 is used.
     double radius = doubleValue(map.value("size"), 1.0);
+    double scale = doubleValue(map.value("scale"), 0.0);
 
     if (map.contains("source"))
     {
@@ -1218,7 +1313,14 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
         mesh = loadMeshFile(modelFileName(sourceName), m_textureLoader.ptr());
         if (mesh)
         {
-            mesh->setMeshScale(radius / mesh->boundingSphereRadius());
+            if (scale != 0.0)
+            {
+                mesh->setMeshScale(float(scale));
+            }
+            else
+            {
+                mesh->setMeshScale(radius / mesh->boundingSphereRadius());
+            }
         }
     }
 

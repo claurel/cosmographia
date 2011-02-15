@@ -57,6 +57,51 @@ MoveProperty(const QVariantMap* src, const QString& srcKey,
 }
 
 
+struct NameMapping
+{
+    QString from;
+    QString to;
+};
+
+static NameMapping SolarSystemNames[] =
+{
+    { "Sol", "Sun" },
+    { "Sol/Mercury", "Mercury" },
+    { "Sol/Venus", "Venus" },
+    { "Sol/Earth", "Earth" },
+    { "Sol/Mars", "Mars" },
+    { "Sol/Jupiter", "Jupiter" },
+    { "Sol/Saturn", "Saturn" },
+    { "Sol/Uranus", "Uranus" },
+    { "Sol/Neptune", "Neptune" },
+    { "Sol/Pluto", "Pluto" },
+    { "Sol/Earth/Moon", "Moon" },
+};
+
+static QMap<QString, QString> SolarSystemMappings;
+
+QString
+TransformSolarSystemName(const QString& name)
+{
+    if (SolarSystemMappings.isEmpty())
+    {
+        for (unsigned int i = 0; i < sizeof(SolarSystemNames) / sizeof(SolarSystemNames[0]); ++i)
+        {
+            SolarSystemMappings[SolarSystemNames[i].from] = SolarSystemNames[i].to;
+        }
+    }
+
+    if (SolarSystemMappings.contains(name))
+    {
+        return SolarSystemMappings.value(name);
+    }
+    else
+    {
+        return name;
+    }
+}
+
+
 TransformSscStatus
 TransformSscGeometry(QVariantMap* obj)
 {
@@ -145,14 +190,14 @@ TransformSscTrajectory(QVariantMap* obj)
         if (value.type() == QVariant::Map)
         {
             QVariantMap properties = value.toMap();
-            trajectory["type"] = "Sampled";
+            trajectory["type"] = "InterpolatedStates";
             MoveProperty(&properties, "Source", &trajectory, "source");
             MoveProperty(&properties, "Interpolation", &trajectory, "interpolation");
         }
     }
     else if (obj->contains("SampledOrbit"))
     {
-        trajectory["type"] = "Sampled";
+        trajectory["type"] = "InterpolatedStates";
         trajectory["source"] = obj->value("SampledOrbit");
     }
     else if (obj->contains("EllipticalOrbit"))
@@ -204,7 +249,7 @@ TransformSscRotationModel(QVariantMap* obj)
     }
     else if (obj->contains("SampledOrientation"))
     {
-        rotationModel["type"] = "Sampled";
+        rotationModel["type"] = "Interpolated";
         rotationModel["source"] = obj->value("SampledOrientation");
     }
     else if (obj->contains("PrecessingRotation"))
@@ -226,15 +271,15 @@ TransformSscRotationModel(QVariantMap* obj)
     }
     else if (obj->contains("FixedRotation"))
     {
-        rotationModel["type"] = "FixedRotation";
+        rotationModel["type"] = "Fixed";
     }
     else if (obj->contains("FixedAttitude"))
     {
     }
     else if (obj->contains("FixedQuaternion"))
     {
-        rotationModel["type"] = "Quaternion";
-        rotationModel["value"] = obj->value("Quaternion");
+        rotationModel["type"] = "Fixed";
+        rotationModel["quaternion"] = obj->value("Quaternion");
     }
 
     if (!rotationModel.empty())
@@ -314,6 +359,9 @@ TransformSscStatus
 TransformSscArc(QVariantMap* obj)
 {
     TransformSscStatus status = SscOk;
+
+    // TODO: handle overrides in trajectory frame
+    obj->insert("center", TransformSolarSystemName(obj->value("_parent").toString()));
 
     status = TransformSscTrajectory(obj);
     if (status != SscOk)

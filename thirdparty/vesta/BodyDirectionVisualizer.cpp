@@ -20,6 +20,7 @@ BodyDirectionVisualizer::BodyDirectionVisualizer(double size, Entity* body) :
     ArrowVisualizer(size),
     m_body(body)
 {
+    setLabelText( body->name() );
 }
 
 

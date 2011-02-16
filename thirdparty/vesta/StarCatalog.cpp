@@ -1,5 +1,5 @@
 /*
- * $Revision: 405 $ $Date: 2010-08-03 13:05:54 -0700 (Tue, 03 Aug 2010) $
+ * $Revision: 558 $ $Date: 2010-11-17 12:20:58 +0100 (Wed, 17 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -58,8 +58,17 @@ static float BVColorIndexToTeff(float bv, float metallicity = 0.0f, float logG =
 }
 
 
+// Convert the CIE chromaticity coordinates for a black body of the specified
+// temperature. The calculation uses a piecewise cubic approximation that is
+// valid for temperatures above 1667 K. For cooler temperatures, we simply clamp
+// them to 1667 K. This is adequate for our use the function to compute star
+// colors as only brown dwarf stars are cooler, and these are so faint that
+// they don't need to be represented in VESTA.
 static Vector2f planckianLocus(float T)
 {
+    // Clamp to a valid range
+    T = std::max(T, 1667.0f);
+
     float t = 1000.0f / T;
     float t2 = t * t;
     float t3 = t2 * t;

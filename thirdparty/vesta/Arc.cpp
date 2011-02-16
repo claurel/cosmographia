@@ -1,5 +1,5 @@
 /*
- * $Revision: 530 $ $Date: 2010-10-12 11:26:43 -0700 (Tue, 12 Oct 2010) $
+ * $Revision: 565 $ $Date: 2011-02-15 16:00:43 -0800 (Tue, 15 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -30,8 +30,8 @@ using namespace Eigen;
 Arc::Arc() :
     m_duration(0.0)
 {
-    m_trajectoryFrame = InertialFrame::equatorJ2000();
-    m_bodyFrame = InertialFrame::equatorJ2000();
+    m_trajectoryFrame = InertialFrame::icrf();
+    m_bodyFrame = InertialFrame::icrf();
     m_trajectory = new FixedPointTrajectory(Vector3d::Zero());
     m_rotationModel = new FixedRotationModel(Quaterniond::Identity());
 }

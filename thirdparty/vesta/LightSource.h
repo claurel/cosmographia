@@ -29,6 +29,22 @@ public:
     {
     }
 
+    enum LightType
+    {
+        Sun          = 0,
+        PointLight   = 1,
+    };
+
+    LightType lightType() const
+    {
+        return m_type;
+    }
+
+    void setLightType(LightType type)
+    {
+        m_type = type;
+    }
+
     /** Get the luminosity of the light source in watts.
       */
     float luminosity() const
@@ -92,6 +108,7 @@ public:
     }
 
 private:
+    LightType m_type;
     float m_luminosity;
     Spectrum m_spectrum;
     float m_range;

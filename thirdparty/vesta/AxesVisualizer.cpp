@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -63,4 +63,18 @@ AxesVisualizer::arrows()
     return dynamic_cast<ArrowGeometry*>(geometry());
 }
 
+/** Enables/Disables the drawing of labels for an arrow specified by which
+  */
+void AxesVisualizer::setLabelEnabled(bool state, unsigned int which)
+{
+    ArrowGeometry* arrow = dynamic_cast<ArrowGeometry*>( geometry() );
+    arrow->setLabelEnabled(state, which);
+}
 
+/** Sets the text of the label for an arrow specified by which
+  */
+void AxesVisualizer::setLabelText(std::string text, unsigned int which)
+{
+    ArrowGeometry* arrow = dynamic_cast<ArrowGeometry*>( geometry() );
+    arrow->setLabelText(text, which);
+}

@@ -1,5 +1,5 @@
 /*
- * $Revision: 541 $ $Date: 2010-10-19 11:56:03 -0700 (Tue, 19 Oct 2010) $
+ * $Revision: 557 $ $Date: 2010-11-16 16:24:20 +0100 (Tue, 16 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -31,7 +31,8 @@ TrajectoryGeometry::TrajectoryGeometry() :
     m_boundingRadius(0.0),
     m_displayedPortion(Entire),
     m_windowDuration(0.0),
-    m_fadeFraction(0.0)
+    m_fadeFraction(0.0),
+    m_lineWidth(1.0f)
 {
     // Make trajectories splittable by default in order to prevent
     // clipping artifacts.
@@ -49,6 +50,41 @@ void
 TrajectoryGeometry::render(RenderContext& rc, double clock) const
 {
     if (!m_curvePlot)
+    {
+        return;
+    }
+
+    bool fade = false;
+    double startTime = m_startTime;
+    double endTime = m_endTime;
+    switch (m_displayedPortion)
+    {
+    case StartToCurrentTime:
+        endTime = clock;
+        break;
+    case CurrentTimeToEnd:
+        startTime = clock;
+        break;
+    case WindowBeforeCurrentTime:
+        endTime = clock;
+        startTime = clock - m_windowDuration;
+        fade = m_fadeFraction > 0.0;
+        break;
+    default:
+        break;
+    }
+
+    // Abort now if there's nothing to draw
+    if (endTime <= startTime)
+    {
+        return;
+    }
+
+    // Skip drawing trajectories that are less than a pixel in size. This should be done by
+    // UniverseRenderer, except that visualizers (which is where TrajectoryGeometry is typically used)
+    // aren't size culled.
+    float projectedSize = (boundingSphereRadius() / float(rc.modelview().translation().norm())) / rc.pixelSize();
+    if (projectedSize < 0.5f)
     {
         return;
     }
@@ -71,26 +107,7 @@ TrajectoryGeometry::render(RenderContext& rc, double clock) const
     rc.pushModelView();
     rc.identityModelView();
 
-    bool fade = false;
-    double startTime = m_startTime;
-    double endTime = m_endTime;
-    switch (m_displayedPortion)
-    {
-    case StartToCurrentTime:
-        endTime = clock;
-        break;
-    case CurrentTimeToEnd:
-        startTime = clock;
-        break;
-    case WindowBeforeCurrentTime:
-        endTime = clock;
-        startTime = clock - m_windowDuration;
-        fade = m_fadeFraction > 0.0;
-        break;
-    default:
-        break;
-    }
-
+    glLineWidth(m_lineWidth);
     double subdivisionThreshold = rc.pixelSize() * 30.0;
     if (fade)
     {
@@ -123,6 +140,7 @@ TrajectoryGeometry::render(RenderContext& rc, double clock) const
                             subdivisionThreshold,
                             startTime, endTime);
     }
+    glLineWidth(1.0f);
 
     rc.popModelView();
 }
@@ -239,7 +257,7 @@ TrajectoryGeometry::updateSamples(const Trajectory* trajectory, double startTime
     }
 
     TrajectorySampleGenerator gen(trajectory);
-    computeSamples(&gen, startTime, endTime, steps);
+    updateSamples(&gen, startTime, endTime, steps);
 }
 
 
@@ -334,7 +352,6 @@ TrajectoryGeometry::updateSamples(const TrajectoryPlotGenerator* generator, doub
 
         if (endTime > m_curvePlot->endTime())
         {
-            unsigned int sampCount = 0;
             // Add samples at the end
             for (double t = m_curvePlot->endTime() + dt; t < windowEndTime; t += dt)
             {
@@ -347,7 +364,6 @@ TrajectoryGeometry::updateSamples(const TrajectoryPlotGenerator* generator, doub
                 sample.velocity = sv.velocity();
                 m_curvePlot->addSample(sample);
                 m_boundingRadius = std::max(m_boundingRadius, sv.position().norm());
-                ++sampCount;
             }
         }
 

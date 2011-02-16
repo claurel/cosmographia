@@ -1,5 +1,5 @@
 /*
- * $Revision: 509 $ $Date: 2010-09-21 14:35:45 -0700 (Tue, 21 Sep 2010) $
+ * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -20,6 +20,7 @@ using namespace Eigen;
 VelocityVisualizer::VelocityVisualizer(double size) :
     ArrowVisualizer(size)
 {
+    setLabelText("Velocity");
 }
 
 

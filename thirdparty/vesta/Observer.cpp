@@ -1,5 +1,5 @@
 /*
- * $Revision: 475 $ $Date: 2010-08-31 08:09:34 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 565 $ $Date: 2011-02-15 16:00:43 -0800 (Tue, 15 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -17,13 +17,13 @@ using namespace Eigen;
 
 /** Create a new observer with the specified center object. The newly
   * created observer is position exactly on the center object (i.e. with
-  * a zero offset vector. The EME J2000 frame is the default pointing
-  * and position frame for the observer.
+  * a zero offset vector. The ICRF is the default pointing and
+  * position frame for the observer.
   */
 Observer::Observer(Entity* center) :
     m_center(center),
-    m_positionFrame(InertialFrame::equatorJ2000()),
-    m_pointingFrame(InertialFrame::equatorJ2000()),
+    m_positionFrame(InertialFrame::icrf()),
+    m_pointingFrame(InertialFrame::icrf()),
     m_position(Vector3d::Zero()),
     m_orientation(Quaterniond::Identity())
 {

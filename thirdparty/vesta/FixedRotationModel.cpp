@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 555 $ $Date: 2010-11-10 11:01:25 +0100 (Wed, 10 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -33,3 +33,9 @@ FixedRotationModel::angularVelocity(double /* t */) const
     return Vector3d::Zero();
 }
 
+
+void
+FixedRotationModel::setOrientation(const Quaterniond& orientation)
+{
+    m_orientation = orientation;
+}

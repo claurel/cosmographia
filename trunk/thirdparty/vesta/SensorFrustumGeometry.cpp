@@ -77,12 +77,16 @@ SensorFrustumGeometry::render(RenderContext& rc,
             targetSemiAxes = dynamic_cast<WorldGeometry*>(target()->geometry())->ellipsoidAxes().cast<double>() / 2.0;
         }
 
-        Matrix3d m = (source()->orientation(currentTime) * m_orientation).toRotationMatrix();
+        Quaterniond rotation = source()->orientation(currentTime);
+        Matrix3d m = (rotation * m_orientation).toRotationMatrix();
 
         double horizontalSize = tan(m_frustumHorizontalAngle / 2.0);
         double verticalSize = tan(m_frustumVerticalAngle / 2.0);
 
         bool showInside = false;
+
+        rc.pushModelView();
+        rc.rotateModelView(rotation.cast<float>().conjugate());
 
         m_frustumPoints.clear();
 
@@ -201,5 +205,7 @@ SensorFrustumGeometry::render(RenderContext& rc,
             }
             glEnd();
         }
+
+        rc.popModelView();
     }
 }

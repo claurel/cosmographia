@@ -40,11 +40,13 @@
 #include <vesta/DataChunk.h>
 #include <vesta/ArrowGeometry.h>
 #include <vesta/MeshGeometry.h>
+#include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
 #include <vesta/Units.h>
 #include <vesta/GregorianDate.h>
 #include <QDateTime>
 #include <QFile>
+#include <QColor>
 #include <QDebug>
 
 using namespace vesta;
@@ -358,6 +360,14 @@ static double doubleValue(QVariant v, double defaultValue = 0.0)
 }
 
 
+// Return distance in kilometers.
+static double distanceValue(QVariant v, double defaultValue = 0.0)
+{
+    // TODO: need to parse units
+    return doubleValue(v, defaultValue);
+}
+
+
 static Vector3d vec3Value(QVariant v, bool* ok)
 {
     Vector3d result = Vector3d::Zero();
@@ -381,6 +391,29 @@ static Vector3d vec3Value(QVariant v, bool* ok)
     if (ok)
     {
         *ok = loadOk;
+    }
+
+    return result;
+}
+
+
+static Spectrum colorValue(QVariant v, const Spectrum& defaultValue)
+{
+    Spectrum result = defaultValue;
+
+    if (v.type() == QVariant::List)
+    {
+        bool ok = false;
+        Vector3d vec = vec3Value(v, &ok);
+        if (ok)
+        {
+            result = Spectrum(float(vec.x()), float(vec.y()), float(vec.z()));
+        }
+    }
+    else if (v.type() == QVariant::String)
+    {
+        QColor c = v.value<QColor>();
+        result = Spectrum(c.redF(), c.greenF(), c.blueF());
     }
 
     return result;
@@ -1328,6 +1361,68 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
 }
 
 
+Geometry*
+UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog* catalog)
+{
+    QVariant targetVar = map.value("target");
+    QVariant rangeVar = map.value("range");
+    QVariant shapeVar = map.value("shape");
+    QVariant horizontalFovVar = map.value("horizontalFov");
+    QVariant verticalFovVar = map.value("verticalFov");
+    QVariant frustumColorVar = map.value("frustumColor");
+    QVariant frustumBaseColorVar = map.value("frustumBaseColor");
+    QVariant frustumOpacityVar = map.value("frustumOpacity");
+    QVariant gridOpacityVar = map.value("gridOpacity");
+
+    if (targetVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing target for sensor geometry";
+        return NULL;
+    }
+
+    if (!rangeVar.canConvert(QVariant::Double))
+    {
+        qDebug() << "Bad or missing range for sensor geometry";
+        return NULL;
+    }
+
+    double range = distanceValue(rangeVar, 1.0);
+    QString shape = shapeVar.toString();
+    double horizontalFov = angleValue(horizontalFovVar, 5.0);
+    double verticalFov = angleValue(verticalFovVar, 5.0);
+    Spectrum frustumColor = colorValue(frustumColorVar, Spectrum(1.0f, 1.0f, 1.0f));
+    Spectrum frustumBaseColor = colorValue(frustumColorVar, Spectrum(1.0f, 1.0f, 1.0f));
+    double frustumOpacity = doubleValue(frustumOpacityVar, 0.3);
+    double gridOpacity = doubleValue(gridOpacityVar, 0.15);
+
+    Entity* target = catalog->find(targetVar.toString());
+    if (!target)
+    {
+        qDebug() << "Target for sensor geometry not found";
+        return NULL;
+    }
+
+    SensorFrustumGeometry* sensorFrustum = new SensorFrustumGeometry();
+    sensorFrustum->setTarget(target);
+    sensorFrustum->setColor(frustumColor);
+    sensorFrustum->setOpacity(frustumOpacity);
+    sensorFrustum->setRange(range);
+    sensorFrustum->setFrustumAngles(horizontalFov, verticalFov);
+    if (shape == "elliptical")
+    {
+        sensorFrustum->setFrustumShape(SensorFrustumGeometry::Elliptical);
+    }
+    else if (shape == "rectangular")
+    {
+        sensorFrustum->setFrustumShape(SensorFrustumGeometry::Rectangular);
+    }
+
+    sensorFrustum->setSource(catalog->find(m_currentBodyName));
+
+    return sensorFrustum;
+}
+
+
 static vesta::ArrowGeometry*
 loadAxesGeometry(const QVariantMap& map)
 {
@@ -1340,7 +1435,7 @@ loadAxesGeometry(const QVariantMap& map)
 
 
 vesta::Geometry*
-UniverseLoader::loadGeometry(const QVariantMap& map)
+UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* catalog)
 {
     Geometry* geometry = NULL;
 
@@ -1366,6 +1461,10 @@ UniverseLoader::loadGeometry(const QVariantMap& map)
     else if (type == "Axes")
     {
         geometry = loadAxesGeometry(map);
+    }
+    else if (type == "Sensor")
+    {
+        geometry = loadSensorGeometry(map, catalog);
     }
     else
     {
@@ -1483,31 +1582,35 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
             if (type == "body" || type.isEmpty())
             {
                 QString bodyName = item.value("name").toString();
+                m_currentBodyName = bodyName;
 
                 vesta::Body* body = dynamic_cast<Body*>(catalog->find(bodyName));
                 if (body == NULL)
                 {
+                    // No body with this name exists, so create it
                     body = new vesta::Body();
                     body->setName(bodyName.toUtf8().data());
+
+                    // Add the body to the catalog now so that it may be referenced by
+                    // frames.
+                    catalog->addBody(bodyName, body);
                 }
                 else
                 {
+                    // Body with the given name already exists; clear all information about
+                    // it and reload.
                     body->setLightSource(NULL);
                     body->setGeometry(NULL);
                     body->setVisible(true);
                     body->chronology()->clearArcs();
                 }
 
-                // Add the body to the catalog now so that it may be referenced by
-                // frames.
-                catalog->addBody(bodyName, body);
-
                 if (item.contains("geometry"))
                 {
                     QVariant geometryValue = item.value("geometry");
                     if (geometryValue.type() == QVariant::Map)
                     {
-                        vesta::Geometry* geometry = loadGeometry(geometryValue.toMap());
+                        vesta::Geometry* geometry = loadGeometry(geometryValue.toMap(), catalog);
                         if (geometry)
                         {
                             body->setGeometry(geometry);

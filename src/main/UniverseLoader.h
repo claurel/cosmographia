@@ -52,9 +52,12 @@ public:
     void setModelSearchPath(const QString& path);
 
 private:
-    vesta::Geometry* loadGeometry(const QVariantMap& map);
+    vesta::Geometry* loadGeometry(const QVariantMap& map,
+                                  const UniverseCatalog* catalog);
     vesta::Geometry* loadGlobeGeometry(const QVariantMap& map);
     vesta::Geometry* loadMeshGeometry(const QVariantMap& map);
+    vesta::Geometry* loadSensorGeometry(const QVariantMap& map,
+                                        const UniverseCatalog* catalog);
 
     vesta::Arc* loadArc(const QVariantMap& map,
                         const UniverseCatalog* catalog);
@@ -83,6 +86,7 @@ private:
     QString m_dataSearchPath;
     QString m_textureSearchPath;
     QString m_modelSearchPath;
+    QString m_currentBodyName;
 };
 
 #endif // _UNIVERSE_LOADER_H_

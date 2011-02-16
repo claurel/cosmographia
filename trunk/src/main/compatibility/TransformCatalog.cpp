@@ -107,18 +107,25 @@ TransformSscGeometry(QVariantMap* obj)
 {
     QVariantMap geometry;
 
-    if (obj->contains("Sensor"))
+    if (obj->value("Sensor").type() == QVariant::Map)
     {
+        QVariantMap sensor = obj->value("Sensor").toMap();
+
         geometry["type"] = "Sensor";
-        MoveProperty(obj, "Target", &geometry, "target");
-        MoveProperty(obj, "Range", &geometry, "range");
-        MoveProperty(obj, "Shape", &geometry, "shape");
-        MoveProperty(obj, "HorizontalFOV", &geometry, "horizontalFov");
-        MoveProperty(obj, "VerticalFOV", &geometry, "verticalFov");
-        MoveProperty(obj, "FrustumColor", &geometry, "frustumColor");
-        MoveProperty(obj, "FrustumBaseColor", &geometry, "frustumBaseColor");
-        MoveProperty(obj, "FrustumOpacity", &geometry, "frustumOpacity");
-        MoveProperty(obj, "GridOpacity", &geometry, "gridOpacity");
+        MoveProperty(&sensor, "Target", &geometry, "target");
+        MoveProperty(&sensor, "Range", &geometry, "range");
+        MoveProperty(&sensor, "Shape", &geometry, "shape");
+        MoveProperty(&sensor, "HorizontalFOV", &geometry, "horizontalFov");
+        MoveProperty(&sensor, "VerticalFOV", &geometry, "verticalFov");
+        MoveProperty(&sensor, "FrustumColor", &geometry, "frustumColor");
+        MoveProperty(&sensor, "FrustumBaseColor", &geometry, "frustumBaseColor");
+        MoveProperty(&sensor, "FrustumOpacity", &geometry, "frustumOpacity");
+        MoveProperty(&sensor, "GridOpacity", &geometry, "gridOpacity");
+
+        if (geometry.contains("target"))
+        {
+            geometry.insert("target", TransformSolarSystemName(geometry.value("target").toString()));
+        }
     }
     else if (obj->contains("Mesh"))
     {

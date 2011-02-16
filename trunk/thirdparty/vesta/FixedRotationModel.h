@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 555 $ $Date: 2010-11-10 11:01:25 +0100 (Wed, 10 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -25,6 +25,8 @@ public:
 
     Eigen::Quaterniond orientation(double t) const;
     Eigen::Vector3d angularVelocity(double t) const;
+
+    void setOrientation(const Eigen::Quaterniond& orientation);
 
 private:
     Eigen::Quaterniond m_orientation;

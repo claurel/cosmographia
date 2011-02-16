@@ -1,5 +1,5 @@
 /*
- * $Revision: 499 $ $Date: 2010-09-10 18:18:05 -0700 (Fri, 10 Sep 2010) $
+ * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -40,6 +40,11 @@ public:
         NormalTexture     = 0x04,
         EmissiveTexture   = 0x08,
         ReflectionTexture = 0x10,
+    };
+
+    enum
+    {
+        MaxLightCount     = 3
     };
 
     ShaderInfo() :
@@ -103,14 +108,31 @@ public:
         m_data &= ~((textures << TextureUsageMaskShift) & TextureUsageMask);
     }
 
-    unsigned int lightCount() const
+    unsigned int directionalLightCount() const
     {
-        return (m_data & LightCountMask) >> LightCountMaskShift;
+        return (m_data & DirectionalLightCountMask) >> DirectionalLightCountMaskShift;
     }
 
-    void setLightCount(unsigned int count)
+    void setDirectionalLightCount(unsigned int count)
     {
-        m_data |= (count << LightCountMaskShift) & LightCountMask;
+        m_data |= (count << DirectionalLightCountMaskShift) & DirectionalLightCountMask;
+    }
+
+    unsigned int pointLightCount() const
+    {
+        return (m_data & PointLightCountMask) >> PointLightCountMaskShift;
+    }
+
+    void setPointLightCount(unsigned int count)
+    {
+        m_data |= (count << PointLightCountMaskShift) & PointLightCountMask;
+    }
+
+    /** Get the combined count of point and directional light sources.
+      */
+    unsigned int totalLightCount() const
+    {
+        return pointLightCount() + directionalLightCount();
     }
 
     unsigned int shadowCount() const
@@ -220,26 +242,28 @@ public:
 private:
     enum
     {
-        ReflectanceModelMask    = 0x00000f,
-        TextureUsageMask        = 0x0001f0,
-        LightCountMask          = 0x000e00,
-        ShadowCountMask         = 0x003000,
-        OmniShadowCountMask     = 0x00c000,
-        VertexColorMask         = 0x010000,
-        AlphaTextureMask        = 0x020000,
-        ScatteringMask          = 0x040000,
-        SphericalGeometryMask   = 0x080000,
-        SpecularInAlphaMask     = 0x100000,
-        FresnelFalloffMask      = 0x200000,
-        CompressedNormalMapMask = 0x400000,
+        ReflectanceModelMask      = 0x000000f,
+        TextureUsageMask          = 0x00001f0,
+        DirectionalLightCountMask = 0x0000e00,
+        PointLightCountMask       = 0x0003000,
+        ShadowCountMask           = 0x000c000,
+        OmniShadowCountMask       = 0x0030000,
+        VertexColorMask           = 0x0040000,
+        AlphaTextureMask          = 0x0080000,
+        ScatteringMask            = 0x0100000,
+        SphericalGeometryMask     = 0x0200000,
+        SpecularInAlphaMask       = 0x0400000,
+        FresnelFalloffMask        = 0x0800000,
+        CompressedNormalMapMask   = 0x1000000,
     };
 
     enum
     {
-        TextureUsageMaskShift     =  4,
-        LightCountMaskShift       =  9,
-        ShadowCountMaskShift      = 12,
-        OmniShadowCountMaskShift  = 14,
+        TextureUsageMaskShift          =  4,
+        DirectionalLightCountMaskShift =  9,
+        PointLightCountMaskShift       = 12,
+        ShadowCountMaskShift           = 14,
+        OmniShadowCountMaskShift       = 16,
     };
 
 private:

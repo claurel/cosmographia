@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 554 $ $Date: 2010-11-09 17:27:59 +0100 (Tue, 09 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -22,12 +22,15 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     FixedPointTrajectory(const Eigen::Vector3d& point);
+    FixedPointTrajectory(const StateVector& state);
 
     virtual StateVector state(double t) const;
     virtual double boundingSphereRadius() const;
 
+    void setState(const StateVector& state);
+
 private:
-    Eigen::Vector3d m_point;
+    StateVector m_state;
 };
 
 }

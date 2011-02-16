@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 561 $ $Date: 2011-01-28 12:11:17 -0800 (Fri, 28 Jan 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -15,6 +15,9 @@
 #include "IntegerTypes.h"
 #include <Eigen/Core>
 #include <cassert>
+#include "DataChunk.h"
+#include "Debug.h"
+#include <fstream>
 
 using namespace vesta;
 using namespace Eigen;
@@ -36,12 +39,22 @@ ArrowGeometry::ArrowGeometry(float shaftLength,
     m_shaft(0),
     m_annulus(0),
     m_point(0),
-    m_vertices(0)
-{
+    m_vertices(0),
+    m_font(NULL)
+{    
     m_arrowColors[0] = Spectrum(1.0f, 0.0f, 0.0f);
     m_arrowColors[1] = Spectrum(0.0f, 1.0f, 0.0f);
     m_arrowColors[2] = Spectrum(0.0f, 0.0f, 1.0f);
     buildArrowGeometry(shaftLength, shaftRadius, headLength, headRadius);
+    readTxfFile();
+
+    m_labels[0] = "X";
+    m_labels[1] = "Y";
+    m_labels[2] = "Z";
+    for(int i = 0; i < 3; i++)
+    {
+        m_labelsEnabled[i] = false;
+    }
 }
 
 
@@ -83,6 +96,55 @@ ArrowGeometry::setArrowColor(unsigned int which, const Spectrum& color)
     }
 }
 
+/** Enables/Disables the drawing of labels for an arrow specified by which
+  */
+void ArrowGeometry::setLabelEnabled(bool state, unsigned int which)
+{
+    switch(which)
+    {
+    case XAxis:
+        m_labelsEnabled[0] = state;
+        break;
+    case YAxis:
+        m_labelsEnabled[1] = state;
+        break;
+    case ZAxis:
+        m_labelsEnabled[2] = state;
+        break;
+    case AllAxes:
+        m_labelsEnabled[0] = state;
+        m_labelsEnabled[1] = state;
+        m_labelsEnabled[2] = state;
+        break;
+    default:
+        break;
+    }
+}
+
+/** Sets the text of the label for an arrow specified by which
+  */
+void ArrowGeometry::setLabelText(string text, unsigned int which)
+{
+    switch(which)
+    {
+    case XAxis:
+        m_labels[0] = text;
+        break;
+    case YAxis:
+        m_labels[1] = text;
+        break;
+    case ZAxis:
+        m_labels[2] = text;
+        break;
+    case AllAxes:
+        m_labels[0] = text;
+        m_labels[1] = text;
+        m_labels[2] = text;
+        break;
+    default:
+        break;
+    }
+}
 
 void
 ArrowGeometry::render(RenderContext& rc,
@@ -106,6 +168,7 @@ ArrowGeometry::render(RenderContext& rc,
         rc.rotateModelView(Quaternionf(AngleAxisf((float) PI / 2.0f, Vector3f::UnitY())));
         rc.bindMaterial(&materials[0]);
         drawArrow(rc);
+        drawLabel(rc, 0);
         rc.popModelView();
     }
 
@@ -115,6 +178,7 @@ ArrowGeometry::render(RenderContext& rc,
         rc.rotateModelView(Quaternionf(AngleAxisf(-(float) PI / 2.0f, Vector3f::UnitX())));
         rc.bindMaterial(&materials[1]);
         drawArrow(rc);
+        drawLabel(rc, 1);
         rc.popModelView();
     }
 
@@ -123,6 +187,7 @@ ArrowGeometry::render(RenderContext& rc,
         rc.pushModelView();
         rc.bindMaterial(&materials[2]);
         drawArrow(rc);
+        drawLabel(rc, 2);
         rc.popModelView();
     }
 
@@ -239,3 +304,72 @@ ArrowGeometry::buildArrowGeometry(float shaftLength,
     delete[] pointIndices;
 }
 
+void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
+{
+
+    Vector3f arrowOriginScreenSpace;
+    Vector3f arrowHeadScreenSpace;
+    Vector3f labelPositionScreenSpace;
+    float cameraDistance;
+    float pixelSize;
+
+    if(m_font == NULL || !m_labelsEnabled[which])
+    {
+        return;
+    }
+
+    arrowOriginScreenSpace = rc.projection() * rc.modelview() * Vector3f(0.0, 0.0, 0.0);
+    arrowHeadScreenSpace = rc.projection() * rc.modelview() * Vector3f(0.0, 0.0, 1.0);
+
+    // note: length of an arrow is 0.5
+    labelPositionScreenSpace.x() = 0.5 * ( arrowHeadScreenSpace.x() - arrowOriginScreenSpace.x() ) *
+                                   rc.viewportWidth();
+    labelPositionScreenSpace.y() = 0.5 * ( arrowHeadScreenSpace.y() - arrowOriginScreenSpace.y() ) *
+                                   rc.viewportHeight();
+    labelPositionScreenSpace.z() = 0.0;// no need for a z value
+
+
+    // move the label to the left, otherwise the label will be drawn on top of the arrow
+    if(labelPositionScreenSpace.x() < 0)
+    {
+        labelPositionScreenSpace.x() -= m_font->textWidth(m_labels[which]);
+    }
+
+    // move the label downwards, otherwise the label will be drawn on top of the arrow
+    // two times the textWidth of the uppercase character A is sufficent
+    if(labelPositionScreenSpace.y() < 0)
+    {
+        labelPositionScreenSpace.y() -= 2.0 * m_font->textWidth("A");
+    }
+
+    cameraDistance = rc.modelview().translation().norm();
+    pixelSize = 0.5 * m_scale / (rc.pixelSize() * cameraDistance);
+
+    if(pixelSize < 10.0){
+        return;
+    }
+
+    rc.drawText( labelPositionScreenSpace, m_labels[which], m_font, m_arrowColors[which], m_opacity);
+}
+
+void ArrowGeometry::readTxfFile(){
+
+    ifstream txfFile;
+    char* data;
+    int fileSize;
+
+
+    txfFile.open("sans-12.txf", ios::in | ios::binary | ios::ate);
+    if( txfFile.is_open() )
+    {
+        fileSize = txfFile.tellg();
+        data = new char [fileSize];
+        txfFile.seekg (0, ios::beg);
+        txfFile.read (data, fileSize);
+        txfFile.close();
+
+        DataChunk chunk(data, fileSize);
+        m_font = TextureFont::LoadTxf(&chunk);
+        delete data;
+    }
+}

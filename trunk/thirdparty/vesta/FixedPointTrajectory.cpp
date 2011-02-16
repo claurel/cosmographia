@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 554 $ $Date: 2010-11-09 17:27:59 +0100 (Tue, 09 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -14,8 +14,18 @@ using namespace vesta;
 using namespace Eigen;
 
 
+/** Create a new FixedPointTrajectory for the specified point.
+  */
 FixedPointTrajectory::FixedPointTrajectory(const Vector3d& point) :
-    m_point(point)
+    m_state(StateVector(point, Vector3d::Zero()))
+{
+}
+
+
+/** Create a new FixedPointTrajectory with the specified state.
+  */
+FixedPointTrajectory::FixedPointTrajectory(const StateVector& state) :
+     m_state(state)
 {
 }
 
@@ -23,12 +33,21 @@ FixedPointTrajectory::FixedPointTrajectory(const Vector3d& point) :
 StateVector
 FixedPointTrajectory::state(double /* t */) const
 {
-    return StateVector(m_point, Vector3d(0.0, 0.0, 0.0));
+    return m_state;
 }
 
 
 double
 FixedPointTrajectory::boundingSphereRadius() const
 {
-    return m_point.norm();
+    return m_state.position().norm();
+}
+
+
+/** Change the state vector of this fixed point trajectory.
+  */
+void
+FixedPointTrajectory::setState(const StateVector& state)
+{
+    m_state = state;
 }

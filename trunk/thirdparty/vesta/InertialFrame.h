@@ -1,5 +1,5 @@
 /*
- * $Revision: 490 $ $Date: 2010-09-07 13:34:23 -0700 (Tue, 07 Sep 2010) $
+ * $Revision: 565 $ $Date: 2011-02-15 16:00:43 -0800 (Tue, 15 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -45,7 +45,7 @@ public:
         return Eigen::Vector3d::Zero();
     }
 
-    /** International Celestial Reference Frame, the base reference frame
+    /** International Celestial Reference Frame, the root reference frame
       * of VESTA.
       */
     static InertialFrame* icrf()
@@ -60,7 +60,8 @@ public:
         return s_EclipticJ2000.ptr();
     }
 
-    /** Earth mean equator of J2000.0.
+    /** Earth mean equator and equinox of J2000.0 (often called
+      * EMEJ2000)
       */
     static InertialFrame* equatorJ2000()
     {

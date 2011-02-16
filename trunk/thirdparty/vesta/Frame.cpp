@@ -9,13 +9,14 @@
  */
 
 #include "Frame.h"
+#include "InertialFrame.h"
 
 using namespace vesta;
 using namespace Eigen;
 
 
 /** Get the 6x6 matrix for converting state vectors in this frame to
-  * the J2000 equator/equinox frame.
+  * the ICRF at the specified time.
   *
   * The transformation T looks like this:
   * <tt>
@@ -37,7 +38,7 @@ using namespace Eigen;
   * \param tsec time in seconds since J2000 TDB
   */
 StateTransform
-Frame::stateTransform(double tsec)
+Frame::stateTransform(double tsec) const
 {
     Matrix3d R = orientation(tsec).toRotationMatrix();
     Vector3d W = angularVelocity(tsec);
@@ -54,15 +55,15 @@ Frame::stateTransform(double tsec)
     return T;
 }
 
-/** Get the 6x6 matrix for converting state vectors in the inertial J2000
-  * frame to this frame.
+/** Get the 6x6 matrix for converting state vectors in the ICRF
+  * to this frame.
   *
   * \see Frame::stateTransform()
   *
   * \param tsec time in seconds since J2000 TDB
   */
 StateTransform
-Frame::inverseStateTransform(double tsec)
+Frame::inverseStateTransform(double tsec) const
 {
     // We're converting states from an inertial frame to the this frame (the target),
     // which may or may not be inertial. We start with the 6x6 state transformation
@@ -132,5 +133,39 @@ Frame::inverseStateTransform(double tsec)
     T.corner<3, 3>(BottomLeft) = Rinv * Wstar;
 
     return T;
+}
+
+
+/** Return the transformation matrix that will convert vectors from
+  * on frame to another at the specified time.
+  *
+  * \param from frame to convert vectors from (use ICRF if null)
+  * \param to frame to convert vectors to (use ICRF if null)
+  * \param tsec time in seconds since J2000 TDB
+  */
+StateTransform
+Frame::stateTransform(const Frame* from, const Frame* to, double tsec)
+{
+    // Optimize for the case when one of the frames is the ICRF: skip
+    // multiplication by identity.
+    if (from == NULL || from == InertialFrame::icrf())
+    {
+        if (to == NULL)
+        {
+            return StateTransform::Identity();
+        }
+        else
+        {
+            return to->inverseStateTransform(tsec);
+        }
+    }
+    else if (to == NULL || to == InertialFrame::icrf())
+    {
+        return from->stateTransform(tsec);
+    }
+    else
+    {
+        return to->inverseStateTransform(tsec) * from->stateTransform(tsec);
+    }
 }
 

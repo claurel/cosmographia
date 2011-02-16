@@ -1,5 +1,5 @@
 /*
- * $Revision: 526 $ $Date: 2010-10-07 20:19:32 -0700 (Thu, 07 Oct 2010) $
+ * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -249,6 +249,7 @@ private:
     Frustum m_viewFrustum;
 
     const LightingEnvironment* m_lighting;
+    counted_ptr<LightSource> m_sun;
 };
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -40,6 +40,15 @@ public:
 
     Spectrum color() const;
     void setColor(const Spectrum& color);
+
+    /** Enables/Disables the drawing of a label
+      */
+    void setLabelEnabled(bool state);
+
+    /** Sets the text of a label
+      */
+    void setLabelText(std::string text);
+
 };
 
 }

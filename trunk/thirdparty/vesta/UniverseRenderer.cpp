@@ -1,5 +1,5 @@
 /*
- * $Revision: 545 $ $Date: 2010-10-20 18:58:01 -0700 (Wed, 20 Oct 2010) $
+ * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -71,6 +71,8 @@ UniverseRenderer::UniverseRenderer() :
     m_skyLayersEnabled(true),
     m_renderViewport(1, 1)
 {
+    m_sun = new LightSource();
+    m_sun->setLightType(LightSource::Sun);
 }
 
 
@@ -323,7 +325,7 @@ UniverseRenderer::beginViewSet(const Universe* universe, double tsec)
     // Add a light source for the Sun
     // TODO: Consider whether it might be good to *not* set this automatically
     LightSourceItem sunItem;
-    sunItem.lightSource = 0;
+    sunItem.lightSource = m_sun.ptr();
     sunItem.position = Vector3d::Zero();
     m_lightSources.push_back(sunItem);
 
@@ -758,9 +760,9 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
 #endif
 
 #if DEBUG_OMNI_SHADOW_MAP
-    if (m_shadowsEnabled && m_omniShadowMap.isValid())
+    if (m_shadowsEnabled && m_omniShadowMaps[0].isValid())
     {
-        showOmniShadowMap(m_omniShadowMap.ptr(), 320.0f, viewport.width(), viewport.height());
+        showOmniShadowMap(m_omniShadowMaps[0].ptr(), 320.0f, viewport.width(), viewport.height());
     }
 #endif
 
@@ -815,14 +817,37 @@ UniverseRenderer::renderView(const Observer* observer,
 }
 
 
-// Predicate used for sorting light sources so that shadow casters are first
+// Predicate used for sorting light sources in the following priority:
+//   1. Sun light sources (only one supported now)
+//   2. Point lights with shadows
+//   3. Point lights without shadows
+//
+// Sun light sources will always cast shadows.
 static bool lightCastsShadowsPredicate(const UniverseRenderer::VisibleLightSourceItem& light0,
                                        const UniverseRenderer::VisibleLightSourceItem& light1)
 {
-    // Handle the special case for the Sun, which casts shadows but has a NULL lightSource.
-    int shadow0 = !light0.lightSource || light0.lightSource->isShadowCaster() ? 1 : 0;
-    int shadow1 = !light1.lightSource || light1.lightSource->isShadowCaster() ? 1 : 0;
-    return shadow0 > shadow1;
+    int priority0 = 0;
+    int priority1 = 0;
+
+    if (light0.lightSource->lightType() == LightSource::Sun)
+    {
+        priority0 = 2;
+    }
+    else
+    {
+        priority0 = light0.lightSource->isShadowCaster() ? 1 : 0;
+    }
+
+    if (light1.lightSource->lightType() == LightSource::Sun)
+    {
+        priority1 = 2;
+    }
+    else
+    {
+        priority1 = light1.lightSource->isShadowCaster() ? 1 : 0;
+    }
+
+    return priority0 > priority1;
 }
 
 
@@ -843,7 +868,7 @@ UniverseRenderer::buildVisibleLightSourceList(const Vector3d& cameraPosition)
         Vector3d cameraRelativePosition = lsi.position - cameraPosition;
 
         bool cull = false;
-        if (lsi.lightSource != NULL)
+        if (lsi.lightSource->lightType() != LightSource::Sun)
         {
             float projectedSize = (lsi.lightSource->range() / float(cameraRelativePosition.norm())) / m_renderContext->pixelSize();
             if (projectedSize < 1.0f)
@@ -1242,12 +1267,16 @@ void UniverseRenderer::renderDepthBufferSpan(const DepthBufferSpan& span, const 
     if (m_shadowsEnabled && !m_visibleLightSources.empty())
     {
         // Render shadows from the Sun (currently always the first light source)
-        shadowsOn = renderDepthBufferSpanShadows(0, span, m_visibleLightSources[0].cameraRelativePosition);
+        if (m_visibleLightSources[0].lightSource->lightType() == LightSource::Sun)
+        {
+            shadowsOn = renderDepthBufferSpanShadows(0, span, m_visibleLightSources[0].cameraRelativePosition);
+        }
 
         // See if there are additional light sources casting shadows.
-        for (unsigned int i = 1; i < m_visibleLightSources.size() && omniShadowCount < m_omniShadowMaps.size(); ++i)
+        for (unsigned int i = 0; i < m_visibleLightSources.size() && omniShadowCount < m_omniShadowMaps.size(); ++i)
         {
-            if (m_visibleLightSources[i].lightSource->isShadowCaster())
+            if (m_visibleLightSources[i].lightSource->lightType() == LightSource::PointLight &&
+                m_visibleLightSources[i].lightSource->isShadowCaster())
             {
                 renderDepthBufferSpanOmniShadows(omniShadowCount,
                                                  span,
@@ -1450,6 +1479,7 @@ UniverseRenderer::renderDepthBufferSpanOmniShadows(unsigned int shadowIndex,
                                                    const LightSource* light,
                                                    const Vector3d& lightPosition)
 {
+    static int frameCount = 0;
     // Check for shadow support
     if (!Framebuffer::supported() || !m_shadowsEnabled)
     {
@@ -1512,6 +1542,7 @@ UniverseRenderer::renderDepthBufferSpanOmniShadows(unsigned int shadowIndex,
             fb->bind();
             glDepthMask(GL_TRUE);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_BLEND);
 
             Quaternionf cameraOrientation = CubeFaceCameraRotations[face].cast<float>();
             Matrix3f toCameraSpace = cameraOrientation.conjugate().toRotationMatrix();
@@ -1591,13 +1622,12 @@ UniverseRenderer::drawItem(const VisibleItem& item)
     {
         for (vector<VisibleLightSourceItem>::const_iterator iter = m_visibleLightSources.begin(); iter != m_visibleLightSources.end(); ++iter)
         {
-            if (!iter->lightSource)
+            if (iter->lightSource->lightType() == LightSource::Sun)
             {
-                // Special case for the Sun
-                m_renderContext->setLight(0, RenderContext::Light(RenderContext::DirectionalLight,
-                                                                  iter->cameraRelativePosition.cast<float>(),
-                                                                  Spectrum(1.0f, 1.0f, 1.0f),
-                                                                  1.0f));
+                m_renderContext->setLight(lightCount, RenderContext::Light(RenderContext::DirectionalLight,
+                                                                           iter->cameraRelativePosition.cast<float>(),
+                                                                           iter->lightSource->spectrum(),
+                                                                           1.0f));
                 ++lightCount;
             }
             else

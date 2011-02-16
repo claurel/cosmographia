@@ -1,5 +1,5 @@
 /*
- * $Revision: 541 $ $Date: 2010-10-19 11:56:03 -0700 (Tue, 19 Oct 2010) $
+ * $Revision: 565 $ $Date: 2011-02-15 16:00:43 -0800 (Tue, 15 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -70,8 +70,8 @@ public:
         return m_frame.ptr();
     }
 
-    /** Set the reference frame for this trajectory plot. If not
-      * set, the inertial J2000 equatorial frame (the native frame
+    /** Set the reference frame for this trajectory plot. If not set, the
+      * inertial International Celestial Reference Frame (the native frame
       * of VESTA) is used.
       */
     void setFrame(Frame* frame)
@@ -198,6 +198,21 @@ public:
     }
 
 
+    /** Get the width of the lines used to plot the trajectory.
+      */
+    float lineWidth() const
+    {
+        return m_lineWidth;
+    }
+
+    /** Set the width of the lines used to plot the trajectory. By default,
+      * lines of width 1 are used.
+      */
+    void setLineWidth(float width)
+    {
+        m_lineWidth = width;
+    }
+
 private:
     counted_ptr<Frame> m_frame;
     Spectrum m_color;
@@ -209,6 +224,7 @@ private:
     TrajectoryPortion m_displayedPortion;
     double m_windowDuration;
     double m_fadeFraction;
+    float m_lineWidth;
 };
 
 }

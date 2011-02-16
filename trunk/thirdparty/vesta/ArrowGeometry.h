@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -16,6 +16,7 @@
 #include "Submesh.h"
 #include "Material.h"
 #include <vector>
+#include "TextureFont.h"
 
 namespace vesta
 {
@@ -98,12 +99,24 @@ public:
         m_opacity = opacity;
     }
 
+    /** Enables/Disables the drawing of labels for an arrow specified by which
+      */
+    void setLabelEnabled(bool state, unsigned int which);
+
+    /** Sets the text of the label for an arrow specified by which
+      */
+    void setLabelText(std::string text, unsigned int which);
+
 private:
+    void readTxfFile();
+
     void buildArrowGeometry(float shaftLength,
                             float shaftRadius,
                             float headLength,
                             float headRadius);
     void drawArrow(RenderContext& rc) const;
+
+    void drawLabel(RenderContext& rc, unsigned int which) const;
 
 private:
     double m_scale;
@@ -117,6 +130,10 @@ private:
     PrimitiveBatch* m_annulus;
     PrimitiveBatch* m_point;
     VertexArray* m_vertices;
+
+    TextureFont* m_font;
+    std::string m_labels[3];
+    bool m_labelsEnabled[3];
 };
 
 }

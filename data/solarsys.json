@@ -17,7 +17,7 @@
           {
               "type" : "Globe",
               "radius" : 695000.0,
-              "baseMap" : "sun.jpg",
+              "baseMap" : "textures/sun.jpg",
               "emissive" : true
           }
         },

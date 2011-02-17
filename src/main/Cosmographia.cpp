@@ -164,27 +164,6 @@ Cosmographia::Cosmographia() :
     /*** Visual aids menu ***/
     QMenu* visualAidsMenu = new QMenu("&Visual Aids", this);
 
-    // Arrows
-    QAction* bodyAxesAction = new QAction("&Body axes", visualAidsMenu);
-    bodyAxesAction->setCheckable(true);
-    visualAidsMenu->addAction(bodyAxesAction);
-    QAction* frameAxesAction = new QAction("&Frame axes", visualAidsMenu);
-    frameAxesAction->setCheckable(true);
-    visualAidsMenu->addAction(frameAxesAction);
-    QAction* velocityAction = new QAction("&Velocity arrow", visualAidsMenu);
-    velocityAction->setCheckable(true);
-    visualAidsMenu->addAction(velocityAction);
-    QAction* nadirAction = new QAction("&Nadir arrow", visualAidsMenu);
-    nadirAction->setCheckable(true);
-    visualAidsMenu->addAction(nadirAction);
-
-    bodyAxesAction->setEnabled(false);
-    frameAxesAction->setEnabled(false);
-    velocityAction->setEnabled(false);
-    nadirAction->setEnabled(false);
-
-    visualAidsMenu->addSeparator();
-
     QAction* eqGridAction = new QAction("E&quatorial grid", visualAidsMenu);
     eqGridAction->setCheckable(true);
     visualAidsMenu->addAction(eqGridAction);
@@ -245,9 +224,6 @@ Cosmographia::Cosmographia() :
 
     this->menuBar()->addMenu(visualAidsMenu);
 
-    connect(bodyAxesAction, SIGNAL(triggered(bool)), m_view3d, SLOT(toggleBodyAxes(bool)));
-    connect(frameAxesAction, SIGNAL(triggered(bool)), m_view3d, SLOT(toggleFrameAxes(bool)));
-    connect(velocityAction, SIGNAL(triggered(bool)), m_view3d, SLOT(toggleVelocityVector(bool)));
     connect(eqGridAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
     connect(eqPlaneAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialPlaneVisibility(bool)));

@@ -117,9 +117,6 @@ public slots:
     void bodyFixedObserver(bool checked);
     void synodicObserver(bool checked);
     void setObserverCenter();
-    void toggleBodyAxes(bool checked);
-    void toggleFrameAxes(bool checked);
-    void toggleVelocityVector(bool checked);
     void setCloudLayerVisibility(bool checked);
     void setMilkyWayVisibility(bool checked);
     void setAsteroidVisibility(bool checked);
@@ -156,6 +153,7 @@ protected:
     void wheelEvent(QWheelEvent* event);
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
+    void contextMenuEvent(QContextMenuEvent* event);
 
 private:
     enum FrameType
@@ -178,6 +176,8 @@ private:
     void updateTrajectoryPlots();
 
     void setPlanetMap(const QString& planetName, vesta::TiledMap* tiledMap);
+
+    vesta::Entity* pickObject(const QPoint& point);
 
 private:
     int m_mouseMovement;

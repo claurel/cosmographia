@@ -57,6 +57,7 @@
 #include <vesta/PlaneVisualizer.h>
 #include <vesta/VelocityVisualizer.h>
 #include <vesta/NadirVisualizer.h>
+#include <vesta/BodyDirectionVisualizer.h>
 #include <vesta/SensorVisualizer.h>
 #include <vesta/LabelGeometry.h>
 #include <vesta/BillboardGeometry.h>
@@ -1029,33 +1030,13 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
     {        
         if (event->button() == Qt::LeftButton)
         {
-            // Left-click selects the object beneath the cursor
-
-            // Get the click point in normalized device coordinaes
-            Vector2d ndc = Vector2d(double(event->pos().x()) / double(size().width()),
-                                    double(event->pos().y()) / double(size().height())) * 2.0 - Vector2d::Ones();
-            ndc.y() = -ndc.y();
-
-            double pixelAngle = m_fovY / size().height();
-
-            // Convert to a direction in view coordinates
-            double aspectRatio = double(size().width()) / double(size().height());
-            double h = tan(m_fovY / 2.0f);
-            Vector3d pickDirection = Vector3d(h * aspectRatio * ndc.x(), h * ndc.y(), -1.0).normalized();
-
-            // Convert to world coordinates
-            pickDirection = m_observer->absoluteOrientation(m_simulationTime) * pickDirection;
-            Vector3d pickOrigin = m_observer->absolutePosition(m_simulationTime);
-
-            PickResult pickResult;
-            if (m_universe->pickObject(m_simulationTime, pickOrigin, pickDirection, pixelAngle, &pickResult))
-            {
-                m_selectedBody = pickResult.hitObject();
-            }
-            else
-            {
-                m_selectedBody = NULL;
-            }
+            m_selectedBody = pickObject(event->pos());
+        }
+        else if (event->button() == Qt::RightButton)
+        {
+            // Right click invokes the context menu
+            QContextMenuEvent menuEvent(QContextMenuEvent::Other, event->pos(), event->globalPos());
+            QCoreApplication::sendEvent(this, &menuEvent);
         }
     }
 }
@@ -1230,6 +1211,172 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
             }
             setPlanetMap("Earth", new WMSTiledMap(m_textureLoader.ptr(), EarthLayerNames[earthLayer], 512, 7));
         }
+    }
+}
+
+
+void
+UniverseView::contextMenuEvent(QContextMenuEvent* event)
+{
+    if (event->reason() == QContextMenuEvent::Mouse)
+    {
+        // Mouse triggered menu events interfere with right-dragging, so
+        // we ignore them.
+        return;
+    }
+
+    Entity* body = pickObject(event->pos());
+    if (body)
+    {
+        float visualizerSize = 1.0f;
+        if (body->geometry())
+        {
+            visualizerSize = body->geometry()->boundingSphereRadius() * 2.0f;
+        }
+
+        // Build the context menu. The first item in the menu
+        // is the object name (non-selectable.)
+        QMenu* menu = new QMenu(this);
+        QAction* nameAction = menu->addAction(QString::fromUtf8(body->name().c_str()));
+        nameAction->setEnabled(false);
+
+        // Add actions for displaying reference vectors
+        menu->addSeparator();
+        QAction* bodyAxesAction = menu->addAction(tr("Body axes"));
+        QAction* frameAxesAction = menu->addAction(tr("Frame axes"));
+        QAction* velocityDirectionAction = menu->addAction("Velocity vector");
+        QAction* sunDirectionAction = NULL;
+        QAction* earthDirectionAction = NULL;
+
+        if (body->name() != "Sun")
+        {
+            sunDirectionAction = menu->addAction(tr("Sun direction"));
+        }
+        if (body->name() != "Earth")
+        {
+            earthDirectionAction = menu->addAction(tr("Earth direction"));
+        }
+
+        bodyAxesAction->setCheckable(true);
+        bodyAxesAction->setChecked(body->visualizer("body axes") != NULL);
+        frameAxesAction->setCheckable(true);
+        frameAxesAction->setChecked(body->visualizer("frame axes") != NULL);
+        velocityDirectionAction->setCheckable(true);
+        velocityDirectionAction->setChecked(body->visualizer("velocity direction") != NULL);
+        if (sunDirectionAction)
+        {
+            sunDirectionAction->setCheckable(true);
+            sunDirectionAction->setChecked(body->visualizer("sun direction") != NULL);
+        }
+        if (earthDirectionAction)
+        {
+            earthDirectionAction->setCheckable(true);
+            earthDirectionAction->setChecked(body->visualizer("earth direction") != NULL);
+        }
+
+        QAction* chosenAction = menu->exec(event->globalPos(), bodyAxesAction);
+        if (chosenAction == bodyAxesAction)
+        {
+            if (bodyAxesAction->isChecked())
+            {
+                AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::BodyAxes, visualizerSize);
+                axes->setVisibility(true);
+                body->setVisualizer("body axes", axes);
+            }
+            else
+            {
+                body->removeVisualizer("body axes");
+            }
+        }
+        else if (chosenAction == frameAxesAction)
+        {
+            if (frameAxesAction->isChecked())
+            {
+                AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::FrameAxes, visualizerSize);
+                axes->setVisibility(true);
+                axes->arrows()->setOpacity(0.3f);
+                body->setVisualizer("frame axes", axes);
+            }
+            else
+            {
+                body->removeVisualizer("frame axes");
+            }
+        }
+        else if (chosenAction == velocityDirectionAction)
+        {
+            if (velocityDirectionAction->isChecked())
+            {
+                VelocityVisualizer* arrow = new VelocityVisualizer(visualizerSize);
+                arrow->setVisibility(true);
+                arrow->setColor(Spectrum(0.25f, 1.0f, 1.0f));
+                body->setVisualizer("velocity direction", arrow);
+            }
+            else
+            {
+                body->removeVisualizer("velocity direction");
+            }
+        }
+        else if (chosenAction == sunDirectionAction && sunDirectionAction)
+        {
+            if (sunDirectionAction->isChecked())
+            {
+                ArrowVisualizer* arrow = new BodyDirectionVisualizer(visualizerSize, m_universe->findFirst("Sun"));
+                arrow->setVisibility(true);
+                arrow->setColor(Spectrum(1.0f, 1.0f, 0.7f));
+                body->setVisualizer("sun direction", arrow);
+            }
+            else
+            {
+                body->removeVisualizer("sun direction");
+            }
+        }
+        else if (chosenAction == earthDirectionAction && earthDirectionAction)
+        {
+            if (earthDirectionAction->isChecked())
+            {
+                ArrowVisualizer* arrow = new BodyDirectionVisualizer(visualizerSize, m_universe->findFirst("Earth"));
+                arrow->setVisibility(true);
+                arrow->setColor(Spectrum(0.7f, 0.7f, 1.0f));
+                body->setVisualizer("earth direction", arrow);
+            }
+            else
+            {
+                body->removeVisualizer("earth direction");
+            }
+        }
+    }
+}
+
+
+// Find the in the view underneat the specified point that is closest to the
+// camera.
+Entity*
+UniverseView::pickObject(const QPoint& point)
+{
+    // Get the click point in normalized device coordinaes
+    Vector2d ndc = Vector2d(double(point.x()) / double(size().width()),
+                            double(point.y()) / double(size().height())) * 2.0 - Vector2d::Ones();
+    ndc.y() = -ndc.y();
+
+    double pixelAngle = m_fovY / size().height();
+
+    // Convert to a direction in view coordinates
+    double aspectRatio = double(size().width()) / double(size().height());
+    double h = tan(m_fovY / 2.0f);
+    Vector3d pickDirection = Vector3d(h * aspectRatio * ndc.x(), h * ndc.y(), -1.0).normalized();
+
+    // Convert to world coordinates
+    pickDirection = m_observer->absoluteOrientation(m_simulationTime) * pickDirection;
+    Vector3d pickOrigin = m_observer->absolutePosition(m_simulationTime);
+
+    PickResult pickResult;
+    if (m_universe->pickObject(m_simulationTime, pickOrigin, pickDirection, pixelAngle, &pickResult))
+    {
+        return pickResult.hitObject();
+    }
+    else
+    {
+        return NULL;
     }
 }
 
@@ -1870,24 +2017,6 @@ UniverseView::synodicObserver(bool checked)
     {
         setCenterAndFrame(m_observer->center(), Frame_Synodic);
     }
-}
-
-
-void
-UniverseView::toggleBodyAxes(bool /* checked */)
-{
-}
-
-
-void
-UniverseView::toggleFrameAxes(bool /* checked */)
-{
-}
-
-
-void
-UniverseView::toggleVelocityVector(bool /* checked */)
-{
 }
 
 

@@ -27,4 +27,4 @@ PrecessionAngles_IAU1976(double tFrom, double tTo,
 Eigen::Quaterniond
 Precession_IAU1976(double tFrom, double tTo);
 
-#endif _ASTRO_PRECESSION_H_
+#endif // _ASTRO_PRECESSION_H_

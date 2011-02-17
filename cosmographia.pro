@@ -409,24 +409,24 @@ FFMPEG_INCLUDE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
 # Do not modify: FFMPEG default settings
 # ##############################################################################
 # Sources for QT wrapper
-SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
-    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
-HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
-    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
+#SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
+#    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
+#HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
+#   $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
 
 # Set list of required FFmpeg libraries
-LIBS += \
-    -lavutil \
-    -lavcodec \
-    -lavformat \
-    -lswscale \
-    -lz \
-    -lbz2
+#LIBS += \
+#    -lavutil \
+#    -lavcodec \
+#    -lavformat \
+#   -lswscale \
+#    -lz \
+#    -lbz2
 
 # Add the path
-LIBS += -L$$FFMPEG_LIBRARY_PATH
-INCLUDEPATH += QVideoEncoder
-INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
+#LIBS += -L$$FFMPEG_LIBRARY_PATH
+#INCLUDEPATH += QVideoEncoder
+#INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
 
 # ##############################################################################
 # FFMPEG: END OF CONFIGURATION
@@ -444,6 +444,7 @@ win32-g++ {
 
 win32 {
     DEFINES += NOMINMAX
+    DEFINES += QJSON_EXPORT=
 }
 
 macx {

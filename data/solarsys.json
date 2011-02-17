@@ -98,9 +98,11 @@
               "radius" : 6378.1,
               "baseMap" :
               {
-                  "type" : "wms",
-                  "layer" : "bmng-feb-nb",
-                  "levelCount" : 7,
+                  "type" : "MultiWMS",
+                  "baseLayer" : "bmng-feb-nb",
+                  "baseLevelCount" : 7,
+                  "detailLayer" : "earth-global-mosaic",
+                  "detailLevelCount" : 13,
                   "tileSize" : 480
               },
               "cloudMap" : "earth-clouds.png",

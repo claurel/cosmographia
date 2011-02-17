@@ -1573,6 +1573,7 @@ void UniverseView::initializeUniverse()
     //moonSphere->setBaseMap(tiledMoonMap);
 #endif
 
+#if 0
     /*
     TextureProperties compNormalMapProps = PlanetTextureProperties();
     compNormalMapProps.usage = TextureProperties::CompressedNormalMap;
@@ -1595,6 +1596,7 @@ void UniverseView::initializeUniverse()
     setPlanetMap("Moon", new WMSTiledMap(m_textureLoader.ptr(), "moon-clementine", 512, 6));
     setPlanetMap("Mars", new WMSTiledMap(m_textureLoader.ptr(), "mars-mdim-moc_na", 512, 10));
     //setPlanetMap("Mars", new WMSTiledMap(m_textureLoader.ptr(), "mars-viking", 512, 6));
+#endif
 
     Entity* center = new Entity();
     m_observer = new Observer(center);
@@ -1602,10 +1604,6 @@ void UniverseView::initializeUniverse()
     m_observer->setPosition(Vector3d(0.0, 0.0, 1.0e9));
 
     m_controller->setObserver(m_observer);
-
-    {
-        // Add mars map
-    }
 
     QFile starFile("tycho2.stars");
     if (starFile.open(QFile::ReadOnly))
@@ -2445,4 +2443,51 @@ UniverseView::replaceEntity(Entity* entity)
     }
     labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr());
 }
+
+
+class GotoAction
+{
+public:
+    GotoAction(const Observer* observer, const Frame* targetFrame, double targetDistance)
+    {
+
+    }
+
+    void updateObserver(Observer* observer, double tsec)
+    {
+        double t = tsec / m_duration;
+
+    }
+
+private:
+    counted_ptr<Frame> m_targetFrame;
+    double m_duration;
+};
+
+void
+UniverseView::gotoSelectedObject()
+{
+    if (m_selectedBody.isValid())
+    {
+        FrameType f = m_observerFrame;
+        Entity* center = m_selectedBody.ptr();
+
+        Frame* targetFrame = NULL;
+        if (f == Frame_BodyFixed)
+        {
+            targetFrame = new BodyFixedFrame(center);
+        }
+        else if (f == Frame_Synodic)
+        {
+            targetFrame = new TwoBodyRotatingFrame(center->chronology()->firstArc()->center(), center);
+        }
+        else
+        {
+            targetFrame = InertialFrame::equatorJ2000();
+        }
+
+    }
+}
+
+
 

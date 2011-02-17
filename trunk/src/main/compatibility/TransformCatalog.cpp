@@ -306,6 +306,59 @@ TransformSscRotationModel(QVariantMap* obj)
 }
 
 
+QVariantMap
+transformTwoVectorDirection(const QVariantMap& direction)
+{
+    QVariantMap newDirection;
+
+    if (direction.contains("RelativePosition"))
+    {
+        QVariant relativePosVar = direction.value("RelativePosition");
+        if (relativePosVar.type() == QVariant::Map)
+        {
+            QVariantMap relativePos = relativePosVar.toMap();
+            newDirection.insert("type", "RelativePosition");
+            if (relativePos.contains("Target"))
+            {
+                newDirection.insert("target", TransformSolarSystemName(relativePos.value("Target").toString()));
+            }
+            if (relativePos.contains("Observer"))
+            {
+                newDirection.insert("observer", TransformSolarSystemName(relativePos.value("Observer").toString()));
+            }
+        }
+    }
+    else if (direction.contains("RelativeVelocity"))
+    {
+        QVariant relativeVelVar = direction.value("RelativeVelocity");
+        if (relativeVelVar.type() == QVariant::Map)
+        {
+            QVariantMap relativeVel = relativeVelVar.toMap();
+            newDirection.insert("type", "RelativeVelocity");
+            if (relativeVel.contains("Target"))
+            {
+                newDirection.insert("target", TransformSolarSystemName(relativeVel.value("Target").toString()));
+            }
+            if (relativeVel.contains("Observer"))
+            {
+                newDirection.insert("observer", TransformSolarSystemName(relativeVel.value("Observer").toString()));
+            }
+        }
+    }
+    else if (direction.contains("ConstantVector"))
+    {
+        QVariant constantVecVar = direction.value("ConstantVector");
+        if (constantVecVar.type() == QVariant::Map)
+        {
+            QVariantMap constantVec = constantVecVar.toMap();
+            newDirection.insert("type", "ConstantVector");
+        }
+    }
+
+    return newDirection;
+}
+
+
 TransformSscStatus
 TransformSscFrame(QVariantMap* obj, const QString& oldName, const QString& newName)
 {
@@ -336,12 +389,52 @@ TransformSscFrame(QVariantMap* obj, const QString& oldName, const QString& newNa
         }
         else if (properties.contains("MeanEquator"))
         {
+            // Not supported
         }
         else if (properties.contains("TwoVector"))
         {
-            QVariantMap frame;
-            frame["type"] = "TwoVector";
-            obj->insert(newName, frame);
+            QVariant twoVectorVar = properties.value("TwoVector");
+            if (twoVectorVar.type() == QVariant::Map)
+            {
+                QVariantMap oldFrame = twoVectorVar.toMap();
+
+                QVariantMap frame;
+                frame["type"] = "TwoVector";
+
+                QVariant primaryVar = oldFrame.value("Primary");
+                QVariant secondaryVar = oldFrame.value("Secondary");
+                QVariant centerVar = oldFrame.value("Center");
+
+                if (primaryVar.type() == QVariant::Map && secondaryVar.type() == QVariant::Map)
+                {
+                    QVariantMap primary = primaryVar.toMap();
+                    QVariantMap secondary = secondaryVar.toMap();
+
+                    QVariantMap newPrimary = transformTwoVectorDirection(primary);
+                    QVariantMap newSecondary = transformTwoVectorDirection(secondary);
+
+                    // Observer defaults to center when it's not specified
+                    if (centerVar.type() == QVariant::String)
+                    {
+                        QString center = TransformSolarSystemName(centerVar.toString());
+                        if (!newPrimary.contains("observer"))
+                        {
+                            newPrimary.insert("observer", center);
+                        }
+                        if (!newSecondary.contains("observer"))
+                        {
+                            newSecondary.insert("observer", center);
+                        }
+                    }
+
+                    // In VESTA, axes are properties of two vector frames, not of the directions
+                    frame["primaryAxis"] = primary.value("Axis");
+                    frame["secondaryAxis"] = secondary.value("Axis");
+                    frame["primary"] = newPrimary;
+                    frame["secondary"] = newSecondary;
+                }
+                obj->insert(newName, frame);
+            }
         }
         else if (properties.contains("Topocentric"))
         {

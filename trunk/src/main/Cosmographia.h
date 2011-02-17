@@ -57,6 +57,8 @@ private:
     void loadSettings();
     void saveSettings();
 
+    void loadCatalogFile(const QString& fileName);
+
 private:
     UniverseCatalog *m_catalog;
     UniverseView *m_view3d;

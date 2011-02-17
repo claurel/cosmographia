@@ -42,6 +42,7 @@
 #include <vesta/MeshGeometry.h>
 #include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
+#include <vesta/BodyDirectionVisualizer.h>
 #include <vesta/Units.h>
 #include <vesta/GregorianDate.h>
 #include <QDateTime>
@@ -1512,6 +1513,42 @@ loadFrameAxesVisualizer(const QVariantMap& map)
 
 
 Visualizer*
+loadBodyDirectionVisualizer(const QVariantMap& map,
+                            const UniverseCatalog* catalog)
+{
+    bool ok = false;
+    double size = map.value("size", 1.0).toDouble(&ok);
+    if (!ok)
+    {
+        qDebug() << "Bad size given for FrameAxes visualizer";
+        return NULL;
+    }
+
+    QVariant targetVar = map.value("target");
+    QVariant colorVar = map.value("color");
+    Spectrum color = colorValue(colorVar, Spectrum::White());
+
+    if (targetVar.type() != QVariant::String)
+    {
+        qDebug() << "Bad or missing target for BodyDirection visualizer";
+        return NULL;
+    }
+
+    Entity* target = catalog->find(targetVar.toString());
+    if (!target)
+    {
+        qDebug() << "Target body " << targetVar.toString() << " for BodyDirection visualizer not found";
+        return NULL;
+    }
+
+    BodyDirectionVisualizer* direction = new BodyDirectionVisualizer(size, target);
+    direction->setColor(color);
+
+    return direction;
+}
+
+
+Visualizer*
 UniverseLoader::loadVisualizer(const QVariantMap& map,
                                const UniverseCatalog* catalog)
 {
@@ -1538,6 +1575,10 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
     else if (type == "FrameAxes")
     {
         return loadFrameAxesVisualizer(style);
+    }
+    else if (type == "BodyDirection")
+    {
+        return loadBodyDirectionVisualizer(style, catalog);
     }
     else
     {

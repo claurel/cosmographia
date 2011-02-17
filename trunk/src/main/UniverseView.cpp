@@ -28,7 +28,9 @@
 #include "WMSTiledMap.h"
 #include "MultiWMSTiledMap.h"
 
+#if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
+#endif
 
 #include <vesta/Chronology.h>
 #include <vesta/Arc.h>
@@ -106,7 +108,7 @@ static const unsigned int ReflectionMapSize = 512;
 
 static JPLEphemeris* g_jplEph = NULL;
 
-static double StartOfTime = GregorianDate(1900, 1, 1).toTDBSec();
+static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
 
 static TextureProperties PlanetTextureProperties()
 {
@@ -870,12 +872,14 @@ void UniverseView::paintGL()
 
     m_renderer->endViewSet();
 
+#if FFMPEG_SUPPORT
     if (m_videoEncoder)
     {
         QImage image = grabFrameBuffer(false);
         image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         m_videoEncoder->encodeImage(image);
     }
+#endif
 
     // Draw informational text over the 3D view
     int viewportWidth = size().width();
@@ -2329,7 +2333,7 @@ UniverseView::addTleObject(const QString& name, const QString& line1, const QStr
 
     Entity* earth = m_universe->findFirst("Earth");
     double month = daysToSeconds(30.0);
-    vesta::Arc* arc = new Arc();
+    vesta::Arc* arc = new vesta::Arc();
     arc->setTrajectory(tleTrajectory);
     arc->setCenter(earth);
     arc->setDuration(month * 2.0);

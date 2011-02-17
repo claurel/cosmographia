@@ -12,6 +12,7 @@
 #include <QGLFormat>
 #include <QDir>
 #include <QMessageBox>
+#include <QDebug>
 
 #ifdef Q_WS_MAC
 #include <CoreFoundation/CFBundle.h>
@@ -34,8 +35,11 @@ int main(int argc, char *argv[])
     format.setSwapInterval(1); // sync to vertical retrace
     QGLFormat::setDefaultFormat(format);
 
-    // Set current directory so that we find the needed media files
+    // Set current directory so that we find the needed data files. On the Mac, we
+    // just look in the app bundle. On other platforms we make some guesses, since we
+    // don't know exactly where the executable will be run from.
     QString dataPath;
+    bool foundData = true;
 #ifdef Q_WS_MAC
     // On the Mac, load resources from the app bundle
     CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
@@ -47,21 +51,34 @@ int main(int argc, char *argv[])
 #else
     if (QDir("../data").exists())
     {
-        mediaPath = "../data";
+        dataPath = "../data";
     }
     else if (QDir("../../data").exists())
     {
         // QtCreator builds in the debug/ or release/ directory
-        mediaPath = "../../data";
+        dataPath = "../../data";
+    }
+    else if (QDir("../../cosmographia/data").exists())
+    {
+        dataPath = "../../cosmographia/data";
+    }
+    else if (QDir("../../trunk/data").exists())
+    {
+        dataPath = "../../trunk/data";
+    }
+    else if (QDir("./data").exists())
+    {
+        dataPath = "./data";
     }
     else
     {
-        mediaPath = ".";
+        foundData = false;
     }
 #endif
-    if (!QDir::setCurrent(dataPath))
+    if (!foundData || !QDir::setCurrent(dataPath))
     {
         QMessageBox::warning(NULL, "Missing data", "Data files not found!");
+        exit(0);
     }
 
     Cosmographia mainWindow;

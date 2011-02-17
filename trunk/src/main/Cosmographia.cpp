@@ -21,7 +21,9 @@
 #include "UniverseCatalog.h"
 #include "UniverseLoader.h"
 #include "Cosmographia.h"
+#if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
+#endif
 #include "JPLEphemeris.h"
 #include "NetworkTextureLoader.h"
 #include "compatibility/CatalogParser.h"
@@ -563,6 +565,7 @@ Cosmographia::saveSettings()
 void
 Cosmographia::recordVideo()
 {
+#if FFMPEG_SUPPORT
     if (m_view3d->isRecordingVideo())
     {
         m_view3d->videoEncoder()->close();
@@ -579,6 +582,7 @@ Cosmographia::recordVideo()
             m_view3d->startVideoRecording(encoder);
         }
     }
+#endif
 }
 
 

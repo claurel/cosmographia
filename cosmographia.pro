@@ -74,6 +74,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/AxesVisualizer.cpp \
     $$VESTA_PATH/BillboardGeometry.cpp \
     $$VESTA_PATH/Body.cpp \
+    $$VESTA_PATH/BodyDirectionVisualizer.cpp \
     $$VESTA_PATH/BodyFixedFrame.cpp \
     $$VESTA_PATH/CelestialCoordinateGrid.cpp \
     $$VESTA_PATH/Chronology.cpp \
@@ -110,6 +111,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/QuadtreeTile.cpp \
     $$VESTA_PATH/RenderContext.cpp \
     $$VESTA_PATH/LightingEnvironment.cpp \
+    $$VESTA_PATH/SensorFrustumGeometry.cpp \
     $$VESTA_PATH/SensorVisualizer.cpp \
     $$VESTA_PATH/ShaderBuilder.cpp \
     $$VESTA_PATH/SkyImageLayer.cpp \
@@ -145,6 +147,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/AxesVisualizer.h \
     $$VESTA_PATH/BillboardGeometry.h \
     $$VESTA_PATH/Body.h \
+    $$VESTA_PATH/BodyDirectionVisualizer.h \
     $$VESTA_PATH/BodyFixedFrame.h \
     $$VESTA_PATH/BoundingBox.h \
     $$VESTA_PATH/BoundingSphere.h \
@@ -193,6 +196,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/RenderContext.h \
     $$VESTA_PATH/LightingEnvironment.h \
     $$VESTA_PATH/RotationModel.h \
+    $$VESTA_PATH/SensorFrustumGeometry.h \
     $$VESTA_PATH/SensorVisualizer.h \
     $$VESTA_PATH/ShaderBuilder.h \
     $$VESTA_PATH/ShaderInfo.h \
@@ -450,7 +454,15 @@ macx {
         data/textures/moon.dds \
         data/textures/moon-normal.dds \
         data/textures/earth-normal.dds \
-        data/textures/mars4k.dds
+        data/textures/mars4k.dds \
+        data/textures/mercury.jpg \
+        data/textures/venus.jpg \
+        data/textures/mars.jpg \
+        data/textures/jupiter.jpg \
+        data/textures/saturn.jpg \
+        data/textures/uranus.jpg \
+        data/textures/neptune.jpg
+
 
     QMAKE_BUNDLE_DATA += TEXTURES
 
@@ -466,6 +478,7 @@ macx {
     DATA.path = Contents/Resources/data
     DATA.files = \
         data/tycho2.stars \
+        data/solarsys.json \
         data/sans-12.txf \
         data/sans-24.txf \
         data/sans-light-24.txf \

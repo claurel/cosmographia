@@ -1157,7 +1157,7 @@ static TiledMap*
 loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
 {
     QString type = map.value("type").toString();
-    if (type == "wms")
+    if (type == "WMS")
     {
         QVariant layerVar = map.value("layer");
         QVariant levelCountVar = map.value("levelCount");
@@ -1190,6 +1190,57 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
         tileSize = std::max(128, std::min(8192, tileSize));
 
         return new WMSTiledMap(textureLoader, layer, tileSize, levelCount);
+    }
+    else if (type == "MultiWMS")
+    {
+        QVariant baseLayerVar = map.value("baseLayer");
+        QVariant baseLevelCountVar = map.value("baseLevelCount");
+        QVariant detailLayerVar = map.value("detailLayer");
+        QVariant detailLevelCountVar = map.value("detailLevelCount");
+        QVariant tileSizeVar = map.value("tileSize");
+
+        if (baseLayerVar.type() != QVariant::String)
+        {
+            qDebug() << "Bad or missing base layer name for MultiWMS tiled texture";
+            return NULL;
+        }
+
+        if (!baseLevelCountVar.canConvert(QVariant::Int))
+        {
+            qDebug() << "Bad or missing base level count for MultiWMS tiled texture";
+            return NULL;
+        }
+
+        if (detailLayerVar.type() != QVariant::String)
+        {
+            qDebug() << "Bad or missing detail layer name for MultiWMS tiled texture";
+            return NULL;
+        }
+
+        if (!detailLevelCountVar.canConvert(QVariant::Int))
+        {
+            qDebug() << "Bad or missing detail level count for MultiWMS tiled texture";
+            return NULL;
+        }
+
+        if (!tileSizeVar.canConvert(QVariant::Int))
+        {
+            qDebug() << "Bad or missing tileSize for MultiWMS tiled texture";
+            return NULL;
+        }
+
+        QString baseLayer = baseLayerVar.toString();
+        QString detailLayer = detailLayerVar.toString();
+        int baseLevelCount = baseLevelCountVar.toInt();
+        int detailLevelCount = detailLevelCountVar.toInt();
+        int tileSize = tileSizeVar.toInt();
+
+        // Enforce some limits on tile size and level count
+        baseLevelCount = std::max(1, std::min(16, baseLevelCount));
+        detailLevelCount = std::max(baseLevelCount + 1, std::min(16, detailLevelCount));
+        tileSize = std::max(128, std::min(8192, tileSize));
+
+        return new MultiWMSTiledMap(textureLoader, baseLayer, baseLevelCount, detailLayer, detailLevelCount, tileSize);
     }
     else
     {

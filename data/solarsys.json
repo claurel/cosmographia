@@ -1,0 +1,268 @@
+{
+     "version": "1.0",
+     "name": "Solar System",
+
+     "items" :
+     [
+        {
+          "name" : "Sun",
+          "center" : "SSB",
+          "trajectory" :
+          {
+              "type" : "FixedPoint",
+              "position" : [ 0, 0, 0 ]
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 695000.0,
+              "baseMap" : "sun.jpg",
+              "emissive" : true
+          }
+        },
+
+        {
+          "name" : "Mercury",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Mercury"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 2439,
+              "baseMap" : "textures/mercury.jpg"
+          }
+        },
+
+        {
+          "name" : "Venus",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Venus"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 6051.8,
+              "baseMap" : "textures/venus.jpg"
+          }
+        },
+
+        {
+          "name" : "Earth",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "EMB"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.997269632262793,
+              "inclination" : 0.0,
+              "ascendingNode" : 0.0,
+              "meridianAngle" : 280.147
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 6378.1,
+              "baseMap" :
+              {
+                  "type" : "wms",
+                  "layer" : "bmng-feb-nb",
+                  "levelCount" : 7,
+                  "tileSize" : 480
+              },
+              "cloudMap" : "earth-clouds.png",
+              "atmosphere" : "earth.atmscat"
+          }
+        },
+
+        {
+          "name" : "Mars",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Mars"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 3389,
+              "baseMap" : "textures/mars.jpg"
+          }
+        },
+
+        {
+          "name" : "Jupiter",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Jupiter"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 69911,
+              "baseMap" : "textures/jupiter.jpg"
+          }
+        },
+
+        {
+          "name" : "Saturn",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Saturn"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 58232,
+              "baseMap" : "saturn/saturn.jpg"
+          }
+        },
+
+        {
+          "name" : "Uranus",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Uranus"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 25362,
+              "baseMap" : "textures/uranus.jpg"
+          }
+        },
+
+        {
+          "name" : "Neptune",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Neptune"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 24622,
+              "baseMap" : "textures/neptune.jpg"
+          }
+        },
+
+        {
+          "name" : "Pluto",
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Pluto"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1195,
+              "baseMap" : "pluto.jpg"
+          }
+        }
+
+    ]
+}

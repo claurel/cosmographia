@@ -365,6 +365,8 @@ Cosmographia::initialize()
 
     // Set up the texture loader
     m_loader->setTextureLoader(m_view3d->textureLoader());
+
+    loadCatalogFile("solarsys.json");
 }
 
 
@@ -590,6 +592,8 @@ Cosmographia::loadSolarSystem()
     QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json *.ssc)");
     if (!solarSystemFileName.isEmpty())
     {
+        loadCatalogFile(solarSystemFileName);
+#if 0
         QFile solarSystemFile(solarSystemFileName);
         QString path = QFileInfo(solarSystemFile).absolutePath();
 
@@ -682,7 +686,108 @@ Cosmographia::loadSolarSystem()
                 }
             }
         }
-
+#endif
         settings.setValue("SolarSystemDir", solarSystemFileName);
+    }
+}
+
+
+void
+Cosmographia::loadCatalogFile(const QString& fileName)
+{
+    if (!fileName.isEmpty())
+    {
+        QFile solarSystemFile(fileName);
+        QString path = QFileInfo(solarSystemFile).absolutePath();
+
+        if (!solarSystemFile.open(QIODevice::ReadOnly))
+        {
+            QMessageBox::warning(this, tr("Solar System File Error"), tr("Could not open file '%1'.").arg(fileName));
+            return;
+        }
+
+        m_loader->setDataSearchPath(path);
+        m_loader->setTextureSearchPath(path);
+        m_loader->setModelSearchPath(path);
+
+        NetworkTextureLoader* textureLoader = dynamic_cast<NetworkTextureLoader*>(m_loader->textureLoader());
+        if (textureLoader)
+        {
+            textureLoader->setLocalSearchPatch(path);
+        }
+
+        if (fileName.toLower().endsWith(".json"))
+        {
+            QJson::Parser parser;
+
+            bool parseOk = false;
+            QVariant result = parser.parse(&solarSystemFile, &parseOk);
+            if (!parseOk)
+            {
+                QMessageBox::warning(this,
+                                     tr("Solar System File Error"),
+                                     QString("Line %1: %2").arg(parser.errorLine()).arg(parser.errorString()));
+                return;
+            }
+
+            QVariantMap contents = result.toMap();
+            if (contents.empty())
+            {
+                qDebug() << "Solar system file is empty.";
+                return;
+            }
+
+            QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+            foreach (QString name, bodyNames)
+            {
+                Entity* e = m_catalog->find(name);
+                if (e)
+                {
+                    qDebug() << "Adding: " << name;
+                    m_view3d->replaceEntity(e);
+                }
+            }
+        }
+        else if (fileName.toLower().endsWith(".ssc"))
+        {
+            m_loader->setDataSearchPath(path);
+            m_loader->setTextureSearchPath(path);
+            m_loader->setModelSearchPath(path);
+
+            QVariantList items;
+
+            CatalogParser parser(&solarSystemFile);
+            QVariant obj = parser.nextSscObject();
+            while (obj.type() == QVariant::Map)
+            {
+                QJson::Serializer serializer;
+                qDebug() << serializer.serialize(obj);
+
+                QVariantMap map = obj.toMap();
+                TransformSscObject(&map);
+                qDebug() << "Converted: " << serializer.serialize(map);
+
+                QString fullName = map.value("_parent").toString() + "/" + map.value("name").toString();
+                map.insert("name", fullName);
+                items << map;
+
+                obj = parser.nextSscObject();
+            }
+
+            QVariantMap contents;
+            contents.insert("name", fileName);
+            contents.insert("items", items);
+
+            QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+            foreach (QString name, bodyNames)
+            {
+                Entity* e = m_catalog->find(name);
+                if (e)
+                {
+                    qDebug() << "Adding: " << name;
+                    m_view3d->replaceEntity(e);
+                }
+            }
+        }
     }
 }

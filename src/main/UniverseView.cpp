@@ -558,6 +558,19 @@ static void labelPlanet(Entity* planet, TextureFont* font, TextureMap* icon)
 }
 
 
+static void labelBody(Entity* planet,const QString& labelText, TextureFont* font, TextureMap* icon)
+{
+    if (planet && planet->isVisible())
+    {
+        Spectrum color = ObjectLabelColor(planet->name().c_str());
+        LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
+        label->setIcon(icon);
+        label->setIconColor(color);
+        planet->setVisualizer("label", new Visualizer(label));
+    }
+}
+
+
 void UniverseView::initializeGL()
 {
     // Initialize the renderer. This must be done *after* an OpenGL context
@@ -2420,6 +2433,12 @@ UniverseView::replaceEntity(Entity* entity)
 
     m_universe->addEntity(entity);
 
-    labelPlanet(entity, m_labelFont.ptr(), m_spacecraftIcon.ptr());
+    QString labelText = QString::fromUtf8(entity->name().c_str());
+    int slashPos = labelText.lastIndexOf('/');
+    if (slashPos >= 0)
+    {
+        labelText = labelText.right(labelText.length() - slashPos - 1);
+    }
+    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr());
 }
 

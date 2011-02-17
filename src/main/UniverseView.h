@@ -142,6 +142,7 @@ public slots:
     void setInfoText(bool enable);
     void plotTrajectory();
     void plotTrajectoryObserver();
+    void gotoSelectedObject();
 
     void tleDataReceived(QNetworkReply* reply);
 

@@ -46,6 +46,8 @@ public:
     void setTextureLoader(vesta::TextureMapLoader* textureLoader);
     void addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory);
     void removeBuiltinOrbit(const QString& name);
+    void addBuiltinRotationModel(const QString& name, vesta::RotationModel* trajectory);
+    void removeBuiltinRotationModel(const QString& name);
 
     void setDataSearchPath(const QString& path);
     void setTextureSearchPath(const QString& path);
@@ -69,6 +71,7 @@ private:
     vesta::Trajectory* loadTleTrajectory(const QVariantMap& info);
 
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
+    vesta::RotationModel* loadBuiltinRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);
 
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
@@ -81,6 +84,7 @@ private:
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
+    QMap<QString, vesta::counted_ptr<vesta::RotationModel> > m_builtinRotations;
     vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
     QMap<QString, vesta::counted_ptr<vesta::Geometry> > m_modelCache;
     QString m_dataSearchPath;

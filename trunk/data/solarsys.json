@@ -121,11 +121,8 @@
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
           {
-              "type" : "Uniform",
-              "period" : 0.997269632262793,
-              "inclination" : 0.0,
-              "ascendingNode" : 0.0,
-              "meridianAngle" : 280.147
+              "type" : "Builtin",
+              "name" : "IAU Moon"
           },
 
           "geometry" :

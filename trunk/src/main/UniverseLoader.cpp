@@ -730,6 +730,22 @@ loadUniformRotationModel(const QVariantMap& map)
 
 
 vesta::RotationModel*
+UniverseLoader::loadBuiltinRotationModel(const QVariantMap& info)
+{
+    if (info.contains("name"))
+    {
+        QString name = info.value("name").toString();
+        return m_builtinRotations[name].ptr();
+    }
+    else
+    {
+        qDebug() << "Builtin rotation model is missing name.";
+        return NULL;
+    }
+}
+
+
+vesta::RotationModel*
 UniverseLoader::loadInterpolatedRotationModel(const QVariantMap& info)
 {
     if (info.contains("source"))
@@ -772,6 +788,10 @@ UniverseLoader::loadRotationModel(const QVariantMap& map)
     else if (type == "Uniform")
     {
         return loadUniformRotationModel(map);
+    }
+    else if (type == "Builtin")
+    {
+        return loadBuiltinRotationModel(map);
     }
     else if (type == "Interpolated")
     {
@@ -1781,6 +1801,20 @@ void
 UniverseLoader::removeBuiltinOrbit(const QString& name)
 {
     m_builtinOrbits.remove(name);
+}
+
+
+void
+UniverseLoader::addBuiltinRotationModel(const QString& name, vesta::RotationModel* rotationModel)
+{
+    m_builtinRotations[name] = rotationModel;
+}
+
+
+void
+UniverseLoader::removeBuiltinRotationModel(const QString& name)
+{
+    m_builtinRotations.remove(name);
 }
 
 

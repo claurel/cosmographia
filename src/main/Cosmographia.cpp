@@ -28,6 +28,7 @@
 #include "NetworkTextureLoader.h"
 #include "compatibility/CatalogParser.h"
 #include "compatibility/TransformCatalog.h"
+#include "astro/IAULunarRotationModel.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -349,6 +350,9 @@ Cosmographia::initialize()
         m_loader->addBuiltinOrbit("Pluto",   eph->trajectory(JPLEphemeris::Pluto));
         m_loader->addBuiltinOrbit("Moon",    eph->trajectory(JPLEphemeris::Moon));
     }
+
+    // Set up builtin rotation models
+    m_loader->addBuiltinRotationModel("IAU Moon", new IAULunarRotationModel());
 
     // Set up the texture loader
     m_loader->setTextureLoader(m_view3d->textureLoader());

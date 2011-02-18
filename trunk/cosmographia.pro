@@ -29,6 +29,7 @@ APP_SOURCES = \
     $$MAIN_PATH/WMSRequester.cpp \
     $$MAIN_PATH/WMSTiledMap.cpp \
     $$MAIN_PATH/MultiWMSTiledMap.cpp \
+    $$MAIN_PATH/astro/IAULunarRotationModel.cpp \
     $$MAIN_PATH/astro/Nutation.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
@@ -52,6 +53,7 @@ APP_HEADERS = \
     $$MAIN_PATH/WMSRequester.h \
     $$MAIN_PATH/WMSTiledMap.h \
     $$MAIN_PATH/MultiWMSTiledMap.h \
+    $$MAIN_PATH/astro/IAULunarRotationModel.h \
     $$MAIN_PATH/astro/Nutation.h \
     $$MAIN_PATH/astro/Precession.h \
     $$MAIN_PATH/astro/Rotation.h \
@@ -409,24 +411,24 @@ FFMPEG_INCLUDE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
 # Do not modify: FFMPEG default settings
 # ##############################################################################
 # Sources for QT wrapper
-#SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
-#    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
-#HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
-#   $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
+SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
+    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
+HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
+    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
 
 # Set list of required FFmpeg libraries
-#LIBS += \
-#    -lavutil \
-#    -lavcodec \
-#    -lavformat \
-#   -lswscale \
-#    -lz \
-#    -lbz2
+LIBS += \
+    -lavutil \
+    -lavcodec \
+    -lavformat \
+    -lswscale \
+    -lz \
+    -lbz2
 
 # Add the path
-#LIBS += -L$$FFMPEG_LIBRARY_PATH
-#INCLUDEPATH += QVideoEncoder
-#INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
+LIBS += -L$$FFMPEG_LIBRARY_PATH
+INCLUDEPATH += QVideoEncoder
+INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
 
 # ##############################################################################
 # FFMPEG: END OF CONFIGURATION
@@ -444,7 +446,6 @@ win32-g++ {
 
 win32 {
     DEFINES += NOMINMAX
-    DEFINES += QJSON_EXPORT=
 }
 
 macx {

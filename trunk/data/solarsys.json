@@ -111,6 +111,38 @@
         },
 
         {
+          "name" : "Moon",
+          "center" : "Earth",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Moon"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.997269632262793,
+              "inclination" : 0.0,
+              "ascendingNode" : 0.0,
+              "meridianAngle" : 280.147
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1737.1,
+              "baseMap" :
+              {
+                  "type" : "WMS",
+                  "layer" : "moon-clementine",
+                  "levelCount" : 6,
+                  "tileSize" : 512
+              }
+          }
+        },
+
+        {
           "name" : "Mars",
           "center" : "Sun",
           "trajectory" :

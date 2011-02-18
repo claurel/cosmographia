@@ -231,78 +231,6 @@ TLESet s_TLESets[] =
 };
 
 
-class MoonRotationModel : public RotationModel
-{
-public:
-    MoonRotationModel() {}
-
-    virtual Eigen::Quaterniond orientation(double t) const
-    {
-        double d = secondsToDays(t); // time in Julian days
-        double T = d / 36525.0; // time in Julian centuries
-
-        double E1  = toRadians(125.045 -  0.0529921 * d);
-        double E2  = toRadians(250.089 -  0.1059842 * d);
-        double E3  = toRadians(260.008 + 13.012009  * d);
-        double E4  = toRadians(176.625 + 13.3407154 * d);
-        double E5  = toRadians(357.529 +  0.9856993 * d);
-        double E6  = toRadians(311.589 + 26.4057084 * d);
-        double E7  = toRadians(134.963 + 13.0649930 * d);
-        double E8  = toRadians(276.617 +  0.3287146 * d);
-        double E9  = toRadians( 34.226 +  1.7484877 * d);
-        double E10 = toRadians( 15.134 -  0.1589763 * d);
-        double E11 = toRadians(119.743 +  0.0036096 * d);
-        double E12 = toRadians(239.961 +  0.1643573 * d);
-        double E13 = toRadians( 25.053 + 12.9590088 * d);
-
-        double a0 = 269.9949
-                    + 0.0013*T
-                    - 3.8787 * sin(E1)
-                    - 0.1204 * sin(E2)
-                    + 0.0700 * sin(E3)
-                    - 0.0172 * sin(E4)
-                    + 0.0072 * sin(E6)
-                    - 0.0052 * sin(E10)
-                    + 0.0043 * sin(E13);
-
-        double d0 = 66.5392
-                    + 0.0130 * T
-                    + 1.5419 * cos(E1)
-                    + 0.0239 * cos(E2)
-                    - 0.0278 * cos(E3)
-                    + 0.0068 * cos(E4)
-                    - 0.0029 * cos(E6)
-                    + 0.0009 * cos(E7)
-                    + 0.0008 * cos(E10)
-                    - 0.0009 * cos(E13);
-
-        double W =    38.3213
-                    + 13.17635815 * d
-                    - 1.4e-12 * d * d
-                    + 3.5610 * sin(E1)
-                    + 0.1208 * sin(E2)
-                    - 0.0642 * sin(E3)
-                    + 0.0158 * sin(E4)
-                    + 0.0252 * sin(E5)
-                    - 0.0066 * sin(E6)
-                    - 0.0047 * sin(E7)
-                    - 0.0046 * sin(E8)
-                    + 0.0028 * sin(E9)
-                    + 0.0052 * sin(E10)
-                    + 0.0040 * sin(E11)
-                    + 0.0019 * sin(E12)
-                    - 0.0044 * sin(E13);
-
-        return Quaterniond(AngleAxisd(toRadians(a0),        Vector3d::UnitZ())) *
-               Quaterniond(AngleAxisd(toRadians(90.0 - d0), Vector3d::UnitX())) *
-               Quaterniond(AngleAxisd(toRadians(90.0 + W),  Vector3d::UnitZ()));
-    }
-
-    virtual Eigen::Vector3d angularVelocity(double /* t */) const
-    {
-        return Vector3d::UnitZ();
-    }
-};
 
 
 class FrameVisualizer : public Visualizer
@@ -1681,70 +1609,6 @@ void UniverseView::initializeUniverse()
 
     m_universe->addEntity(sun);
 
-#if 0
-    Body* earth = createPlanet("Earth", sun, 23.934);
-    {
-        // Create a Keplerian orbit for the Earth
-        OrbitalElements el;
-        el.periapsisDistance = 1.5e8;
-        el.meanMotion = toRadians(360.0) / daysToSeconds(365.25);
-        earth->chronology()->firstArc()->setTrajectory(new KeplerianTrajectory(el));
-
-        if (g_jplEph)
-        {
-            earth->chronology()->firstArc()->setTrajectory(g_jplEph->trajectory(JPLEphemeris::EarthMoonBarycenter));
-        }
-
-        UniformRotationModel* earthRotation = new UniformRotationModel(Vector3d::UnitZ(), toRadians(360.9856235) / 86400.0, toRadians(190.147 + 90.0));
-        earth->chronology()->firstArc()->setRotationModel(earthRotation);
-    }
-
-    WorldGeometry* earthSphere = new WorldGeometry();
-    earthSphere->setSphere(6378.0);
-    earth->setGeometry(earthSphere);
-    m_universe->addEntity(earth);
-
-    Body* moon = createPlanet("Moon", earth, 23.934);
-    moon->chronology()->firstArc()->setTrajectory(g_jplEph->trajectory(JPLEphemeris::Moon));
-    moon->chronology()->firstArc()->setRotationModel(new MoonRotationModel);
-
-    WorldGeometry* moonSphere = new WorldGeometry();
-    moonSphere->setSphere(1737.1);
-    moon->setGeometry(moonSphere);
-    m_universe->addEntity(moon);
-
-    //tex = loadTexture("textures/moon.dds", PlanetTextureProperties());
-    //moonSphere->setBaseMap(tex);
-    //WMSTiledMap* tiledMoonMap = new WMSTiledMap(m_textureLoader.ptr(), "wms:moon-lo,%1,%2,%3", 512, 10);
-    //WMSTiledMap* tiledMoonMap = new WMSTiledMap(m_textureLoader.ptr(), "wms:moon-clementine", 512, 6);
-    //moonSphere->setBaseMap(tiledMoonMap);
-#endif
-
-#if 0
-    /*
-    TextureProperties compNormalMapProps = PlanetTextureProperties();
-    compNormalMapProps.usage = TextureProperties::CompressedNormalMap;
-    moonSphere->setNormalMap(loadTexture("textures/moon-normal.dds", compNormalMapProps));
-    */
-
-    UniformRotationModel* defaultRotation = new UniformRotationModel(Vector3d::UnitZ(), toRadians(360.0) / 86400.0, 0.0, 0.0);
-    //m_universe->addEntity(createPlanet("Mercury", sun, g_jplEph->trajectory(JPLEphemeris::Mercury), defaultRotation, 2439.7));
-    //m_universe->addEntity(createPlanet("Venus",   sun, g_jplEph->trajectory(JPLEphemeris::Venus),   defaultRotation, 6051.8));
-    //m_universe->addEntity(createPlanet("Mars",    sun, g_jplEph->trajectory(JPLEphemeris::Mars),    defaultRotation, 3389.5 / 3389));
-    //m_universe->addEntity(createPlanet("Jupiter", sun, g_jplEph->trajectory(JPLEphemeris::Jupiter), defaultRotation, 69911.0));
-    //m_universe->addEntity(createPlanet("Saturn",  sun, g_jplEph->trajectory(JPLEphemeris::Saturn),  defaultRotation, 58232.0));
-    //m_universe->addEntity(createPlanet("Uranus",  sun, g_jplEph->trajectory(JPLEphemeris::Uranus),  defaultRotation, 25362.0));
-    //m_universe->addEntity(createPlanet("Neptune", sun, g_jplEph->trajectory(JPLEphemeris::Neptune), defaultRotation, 24622));
-    //m_universe->addEntity(createPlanet("Pluto",   sun, g_jplEph->trajectory(JPLEphemeris::Pluto),   defaultRotation, 1195));
-
-    //TextureMap* tex = loadTexture(EarthTextureSource, PlanetTextureProperties());
-    //LocalTiledMap* tiledMap = new LocalTiledMap(m_textureLoader.ptr(), "/Users/chrislaurel/dev/maps/jmiiearth/level%1/tx_%2_%3.dds", true, 1024);
-    setPlanetMap("Earth", new MultiWMSTiledMap(m_textureLoader.ptr(), "bmng-apr-nb", 7, "earth-global-mosaic", 13, 480));
-    setPlanetMap("Moon", new WMSTiledMap(m_textureLoader.ptr(), "moon-clementine", 512, 6));
-    setPlanetMap("Mars", new WMSTiledMap(m_textureLoader.ptr(), "mars-mdim-moc_na", 512, 10));
-    //setPlanetMap("Mars", new WMSTiledMap(m_textureLoader.ptr(), "mars-viking", 512, 6));
-#endif
-
     Entity* center = new Entity();
     m_observer = new Observer(center);
     m_observer->addRef();
@@ -2370,7 +2234,6 @@ UniverseView::setShadows(bool enable)
 void
 UniverseView::setReflections(bool enable)
 {
-    qDebug() << "reflections: " << enable;
     m_reflectionsEnabled = enable;
 }
 

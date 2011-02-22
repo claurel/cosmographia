@@ -581,7 +581,6 @@ Cosmographia::loadSolarSystem()
     QSettings settings;
     QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
     defaultFileName = settings.value("SolarSystemDir", defaultFileName).toString();
-    qDebug() << "File: " << defaultFileName;
 
     QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json *.ssc)");
     if (!solarSystemFileName.isEmpty())

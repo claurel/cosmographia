@@ -389,7 +389,7 @@ Cosmographia::setTime()
     QVBoxLayout* vbox = new QVBoxLayout(&timeDialog);
     timeDialog.setLayout(vbox);
 
-    QHBoxLayout* hbox = new QHBoxLayout(&timeDialog);
+    QHBoxLayout* hbox = new QHBoxLayout();
     hbox->addWidget(new QLabel("Enter date: ", &timeDialog));
     hbox->addWidget(timeEdit);
 
@@ -581,6 +581,7 @@ Cosmographia::loadSolarSystem()
     QSettings settings;
     QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
     defaultFileName = settings.value("SolarSystemDir", defaultFileName).toString();
+    qDebug() << "File: " << defaultFileName;
 
     QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json *.ssc)");
     if (!solarSystemFileName.isEmpty())

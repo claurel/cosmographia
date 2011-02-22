@@ -399,36 +399,36 @@ INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 # Modify here: set FFMPEG_LIBRARY_PATH and FFMPEG_INCLUDE_PATH
 # ##############################################################################
 # Set QTFFMPEGWRAPPER_SOURCE_PATH to point to the directory containing the QTFFmpegWrapper sources
-QTFFMPEGWRAPPER_SOURCE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
+#QTFFMPEGWRAPPER_SOURCE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
 
 # Set FFMPEG_LIBRARY_PATH to point to the directory containing the FFmpeg import libraries (if needed - typically for Windows), i.e. the dll.a files
-FFMPEG_LIBRARY_PATH = ../trunk/lib/macosx/ffmpeg
+#FFMPEG_LIBRARY_PATH = ../trunk/lib/macosx/ffmpeg
 
 # Set FFMPEG_INCLUDE_PATH to point to the directory containing the FFMPEG includes (if needed - typically for Windows)
-FFMPEG_INCLUDE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
+#FFMPEG_INCLUDE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
 
 # ##############################################################################
 # Do not modify: FFMPEG default settings
 # ##############################################################################
 # Sources for QT wrapper
-SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
-    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
-HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
-    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
+#SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
+#    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
+#HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
+#    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
 
 # Set list of required FFmpeg libraries
-LIBS += \
-    -lavutil \
-    -lavcodec \
-    -lavformat \
-    -lswscale \
-    -lz \
-    -lbz2
+#LIBS += \
+#    -lavutil \
+#    -lavcodec \
+#    -lavformat \
+#    -lswscale \
+#    -lz \
+#    -lbz2
 
 # Add the path
-LIBS += -L$$FFMPEG_LIBRARY_PATH
-INCLUDEPATH += QVideoEncoder
-INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
+#LIBS += -L$$FFMPEG_LIBRARY_PATH
+#INCLUDEPATH += QVideoEncoder
+#INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
 
 # ##############################################################################
 # FFMPEG: END OF CONFIGURATION
@@ -436,6 +436,7 @@ INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
 
 
 DEFINES += EIGEN_USE_NEW_STDVECTOR
+DEFINES += QJSON_EXPORT=
 
 win32-g++ {
     # Work around alignment problems with MinGW. Fixed-size Eigen matrices

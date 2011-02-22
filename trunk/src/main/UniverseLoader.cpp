@@ -74,7 +74,7 @@ public:
     orientation(double t) const
     {
         double meridianAngle = m_meridianAngleAtEpoch + (t - m_epoch) * m_rotationRate;
-        return m_rotation * Quaterniond(AngleAxis<double>(meridianAngle, Vector3d::UnitZ()));
+        return m_rotation * Quaterniond(AngleAxisd(meridianAngle, Vector3d::UnitZ()));
     }
 
 
@@ -456,7 +456,7 @@ static Quaterniond quaternionValue(QVariant v, bool* ok)
 }
 
 
-
+// Load an angle from a variant and convert it to radians
 static double angleValue(QVariant v, double defaultValue = 0.0)
 {
     bool ok = false;
@@ -711,6 +711,18 @@ loadFixedRotationModel(const QVariantMap& map)
         {
             return new FixedRotationModel(q);
         }
+    }
+    else
+    {
+        double inclination   = angleValue(map.value("inclination"));
+        double ascendingNode = angleValue(map.value("ascendingNode"));
+        double meridianAngle = angleValue(map.value("meridianAngle"));
+
+        Quaterniond q = (AngleAxisd(ascendingNode, Vector3d::UnitZ()) *
+                         AngleAxisd(inclination, Vector3d::UnitX()) *
+                         AngleAxisd(meridianAngle, Vector3d::UnitZ()));
+
+        return new FixedRotationModel(q);
     }
 
     return NULL;

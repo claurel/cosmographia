@@ -17,6 +17,7 @@
 
 #include "Scanner.h"
 #include <cstdlib>
+#include <cstdio>
 #include <cmath>
 
 using namespace std;
@@ -26,7 +27,7 @@ using namespace std;
 // instead of LGPL, this source module is a complete rewrite. No code from Celestia should
 // be introduced here!
 
-static const int EndOfFile = -1000;
+static const int EndOfFile = EOF;
 
 
 /** The Scanner class is intended to be used for parsing tokens in Celestia
@@ -134,7 +135,12 @@ Scanner::readNext()
         switch (state)
         {
         case BeginTokenState:
-            if (isspace(m_nextChar))
+            if (m_nextChar == EndOfFile)
+            {
+                state = EndTokenState;
+                m_currentTokenType = EndToken;
+            }
+            else if (isspace(m_nextChar))
             {
                 // Nothing
             }
@@ -190,11 +196,6 @@ Scanner::readNext()
             {
                 state = EndTokenState;
                 m_currentTokenType = CloseSquareBracket;
-            }
-            else if (m_nextChar == EndOfFile)
-            {
-                state = EndTokenState;
-                m_currentTokenType = EndToken;
             }
             else
             {

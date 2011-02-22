@@ -257,6 +257,11 @@ LoadXYZTrajectory(const QString& fileName)
             record.position = position;
             positions.push_back(record);
         }
+
+        if (positions.size() % 1000 == 0)
+        {
+            qDebug() << ".xyz records: " << positions.size();
+        }
     }
 
     if (!ok)

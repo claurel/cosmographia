@@ -1520,8 +1520,6 @@ UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* cata
 
     QString type = typeValue.toString();
 
-    qDebug() << "geometry type: " << type;
-
     if (type == "Globe")
     {
         geometry = loadGlobeGeometry(map);

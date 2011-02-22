@@ -278,7 +278,15 @@ TransformSscRotationModel(QVariantMap* obj)
     }
     else if (obj->contains("FixedRotation"))
     {
-        rotationModel["type"] = "Fixed";
+        QVariant value = obj->value("FixedRotation");
+        if (value.type() == QVariant::Map)
+        {
+            QVariantMap properties = value.toMap();
+            rotationModel["type"] = "Fixed";
+            MoveProperty(&properties, "Inclination", &rotationModel, "inclination");
+            MoveProperty(&properties, "AscendingNode", &rotationModel, "ascendingNode");
+            MoveProperty(&properties, "MeridianAngle", &rotationModel, "meridianAngle");
+        }
     }
     else if (obj->contains("FixedAttitude"))
     {

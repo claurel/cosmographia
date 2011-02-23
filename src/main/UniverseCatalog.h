@@ -19,8 +19,27 @@
 #define _UNIVERSE_CATALOG_H_
 
 #include <vesta/Entity.h>
+#include <vesta/Spectrum.h>
 #include <QString>
 #include <QMap>
+
+
+class BodyInfo : public vesta::Object
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    BodyInfo() :
+        trajectoryPlotDuration(0.0),
+        trajectoryPlotSamples(1000),
+        trajectoryPlotColor(vesta::Spectrum::White())
+    {
+    }
+
+    double trajectoryPlotDuration;
+    unsigned int trajectoryPlotSamples;
+    vesta::Spectrum trajectoryPlotColor;
+};
 
 
 class UniverseCatalog
@@ -30,12 +49,15 @@ public:
     ~UniverseCatalog();
 
     void removeBody(const QString& name);
-    void addBody(const QString& name, vesta::Entity* body);
+    void addBody(const QString& name, vesta::Entity* body, BodyInfo* info = NULL);
+    void setBodyInfo(const QString& name, BodyInfo* info);
     vesta::Entity* find(const QString& name) const;
+    BodyInfo* findInfo(const QString& name) const;
     bool contains(const QString& name) const;
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Entity> > m_bodies;
+    QMap<QString, vesta::counted_ptr<BodyInfo> > m_info;
 };
 
 #endif // _UNIVERSE_CATALOG_H_

@@ -48,10 +48,37 @@
 #include <QDateTime>
 #include <QFile>
 #include <QColor>
+#include <QRegExp>
 #include <QDebug>
 
 using namespace vesta;
 using namespace Eigen;
+
+
+enum TimeUnit
+{
+    Unit_Millisecond,
+    Unit_Second,
+    Unit_Minute,
+    Unit_Hour,
+    Unit_Day,
+    Unit_Year,
+    InvalidTimeUnit,
+};
+
+enum DistanceUnit
+{
+    Unit_Millimeter,
+    Unit_Centimeter,
+    Unit_Meter,
+    Unit_Kilometer,
+    Unit_AU,
+    InvalidDistanceUnit,
+};
+
+
+QString ValueUnitsRegexpString("^\\s*([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\\s*([A-Za-z]+)?\\s*$");
+
 
 
 class SimpleRotationModel : public RotationModel
@@ -366,14 +393,6 @@ static double doubleValue(QVariant v, double defaultValue = 0.0)
 }
 
 
-// Return distance in kilometers.
-static double distanceValue(QVariant v, double defaultValue = 0.0)
-{
-    // TODO: need to parse units
-    return doubleValue(v, defaultValue);
-}
-
-
 static Vector3d vec3Value(QVariant v, bool* ok)
 {
     Vector3d result = Vector3d::Zero();
@@ -472,18 +491,211 @@ static double angleValue(QVariant v, double defaultValue = 0.0)
 }
 
 
-static double durationValue(QVariant v, double defaultValue = 0.0)
+static DistanceUnit parseDistanceUnit(const QString unitString)
 {
-    bool ok = false;
-    double value = v.toDouble(&ok);
-    if (ok)
+    if (unitString == "mm")
     {
-        return value;
+        return Unit_Millimeter;
+    }
+    else if (unitString == "cm")
+    {
+        return Unit_Centimeter;
+    }
+    else if (unitString == "m")
+    {
+        return Unit_Meter;
+    }
+    else if (unitString == "km")
+    {
+        return Unit_Kilometer;
+    }
+    else if (unitString == "au")
+    {
+        return Unit_AU;
     }
     else
     {
-        return defaultValue;
+        return InvalidDistanceUnit;
     }
+}
+
+
+static TimeUnit parseTimeUnit(const QString unitString)
+{
+    if (unitString == "ms")
+    {
+        return Unit_Millisecond;
+    }
+    else if (unitString == "s")
+    {
+        return Unit_Second;
+    }
+    else if (unitString == "m")
+    {
+        return Unit_Minute;
+    }
+    else if (unitString == "h")
+    {
+        return Unit_Hour;
+    }
+    else if (unitString == "d")
+    {
+        return Unit_Day;
+    }
+    else if (unitString == "y" || unitString == "a")
+    {
+        return Unit_Year;
+    }
+    else
+    {
+        return InvalidTimeUnit;
+    }
+}
+
+
+static double timeUnitConversion(TimeUnit unit)
+{
+    switch (unit)
+    {
+    case Unit_Millisecond:
+        return 0.001;
+    case Unit_Second:
+        return 1.0;
+    case Unit_Minute:
+        return 60.0;
+    case Unit_Hour:
+        return 3600.0;
+    case Unit_Day:
+        return 86400.0;
+    case Unit_Year:
+        return 365.25 * 86400.0;
+    default:
+        return 0.0;
+    }
+}
+
+
+static double distanceUnitConversion(DistanceUnit unit)
+{
+    switch (unit)
+    {
+    case Unit_Millimeter:
+        return 1.0e-6;
+    case Unit_Centimeter:
+        return 1.0e-5;
+    case Unit_Meter:
+        return 1.0e-3;
+    case Unit_Kilometer:
+        return 1.0;
+    case Unit_AU:
+        return 149597870.691;
+    default:
+        return 0.0;
+    }
+}
+
+
+static double convertTime(double value, TimeUnit fromUnit, TimeUnit toUnit)
+{
+    return value * timeUnitConversion(fromUnit) / timeUnitConversion(toUnit);
+}
+
+
+static double convertDistance(double value, DistanceUnit fromUnit, DistanceUnit toUnit)
+{
+    return value * distanceUnitConversion(fromUnit) / distanceUnitConversion(toUnit);
+}
+
+
+// Return distance in kilometers.
+// Load a duration value from a variant and convert it to seconds
+static double distanceValue(QVariant v, DistanceUnit defaultUnit, double defaultValue, bool* ok = NULL)
+{
+    DistanceUnit unit = defaultUnit;
+    double value = defaultValue;
+
+    if (v.type() == QVariant::String)
+    {
+        QRegExp re(ValueUnitsRegexpString);
+        if (re.indexIn(v.toString()) != -1)
+        {
+            QStringList parts = re.capturedTexts();
+            value = parts[1].toDouble();
+
+            QString unitString = parts[2];
+
+            if (!unitString.isEmpty())
+            {
+                unit = parseDistanceUnit(unitString);
+            }
+        }
+        else
+        {
+            // Error
+            unit = InvalidDistanceUnit;
+        }
+    }
+    else
+    {
+        bool convertOk = false;
+        value = v.toDouble(&convertOk);
+        if (!convertOk)
+        {
+            unit = InvalidDistanceUnit;
+        }
+    }
+
+
+    if (ok)
+    {
+        *ok = (unit != InvalidDistanceUnit);
+    }
+
+    if (unit == InvalidDistanceUnit)
+    {
+        return 0.0;
+    }
+    else
+    {
+        return convertDistance(value, unit, Unit_Kilometer);
+    }
+}
+
+
+// Load a duration value from a variant and convert it to seconds
+static double durationValue(QVariant v, TimeUnit defaultUnit, double defaultValue = 0.0)
+{
+    TimeUnit unit = defaultUnit;
+    double value = defaultValue;
+    bool ok = false;
+
+    if (v.type() == QVariant::String)
+    {
+        QRegExp re(ValueUnitsRegexpString);
+        if (re.indexIn(v.toString()) != -1)
+        {
+            QStringList parts = re.capturedTexts();
+            value = parts[1].toDouble();
+
+            QString unitString = parts[2];
+
+            qDebug() << "duration: " << parts;
+            if (!unitString.isEmpty())
+            {
+                unit = parseTimeUnit(unitString);
+            }
+        }
+        else
+        {
+            // Error
+        }
+    }
+    else
+    {
+        value = v.toDouble(&ok);
+    }
+
+    return convertTime(value, unit, Unit_Second);
 }
 
 
@@ -735,11 +947,12 @@ loadUniformRotationModel(const QVariantMap& map)
     double inclination   = angleValue(map.value("inclination"));
     double ascendingNode = angleValue(map.value("ascendingNode"));
     double meridianAngle = angleValue(map.value("meridianAngle"));
-    double period        = durationValue(map.value("period"), 0.0);
+    double period        = durationValue(map.value("period"), Unit_Day, 0.0);
 
+    qDebug() << "Period: " << period;
     Vector3d axis = (AngleAxisd(ascendingNode, Vector3d::UnitZ()) * AngleAxisd(inclination, Vector3d::UnitX())) * Vector3d::UnitZ();
     //Vector3d axis = (AngleAxisd(inclination, Vector3d::UnitX()) * AngleAxisd(ascendingNode, Vector3d::UnitZ())) * Vector3d::UnitZ();
-    double rotationRate = 2 * PI / daysToSeconds(period);
+    double rotationRate = 2 * PI / period;
 
     //return new UniformRotationModel(axis, rotationRate, meridianAngle);
     return new SimpleRotationModel(inclination, ascendingNode, rotationRate, meridianAngle, 0.0);
@@ -1313,9 +1526,10 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
 {
     Vector3d radii = Vector3d::Zero();
 
-    if (map.value("radius").canConvert(QVariant::Double))
+    QVariant radiusVar = map.value("radius");
+    if (radiusVar.type() != QVariant::Invalid)
     {
-        double r = map.value("radius").toDouble();
+        double r = distanceValue(radiusVar, Unit_Kilometer, 1.0);
         radii = Vector3d::Constant(r);
     }
     else if (map.contains("radii"))
@@ -1426,7 +1640,7 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
     //
     // scale overrides size when it's present. If neither size nor scale is given, a default
     // size of 1.0 is used.
-    double radius = doubleValue(map.value("size"), 1.0);
+    double radius = distanceValue(map.value("size"), Unit_Kilometer, 1.0);
     double scale = doubleValue(map.value("scale"), 0.0);
 
     if (map.contains("source"))
@@ -1475,7 +1689,7 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
         return NULL;
     }
 
-    double range = distanceValue(rangeVar, 1.0);
+    double range = distanceValue(rangeVar, Unit_Kilometer, 1.0);
     QString shape = shapeVar.toString();
     double horizontalFov = angleValue(horizontalFovVar, 5.0);
     double verticalFov = angleValue(verticalFovVar, 5.0);
@@ -1674,6 +1888,49 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
 }
 
 
+void
+loadTrajectoryPlotInfo(BodyInfo* info,
+                       const QVariantMap& plot)
+{
+    QVariant colorVar = plot.value("color");
+    QVariant durationVar = plot.value("duration");
+    QVariant sampleCountVar = plot.value("sampleCount");
+
+    if (sampleCountVar.canConvert(QVariant::Int))
+    {
+        int count = sampleCountVar.toInt();
+        info->trajectoryPlotSamples = (unsigned int) std::max(100, std::min(50000, count));
+    }
+
+    double duration = durationValue(durationVar, Unit_Day, 0.0);
+    if (duration != 0.0)
+    {
+        info->trajectoryPlotDuration = duration;
+    }
+
+    info->trajectoryPlotColor = colorValue(colorVar, Spectrum::White());
+
+}
+
+
+/** Load additional information about a body.
+  */
+BodyInfo*
+loadBodyInfo(const QVariantMap& item)
+{
+    BodyInfo* info = new BodyInfo();
+
+    QVariant trajectoryPlotVar = item.value("trajectoryPlot");
+    if (trajectoryPlotVar.type() == QVariant::Map)
+    {
+        QVariantMap trajectoryPlot = trajectoryPlotVar.toMap();
+        loadTrajectoryPlotInfo(info, trajectoryPlot);
+    }
+
+    return info;
+}
+
+
 QStringList
 UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                                 UniverseCatalog* catalog)
@@ -1762,6 +2019,9 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
 
                 // Visible property
                 body->setVisible(item.value("visible", true).toBool());
+
+                BodyInfo* info = loadBodyInfo(item);
+                catalog->setBodyInfo(bodyName, info);
 
                 bodyNames << bodyName;
             }

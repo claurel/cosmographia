@@ -563,17 +563,6 @@ void UniverseView::initializeGL()
     }
 
     labelPlanet(m_universe->findFirst("Sun"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-#if 0
-    labelPlanet(m_universe->findFirst("Mercury"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Venus"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Earth"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Mars"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Jupiter"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Saturn"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Uranus"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    labelPlanet(m_universe->findFirst("Neptune"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-    //labelPlanet(m_universe->findFirst("Pluto"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
-#endif
 }
 
 
@@ -1351,27 +1340,6 @@ loadMeshFile(const string& fileName, TextureMapLoader* textureLoader)
 }
 
 
-#if 0
-static Body*
-createComponentBody(const string& name, Entity* parent, double startTime, double duration)
-{
-    Body* body = new Body();
-    body->setName(name);
-    vesta::Arc* arc = new vesta::Arc();
-    arc->setCenter(parent);
-    arc->setDuration(duration);
-
-    BodyFixedFrame* parentFixedFrame = new BodyFixedFrame(parent);
-    arc->setBodyFrame(parentFixedFrame);
-    arc->setTrajectoryFrame(parentFixedFrame);
-    body->chronology()->addArc(arc);
-    body->chronology()->setBeginning(startTime);
-
-    return body;
-}
-#endif
-
-
 /** Create a new planet
   * @param rotationPeriod rotation period in hours
   */
@@ -1391,36 +1359,6 @@ static Body* createPlanet(const QString& name,
 
     return body;
 }
-
-
-#if 0
-/** Create a new planet
-  * @param rotationPeriod rotation period in hours
-  */
-static Body* createPlanet(const QString& name,
-                          Entity* parent,
-                          Trajectory* orbit,
-                          RotationModel* rotation,
-                          double radius)
-{
-    Body* body = new Body();
-    body->setName(name.toUtf8().data());
-
-    vesta::Arc* arc = new vesta::Arc();
-    arc->setCenter(parent);
-    arc->setDuration(daysToSeconds(365.25 * 200.0));
-    arc->setTrajectory(orbit);
-    arc->setRotationModel(rotation);
-    body->chronology()->setBeginning(StartOfTime);
-    body->chronology()->addArc(arc);
-
-    WorldGeometry* globe = new WorldGeometry();
-    globe->setSphere(float(radius));
-    body->setGeometry(globe);
-
-    return body;
-}
-#endif
 
 
 TextureMap*
@@ -2065,30 +2003,40 @@ UniverseView::setTrajectoryVisibility(bool /* enable */)
 
 
 void
-UniverseView::plotTrajectory()
+UniverseView::plotTrajectory(Entity* body, const Spectrum& color, double duration)
 {
-    if (m_selectedBody.isValid())
+    if (!body)
     {
-        vesta::Arc* arc = m_selectedBody->chronology()->firstArc();
-        string visName = string("traj - ") + m_selectedBody->name();
-        Visualizer* vis = arc->center()->visualizer(visName);
-        if (!vis)
-        {
-            TrajectoryGeometry* plot = new TrajectoryGeometry();
-            Visualizer* visualizer = new Visualizer(plot);
-            plot->setFrame(arc->trajectoryFrame());
-            plot->setWindowDuration(arc->trajectory()->period());
-            plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
-            plot->setFadeFraction(0.25);
-            plot->setColor(ObjectLabelColor(m_selectedBody->name().c_str()));
-            arc->center()->setVisualizer(visName, visualizer);
+        return;
+    }
 
-            TrajectoryPlotEntry plotEntry;
-            plotEntry.trajectory = arc->trajectory();
-            plotEntry.visualizer = visualizer;
-            plotEntry.generator = NULL;
-            m_trajectoryPlots.push_back(plotEntry);
+    vesta::Arc* arc = body->chronology()->firstArc();
+    string visName = string("traj - ") + body->name();
+    Visualizer* vis = arc->center()->visualizer(visName);
+    if (!vis)
+    {
+        TrajectoryGeometry* plot = new TrajectoryGeometry();
+        Visualizer* visualizer = new Visualizer(plot);
+        plot->setFrame(arc->trajectoryFrame());
+
+        if (duration <= 0.0)
+        {
+            plot->setWindowDuration(arc->trajectory()->period());
         }
+        else
+        {
+            plot->setWindowDuration(duration);
+        }
+        plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
+        plot->setFadeFraction(0.25);
+        plot->setColor(color);
+        arc->center()->setVisualizer(visName, visualizer);
+
+        TrajectoryPlotEntry plotEntry;
+        plotEntry.trajectory = arc->trajectory();
+        plotEntry.visualizer = visualizer;
+        plotEntry.generator = NULL;
+        m_trajectoryPlots.push_back(plotEntry);
     }
 }
 

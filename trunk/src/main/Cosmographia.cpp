@@ -232,8 +232,8 @@ Cosmographia::Cosmographia() :
     connect(antennaLobeAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setAntennaLobeVisibility(bool)));
     connect(trajectoriesAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setTrajectoryVisibility(bool)));
     connect(planetOrbitsAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setPlanetOrbitsVisibility(bool)));
-    connect(plotTrajectoryAction, SIGNAL(triggered()), m_view3d, SLOT(plotTrajectory()));
-    connect(plotTrajectoryObserverAction, SIGNAL(triggered()), m_view3d, SLOT(plotTrajectoryObserver()));
+    connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));
+    connect(plotTrajectoryObserverAction, SIGNAL(triggered()), this, SLOT(plotTrajectoryObserver()));
     connect(infoTextAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setInfoText(bool)));
 
     connect(labelGroup, SIGNAL(triggered(QAction*)), this, SLOT(setLabelMode(QAction*)));
@@ -488,6 +488,36 @@ Cosmographia::setLabelMode(QAction* action)
 {
     UniverseView::LabelMode mode = (UniverseView::LabelMode) action->data().toInt();
     m_view3d->setLabelMode(mode);
+}
+
+
+void
+Cosmographia::plotTrajectory()
+{
+    Entity* body = m_view3d->selectedBody();
+    if (body)
+    {
+        QString name = QString::fromUtf8(body->name().c_str());
+        BodyInfo* info = m_catalog->findInfo(name);
+
+        double duration = 0.0;
+        Spectrum color = Spectrum::White();
+
+        if (info)
+        {
+            duration = info->trajectoryPlotDuration;
+            color = info->trajectoryPlotColor;
+        }
+
+        m_view3d->plotTrajectory(body, color, duration);
+    }
+}
+
+
+void
+Cosmographia::plotTrajectoryObserver()
+{
+    m_view3d->plotTrajectoryObserver();
 }
 
 

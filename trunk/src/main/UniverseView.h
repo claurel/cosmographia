@@ -97,6 +97,11 @@ public:
         return m_textureLoader.ptr();
     }
 
+    vesta::Entity* selectedBody() const
+    {
+        return m_selectedBody.ptr();
+    }
+
     void replaceEntity(vesta::Entity* entity);
 
     enum LabelMode
@@ -137,7 +142,7 @@ public slots:
     void setReflections(bool enable);
     void setAnaglyphStereo(bool enable);
     void setInfoText(bool enable);
-    void plotTrajectory();
+    void plotTrajectory(vesta::Entity* body, const vesta::Spectrum& color, double duration);
     void plotTrajectoryObserver();
     void gotoSelectedObject();
 

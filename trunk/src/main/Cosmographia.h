@@ -47,6 +47,8 @@ public slots:
     void about();
     void saveScreenShot();
     void recordVideo();
+    void plotTrajectory();
+    void plotTrajectoryObserver();
 
 private slots:
     void setLabelMode(QAction* action);

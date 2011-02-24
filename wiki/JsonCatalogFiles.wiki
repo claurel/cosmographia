@@ -141,3 +141,62 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
      "source" : "http://celestrak.com/NORAD/elements/visual.txt"
 }
 }}}
+
+= Rotation Model Types =
+
+== Fixed ==
+
+== Builtin ==
+
+== Uniform ==
+
+== Interpolated ==
+
+
+= Frame Types =
+
+== Inertial ==
+
+Built-in inertial frames are specified by providing the name of the frame:
+{{{
+"trajectoryFrame" : "EclipticJ2000"
+}}}
+
+The available inertial frames are:
+ * ICRF (the default)
+ * EquatorJ2000 (commonly called EME2000 elsewhere)
+ * EclipticJ2000
+ * EquatorB1950
+
+== BodyFixed ==
+
+{{{
+"bodyFrame" :
+{
+    "type" : "BodyFixed",
+    "body" : "CubeSat"
+}
+}}}
+
+== TwoVector ==
+
+= Trajectory Plot Properties =
+
+It is possible to control the appearance of the plot of a body's trajectory.
+
+* color - the color of the plot 
+* duration - time window over which to plot the trajectory (in units of days)
+* lead - amount of time ahead of the current time to start the plot (units of days, defaults to zero)
+* fade - a value between 0 and 100 giving the fraction of the orbit over which the fade from opaqe to transparent occurs; defaults to 0, indicating no fading
+
+Example:
+{{{
+"trajectoryPlot" :
+{
+    "color" : "#00ff00",
+    "duration" : 0.5,
+    "fade" : 0.5,
+     "lead" : 0.1
+}
+}}}
+

@@ -58,6 +58,10 @@ InterpolatedStateTrajectory::InterpolatedStateTrajectory(const TimeStateList& st
     m_boundingRadius(0.0)
 {
     m_states = states;
+    if (!states.empty())
+    {
+        setValidTimeRange(states.front().tsec, states.back().tsec);
+    }
 }
 
 
@@ -70,6 +74,10 @@ InterpolatedStateTrajectory::InterpolatedStateTrajectory(const TimePositionList&
     m_boundingRadius(0.0)
 {
     m_positions = positions;
+    if (!positions.empty())
+    {
+        setValidTimeRange(positions.front().tsec, positions.back().tsec);
+    }
 }
 
 
@@ -241,4 +249,46 @@ void
 InterpolatedStateTrajectory::setPeriod(double period)
 {
     m_period = period;
+}
+
+
+unsigned int
+InterpolatedStateTrajectory::stateCount() const
+{
+    if (!m_states.empty())
+    {
+        return m_states.size();
+    }
+    else
+    {
+        return m_positions.size();
+    }
+}
+
+
+double
+InterpolatedStateTrajectory::time(unsigned int index) const
+{
+    if (!m_states.empty())
+    {
+        if (index < m_states.size())
+        {
+            return m_states[index].tsec;
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
+    else
+    {
+        if (index < m_positions.size())
+        {
+            return m_positions[index].tsec;
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
 }

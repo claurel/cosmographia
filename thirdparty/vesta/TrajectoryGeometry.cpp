@@ -1,5 +1,5 @@
 /*
- * $Revision: 557 $ $Date: 2010-11-16 16:24:20 +0100 (Tue, 16 Nov 2010) $
+ * $Revision: 567 $ $Date: 2011-02-24 13:28:02 -0800 (Thu, 24 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -31,6 +31,7 @@ TrajectoryGeometry::TrajectoryGeometry() :
     m_boundingRadius(0.0),
     m_displayedPortion(Entire),
     m_windowDuration(0.0),
+    m_windowLead(0.),
     m_fadeFraction(0.0),
     m_lineWidth(1.0f)
 {
@@ -66,8 +67,8 @@ TrajectoryGeometry::render(RenderContext& rc, double clock) const
         startTime = clock;
         break;
     case WindowBeforeCurrentTime:
-        endTime = clock;
-        startTime = clock - m_windowDuration;
+        endTime = clock + m_windowLead;
+        startTime = clock + m_windowLead - m_windowDuration;
         fade = m_fadeFraction > 0.0;
         break;
     default:

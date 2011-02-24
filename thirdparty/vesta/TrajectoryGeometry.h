@@ -1,5 +1,5 @@
 /*
- * $Revision: 565 $ $Date: 2011-02-15 16:00:43 -0800 (Tue, 15 Feb 2011) $
+ * $Revision: 567 $ $Date: 2011-02-24 13:28:02 -0800 (Thu, 24 Feb 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -136,11 +136,12 @@ public:
       *    Entire - show the complete trajectory from beginning to end
       *    StartToCurrentTime - show the trajectory from the first point through the current time
       *    CurrenTimeToEnd - show the trajectory from the current time through the end point
-      *    WindowBeforeCurrentTime - show the trajectory over the span [ currentTime - windowDuration, currentTime ]
+      *    WindowBeforeCurrentTime - show the trajectory over the span [ currentTime - windowDuration + windowLead, currentTime + windowLead ]
       *
       * In order to use WindowBeforeCurrentTime, the window duration must be set to an appropriate
       * value. The default is 0, so the trajectory won't be shown at all without calling setWindowDuration()
-      * to a non-zero value.
+      * to a non-zero value. To plot the trajectory at times ahead of the
+      * current time, the windowLead can be set to a positive value.
       */
     void setDisplayedPortion(TrajectoryPortion portion)
     {
@@ -165,6 +166,28 @@ public:
     void setWindowDuration(double duration)
     {
         m_windowDuration = duration;
+    }
+
+    /** Get the window lead. At a given time t, the time interval that will
+      * be plotted is [ t - duration + lead, t + lead ]. The window lead is
+      * only used when the displayed portion is set to WindowBeforeCurrentTime.
+      *
+      * \returns the window lead in seconds
+      */
+    double windowLead() const
+    {
+        return m_windowLead;
+    }
+
+    /** Get the window lead. At a given time t, the time interval that will
+      * be plotted is [ t - duration + lead, t + lead ]. The window lead is
+      * only used when the displayed portion is set to WindowBeforeCurrentTime.
+      *
+      * \returns the window lead in seconds
+      */
+    void setWindowLead(double duration)
+    {
+        m_windowLead = duration;
     }
 
     /** Get the fraction of the window duration over which the trajectory plot
@@ -223,6 +246,7 @@ private:
     double m_boundingRadius;
     TrajectoryPortion m_displayedPortion;
     double m_windowDuration;
+    double m_windowLead;
     double m_fadeFraction;
     float m_lineWidth;
 };

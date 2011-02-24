@@ -1,5 +1,5 @@
 //
-// $Revision: 551 $ $Date: 2010-10-21 15:19:54 -0700 (Thu, 21 Oct 2010) $
+// $Revision: 567 $ $Date: 2011-02-24 13:28:02 -0800 (Thu, 24 Feb 2011) $
 //
 // Copyright by Astos Solutions GmbH, Germany
 //  
@@ -1262,8 +1262,12 @@ public:
     void setDisplayedPortion(TrajectoryPortion portion);
     double windowDuration() const;
     void setWindowDuration(double duration);
+    double windowLead() const;
+    void setWindowLead(double duration);
     double fadeFraction() const;
     void setFadeFraction(double fadeFraction);
+    float lineWidth() const;
+    void setLineWidth(float width);
 
     void computeSamples(const Trajectory* trajectory, double startTime, double endTime, unsigned int steps);
     void updateSamples(const Trajectory* trajectory, double startTime, double endTime, unsigned int steps);
@@ -1441,8 +1445,11 @@ class FixedPointTrajectory : public Trajectory
 {
 public:
     FixedPointTrajectory(const Eigen::Vector3d& point);
+    FixedPointTrajectory(const StateVector& state);
     virtual StateVector state(double t) const;
     virtual double boundingSphereRadius() const;
+
+    void setState(const StateVector& state);
 
     %extend {
     static FixedPointTrajectory* cast(vesta::Trajectory* trajectory)
@@ -1490,6 +1497,7 @@ class FixedRotationModel : public RotationModel
 public:
     FixedRotationModel(const Eigen::Quaterniond& orientation);
     Eigen::Quaterniond orientation(double t) const;
+    void setOrientation(const Eigen::Quaterniond& orientation);
 };
 
 class UniformRotationModel : public RotationModel

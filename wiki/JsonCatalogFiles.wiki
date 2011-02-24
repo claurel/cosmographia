@@ -95,3 +95,49 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 == Axes ==
 
 == Sensor ==
+
+= Trajectory Types =
+
+== Fixed Point ==
+
+{{{
+"trajectory" :
+{
+    "type" : "FixedPoint",
+    "position" : [ 0.1 0.2 0.3 ]
+}}}
+
+== Keplerian ==
+
+== Builtin ==
+
+{{{
+"trajectory" :
+{
+    "type" : "Builtin",
+    "name" : "Mars"
+}
+}}}
+
+== Interpolated States ==
+
+{{{
+"trajectory" :
+{
+    "type" : "InterpolatedStates",
+    "source" : "cassini-solstice.xyzv"
+}
+}}}
+
+== TLE ==
+
+{{{
+"trajectory" :
+{
+    "type" : "TLE",
+    "name" : "ISS (ZARYA)",
+    "line1" : "1 25544U 98067A   11042.40620627  .00065760  00000-0  48638-3 0  8024",
+    "line2" : "2 25544  51.6440  85.8998 0004217 288.1282 194.3117 15.72311137701100",
+     "source" : "http://celestrak.com/NORAD/elements/visual.txt"
+}
+}}}

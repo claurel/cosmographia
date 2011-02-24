@@ -1314,8 +1314,8 @@ UniverseView::updateTrajectoryPlots()
         }
         else if (iter->trajectory.isValid())
         {
-            double startTime = m_simulationTime - plot->windowDuration();
-            double endTime = m_simulationTime;
+            double startTime = m_simulationTime - plot->windowDuration() + plot->windowLead();
+            double endTime = m_simulationTime + plot->windowLead();
             startTime = max(startTime, iter->trajectory->startTime());
             endTime = min(endTime, iter->trajectory->endTime());
 
@@ -2045,6 +2045,7 @@ UniverseView::plotTrajectory(Entity* body, BodyInfo* info)
     }
 
     plot->setWindowDuration(duration);
+    plot->setWindowLead(lead);
     plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
     plot->setFadeFraction(fade);
     plot->setColor(color);

@@ -105,6 +105,7 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 {
     "type" : "FixedPoint",
     "position" : [ 0.1 0.2 0.3 ]
+}
 }}}
 
 == Keplerian ==
@@ -199,4 +200,3 @@ Example:
      "lead" : 0.1
 }
 }}}
-

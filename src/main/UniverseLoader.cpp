@@ -284,11 +284,6 @@ LoadXYZTrajectory(const QString& fileName)
             record.position = position;
             positions.push_back(record);
         }
-
-        if (positions.size() % 1000 == 0)
-        {
-            qDebug() << ".xyz records: " << positions.size();
-        }
     }
 
     if (!ok)
@@ -679,7 +674,6 @@ static double durationValue(QVariant v, TimeUnit defaultUnit, double defaultValu
 
             QString unitString = parts[2];
 
-            qDebug() << "duration: " << parts;
             if (!unitString.isEmpty())
             {
                 unit = parseTimeUnit(unitString);
@@ -1895,6 +1889,8 @@ loadTrajectoryPlotInfo(BodyInfo* info,
     QVariant colorVar = plot.value("color");
     QVariant durationVar = plot.value("duration");
     QVariant sampleCountVar = plot.value("sampleCount");
+    QVariant fadeVar = plot.value("fade");
+    QVariant leadVar = plot.value("lead");
 
     if (sampleCountVar.canConvert(QVariant::Int))
     {
@@ -1908,8 +1904,17 @@ loadTrajectoryPlotInfo(BodyInfo* info,
         info->trajectoryPlotDuration = duration;
     }
 
-    info->trajectoryPlotColor = colorValue(colorVar, Spectrum::White());
+    if (leadVar.isValid())
+    {
+        info->trajectoryPlotLead = durationValue(leadVar, Unit_Day, 0.0);
+    }
 
+    if (fadeVar.canConvert(QVariant::Double))
+    {
+        info->trajectoryPlotFade = std::max(0.0, std::min(1.0, fadeVar.toDouble()));
+    }
+
+    info->trajectoryPlotColor = colorValue(colorVar, Spectrum::White());
 }
 
 

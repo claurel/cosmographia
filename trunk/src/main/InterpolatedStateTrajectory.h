@@ -65,6 +65,9 @@ public:
 
     void setPeriod(double period);
 
+    unsigned int stateCount() const;
+    double time(unsigned int index) const;
+
 private:
     double m_period;
     double m_boundingRadius;

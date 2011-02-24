@@ -500,16 +500,7 @@ Cosmographia::plotTrajectory()
         QString name = QString::fromUtf8(body->name().c_str());
         BodyInfo* info = m_catalog->findInfo(name);
 
-        double duration = 0.0;
-        Spectrum color = Spectrum::White();
-
-        if (info)
-        {
-            duration = info->trajectoryPlotDuration;
-            color = info->trajectoryPlotColor;
-        }
-
-        m_view3d->plotTrajectory(body, color, duration);
+        m_view3d->plotTrajectory(body, info);
     }
 }
 

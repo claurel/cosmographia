@@ -520,6 +520,19 @@ TransformSscBody(QVariantMap* obj)
     TransformProperty(obj, "Class", "class");
     TransformProperty(obj, "Visible", "visible");
 
+    if (obj->contains("OrbitColor") ||
+        obj->contains("TrajectoryPlotDuration") ||
+        obj->contains("TrajectoryPlotLead") ||
+        obj->contains("TrajectoryPlotFade"))
+    {
+        QVariantMap trajectoryPlot;
+        MoveProperty(obj, "OrbitColor", &trajectoryPlot, "color");
+        MoveProperty(obj, "TrajectoryPlotDuration", &trajectoryPlot, "duration");
+        MoveProperty(obj, "TrajectoryPlotLead", &trajectoryPlot, "lead");
+        MoveProperty(obj, "TrajectoryPlotFade", &trajectoryPlot, "fade");
+        obj->insert("trajectoryPlot", trajectoryPlot);
+    }
+
     return SscOk;
 }
 

@@ -19,6 +19,7 @@
 #define _UNIVERSE_VIEW_H_
 
 #include "NetworkTextureLoader.h"
+#include "UniverseCatalog.h"
 #include <QGLWidget>
 #include <QTimer>
 #include <QDateTime>
@@ -142,7 +143,7 @@ public slots:
     void setReflections(bool enable);
     void setAnaglyphStereo(bool enable);
     void setInfoText(bool enable);
-    void plotTrajectory(vesta::Entity* body, const vesta::Spectrum& color, double duration);
+    void plotTrajectory(vesta::Entity* body, BodyInfo* info);
     void plotTrajectoryObserver();
     void gotoSelectedObject();
 
@@ -233,9 +234,12 @@ private:
 
     struct TrajectoryPlotEntry
     {
+        TrajectoryPlotEntry();
         vesta::counted_ptr<vesta::Visualizer> visualizer;
         vesta::counted_ptr<vesta::Trajectory> trajectory;
         vesta::TrajectoryPlotGenerator* generator;
+        unsigned int sampleCount;
+        double leadDuration;
     };
     std::vector<TrajectoryPlotEntry> m_trajectoryPlots;
 

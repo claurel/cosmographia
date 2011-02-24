@@ -23,6 +23,7 @@
 #include "WMSRequester.h"
 #include "TleTrajectory.h"
 #include "ChebyshevPolyTrajectory.h"
+#include "InterpolatedStateTrajectory.h"
 #include "JPLEphemeris.h"
 #include "KeplerianSwarm.h"
 #include "WMSTiledMap.h"
@@ -1309,11 +1310,16 @@ UniverseView::updateTrajectoryPlots()
 
         if (iter->generator)
         {
-            plot->updateSamples(iter->generator, m_simulationTime - plot->windowDuration(), m_simulationTime, 300);
+            plot->updateSamples(iter->generator, m_simulationTime - plot->windowDuration(), m_simulationTime, iter->sampleCount);
         }
-        else
+        else if (iter->trajectory.isValid())
         {
-            plot->updateSamples(iter->trajectory.ptr(), m_simulationTime - plot->windowDuration(), m_simulationTime, 100);
+            double startTime = m_simulationTime - plot->windowDuration();
+            double endTime = m_simulationTime;
+            startTime = max(startTime, iter->trajectory->startTime());
+            endTime = min(endTime, iter->trajectory->endTime());
+
+            plot->updateSamples(iter->trajectory.ptr(), startTime, endTime, iter->sampleCount);
         }
     }
 }
@@ -2003,7 +2009,7 @@ UniverseView::setTrajectoryVisibility(bool /* enable */)
 
 
 void
-UniverseView::plotTrajectory(Entity* body, const Spectrum& color, double duration)
+UniverseView::plotTrajectory(Entity* body, BodyInfo* info)
 {
     if (!body)
     {
@@ -2012,32 +2018,75 @@ UniverseView::plotTrajectory(Entity* body, const Spectrum& color, double duratio
 
     vesta::Arc* arc = body->chronology()->firstArc();
     string visName = string("traj - ") + body->name();
-    Visualizer* vis = arc->center()->visualizer(visName);
-    if (!vis)
+    Visualizer* oldVisualizer = arc->center()->visualizer(visName);
+
+    TrajectoryGeometry* plot = new TrajectoryGeometry();
+    Visualizer* visualizer = new Visualizer(plot);
+
+    plot->setFrame(arc->trajectoryFrame());
+
+    double duration = 0.0;
+    Spectrum color = Spectrum::White();
+    double lead = 0.0;
+    double fade = 0.0;
+    unsigned int sampleCount = 100;
+    if (info)
     {
-        TrajectoryGeometry* plot = new TrajectoryGeometry();
-        Visualizer* visualizer = new Visualizer(plot);
-        plot->setFrame(arc->trajectoryFrame());
-
-        if (duration <= 0.0)
-        {
-            plot->setWindowDuration(arc->trajectory()->period());
-        }
-        else
-        {
-            plot->setWindowDuration(duration);
-        }
-        plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
-        plot->setFadeFraction(0.25);
-        plot->setColor(color);
-        arc->center()->setVisualizer(visName, visualizer);
-
-        TrajectoryPlotEntry plotEntry;
-        plotEntry.trajectory = arc->trajectory();
-        plotEntry.visualizer = visualizer;
-        plotEntry.generator = NULL;
-        m_trajectoryPlots.push_back(plotEntry);
+        duration = info->trajectoryPlotDuration;
+        lead = info->trajectoryPlotLead;
+        fade = info->trajectoryPlotFade;
+        color = info->trajectoryPlotColor;
+        sampleCount = info->trajectoryPlotSamples;
     }
+
+    if (duration <= 0.0)
+    {
+        duration = arc->trajectory()->period();
+    }
+
+    plot->setWindowDuration(duration);
+    plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
+    plot->setFadeFraction(fade);
+    plot->setColor(color);
+    arc->center()->setVisualizer(visName, visualizer);
+
+    TrajectoryPlotEntry plotEntry;
+    plotEntry.visualizer = visualizer;
+    plotEntry.generator = NULL;
+    plotEntry.sampleCount = sampleCount;
+
+    const InterpolatedStateTrajectory* interpolatedTraj = dynamic_cast<const InterpolatedStateTrajectory*>(arc->trajectory());
+    if (interpolatedTraj)
+    {
+        // Special handling for interpolated trajectories: we just use the states from the
+        // trajectory for the plot so that the plotted line follows the spacecraft motion
+        // exactly (both plotting and InterpolateStateTrajectory use cubic Hermite interpolation)
+        for (unsigned int i = 0; i < interpolatedTraj->stateCount(); ++i)
+        {
+            double t = interpolatedTraj->time(i);
+            plot->addSample(t, interpolatedTraj->state(t));
+        }
+        plotEntry.trajectory = NULL;
+    }
+    else
+    {
+        plotEntry.trajectory = arc->trajectory();
+    }
+
+    // Remove the old entry (if there was one)
+    if (oldVisualizer)
+    {
+        for (vector<TrajectoryPlotEntry>::iterator iter = m_trajectoryPlots.begin(); iter != m_trajectoryPlots.end(); ++iter)
+        {
+            if (iter->visualizer.ptr() == oldVisualizer)
+            {
+                m_trajectoryPlots.erase(iter);
+                break;
+            }
+        }
+    }
+
+    m_trajectoryPlots.push_back(plotEntry);
 }
 
 
@@ -2074,6 +2123,7 @@ UniverseView::setPlanetOrbitsVisibility(bool enable)
                     plotEntry.trajectory = arc->trajectory();
                     plotEntry.visualizer = visualizer;
                     plotEntry.generator = NULL;
+                    plotEntry.sampleCount = 100;
                     m_trajectoryPlots.push_back(plotEntry);
                 }
             }
@@ -2141,6 +2191,7 @@ UniverseView::plotTrajectoryObserver()
             plotEntry.trajectory = NULL;
             plotEntry.visualizer = visualizer;
             plotEntry.generator = new BodyPositionSampleGenerator(m_selectedBody.ptr(), center, frame);
+            plotEntry.sampleCount = 300;
             m_trajectoryPlots.push_back(plotEntry);
         }
     }
@@ -2428,6 +2479,15 @@ UniverseView::gotoSelectedObject()
 
     }
 }
+
+
+UniverseView::TrajectoryPlotEntry::TrajectoryPlotEntry() :
+    generator(NULL),
+    sampleCount(100),
+    leadDuration(0.0)
+{
+}
+
 
 
 

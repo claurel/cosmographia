@@ -32,13 +32,17 @@ public:
     BodyInfo() :
         trajectoryPlotDuration(0.0),
         trajectoryPlotSamples(1000),
-        trajectoryPlotColor(vesta::Spectrum::White())
+        trajectoryPlotColor(vesta::Spectrum::White()),
+        trajectoryPlotLead(0.0),
+        trajectoryPlotFade(0.0)
     {
     }
 
     double trajectoryPlotDuration;
     unsigned int trajectoryPlotSamples;
     vesta::Spectrum trajectoryPlotColor;
+    double trajectoryPlotLead;
+    double trajectoryPlotFade;
 };
 
 

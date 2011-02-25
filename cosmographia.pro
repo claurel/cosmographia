@@ -465,7 +465,9 @@ macx {
         data/textures/saturn.jpg \
         data/textures/uranus.jpg \
         data/textures/neptune.jpg \
-        data/textures/sun.jpg
+        data/textures/sun.jpg \
+        data/textures/saturn-rings.png \
+        data/textures/uranus-rings.png
 
 
     QMAKE_BUNDLE_DATA += TEXTURES

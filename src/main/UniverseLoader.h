@@ -29,6 +29,11 @@
 #include <QStringList>
 
 
+namespace vesta
+{
+    class PlanetaryRings;
+}
+
 class UniverseLoader
 {
 public:
@@ -57,6 +62,7 @@ private:
     vesta::Geometry* loadGeometry(const QVariantMap& map,
                                   const UniverseCatalog* catalog);
     vesta::Geometry* loadGlobeGeometry(const QVariantMap& map);
+    vesta::PlanetaryRings* loadRingSystemGeometry(const QVariantMap& map);
     vesta::Geometry* loadMeshGeometry(const QVariantMap& map);
     vesta::Geometry* loadSensorGeometry(const QVariantMap& map,
                                         const UniverseCatalog* catalog);

@@ -151,7 +151,7 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
+              "period" : "24.6229h",
               "inclination" : 115.60,
               "ascendingNode" : 228.34,
               "meridianAngle" : 320.75
@@ -213,7 +213,13 @@
           {
               "type" : "Globe",
               "radius" : 58232,
-              "baseMap" : "saturn/saturn.jpg"
+              "baseMap" : "textures/saturn.jpg",
+              "ringSystem" : 
+              {
+                  "innerRadius" : 74660,
+                  "outerRadius" : 140220,
+                  "texture" : "textures/saturn-rings.png"
+              }
           }
         },
 
@@ -239,7 +245,13 @@
           {
               "type" : "Globe",
               "radius" : 25362,
-              "baseMap" : "textures/uranus.jpg"
+              "baseMap" : "textures/uranus.jpg",
+              "ringSystem" : 
+              {
+                  "innerRadius" : 41837,
+                  "outerRadius" : 51179,
+                  "texture" : "textures/uranus-rings.png"
+              }
           }
         },
 

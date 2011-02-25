@@ -11,6 +11,12 @@ mercury.jpg - Created by Steve Albers for the Science on a Sphere project.
 venus.jpg, saturn.jpg, jupiter.jpg - Created by Bj�rn J�nsson and available at
 http://www.mmedia.is/~bjj/
 
+The Saturn and Uranus ring textures are from Celestia 1.6.0. The Saturn ring
+texture was created by Grant Hutchison from Cassini images and opacities
+derived from stellar transit measurements: 
+http://pds-rings.arc.nasa.gov/ringocc/ringocc.html
+
+
 
 
 

@@ -22,6 +22,7 @@ APP_SOURCES = \
     $$MAIN_PATH/InterpolatedStateTrajectory.cpp \
     $$MAIN_PATH/JPLEphemeris.cpp \
     $$MAIN_PATH/KeplerianSwarm.cpp \
+    $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
     $$MAIN_PATH/UniverseCatalog.cpp \
     $$MAIN_PATH/UniverseLoader.cpp \
@@ -46,6 +47,7 @@ APP_HEADERS = \
     $$MAIN_PATH/InterpolatedStateTrajectory.h \
     $$MAIN_PATH/JPLEphemeris.h \
     $$MAIN_PATH/KeplerianSwarm.h \
+    $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/TleTrajectory.h \
     $$MAIN_PATH/TwoVectorFrame.h \
     $$MAIN_PATH/UniverseCatalog.h \

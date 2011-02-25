@@ -26,6 +26,7 @@
 #endif
 #include "JPLEphemeris.h"
 #include "NetworkTextureLoader.h"
+#include "LinearCombinationTrajectory.h"
 #include "compatibility/CatalogParser.h"
 #include "compatibility/TransformCatalog.h"
 #include "astro/IAULunarRotationModel.h"
@@ -329,6 +330,17 @@ Cosmographia::~Cosmographia()
 }
 
 
+// Convert a JPL ephemeris orbit from SSB-centered to Sun-centered
+static Trajectory*
+createSunRelativeTrajectory(const JPLEphemeris* eph, JPLEphemeris::JplObjectId id)
+{
+    LinearCombinationTrajectory* orbit = new LinearCombinationTrajectory(eph->trajectory(id), 1.0,
+                                                                         eph->trajectory(JPLEphemeris::Sun), -1.0);
+    orbit->setPeriod(eph->trajectory(id)->period());
+    return orbit;
+}
+
+
 /** Perform once-per-run initialization, such as loading planetary ephemerides.
   */
 void
@@ -339,6 +351,10 @@ Cosmographia::initialize()
     if (eph)
     {
         m_loader->addBuiltinOrbit("Sun",     eph->trajectory(JPLEphemeris::Sun));
+        m_loader->addBuiltinOrbit("Moon",    eph->trajectory(JPLEphemeris::Moon));
+
+        // The code below will create planet trajectories relative to the SSB
+        /*
         m_loader->addBuiltinOrbit("Mercury", eph->trajectory(JPLEphemeris::Mercury));
         m_loader->addBuiltinOrbit("Venus",   eph->trajectory(JPLEphemeris::Venus));
         m_loader->addBuiltinOrbit("EMB",     eph->trajectory(JPLEphemeris::EarthMoonBarycenter));
@@ -348,7 +364,37 @@ Cosmographia::initialize()
         m_loader->addBuiltinOrbit("Uranus",  eph->trajectory(JPLEphemeris::Uranus));
         m_loader->addBuiltinOrbit("Neptune", eph->trajectory(JPLEphemeris::Neptune));
         m_loader->addBuiltinOrbit("Pluto",   eph->trajectory(JPLEphemeris::Pluto));
-        m_loader->addBuiltinOrbit("Moon",    eph->trajectory(JPLEphemeris::Moon));
+        */
+
+        Trajectory* embTrajectory = createSunRelativeTrajectory(eph, JPLEphemeris::EarthMoonBarycenter);
+        m_loader->addBuiltinOrbit("EMB", embTrajectory);
+
+        m_loader->addBuiltinOrbit("Mercury", createSunRelativeTrajectory(eph, JPLEphemeris::Mercury));
+        m_loader->addBuiltinOrbit("Venus",   createSunRelativeTrajectory(eph, JPLEphemeris::Venus));
+        m_loader->addBuiltinOrbit("Mars",    createSunRelativeTrajectory(eph, JPLEphemeris::Mars));
+        m_loader->addBuiltinOrbit("Jupiter", createSunRelativeTrajectory(eph, JPLEphemeris::Jupiter));
+        m_loader->addBuiltinOrbit("Saturn",  createSunRelativeTrajectory(eph, JPLEphemeris::Saturn));
+        m_loader->addBuiltinOrbit("Uranus",  createSunRelativeTrajectory(eph, JPLEphemeris::Uranus));
+        m_loader->addBuiltinOrbit("Neptune", createSunRelativeTrajectory(eph, JPLEphemeris::Neptune));
+        m_loader->addBuiltinOrbit("Pluto",   createSunRelativeTrajectory(eph, JPLEphemeris::Pluto));
+
+        // m = the ratio of the Moon's to the mass of the Earth-Moon system
+        double m = 1.0 / (1.0 + eph->earthMoonMassRatio());
+        LinearCombinationTrajectory* earthTrajectory =
+                new LinearCombinationTrajectory(embTrajectory, 1.0,
+                                                eph->trajectory(JPLEphemeris::Moon), -m);
+        earthTrajectory->setPeriod(embTrajectory->period());
+        m_loader->addBuiltinOrbit("Earth", earthTrajectory);
+
+        // JPL HORIZONS results for position of Moon with respect to Earth at 1 Jan 2000 12:00
+        // position: -2.916083884571964E+05 -2.667168292374240E+05 -7.610248132320160E+04
+        // velocity:  6.435313736079528E-01 -6.660876955662288E-01 -3.013257066079174E-01
+        //std::cout << "Moon @ J2000:  " << eph->trajectory(JPLEphemeris::Moon)->position(0.0).transpose().format(16) << std::endl;
+
+        // JPL HORIZONS results for position of Earth with respect to Sun at 1 Jan 2000 12:00
+        // position: -2.649903422886233E+07  1.327574176646856E+08  5.755671744790662E+07
+        // velocity: -2.979426004836674E+01 -5.018052460415045E+00 -2.175393728607054E+00
+        //std::cout << "Earth @ J2000: " << earthTrajectory->position(0.0).transpose().format(16) << std::endl;
     }
 
     // Set up builtin rotation models

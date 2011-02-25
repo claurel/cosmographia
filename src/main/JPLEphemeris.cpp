@@ -25,7 +25,8 @@ using namespace vesta;
 using namespace std;
 
 
-JPLEphemeris::JPLEphemeris()
+JPLEphemeris::JPLEphemeris() :
+    m_earthMoonMassRatio(0.0)
 {
 }
 
@@ -115,8 +116,8 @@ JPLEphemeris::load(const string& filename)
     in.skipRawData(sizeof(quint32));
 
     double kmPerAu = 0.0;
-    double earthMoonMassRatio = 0.0;
     in >> kmPerAu;
+    double earthMoonMassRatio = 0.0;
     in >> earthMoonMassRatio;
 
     JplEphCoeffInfo coeffInfo[JplEph_ObjectCount];
@@ -216,6 +217,9 @@ JPLEphemeris::load(const string& filename)
         trajectory->setPeriod(daysToSeconds(orbitalPeriods[objectIndex] * 365.25));
         eph->setTrajectory(JplObjectId(objectIndex), trajectory);
     }
+
+    // Set constants
+    eph->m_earthMoonMassRatio = earthMoonMassRatio;
 
     return eph;
 }

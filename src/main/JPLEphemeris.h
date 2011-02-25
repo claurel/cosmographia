@@ -50,8 +50,14 @@ public:
 
     static JPLEphemeris* load(const std::string& filename);
 
+    double earthMoonMassRatio() const
+    {
+        return m_earthMoonMassRatio;
+    }
+
 private:
     vesta::counted_ptr<ChebyshevPolyTrajectory> m_trajectories[int(ObjectCount)];
+    double m_earthMoonMassRatio;
 };
 
 #endif // _JPL_EPHEMERIS_H_

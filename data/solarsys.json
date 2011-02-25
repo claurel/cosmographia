@@ -80,7 +80,7 @@
           "trajectory" :
           {
               "type" : "Builtin",
-              "name" : "EMB"
+              "name" : "Earth"
           },
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
@@ -118,7 +118,6 @@
               "type" : "Builtin",
               "name" : "Moon"
           },
-          "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
           {
               "type" : "Builtin",

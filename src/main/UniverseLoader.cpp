@@ -944,7 +944,6 @@ loadUniformRotationModel(const QVariantMap& map)
     double meridianAngle = angleValue(map.value("meridianAngle"));
     double period        = durationValue(map.value("period"), Unit_Day, 0.0);
 
-    qDebug() << "Period: " << period;
     Vector3d axis = (AngleAxisd(ascendingNode, Vector3d::UnitZ()) * AngleAxisd(inclination, Vector3d::UnitX())) * Vector3d::UnitZ();
     //Vector3d axis = (AngleAxisd(inclination, Vector3d::UnitX()) * AngleAxisd(ascendingNode, Vector3d::UnitZ())) * Vector3d::UnitZ();
     double rotationRate = 2 * PI / period;

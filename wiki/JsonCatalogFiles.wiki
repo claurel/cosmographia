@@ -181,6 +181,27 @@ The available inertial frames are:
 
 == TwoVector ==
 
+{{{
+"bodyFrame" :
+{
+    "type" : "TwoVector",
+    "primaryAxis" : "x",
+    "primary" :
+    {
+        "type" : "RelativePosition",
+        "observer" : "CubeSat",
+        "target" : "Ceres"
+    },
+    "secondaryAxis" : "-y",
+    "secondary" :
+    {
+        "type" : "RelativeVelocity",
+        "observer" : "CubeSat",
+        "target" : "Ceres"
+     }
+}
+}}}
+
 = Trajectory Plot Properties =
 
 It is possible to control the appearance of the plot of a body's trajectory.

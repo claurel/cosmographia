@@ -40,6 +40,7 @@
 #include <vesta/DataChunk.h>
 #include <vesta/ArrowGeometry.h>
 #include <vesta/MeshGeometry.h>
+#include <vesta/PlanetaryRings.h>
 #include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
 #include <vesta/BodyDirectionVisualizer.h>
@@ -1515,6 +1516,64 @@ loadMeshFile(const QString& fileName, TextureMapLoader* textureLoader)
 }
 
 
+PlanetaryRings*
+UniverseLoader::loadRingSystemGeometry(const QVariantMap& map)
+{
+    QVariant innerRadiusVar = map.value("innerRadius");
+    QVariant outerRadiusVar = map.value("outerRadius");
+    QVariant textureVar = map.value("texture");
+
+    if (!innerRadiusVar.isValid())
+    {
+        qDebug() << "innerRadius missing for ring system";
+        return NULL;
+    }
+
+    if (!outerRadiusVar.isValid())
+    {
+        qDebug() << "outerRadius missing for ring system";
+        return NULL;
+    }
+
+    if (!textureVar.isValid())
+    {
+        qDebug() << "texture missing for ring system";
+        return NULL;
+    }
+
+    bool ok = false;
+    double innerRadius = distanceValue(innerRadiusVar, Unit_Kilometer, 1.0, &ok);
+    if (!ok)
+    {
+        qDebug() << "Bad value for inner radius of ring system";
+        return NULL;
+    }
+
+    double outerRadius = distanceValue(outerRadiusVar, Unit_Kilometer, 1.0, &ok);
+    if (!ok)
+    {
+        qDebug() << "Bad value for outer radius of ring system";
+        return NULL;
+    }
+
+    // The rings texture should be oriented so that its horizontal axis is
+    // the radial direction. We thus wrap vertically (t), but clamp horizontally (s).
+    TextureProperties ringTextureProps;
+    ringTextureProps.addressS = TextureProperties::Clamp;
+    ringTextureProps.addressT = TextureProperties::Wrap;
+
+    PlanetaryRings* ringSystem = new PlanetaryRings(innerRadius, outerRadius);
+    if (m_textureLoader.isValid())
+    {
+        QString textureName = textureVar.toString();
+        TextureMap* ringTexture = m_textureLoader->loadTexture(textureFileName(textureName).toUtf8().data(), ringTextureProps);
+        ringSystem->setTexture(ringTexture);
+    }
+
+    return ringSystem;
+}
+
+
 Geometry*
 UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
 {
@@ -1616,6 +1675,20 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
                 atm->addRef();
                 world->setAtmosphere(atm);
             }
+        }
+    }
+
+    QVariant ringsVar = map.value("ringSystem");
+    if (ringsVar.isValid())
+    {
+        if (ringsVar.type() == QVariant::Map)
+        {
+            PlanetaryRings* ringSystem = loadRingSystemGeometry(ringsVar.toMap());
+            world->setRingSystem(ringSystem);
+        }
+        else
+        {
+            qDebug() << "Error in definition of ringSystem";
         }
     }
 

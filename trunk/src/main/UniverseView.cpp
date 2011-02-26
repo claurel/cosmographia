@@ -490,7 +490,7 @@ static void labelPlanet(Entity* planet, TextureFont* font, TextureMap* icon)
 }
 
 
-static void labelBody(Entity* planet,const QString& labelText, TextureFont* font, TextureMap* icon)
+static void labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon)
 {
     if (planet && planet->isVisible())
     {
@@ -498,6 +498,24 @@ static void labelBody(Entity* planet,const QString& labelText, TextureFont* font
         LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
         label->setIcon(icon);
         label->setIconColor(color);
+
+        // Set up the labels to fade when the labeled object is very close or very distant
+        float geometrySize = 1.0f;
+        if (planet->geometry())
+        {
+            geometrySize = planet->geometry()->boundingSphereRadius();
+        }
+
+        float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
+        float minPixels = 20.0f;
+        float maxPixels = 20.0f * orbitSize / geometrySize;
+
+        if (planet->name() != "Sun")
+        {
+            label->setFadeSize(orbitSize);
+            label->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
+        }
+
         planet->setVisualizer("label", new Visualizer(label));
     }
 }
@@ -1829,34 +1847,6 @@ UniverseView::synodicObserver(bool checked)
 
 
 void
-UniverseView::setCloudLayerVisibility(bool checked)
-{
-    Entity* earth = m_universe->findFirst("Earth");
-    if (earth)
-    {
-        WorldGeometry* geom = dynamic_cast<WorldGeometry*>(earth->geometry());
-        if (geom)
-        {
-            if (checked)
-            {
-                TextureProperties planetTexProperties;
-                planetTexProperties.addressS = TextureProperties::Wrap;
-                planetTexProperties.addressT = TextureProperties::Clamp;
-
-                TextureMap* cloudTex = loadTexture(CloudTextureSource, planetTexProperties);
-                geom->setCloudMap(cloudTex);
-                geom->setCloudAltitude(7.0f);
-            }
-            else
-            {
-                geom->setCloudMap(NULL);
-            }
-        }
-    }
-}
-
-
-void
 UniverseView::setAsteroidVisibility(bool checked)
 {
     unsigned int familyCount = sizeof(AsteroidFamilyNames) / sizeof(AsteroidFamilyNames[0]);
@@ -1987,18 +1977,6 @@ UniverseView::setPlanetographicGridVisibility(bool enable)
             }
         }
     }
-}
-
-
-void
-UniverseView::setLabelMode(LabelMode /* mode */)
-{
-}
-
-
-void
-UniverseView::setAntennaLobeVisibility(bool /* enable */)
-{
 }
 
 

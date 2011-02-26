@@ -7,6 +7,9 @@
         {
           "name" : "Sun",
           "center" : "SSB",
+
+          "label" : { "color" : [ 1, 1, 0 ] },
+
           "trajectory" :
           {
               "type" : "FixedPoint",
@@ -24,6 +27,9 @@
 
         {
           "name" : "Mercury",
+          "label" : { "color" : [ 0.8, 0.4, 0.1 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -50,6 +56,9 @@
 
         {
           "name" : "Venus",
+          "label" : { "color" : [ 1.0, 1.0, 0.9 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -76,6 +85,9 @@
 
         {
           "name" : "Earth",
+          "label" : { "color" : [ 0.7, 0.8, 1 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -112,6 +124,8 @@
 
         {
           "name" : "Moon",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+
           "center" : "Earth",
           "trajectory" :
           {
@@ -140,6 +154,9 @@
 
         {
           "name" : "Mars",
+          "label" : { "color" : [ 0.8, 0.4, 0.3 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -166,6 +183,9 @@
 
         {
           "name" : "Jupiter",
+          "label" : { "color" : [ 1, 1, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -192,6 +212,9 @@
 
         {
           "name" : "Saturn",
+          "label" : { "color" : [ 0.8, 1.0, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -224,6 +247,9 @@
 
         {
           "name" : "Uranus",
+          "label" : { "color" : [ 0.5, 1.0, 1.0 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -256,6 +282,9 @@
 
         {
           "name" : "Neptune",
+          "label" : { "color" : [ 0.5, 0.5, 1.0 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -282,6 +311,9 @@
 
         {
           "name" : "Pluto",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
           "center" : "Sun",
           "trajectory" :
           {

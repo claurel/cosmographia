@@ -103,7 +103,7 @@ public:
         return m_selectedBody.ptr();
     }
 
-    void replaceEntity(vesta::Entity* entity);
+    void replaceEntity(vesta::Entity* entity, const BodyInfo* info);
 
 public slots:
     void tick();
@@ -123,7 +123,6 @@ public slots:
     void setEquatorialPlaneVisibility(bool checked);
     void setPlanetographicGridVisibility(bool checked);
     void setTrajectoryVisibility(bool enable);
-    void setPlanetOrbitsVisibility(bool enable);
     void setNormalMaps(bool enable);
     void setShadows(bool enable);
     void setAtmospheres(bool enable);
@@ -132,8 +131,8 @@ public slots:
     void setReflections(bool enable);
     void setAnaglyphStereo(bool enable);
     void setInfoText(bool enable);
-    void plotTrajectory(vesta::Entity* body, BodyInfo* info);
-    void plotTrajectoryObserver();
+    void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
+    void plotTrajectoryObserver(const BodyInfo* info);
     void gotoSelectedObject();
 
     void tleDataReceived(QNetworkReply* reply);

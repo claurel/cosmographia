@@ -320,73 +320,6 @@ static void SafeRelease(Object* obj)
 }
 
 
-static Spectrum ObjectLabelColor(const QString& name)
-{
-    Spectrum labelColor(1.0f, 1.0f, 1.0f);
-    if (name.contains("IRIDIUM 33 DEB"))
-    {
-        labelColor = Spectrum(0.35f, 0.25f, 1.0f);
-    }
-    else if (name.contains("IRIDIUM"))
-    {
-        labelColor = Spectrum(0.30f, 1.0f, 0.0f);
-    }
-    else if (name.startsWith("GPS"))
-    {
-        labelColor = Spectrum(0.8, 0.0f, 1.0f);
-    }
-    else if (name == "Sun")
-    {
-        labelColor = Spectrum(1.0f, 1.0f, 0.0f);
-    }
-    else if (name == "Mercury")
-    {
-        labelColor = Spectrum(0.8f, 0.4f, 0.1f);
-    }
-    else if (name == "Venus")
-    {
-        labelColor = Spectrum(1.0f, 1.0f, 0.9f);
-    }
-    else if (name == "Earth")
-    {
-        labelColor = Spectrum(0.7f, 0.8f, 1.0f);
-    }
-    else if (name == "Mars")
-    {        
-        labelColor = Spectrum(0.8f, 0.4f, 0.3f);
-    }
-    else if (name == "Jupiter")
-    {
-        labelColor = Spectrum(1.0f, 1.0f, 0.5f);
-    }
-    else if (name == "Saturn")
-    {
-        labelColor = Spectrum(0.8f, 1.0f, 0.5f);
-    }
-    else if (name == "Uranus")
-    {
-        labelColor = Spectrum(0.5f, 1.0f, 1.0f);
-    }
-    else if (name == "Neptune")
-    {
-        labelColor = Spectrum(0.5f, 0.5f, 1.0f);
-    }
-    else if (name == "Pluto")
-    {
-        labelColor = Spectrum(0.5f, 0.5f, 0.5f);
-    }
-    else if (name == "Moon")
-    {
-        labelColor = Spectrum(0.5f, 0.5f, 0.5f);
-    }
-    else if (name.startsWith("20"))
-    {
-        labelColor = Spectrum(0.7f, 0.5f, 0.3f);
-    }
-    return labelColor;
-}
-
-
 UniverseView::UniverseView(QWidget *parent) :
     QGLWidget(parent),
     m_mouseMovement(0),
@@ -477,24 +410,11 @@ QSize UniverseView::sizeHint() const
 }
 
 
-static void labelPlanet(Entity* planet, TextureFont* font, TextureMap* icon)
-{
-    if (planet)
-    {
-        Spectrum color = ObjectLabelColor(planet->name().c_str());
-        LabelGeometry* label = new LabelGeometry(planet->name(), font, color, 6.0f);
-        label->setIcon(icon);
-        label->setIconColor(color);
-        planet->setVisualizer("label", new Visualizer(label));
-    }
-}
 
-
-static void labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon)
+static void labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color)
 {
     if (planet && planet->isVisible())
     {
-        Spectrum color = ObjectLabelColor(planet->name().c_str());
         LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
         label->setIcon(icon);
         label->setIconColor(color);
@@ -580,8 +500,6 @@ void UniverseView::initializeGL()
     {
         m_reflectionMap = CubeMapFramebuffer::CreateCubicReflectionMap(ReflectionMapSize, TextureMap::R8G8B8A8);
     }
-
-    labelPlanet(m_universe->findFirst("Sun"), m_labelFont.ptr(), m_spacecraftIcon.ptr());
 }
 
 
@@ -1987,7 +1905,7 @@ UniverseView::setTrajectoryVisibility(bool /* enable */)
 
 
 void
-UniverseView::plotTrajectory(Entity* body, BodyInfo* info)
+UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
 {
     if (!body)
     {
@@ -2069,48 +1987,6 @@ UniverseView::plotTrajectory(Entity* body, BodyInfo* info)
 }
 
 
-void
-UniverseView::setPlanetOrbitsVisibility(bool enable)
-{
-    const char* planetNames[] = {
-        "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon"
-    };
-
-    for (unsigned int i = 0; i < sizeof(planetNames) / sizeof(planetNames[0]); ++i)
-    {
-        Entity* planet = m_universe->findFirst(planetNames[i]);
-
-        if (planet)
-        {
-            if (enable)
-            {
-                vesta::Arc* arc = planet->chronology()->firstArc();
-                string visName = string("traj - ") + planet->name();
-                Visualizer* vis = arc->center()->visualizer(visName);
-                if (!vis)
-                {
-                    TrajectoryGeometry* plot = new TrajectoryGeometry();
-                    Visualizer* visualizer = new Visualizer(plot);
-                    plot->setFrame(arc->trajectoryFrame());
-                    plot->setWindowDuration(arc->trajectory()->period());
-                    plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
-                    plot->setFadeFraction(0.25);
-                    plot->setColor(ObjectLabelColor(planet->name().c_str()));
-                    arc->center()->setVisualizer(visName, visualizer);
-
-                    TrajectoryPlotEntry plotEntry;
-                    plotEntry.trajectory = arc->trajectory();
-                    plotEntry.visualizer = visualizer;
-                    plotEntry.generator = NULL;
-                    plotEntry.sampleCount = 100;
-                    m_trajectoryPlots.push_back(plotEntry);
-                }
-            }
-        }
-    }
-}
-
-
 class BodyPositionSampleGenerator : public TrajectoryPlotGenerator
 {
 public:
@@ -2147,8 +2023,14 @@ private:
 
 
 void
-UniverseView::plotTrajectoryObserver()
+UniverseView::plotTrajectoryObserver(const BodyInfo* info)
 {
+    Spectrum color = Spectrum::White();
+    if (info != NULL)
+    {
+        color = info->trajectoryPlotColor;
+    }
+
     if (m_selectedBody.isValid())
     {
         Entity* center = m_observer->center();
@@ -2163,7 +2045,7 @@ UniverseView::plotTrajectoryObserver()
             plot->setWindowDuration(daysToSeconds(3.0));
             plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
             plot->setFadeFraction(0.5);
-            plot->setColor(ObjectLabelColor(m_selectedBody->name().c_str()));
+            plot->setColor(color);
             center->setVisualizer(visName, visualizer);
 
             TrajectoryPlotEntry plotEntry;
@@ -2311,7 +2193,7 @@ UniverseView::addTleObject(const QString& name, const QString& line1, const QStr
     spacecraft->chronology()->addArc(arc);
 
     string labelText = bodyName;
-    Spectrum labelColor = ObjectLabelColor(name);
+    Spectrum labelColor = Spectrum::White();
 
     LabelGeometry* label = new LabelGeometry(labelText, m_labelFont.ptr(), labelColor, 6.0f);
     label->setFadeSize(tleTrajectory->boundingSphereRadius());
@@ -2395,7 +2277,7 @@ UniverseView::setPlanetMap(const QString& planetName, vesta::TiledMap* tiledMap)
 
 
 void
-UniverseView::replaceEntity(Entity* entity)
+UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
 {
     Entity* existingBody = m_universe->findFirst(entity->name());
     if (existingBody)
@@ -2411,10 +2293,17 @@ UniverseView::replaceEntity(Entity* entity)
     {
         labelText = labelText.right(labelText.length() - slashPos - 1);
     }
-    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr());
+
+    Spectrum color = Spectrum::White();
+    if (info)
+    {
+        color = info->labelColor;
+    }
+    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color);
 }
 
 
+#if 0
 class GotoAction
 {
 public:
@@ -2433,6 +2322,8 @@ private:
     counted_ptr<Frame> m_targetFrame;
     double m_duration;
 };
+#endif
+
 
 void
 UniverseView::gotoSelectedObject()

@@ -199,7 +199,7 @@ Cosmographia::Cosmographia() :
     connect(eqGridAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
     connect(trajectoriesAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setTrajectoryVisibility(bool)));
-    connect(planetOrbitsAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setPlanetOrbitsVisibility(bool)));
+    connect(planetOrbitsAction, SIGNAL(triggered(bool)), this, SLOT(setPlanetOrbitsVisibility(bool)));
     connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));
     connect(plotTrajectoryObserverAction, SIGNAL(triggered()), this, SLOT(plotTrajectoryObserver()));
     connect(infoTextAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setInfoText(bool)));
@@ -511,7 +511,31 @@ Cosmographia::plotTrajectory()
 void
 Cosmographia::plotTrajectoryObserver()
 {
-    m_view3d->plotTrajectoryObserver();
+    Entity* body = m_view3d->selectedBody();
+    if (body)
+    {
+        QString name = QString::fromUtf8(body->name().c_str());
+        BodyInfo* info = m_catalog->findInfo(name);
+
+        m_view3d->plotTrajectoryObserver(info);
+    }
+}
+
+
+void
+Cosmographia::setPlanetOrbitsVisibility(bool enabled)
+{
+    const char* planetNames[] = {
+        "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon"
+    };
+
+    for (unsigned int i = 0; i < sizeof(planetNames) / sizeof(planetNames[0]); ++i)
+    {
+        Entity* planet = m_catalog->find(planetNames[i]);
+        BodyInfo* info = m_catalog->findInfo(planetNames[i]);
+
+        m_view3d->plotTrajectory(planet, info);
+    }
 }
 
 
@@ -666,8 +690,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
                 Entity* e = m_catalog->find(name);
                 if (e)
                 {
-                    qDebug() << "Adding: " << name;
-                    m_view3d->replaceEntity(e);
+                    m_view3d->replaceEntity(e, m_catalog->findInfo(name));
                 }
             }
         }
@@ -717,7 +740,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
                 if (e)
                 {
                     qDebug() << "Adding: " << name;
-                    m_view3d->replaceEntity(e);
+                    m_view3d->replaceEntity(e, m_catalog->findInfo(name));
                 }
             }
         }

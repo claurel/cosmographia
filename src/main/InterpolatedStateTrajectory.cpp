@@ -62,6 +62,11 @@ InterpolatedStateTrajectory::InterpolatedStateTrajectory(const TimeStateList& st
     {
         setValidTimeRange(states.front().tsec, states.back().tsec);
     }
+
+    for (TimeStateList::const_iterator iter = states.begin(); iter != states.end(); ++iter)
+    {
+        m_boundingRadius = std::max(m_boundingRadius, iter->state.position().norm());
+    }
 }
 
 
@@ -77,6 +82,11 @@ InterpolatedStateTrajectory::InterpolatedStateTrajectory(const TimePositionList&
     if (!positions.empty())
     {
         setValidTimeRange(positions.front().tsec, positions.back().tsec);
+    }
+
+    for (TimePositionList::const_iterator iter = positions.begin(); iter != positions.end(); ++iter)
+    {
+        m_boundingRadius = std::max(m_boundingRadius, iter->position.norm());
     }
 }
 
@@ -227,7 +237,7 @@ InterpolatedStateTrajectory::state(double tdbSec) const
 double
 InterpolatedStateTrajectory::boundingSphereRadius() const
 {
-    return 1.0e10;
+    return m_boundingRadius;
 }
 
 

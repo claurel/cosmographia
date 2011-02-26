@@ -30,14 +30,16 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     BodyInfo() :
+        labelColor(vesta::Spectrum::White()),
         trajectoryPlotDuration(0.0),
-        trajectoryPlotSamples(1000),
+        trajectoryPlotSamples(100),
         trajectoryPlotColor(vesta::Spectrum::White()),
         trajectoryPlotLead(0.0),
         trajectoryPlotFade(0.0)
     {
     }
 
+    vesta::Spectrum labelColor;
     double trajectoryPlotDuration;
     unsigned int trajectoryPlotSamples;
     vesta::Spectrum trajectoryPlotColor;

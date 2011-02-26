@@ -1986,7 +1986,22 @@ loadTrajectoryPlotInfo(BodyInfo* info,
         info->trajectoryPlotFade = std::max(0.0, std::min(1.0, fadeVar.toDouble()));
     }
 
-    info->trajectoryPlotColor = colorValue(colorVar, Spectrum::White());
+    if (colorVar.isValid())
+    {
+        info->trajectoryPlotColor = colorValue(colorVar, Spectrum::White());
+    }
+}
+
+
+void
+loadLabelInfo(BodyInfo* info, const QVariantMap& map)
+{
+    QVariant colorVar = map.value("color");
+
+    if (colorVar.isValid())
+    {
+        info->labelColor = colorValue(colorVar, Spectrum::White());
+    }
 }
 
 
@@ -1996,6 +2011,15 @@ BodyInfo*
 loadBodyInfo(const QVariantMap& item)
 {
     BodyInfo* info = new BodyInfo();
+
+    QVariant labelVar = item.value("label");
+    if (labelVar.type() == QVariant::Map)
+    {
+        loadLabelInfo(info, labelVar.toMap());
+    }
+
+    // The default trajectory color is the label color
+    info->trajectoryPlotColor = info->labelColor;
 
     QVariant trajectoryPlotVar = item.value("trajectoryPlot");
     if (trajectoryPlotVar.type() == QVariant::Map)

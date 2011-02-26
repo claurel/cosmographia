@@ -49,6 +49,7 @@ public slots:
     void recordVideo();
     void plotTrajectory();
     void plotTrajectoryObserver();
+    void setPlanetOrbitsVisibility(bool enabled);
 
 private slots:
     void setFullScreen(bool enabled);

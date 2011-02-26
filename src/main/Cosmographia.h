@@ -51,7 +51,6 @@ public slots:
     void plotTrajectoryObserver();
 
 private slots:
-    void setLabelMode(QAction* action);
     void setFullScreen(bool enabled);
     void loadSolarSystem();
 

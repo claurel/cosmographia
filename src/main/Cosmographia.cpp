@@ -172,16 +172,6 @@ Cosmographia::Cosmographia() :
     QAction* eclipticAction = new QAction("&Ecliptic", visualAidsMenu);
     eclipticAction->setCheckable(true);
     visualAidsMenu->addAction(eclipticAction);
-    QAction* eqPlaneAction = new QAction("E&quatorial plane", visualAidsMenu);
-    eqPlaneAction->setCheckable(true);
-    visualAidsMenu->addAction(eqPlaneAction);
-    QAction* planetGridAction = new QAction("Planetographic grid", visualAidsMenu);
-    planetGridAction->setCheckable(true);
-    visualAidsMenu->addAction(planetGridAction);
-    QAction* antennaLobeAction = new QAction("&Antenna lobe", visualAidsMenu);
-    antennaLobeAction->setCheckable(true);
-    visualAidsMenu->addAction(antennaLobeAction);
-
     visualAidsMenu->addSeparator();
 
     QAction* trajectoriesAction = new QAction("&Trajectories", visualAidsMenu);
@@ -199,26 +189,6 @@ Cosmographia::Cosmographia() :
     visualAidsMenu->addAction(plotTrajectoryObserverAction);
 
     visualAidsMenu->addSeparator();
-    QActionGroup* labelGroup = new QActionGroup(visualAidsMenu);
-    QAction* noLabelAction = new QAction("No labels", labelGroup);
-    visualAidsMenu->addAction(noLabelAction);
-    noLabelAction->setCheckable(true);
-    noLabelAction->setData(int(UniverseView::NoLabels));
-    QAction* labelOnlyAction = new QAction("Labels only", labelGroup);
-    visualAidsMenu->addAction(labelOnlyAction);
-    labelOnlyAction->setCheckable(true);
-    labelOnlyAction->setData(int(UniverseView::LabelsOnly));
-    QAction* iconOnlyAction = new QAction("Icons only", labelGroup);
-    visualAidsMenu->addAction(iconOnlyAction);
-    iconOnlyAction->setCheckable(true);
-    iconOnlyAction->setData(int(UniverseView::IconsOnly));
-    QAction* labelAndIconAction = new QAction("Labels and icons", labelGroup);
-    visualAidsMenu->addAction(labelAndIconAction);
-    labelAndIconAction->setCheckable(true);
-    labelAndIconAction->setData(int(UniverseView::LabelsAndIcons));
-    noLabelAction->setChecked(true);
-
-    visualAidsMenu->addSeparator();
     QAction* infoTextAction = new QAction("Info text", visualAidsMenu);
     infoTextAction->setCheckable(true);
     infoTextAction->setChecked(true);
@@ -228,16 +198,11 @@ Cosmographia::Cosmographia() :
 
     connect(eqGridAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
-    connect(eqPlaneAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialPlaneVisibility(bool)));
-    connect(planetGridAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setPlanetographicGridVisibility(bool)));
-    connect(antennaLobeAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setAntennaLobeVisibility(bool)));
     connect(trajectoriesAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setTrajectoryVisibility(bool)));
     connect(planetOrbitsAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setPlanetOrbitsVisibility(bool)));
     connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));
     connect(plotTrajectoryObserverAction, SIGNAL(triggered()), this, SLOT(plotTrajectoryObserver()));
     connect(infoTextAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setInfoText(bool)));
-
-    connect(labelGroup, SIGNAL(triggered(QAction*)), this, SLOT(setLabelMode(QAction*)));
 
     /*** Graphics menu ***/
     QMenu* graphicsMenu = new QMenu("&Graphics", this);
@@ -291,7 +256,7 @@ Cosmographia::Cosmographia() :
     connect(normalMapAction,        SIGNAL(triggered(bool)), m_view3d, SLOT(setNormalMaps(bool)));
     connect(shadowsAction,          SIGNAL(triggered(bool)), m_view3d, SLOT(setShadows(bool)));
     connect(atmospheresAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setAtmospheres(bool)));
-    connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayerVisibility(bool)));
+    //connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayerVisibility(bool)));
     connect(realisticPlanetsAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setRealisticPlanets(bool)));
     connect(ambientLightAction,     SIGNAL(triggered(bool)), m_view3d, SLOT(setAmbientLight(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));
@@ -526,14 +491,6 @@ void
 Cosmographia::reverseTime()
 {
     m_view3d->setTimeScale(-m_view3d->timeScale());
-}
-
-
-void
-Cosmographia::setLabelMode(QAction* action)
-{
-    UniverseView::LabelMode mode = (UniverseView::LabelMode) action->data().toInt();
-    m_view3d->setLabelMode(mode);
 }
 
 

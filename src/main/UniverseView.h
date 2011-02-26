@@ -105,14 +105,6 @@ public:
 
     void replaceEntity(vesta::Entity* entity);
 
-    enum LabelMode
-    {
-        NoLabels,
-        LabelsOnly,
-        IconsOnly,
-        LabelsAndIcons,
-    };
-
 public slots:
     void tick();
     void setPaused(bool paused);
@@ -123,7 +115,6 @@ public slots:
     void bodyFixedObserver(bool checked);
     void synodicObserver(bool checked);
     void setObserverCenter();
-    void setCloudLayerVisibility(bool checked);
     void setMilkyWayVisibility(bool checked);
     void setAsteroidVisibility(bool checked);
     void highlightAsteroidFamily();
@@ -131,10 +122,8 @@ public slots:
     void setEclipticVisibility(bool checked);
     void setEquatorialPlaneVisibility(bool checked);
     void setPlanetographicGridVisibility(bool checked);
-    void setAntennaLobeVisibility(bool enable);
     void setTrajectoryVisibility(bool enable);
     void setPlanetOrbitsVisibility(bool enable);
-    void setLabelMode(LabelMode mode);
     void setNormalMaps(bool enable);
     void setShadows(bool enable);
     void setAtmospheres(bool enable);

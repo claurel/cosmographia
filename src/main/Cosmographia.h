@@ -53,7 +53,7 @@ public slots:
 
 private slots:
     void setFullScreen(bool enabled);
-    void loadSolarSystem();
+    void loadCatalog();
 
 private:
     void loadSettings();

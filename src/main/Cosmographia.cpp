@@ -75,19 +75,19 @@ Cosmographia::Cosmographia() :
     recordVideoAction->setEnabled(false);
 #endif
     fileMenu->addSeparator();
-    QAction* loadSolarSystemAction = fileMenu->addAction("&Load Solar System");
+    QAction* loadCatalogAction = fileMenu->addAction("&Load Catalog...");
     fileMenu->addSeparator();
     QAction* quitAction = fileMenu->addAction("&Quit");
     this->menuBar()->addMenu(fileMenu);
 
     connect(saveScreenShotAction, SIGNAL(triggered()), this, SLOT(saveScreenShot()));
     connect(recordVideoAction, SIGNAL(triggered()), this, SLOT(recordVideo()));
-    connect(loadSolarSystemAction, SIGNAL(triggered()), this, SLOT(loadSolarSystem()));
+    connect(loadCatalogAction, SIGNAL(triggered()), this, SLOT(loadCatalog()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     /*** Time Menu ***/
     QMenu* timeMenu = new QMenu("&Time", this);
-    QAction* setTimeAction = new QAction("Set &time...", timeMenu);
+    QAction* setTimeAction = new QAction("Set &Time...", timeMenu);
     setTimeAction->setShortcut(QKeySequence("Ctrl+T"));
     timeMenu->addAction(setTimeAction);
     timeMenu->addSeparator();
@@ -624,13 +624,13 @@ Cosmographia::recordVideo()
 
 
 void
-Cosmographia::loadSolarSystem()
+Cosmographia::loadCatalog()
 {
     QSettings settings;
     QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
     defaultFileName = settings.value("SolarSystemDir", defaultFileName).toString();
 
-    QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Solar System...", defaultFileName, "Solar System Files (*.json *.ssc)");
+    QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Catalog", defaultFileName, "Catalog Files (*.json *.ssc)");
     if (!solarSystemFileName.isEmpty())
     {
         loadCatalogFile(solarSystemFileName);

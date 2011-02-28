@@ -153,6 +153,16 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 
 == Interpolated ==
 
+{{{
+"rotationModel" :
+{
+    "type" : "Interpolated",
+    "source" : "attitude.q"
+}
+}}}
+
+ * source - name of a file containing a list of time-tagged quaternions representing orientations
+ * compatibility - if set to the string "celestia", the quaternions are converted to Celestia's conventions for orientation.
 
 = Frame Types =
 

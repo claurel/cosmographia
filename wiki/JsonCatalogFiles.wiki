@@ -222,7 +222,8 @@ Example:
 {
     "color" : "#ff0000"
 }
-}}}}
+}}}
+
 
 = Trajectory Plot Properties =
 

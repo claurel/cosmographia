@@ -139,7 +139,7 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
     "name" : "ISS (ZARYA)",
     "line1" : "1 25544U 98067A   11042.40620627  .00065760  00000-0  48638-3 0  8024",
     "line2" : "2 25544  51.6440  85.8998 0004217 288.1282 194.3117 15.72311137701100",
-     "source" : "http://celestrak.com/NORAD/elements/visual.txt"
+    "source" : "http://celestrak.com/NORAD/elements/visual.txt"
 }
 }}}
 
@@ -149,7 +149,26 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 
 == Builtin ==
 
+{{{
+"rotationModel" :
+{
+    "type" : "Builtin",
+    "name" : "IAU Moon"
+}
+}}}
+
 == Uniform ==
+
+{{{
+"rotationModel" :
+{
+    "type" : "Uniform",
+    "period" : 6.387206,
+    "inclination" : 115.60,
+    "ascendingNode" : 228.34,
+    "meridianAngle" : 320.75
+}
+}}}
 
 == Interpolated ==
 

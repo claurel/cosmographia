@@ -24,6 +24,7 @@
 #include "MultiWMSTiledMap.h"
 #include "KeplerianSwarm.h"
 #include "compatibility/Scanner.h"
+#include "astro/Rotation.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -301,6 +302,12 @@ LoadXYZTrajectory(const QString& fileName)
 }
 
 
+enum RotationConvention
+{
+    Standard_Rotation,
+    Celestia_Rotation,
+};
+
 /** Load a list of time/quaternion records from a file. The values
   * are stored in ASCII format with newline terminated hash comments
   * allowed. Dates are given as TDB Julian dates and orientations are
@@ -308,7 +315,7 @@ LoadXYZTrajectory(const QString& fileName)
   * real part of the quaternion is before the imaginary parts.)
   */
 InterpolatedRotation*
-LoadInterpolatedRotation(const QString& fileName)
+LoadInterpolatedRotation(const QString& fileName, RotationConvention mode)
 {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
@@ -348,7 +355,17 @@ LoadInterpolatedRotation(const QString& fileName)
             double tdbSec = daysToSeconds(jd - vesta::J2000);
             InterpolatedRotation::TimeOrientation record;
             record.tsec = tdbSec;
-            record.orientation = q;
+
+            // Normal mode
+            if (mode == Celestia_Rotation)
+            {
+                record.orientation = q.conjugate() * xRotation(toRadians(90.0)) * yRotation(toRadians(180.0));
+            }
+            else
+            {
+                record.orientation = q;
+            }
+
             orientations.push_back(record);
         }
     }
@@ -1073,10 +1090,18 @@ UniverseLoader::loadInterpolatedRotationModel(const QVariantMap& info)
     {
         QString name = info.value("source").toString();
 
+        // Check the compatibility flag; Celestia uses non-standard coordinate
+        // system conventions, so orientations must be converted.
+        RotationConvention rotationConvention = Standard_Rotation;
+        if (info.value("compatibility").toString() == "celestia")
+        {
+            rotationConvention = Celestia_Rotation;
+        }
+
         QString fileName = dataFileName(name);
         if (name.toLower().endsWith(".q"))
         {
-            return LoadInterpolatedRotation(fileName);
+            return LoadInterpolatedRotation(fileName, rotationConvention);
         }
         else
         {

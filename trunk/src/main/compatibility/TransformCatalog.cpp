@@ -258,6 +258,7 @@ TransformSscRotationModel(QVariantMap* obj)
     {
         rotationModel["type"] = "Interpolated";
         rotationModel["source"] = obj->value("SampledOrientation");
+        rotationModel["compatibility"] = "celestia";
     }
     else if (obj->contains("PrecessingRotation"))
     {

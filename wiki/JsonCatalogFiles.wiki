@@ -214,7 +214,7 @@ The available inertial frames are:
 
 = Label Properties =
 
-* color - the color of the label (defaults to white)
+color - the color of the label (defaults to white)
 
 Example:
 {{{

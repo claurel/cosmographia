@@ -66,6 +66,11 @@ A body is identified by setting the value of type to "body"; this is the value a
 
 *Note:* The center, frames, trajectory, and rotation model collectively comprise an _arc_. The catalog file format will soon be updated to support multiple arcs for a body.
 
+The default values for arc properties are:
+ * trajectoryFrame and bodyFrame - ICRF (International Celestial Reference Frame)
+ * trajectory - FixedPoint, at the origin
+ * rotationModel - Fixed, identity rotation
+
 = Geometry types =
 
 == Mesh ==

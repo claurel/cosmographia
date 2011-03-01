@@ -905,7 +905,7 @@ loadKeplerianTrajectory(const QVariantMap& info)
     OrbitalElements elements;
     elements.eccentricity = doubleValue(info.value("eccentricity"));
     elements.inclination = toRadians(doubleValue(info.value("inclination")));
-    elements.meanMotion = toRadians(360.0) / daysToSeconds(period);
+    elements.meanMotion = toRadians(360.0) / period;
     elements.longitudeOfAscendingNode = toRadians(doubleValue(info.value("ascendingNode")));
     elements.argumentOfPeriapsis = toRadians(doubleValue(info.value("argumentOfPeriapsis")));
     elements.meanAnomalyAtEpoch = toRadians(doubleValue(info.value("meanAnomaly")));

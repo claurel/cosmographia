@@ -101,6 +101,31 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 
 == Sensor ==
 
+        MoveProperty(&sensor, "Target", &geometry, "target");
+        MoveProperty(&sensor, "Range", &geometry, "range");
+        MoveProperty(&sensor, "Shape", &geometry, "shape");
+        MoveProperty(&sensor, "HorizontalFOV", &geometry, "horizontalFov");
+        MoveProperty(&sensor, "VerticalFOV", &geometry, "verticalFov");
+        MoveProperty(&sensor, "FrustumColor", &geometry, "frustumColor");
+        MoveProperty(&sensor, "FrustumBaseColor", &geometry, "frustumBaseColor");
+        MoveProperty(&sensor, "FrustumOpacity", &geometry, "frustumOpacity");
+        MoveProperty(&sensor, "GridOpacity", &geometry, "gridOpacity");
+
+{{{
+"geometry" :
+{
+    "type" : "Sensor",
+    "range" : 10000,
+    "shape" : "elliptical",
+    "horizontalFov" : 5,
+    "verticalFov" : 3,
+    "frustumColor" : "#00ffff",
+    "frustumBaseColor" : "#ffffff",
+    "frustumOpacity" : 0.3,
+    "gridOpacity" : 0.3
+}
+}}}
+
 == KeplerianSwarm ==
 
 This is a specialized geometry type used for representing large numbers of points in Keplerian orbits. The only data file format currently supported is _astorb_, which is used for Ted Bowell's minor planet catalogs and described completely at http://www.naic.edu/~nolan/astorb.html 

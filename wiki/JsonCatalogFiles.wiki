@@ -146,6 +146,21 @@ This is a specialized geometry type used for representing large numbers of point
 
 == Keplerian ==
 
+{{{
+"trajectory" :
+{
+    "type"                : "Keplerian",
+    "epoch"               : 2455387.5,
+    "period"              : "3.801940080524025 y",
+    "semiMajorAxis"       : "2.435929475203178 au",
+    "eccentricity"        : 0.1628635085186526,
+    "inclination"         : 3.063744992999521,
+    "ascendingNode"       : 80.89993758667205,
+    "argumentOfPeriapsis" : 250.1880363237300,
+    "meanAnomaly"         : 230.6845245681190
+}
+}}}
+
 == Builtin ==
 
 {{{

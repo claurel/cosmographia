@@ -19,6 +19,7 @@
 #define _COSMOGRAPHIA_H_
 
 #include <QMainWindow>
+#include <QNetworkAccessManager>
 
 
 class UniverseView;
@@ -51,6 +52,8 @@ public slots:
     void plotTrajectoryObserver();
     void setPlanetOrbitsVisibility(bool enabled);
 
+    void processReceivedResource(QNetworkReply* reply);
+
 private slots:
     void setFullScreen(bool enabled);
     void loadCatalog();
@@ -67,6 +70,8 @@ private:
     UniverseLoader *m_loader;
 
     QAction* m_fullScreenAction;
+
+    QNetworkAccessManager* m_networkManager;
 };
 
 #endif // _COSMOGRAPHIA_H_

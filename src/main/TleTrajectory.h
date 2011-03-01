@@ -40,6 +40,8 @@ public:
         return m_epoch;
     }
 
+    void copy(TleTrajectory* other);
+
     static TleTrajectory* Create(const std::string& line1, const std::string& line2);
 
 private:

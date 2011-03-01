@@ -351,7 +351,6 @@ UniverseView::UniverseView(QWidget *parent) :
     m_anaglyphEnabled(false),
     m_highlightedAsteroidFamily(0),
     m_infoTextVisible(true),
-    m_networkManager(NULL),
     m_videoEncoder(NULL)
 {
     m_textureLoader = new NetworkTextureLoader(this);
@@ -515,24 +514,6 @@ UniverseView::initPlanetEphemeris()
 void
 UniverseView::initNetwork()
 {
-    m_networkManager = new QNetworkAccessManager();
-    QNetworkDiskCache* cache = new QNetworkDiskCache();
-    cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
-    m_networkManager->setCache(cache);
-
-    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(tleDataReceived(QNetworkReply*)));
-
-#if 0
-    for (unsigned int i = 0; i < sizeof(s_TLESets) / sizeof(s_TLESets[0]); ++i)
-    {
-        const TLESet& tleSet = s_TLESets[i];
-        QNetworkRequest request(QNetworkRequest(tleSet.url));
-        // Offline mode:
-        request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
-        QNetworkReply* reply = m_networkManager->get(request);
-    }
-#endif
-
     WMSRequester* wms = m_textureLoader->wmsHandler();
     wms->addSurfaceDefinition("bmng-jan-nb",
                               "http://wms.jpl.nasa.gov/wms.cgi?request=GetMap&layers=BMNG&srs=EPSG:4326&format=image/jpeg&styles=Jan_nb",
@@ -2012,43 +1993,6 @@ UniverseView::addTleObject(const QString& name, const QString& line1, const QStr
     qDebug() << labelText.c_str();
 
     m_universe->addEntity(spacecraft);
-}
-
-
-void
-UniverseView::tleDataReceived(QNetworkReply* reply)
-{
-    qDebug() << "TLE data received";
-
-    QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
-    qDebug() << "page from cache?" << fromCache.toBool();
-
-    if (reply->open(QIODevice::ReadOnly))
-    {
-        QTextStream str(reply);
-
-        QTextStream::Status status = QTextStream::Ok;
-        while (status == QTextStream::Ok)
-        {
-            QString name = str.readLine();
-            QString tleLine1 = str.readLine();
-            QString tleLine2 = str.readLine();
-
-            name = name.trimmed();
-            status = str.status();
-            if (status == QTextStream::Ok)
-            {
-                if (name.isEmpty())
-                {
-                    break;
-                }
-                else
-                {
-                    addTleObject(name, tleLine1, tleLine2);
-                }
-            }
-        }
-    }
 }
 
 

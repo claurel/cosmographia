@@ -162,3 +162,21 @@ TleTrajectory::Create(const std::string& line1, const std::string& line2)
 
     return new TleTrajectory(tle);
 }
+
+
+/** Copy the contents of another TLE trajectory.
+  */
+void
+TleTrajectory::copy(TleTrajectory* other)
+{
+    if (other)
+    {
+        *m_tle = *other->m_tle;
+        m_epoch = other->m_epoch;
+        m_ephemerisType = other->m_ephemerisType;
+        for (unsigned int i = 0; i < sizeof(m_satParams) / sizeof(m_satParams[0]); ++i)
+        {
+            m_satParams[i] = other->m_satParams[i];
+        }
+    }
+}

@@ -135,8 +135,6 @@ public slots:
     void plotTrajectoryObserver(const BodyInfo* info);
     void gotoSelectedObject();
 
-    void tleDataReceived(QNetworkReply* reply);
-
 protected:
     void initializeGL();
     void paintGL();
@@ -233,8 +231,6 @@ private:
 
     unsigned int m_highlightedAsteroidFamily;
     bool m_infoTextVisible;
-
-    QNetworkAccessManager* m_networkManager;
 
     QVideoEncoder* m_videoEncoder;
 };

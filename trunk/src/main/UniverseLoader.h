@@ -27,7 +27,12 @@
 #include <vesta/Visualizer.h>
 #include <QVariant>
 #include <QStringList>
+#include <QTextStream>
+#include <QHash>
+#include <QSet>
 
+
+class TleTrajectory;
 
 namespace vesta
 {
@@ -57,6 +62,15 @@ public:
     void setDataSearchPath(const QString& path);
     void setTextureSearchPath(const QString& path);
     void setModelSearchPath(const QString& path);
+
+    void updateTle(const QString& source, const QString& name, const QString& line1, const QString& line2);
+
+    QSet<QString> resourceRequests() const;
+    void clearResourceRequests();
+
+public slots:
+    void processUpdates();
+    void processTleSet(const QString& source, QTextStream& stream);
 
 private:
     vesta::Geometry* loadGeometry(const QVariantMap& map,
@@ -98,6 +112,19 @@ private:
     QString m_textureSearchPath;
     QString m_modelSearchPath;
     QString m_currentBodyName;
+
+    struct TleRecord
+    {
+        QString source;
+        QString name;
+        QString line1;
+        QString line2;
+    };
+
+    QHash<QString,TleRecord> m_tleCache;
+    QMultiHash<QString, vesta::counted_ptr<TleTrajectory> > m_tleTrajectories;
+    QList<TleRecord> m_tleUpdates;
+    QSet<QString> m_resourceRequests;
 };
 
 #endif // _UNIVERSE_LOADER_H_

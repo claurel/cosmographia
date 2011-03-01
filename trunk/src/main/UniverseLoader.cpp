@@ -84,6 +84,11 @@ static const double AU = 149597870.691;
 QString ValueUnitsRegexpString("^\\s*([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\\s*([A-Za-z]+)?\\s*$");
 
 
+QString TleKey(const QString& source, const QString& name)
+{
+    return source + "!" + name;
+}
+
 
 class SimpleRotationModel : public RotationModel
 {
@@ -964,15 +969,46 @@ UniverseLoader::loadTleTrajectory(const QVariantMap& info)
         return NULL;
     }
 
-    TleTrajectory* tleTrajectory = TleTrajectory::Create(line1Var.toString().toAscii().data(),
-                                                         line2Var.toString().toAscii().data());
-    if (!tleTrajectory)
+    QString name = nameVar.toString();
+    QString source = sourceVar.toString();
+    QString line1 = line1Var.toString();
+    QString line2 = line2Var.toString();
+
+    QString key;
+    if (!source.isEmpty())
     {
-        qDebug() << "Invalid TLE data for " << nameVar.toString();
+        key = TleKey(source, name);
+        if (m_tleCache.contains(key))
+        {
+            // Use the cached value
+            TleRecord cachedTle = m_tleCache.value(key);
+            line1 = cachedTle.line1;
+            line2 = cachedTle.line2;
+        }
+        else
+        {
+            // Not cached; request a new TLE set (probably from some URL) and
+            // we'll update the trajectory when the data arrives.
+            m_resourceRequests.insert(source);
+        }
+    }
+
+    counted_ptr<TleTrajectory> tleTrajectory(TleTrajectory::Create(line1.toAscii().data(),
+                                                                   line2.toAscii().data()));
+    if (tleTrajectory.isNull())
+    {
+        qDebug() << "Invalid TLE data for " << name;
         return NULL;
     }
 
-    return tleTrajectory;
+    // Only keep track of TLEs for which a source was specified; the others will
+    // never need to be updated.
+    if (!key.isEmpty())
+    {
+        m_tleTrajectories.insert(key, tleTrajectory);
+    }
+
+    return tleTrajectory.ptr();
 }
 
 
@@ -2426,4 +2462,99 @@ QString
 UniverseLoader::modelFileName(const QString& fileName)
 {
     return m_modelSearchPath + "/" + fileName;
+}
+
+
+/** Process all pending object updates, e.g. new TLE sets received from
+  * the network.
+  */
+void
+UniverseLoader::processUpdates()
+{
+    foreach (TleRecord tleData, m_tleUpdates)
+    {
+        QString key = TleKey(tleData.source, tleData.name);
+
+        // Add it to the TLE cache
+        m_tleCache.insert(key, tleData);
+
+        // Update all TLE trajectories that refer to this TLE
+        foreach (counted_ptr<TleTrajectory> trajectory, m_tleTrajectories.values(key))
+        {
+            // Create a temporary TLE trajectory from the data and use it to udpate the trajectory in
+            // the cache.
+            counted_ptr<TleTrajectory> tempTle(TleTrajectory::Create(tleData.line1.toAscii().data(),
+                                                                     tleData.line2.toAscii().data()));
+            if (tempTle.isValid())
+            {
+                trajectory->copy(tempTle.ptr());
+            }
+            else
+            {
+                qDebug() << "Bad TLE received: " << tleData.name << " from " << tleData.source;
+            }
+        }
+    }
+
+    m_tleUpdates.clear();
+}
+
+
+/** Process a new TLE data set.
+  */
+void
+UniverseLoader::processTleSet(const QString &source, QTextStream& stream)
+{
+    QTextStream::Status status = QTextStream::Ok;
+    while (status == QTextStream::Ok)
+    {
+        QString name = stream.readLine();
+        QString tleLine1 = stream.readLine();
+        QString tleLine2 = stream.readLine();
+
+        name = name.trimmed();
+        status = stream.status();
+        if (status == QTextStream::Ok)
+        {
+            if (name.isEmpty())
+            {
+                break;
+            }
+            else
+            {
+                updateTle(source, name, tleLine1, tleLine2);
+            }
+        }
+    }
+}
+
+
+void
+UniverseLoader::updateTle(const QString &source, const QString &name, const QString &line1, const QString &line2)
+{
+    TleRecord tle;
+    tle.source = source;
+    tle.name = name;
+    tle.line1 = line1;
+    tle.line2 = line2;
+
+    m_tleUpdates << tle;
+}
+
+
+/** Get the set of all resources requested (since the last time clearResourceRequests was called.)
+  */
+QSet<QString>
+UniverseLoader::resourceRequests() const
+{
+    return m_resourceRequests;
+}
+
+
+/** Clear all resource requests.
+  */
+void
+UniverseLoader::clearResourceRequests()
+{
+    m_resourceRequests.clear();
 }

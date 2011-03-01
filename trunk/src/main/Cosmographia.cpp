@@ -48,6 +48,9 @@
 #include <QBoxLayout>
 #include <QDialogButtonBox>
 
+#include <QNetworkDiskCache>
+#include <QNetworkRequest>
+
 using namespace vesta;
 using namespace Eigen;
 
@@ -56,7 +59,8 @@ Cosmographia::Cosmographia() :
     m_catalog(NULL),
     m_view3d(NULL),
     m_loader(NULL),
-    m_fullScreenAction(NULL)
+    m_fullScreenAction(NULL),
+    m_networkManager(NULL)
 {
     m_catalog = new UniverseCatalog();
     m_view3d = new UniverseView();
@@ -365,6 +369,13 @@ Cosmographia::initialize()
     // Set up builtin rotation models
     m_loader->addBuiltinRotationModel("IAU Moon", new IAULunarRotationModel());
 
+    // Set up the network manager
+    m_networkManager = new QNetworkAccessManager();
+    QNetworkDiskCache* cache = new QNetworkDiskCache();
+    cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
+    m_networkManager->setCache(cache);
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processReceivedResource(QNetworkReply*)));
+
     // Set up the texture loader
     m_loader->setTextureLoader(m_view3d->textureLoader());
 
@@ -642,107 +653,142 @@ Cosmographia::loadCatalog()
 void
 Cosmographia::loadCatalogFile(const QString& fileName)
 {
-    if (!fileName.isEmpty())
+    if (fileName.isEmpty())
     {
-        QFile solarSystemFile(fileName);
-        QString path = QFileInfo(solarSystemFile).absolutePath();
+        return;
+    }
 
-        if (!solarSystemFile.open(QIODevice::ReadOnly))
+    QFile solarSystemFile(fileName);
+    QString path = QFileInfo(solarSystemFile).absolutePath();
+
+    m_loader->clearResourceRequests();
+
+    if (!solarSystemFile.open(QIODevice::ReadOnly))
+    {
+        QMessageBox::warning(this, tr("Solar System File Error"), tr("Could not open file '%1'.").arg(fileName));
+        return;
+    }
+
+    m_loader->setDataSearchPath(path);
+    m_loader->setTextureSearchPath(path);
+    m_loader->setModelSearchPath(path);
+
+    NetworkTextureLoader* textureLoader = dynamic_cast<NetworkTextureLoader*>(m_loader->textureLoader());
+    if (textureLoader)
+    {
+        textureLoader->setLocalSearchPatch(path);
+    }
+
+    if (fileName.toLower().endsWith(".json"))
+    {
+        QJson::Parser parser;
+
+        bool parseOk = false;
+        QVariant result = parser.parse(&solarSystemFile, &parseOk);
+        if (!parseOk)
         {
-            QMessageBox::warning(this, tr("Solar System File Error"), tr("Could not open file '%1'.").arg(fileName));
+            QMessageBox::warning(this,
+                                 tr("Solar System File Error"),
+                                 QString("Line %1: %2").arg(parser.errorLine()).arg(parser.errorString()));
             return;
         }
 
-        m_loader->setDataSearchPath(path);
-        m_loader->setTextureSearchPath(path);
-        m_loader->setModelSearchPath(path);
+        QVariantMap contents = result.toMap();
+        if (contents.empty())
+        {
+            qDebug() << "Solar system file is empty.";
+            return;
+        }
 
-        NetworkTextureLoader* textureLoader = dynamic_cast<NetworkTextureLoader*>(m_loader->textureLoader());
+        QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+        foreach (QString name, bodyNames)
+        {
+            Entity* e = m_catalog->find(name);
+            if (e)
+            {
+                m_view3d->replaceEntity(e, m_catalog->findInfo(name));
+            }
+        }
+    }
+    else if (fileName.toLower().endsWith(".ssc"))
+    {
+        // SSC files expect media and trajectory data files in subdirectories:
+        //   trajectories and rotation models - ./data
+        //   textures - ./textures/medres
+        //   mesh files - ./models
+        // Where '.' is the directory containing the ssc file
+        m_loader->setDataSearchPath(path + "/data");
+        m_loader->setTextureSearchPath(path + "/textures/medres");
+        m_loader->setModelSearchPath(path + "/models");
         if (textureLoader)
         {
-            textureLoader->setLocalSearchPatch(path);
+            textureLoader->setLocalSearchPatch(path + "/textures/medres");
         }
 
-        if (fileName.toLower().endsWith(".json"))
+        QVariantList items;
+
+        CatalogParser parser(&solarSystemFile);
+        QVariant obj = parser.nextSscObject();
+        while (obj.type() == QVariant::Map)
         {
-            QJson::Parser parser;
+            QJson::Serializer serializer;
+            qDebug() << serializer.serialize(obj);
 
-            bool parseOk = false;
-            QVariant result = parser.parse(&solarSystemFile, &parseOk);
-            if (!parseOk)
-            {
-                QMessageBox::warning(this,
-                                     tr("Solar System File Error"),
-                                     QString("Line %1: %2").arg(parser.errorLine()).arg(parser.errorString()));
-                return;
-            }
+            QVariantMap map = obj.toMap();
+            TransformSscObject(&map);
+            qDebug() << "Converted: " << serializer.serialize(map);
 
-            QVariantMap contents = result.toMap();
-            if (contents.empty())
-            {
-                qDebug() << "Solar system file is empty.";
-                return;
-            }
+            QString fullName = map.value("_parent").toString() + "/" + map.value("name").toString();
+            map.insert("name", fullName);
+            items << map;
 
-            QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
-            foreach (QString name, bodyNames)
-            {
-                Entity* e = m_catalog->find(name);
-                if (e)
-                {
-                    m_view3d->replaceEntity(e, m_catalog->findInfo(name));
-                }
-            }
+            obj = parser.nextSscObject();
         }
-        else if (fileName.toLower().endsWith(".ssc"))
+
+        QVariantMap contents;
+        contents.insert("name", fileName);
+        contents.insert("items", items);
+
+        QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+        foreach (QString name, bodyNames)
         {
-            // SSC files expect media and trajectory data files in subdirectories:
-            //   trajectories and rotation models - ./data
-            //   textures - ./textures/medres
-            //   mesh files - ./models
-            // Where '.' is the directory containing the ssc file
-            m_loader->setDataSearchPath(path + "/data");
-            m_loader->setTextureSearchPath(path + "/textures/medres");
-            m_loader->setModelSearchPath(path + "/models");
-            if (textureLoader)
+            Entity* e = m_catalog->find(name);
+            if (e)
             {
-                textureLoader->setLocalSearchPatch(path + "/textures/medres");
-            }
-
-            QVariantList items;
-
-            CatalogParser parser(&solarSystemFile);
-            QVariant obj = parser.nextSscObject();
-            while (obj.type() == QVariant::Map)
-            {
-                QJson::Serializer serializer;
-                qDebug() << serializer.serialize(obj);
-
-                QVariantMap map = obj.toMap();
-                TransformSscObject(&map);
-                qDebug() << "Converted: " << serializer.serialize(map);
-
-                QString fullName = map.value("_parent").toString() + "/" + map.value("name").toString();
-                map.insert("name", fullName);
-                items << map;
-
-                obj = parser.nextSscObject();
-            }
-
-            QVariantMap contents;
-            contents.insert("name", fileName);
-            contents.insert("items", items);
-
-            QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
-            foreach (QString name, bodyNames)
-            {
-                Entity* e = m_catalog->find(name);
-                if (e)
-                {
-                    qDebug() << "Adding: " << name;
-                    m_view3d->replaceEntity(e, m_catalog->findInfo(name));
-                }
+                qDebug() << "Adding: " << name;
+                m_view3d->replaceEntity(e, m_catalog->findInfo(name));
             }
         }
+    }
+
+    QSet<QString> resourceRequests = m_loader->resourceRequests();
+    if (!resourceRequests.isEmpty())
+    {
+        qDebug() << "Resource requests:";
+        foreach (QString resource, resourceRequests)
+        {
+            QNetworkRequest request(resource);
+            request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferNetwork);
+            QNetworkReply* reply = m_networkManager->get(request);
+
+            qDebug() << resource << " -> " << reply->url().toString();
+        }
+    }
+}
+
+
+void
+Cosmographia::processReceivedResource(QNetworkReply* reply)
+{
+    qDebug() << "Resource received: " << reply->url().toString();
+
+    QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
+    qDebug() << "Cached?" << fromCache.toBool();
+
+    if (reply->open(QIODevice::ReadOnly))
+    {
+        QTextStream stream(reply);
+        m_loader->processTleSet(reply->url().toString(), stream);
+        m_loader->processUpdates();
     }
 }

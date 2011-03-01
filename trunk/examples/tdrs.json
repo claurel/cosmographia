@@ -1,0 +1,215 @@
+{
+     "version": "1.0",
+     "name": "TDRS Constellation",
+
+     "items" :
+     [
+        {
+          "name" : "TDRS-1",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 1",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-3",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 3",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-4",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 4",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-5",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 5",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-6",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 6",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-7",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 7",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-8",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 8",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-9",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 9",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        },
+
+        {
+          "name" : "TDRS-10",
+          "label" : { "color" : "lime" },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE", 
+              "name" : "TDRS 10",
+              "line1" : "1 13969U 83026B   11048.58429394 -.00000164  00000-0  10000-3 0  2275",
+              "line2" : "2 13969  13.5162   6.4352 0016588 111.9813 248.2362  0.98746064 75081",
+              "source" : "http://celestrak.com/NORAD/elements/tdrss.txt"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/jason.obj"
+          }
+        }
+
+    ]
+}

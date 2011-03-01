@@ -778,11 +778,10 @@ static double distanceValue(QVariant v, DistanceUnit defaultUnit, double default
 
 
 // Load a duration value from a variant and convert it to seconds
-static double durationValue(QVariant v, TimeUnit defaultUnit, double defaultValue = 0.0)
+static double durationValue(QVariant v, TimeUnit defaultUnit, double defaultValue, bool* ok)
 {
     TimeUnit unit = defaultUnit;
     double value = defaultValue;
-    bool ok = false;
 
     if (v.type() == QVariant::String)
     {
@@ -801,15 +800,32 @@ static double durationValue(QVariant v, TimeUnit defaultUnit, double defaultValu
         }
         else
         {
-            // Error
+            unit = InvalidTimeUnit;
         }
     }
     else
     {
-        value = v.toDouble(&ok);
+        bool convertOk = false;
+        value = v.toDouble(&convertOk);
+        if (!convertOk)
+        {
+            unit = InvalidTimeUnit;
+        }
     }
 
-    return convertTime(value, unit, Unit_Second);
+    if (ok)
+    {
+        *ok = (unit != InvalidTimeUnit);
+    }
+
+    if (unit == InvalidTimeUnit)
+    {
+        return 0.0;
+    }
+    else
+    {
+        return convertTime(value, unit, Unit_Second);
+    }
 }
 
 
@@ -868,17 +884,21 @@ vesta::Trajectory* loadFixedTrajectory(const QVariantMap& info)
 vesta::Trajectory*
 loadKeplerianTrajectory(const QVariantMap& info)
 {
-    double sma = doubleValue(info.value("semiMajorAxis"), 0.0);
-    if (sma <= 0.0)
+    bool ok = false;
+
+    QVariant semiMajorAxisVar = info.value("semiMajorAxis");
+    double sma = distanceValue(semiMajorAxisVar, Unit_Kilometer, 0.0, &ok);
+    if (!ok)
     {
-        qDebug() << "Invalid semimajor axis given for Keplerian orbit.";
+        qDebug() << "Missing or invalid semi-major axis for Keplerian orbit.";
         return NULL;
     }
 
-    double period = doubleValue(info.value("period"), 0.0);
-    if (period <= 0.0)
+    QVariant periodVar = info.value("period");
+    double period = durationValue(periodVar, Unit_Day, 1.0, &ok);
+    if (!ok)
     {
-        qDebug() << "Invalid period given for Keplerian orbit.";
+        qDebug() << "Missing or invalid period for Keplerian orbit.";
         return NULL;
     }
 
@@ -890,6 +910,16 @@ loadKeplerianTrajectory(const QVariantMap& info)
     elements.argumentOfPeriapsis = toRadians(doubleValue(info.value("argumentOfPeriapsis")));
     elements.meanAnomalyAtEpoch = toRadians(doubleValue(info.value("meanAnomaly")));
     elements.periapsisDistance = (1.0 - elements.eccentricity) * sma;
+
+    QVariant epochVar = info.value("epoch");
+    if (epochVar.isValid())
+    {
+        elements.epoch = dateValue(epochVar, &ok);
+        if (!ok)
+        {
+            qDebug() << "Invalid epoch for Keplerian orbit.";
+        }
+    }
 
     KeplerianTrajectory* trajectory = new KeplerianTrajectory(elements);
 
@@ -1089,10 +1119,12 @@ loadFixedRotationModel(const QVariantMap& map)
 vesta::RotationModel*
 loadUniformRotationModel(const QVariantMap& map)
 {
+    bool ok = false;
+
     double inclination   = angleValue(map.value("inclination"));
     double ascendingNode = angleValue(map.value("ascendingNode"));
     double meridianAngle = angleValue(map.value("meridianAngle"));
-    double period        = durationValue(map.value("period"), Unit_Day, 0.0);
+    double period        = durationValue(map.value("period"), Unit_Day, 1.0, &ok);
 
     Vector3d axis = (AngleAxisd(ascendingNode, Vector3d::UnitZ()) * AngleAxisd(inclination, Vector3d::UnitX())) * Vector3d::UnitZ();
     //Vector3d axis = (AngleAxisd(inclination, Vector3d::UnitX()) * AngleAxisd(ascendingNode, Vector3d::UnitZ())) * Vector3d::UnitZ();
@@ -2192,7 +2224,9 @@ loadTrajectoryPlotInfo(BodyInfo* info,
         info->trajectoryPlotSamples = (unsigned int) std::max(100, std::min(50000, count));
     }
 
-    double duration = durationValue(durationVar, Unit_Day, 0.0);
+    bool ok = false;
+
+    double duration = durationValue(durationVar, Unit_Day, 0.0, &ok);
     if (duration != 0.0)
     {
         info->trajectoryPlotDuration = duration;
@@ -2200,7 +2234,7 @@ loadTrajectoryPlotInfo(BodyInfo* info,
 
     if (leadVar.isValid())
     {
-        info->trajectoryPlotLead = durationValue(leadVar, Unit_Day, 0.0);
+        info->trajectoryPlotLead = durationValue(leadVar, Unit_Day, 0.0, &ok);
     }
 
     if (fadeVar.canConvert(QVariant::Double))

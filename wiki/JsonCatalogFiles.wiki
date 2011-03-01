@@ -101,16 +101,6 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 
 == Sensor ==
 
-        MoveProperty(&sensor, "Target", &geometry, "target");
-        MoveProperty(&sensor, "Range", &geometry, "range");
-        MoveProperty(&sensor, "Shape", &geometry, "shape");
-        MoveProperty(&sensor, "HorizontalFOV", &geometry, "horizontalFov");
-        MoveProperty(&sensor, "VerticalFOV", &geometry, "verticalFov");
-        MoveProperty(&sensor, "FrustumColor", &geometry, "frustumColor");
-        MoveProperty(&sensor, "FrustumBaseColor", &geometry, "frustumBaseColor");
-        MoveProperty(&sensor, "FrustumOpacity", &geometry, "frustumOpacity");
-        MoveProperty(&sensor, "GridOpacity", &geometry, "gridOpacity");
-
 {{{
 "geometry" :
 {

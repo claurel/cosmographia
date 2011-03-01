@@ -96,6 +96,22 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 
 == Sensor ==
 
+== KeplerianSwarm ==
+
+This is a specialized geometry type used for representing large numbers of points in Keplerian orbits. The only data file format currently supported is _astorb_, which is used for Ted Bowell's minor planet catalogs and described completely at http://www.naic.edu/~nolan/astorb.html 
+
+{{{
+"geometry" :
+{
+    "type" : "KeplerianSwarm",
+    "format" : "astorb",
+    "source" : "astorb.dat",
+    "particleSize" : 1.0,
+    "color" : "#aa8855",
+    "opacity" : 0.5
+}
+}}}
+
 = Trajectory Types =
 
 == Fixed Point ==

@@ -81,6 +81,7 @@ private:
     vesta::Geometry* loadSensorGeometry(const QVariantMap& map,
                                         const UniverseCatalog* catalog);
     vesta::Geometry* loadSwarmGeometry(const QVariantMap& map);
+    vesta::Geometry* loadParticleSystemGeometry(const QVariantMap& map);
 
     vesta::Arc* loadArc(const QVariantMap& map,
                         const UniverseCatalog* catalog);

@@ -46,8 +46,15 @@
 #include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
 #include <vesta/BodyDirectionVisualizer.h>
+#include <vesta/ParticleSystemGeometry.h>
 #include <vesta/Units.h>
 #include <vesta/GregorianDate.h>
+
+#include <vesta/particlesys/ParticleEmitter.h>
+#include <vesta/particlesys/PointGenerator.h>
+#include <vesta/particlesys/BoxGenerator.h>
+#include <vesta/particlesys/DiscGenerator.h>
+
 #include <QDateTime>
 #include <QFile>
 #include <QColor>
@@ -2053,7 +2060,233 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
 }
 
 
-vesta::Geometry*
+static InitialStateGenerator*
+loadParticleStateGenerator(const QVariantMap& map)
+{
+    QVariant typeVar = map.value("type");
+    if (!typeVar.isValid())
+    {
+        qDebug() << "Missing type for particle generator.";
+        return NULL;
+    }
+
+    QString type = typeVar.toString();
+    if (type == "Point")
+    {
+        bool ok = false;
+        Vector3d position = vec3Value(map.value("position"), &ok);
+        Vector3d velocity = vec3Value(map.value("velocity"), &ok);
+        PointGenerator* generator = new PointGenerator(position.cast<float>(), velocity.cast<float>());
+
+        return generator;
+    }
+    else if (type == "Box")
+    {
+        bool ok = false;
+        Vector3d sides = vec3Value(map.value("sides"), &ok);
+        Vector3d center = vec3Value(map.value("center"), &ok);
+        Vector3d velocity = vec3Value(map.value("velocity"), &ok);
+        BoxGenerator* generator = new BoxGenerator(sides.cast<float>(),
+                                                   center.cast<float>(),
+                                                   velocity.cast<float>());
+
+        return generator;
+    }
+    else if (type == "Disc")
+    {
+        bool ok = false;
+        float radius = map.value("radius").toFloat();
+        Vector3d velocity = vec3Value(map.value("velocity"), &ok);
+
+        DiscGenerator* generator = new DiscGenerator(radius, velocity.cast<float>());
+
+        return generator;
+    }
+    else
+    {
+        qDebug() << "Unknown particle generator type " << type;
+        return NULL;
+    }
+}
+
+
+static ParticleEmitter*
+loadParticleEmitter(const QVariantMap& map)
+{
+    QVariant startTimeVar = map.value("startTime");
+    QVariant endTimeVar = map.value("endTime");
+    QVariant spawnRateVar = map.value("spawnRate");
+    QVariant lifetimeVar = map.value("lifetime");
+    QVariant startSizeVar = map.value("startSize");
+    QVariant endSizeVar = map.value("endSize");
+    QVariant colorsVar = map.value("colors");
+    QVariant generatorVar = map.value("generator");
+    QVariant velocityVariationVar = map.value("velocityVariation");
+
+    // Get the required parameters: lifetime and spawn rate
+    double lifetime = 0.0;
+    double spawnRate = 0.0;
+    if (!spawnRateVar.isValid())
+    {
+        qDebug() << "Spawn rate not specified for particle emitter.";
+        return NULL;
+    }
+
+    if (!lifetimeVar.isValid())
+    {
+        qDebug() << "Lifetime not specified for particle emitter.";
+        return NULL;
+    }
+
+    if (generatorVar.type() != QVariant::Map)
+    {
+        qDebug() << "Invalid or missing generator for particle emitter.";
+        return NULL;
+    }
+
+    QVariantMap generatorMap = generatorVar.toMap();
+    InitialStateGenerator* generator = loadParticleStateGenerator(generatorMap);
+    if (generator == NULL)
+    {
+        return NULL;
+    }
+
+
+    lifetime = lifetimeVar.toDouble();
+    spawnRate = spawnRateVar.toDouble();
+
+    if (lifetime <= 0.0)
+    {
+        qDebug() << "Particle lifetime must be a positive value.";
+        return NULL;
+    }
+
+    if (spawnRate <= 0.0)
+    {
+        qDebug() << "Particle spawn rate must be a positive value.";
+        return NULL;
+    }
+
+    if (lifetime * spawnRate > 200000)
+    {
+        qDebug() << "200K particle per emitter rate exceeded. Reduce particle spawn rate.";
+        return NULL;
+    }
+
+    ParticleEmitter* emitter = new ParticleEmitter();
+    emitter->setGenerator(generator);
+    emitter->setParticleLifetime(lifetime);
+    emitter->setSpawnRate(spawnRate);
+
+    bool ok = false;
+
+    // Now parse the optional parameters
+    float startSize = 0.0f;
+    float endSize = 1.0f;
+    startSize = float(distanceValue(startSizeVar, Unit_Kilometer, 0.0, &ok));
+    endSize = float(distanceValue(endSizeVar, Unit_Kilometer, 1.0f, &ok));
+    emitter->setSizeRange(startSize, endSize);
+
+    if (startTimeVar.isValid())
+    {
+        emitter->setStartTime(dateValue(startTimeVar, &ok));
+    }
+
+    if (endTimeVar.isValid())
+    {
+        emitter->setEndTime(dateValue(endTimeVar, &ok));
+    }
+
+    if (velocityVariationVar.isValid())
+    {
+        emitter->setVelocityVariation(velocityVariationVar.toFloat());
+    }
+
+    // Load the color ramp. This is an array of values arranged
+    // with interleaved color and opacity values, e.g.
+    //   [ "#00ff00", 0.0, "#ffff80", 1.0 ]
+    //
+    // Up to five values are used; anything beyond that is ignored
+    Spectrum colors[5];
+    float opacities[5];
+    colors[0] = Spectrum::White();
+    opacities[0] = 1.0;
+    unsigned int colorCount = 1;
+
+    if (colorsVar.type() == QVariant::List)
+    {
+        QVariantList colorsList = colorsVar.toList();
+        colorCount = (unsigned int) colorsList.size() / 2;
+        for (unsigned int i = 0; i < colorCount; ++i)
+        {
+            colors[i] = colorValue(colorsList[i * 2], Spectrum::White());
+            opacities[i] = float(doubleValue(colorsList[i * 2 + 1], 1.0));
+        }
+    }
+
+    emitter->setColorCount(colorCount);
+    for (unsigned int i = 0; i < colorCount; ++i)
+    {
+        emitter->setColor(i, colors[i], opacities[i]);
+    }
+
+    return emitter;
+}
+
+
+Geometry*
+UniverseLoader::loadParticleSystemGeometry(const QVariantMap& map)
+{
+    QVariant emittersVar = map.value("emitters");
+    if (!emittersVar.isValid())
+    {
+        qDebug() << "Emitters are missing from particle system";
+        return NULL;
+    }
+
+    if (emittersVar.type() != QVariant::List)
+    {
+        qDebug() << "Emitters in particle system must be an array";
+        return NULL;
+    }
+
+    QVariantList emitters = emittersVar.toList();
+
+    ParticleSystemGeometry* particles = new ParticleSystemGeometry();
+    foreach (QVariant emitterVar, emitters)
+    {
+        if (emitterVar.type() == QVariant::Map)
+        {
+            QVariantMap emitterMap = emitterVar.toMap();
+            QVariant textureVar = emitterMap.value("texture");
+
+            TextureMap* texture = NULL;
+            TextureProperties particleTextureProps;
+            particleTextureProps.addressS = TextureProperties::Clamp;
+            particleTextureProps.addressT = TextureProperties::Clamp;
+            if (m_textureLoader.isValid())
+            {
+                QString textureName = textureVar.toString();
+                texture = m_textureLoader->loadTexture(textureFileName(textureName).toUtf8().data(), particleTextureProps);
+            }
+
+            ParticleEmitter* emitter = loadParticleEmitter(emitterMap);
+            if (emitter)
+            {
+                particles->addEmitter(emitter, texture);
+            }
+        }
+        else
+        {
+            qDebug() << "Bad emitter in particle system";
+        }
+    }
+
+    return particles;
+}
+
+
+Geometry*
 UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* catalog)
 {
     Geometry* geometry = NULL;
@@ -2086,6 +2319,10 @@ UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* cata
     else if (type == "KeplerianSwarm")
     {
         geometry = loadSwarmGeometry(map);
+    }
+    else if (type == "ParticleSystem")
+    {
+        geometry = loadParticleSystemGeometry(map);
     }
     else
     {

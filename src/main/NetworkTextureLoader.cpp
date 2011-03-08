@@ -220,7 +220,15 @@ NetworkTextureLoader::realizeLoadedTextures()
         }
         else
         {
-            ok = SetTextureImage(t.texture, t.texImage);
+            if (t.texImage.format() == QImage::Format_Indexed8)
+            {
+                // Convert indexed color images to RGB
+                ok = SetTextureImage(t.texture, t.texImage.convertToFormat(QImage::Format_RGB32));
+            }
+            else
+            {
+                ok = SetTextureImage(t.texture, t.texImage);
+            }
         }
 
         if (!ok)

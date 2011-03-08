@@ -1,0 +1,119 @@
+{
+     "version": "1.0",
+     "name": "Rosetta Mission",
+
+     "items" :
+     [
+        {
+          "name" : "Rosetta",
+          "label" : { "color" : "#00ff00" },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "rosetta.xyzv"
+          },
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "-y",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Rosetta",
+                  "target" : "Sun"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Rosetta",
+                  "target" : "Sun"
+              }
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "rosetta2.3ds"
+          },
+          "trajectoryPlot" :
+          {
+              "duration" : "2 y",
+              "fade" : 0.5
+          }
+        },
+
+        {
+          "name" : "2867 Steins",
+          "label" : { "color" : "#aa8855" },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type"                : "Keplerian",
+              "epoch"               : 2454715.373611111,
+              "period"              : "3.633243181750171 y",
+              "semiMajorAxis"       : "2.363328959080129 au",
+              "eccentricity"        : 0.1462224605357432,
+              "inclination"         : 9.944968028333918,
+              "ascendingNode"       : 55.52939981054162,
+              "argumentOfPeriapsis" : 250.5163959362615,
+              "meanAnomaly"         : 317.5472091052329
+          }
+        },
+
+        {
+          "name" : "21 Lutetia",
+          "label" : { "color" : "#aa8855" },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type"                : "Keplerian",
+              "epoch"               : 2455387.5,
+              "period"              : "3.801940080524025 y",
+              "semiMajorAxis"       : "2.435929475203178 au",
+              "eccentricity"        : 0.1628635085186526,
+              "inclination"         : 3.063744992999521,
+              "ascendingNode"       : 80.89993758667205,
+              "argumentOfPeriapsis" : 250.1880363237300,
+              "meanAnomaly"         : 230.6845245681190
+          },
+
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "0.3402d",
+              "inclination" : 0.0,
+              "ascendingNode" : 0.0,
+              "meridianAngle" : 0.0
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 10,
+              "source" : "../smallbodies/phobos.obj"
+          }
+
+        },
+
+        {
+          "name" : "67P/Churyumov-Gerasimenko",
+          "label" : { "color" : "#bbeeff" },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "67p.xyzv"
+          }
+        }
+    ]
+}

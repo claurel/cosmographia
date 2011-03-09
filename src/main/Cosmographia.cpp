@@ -41,6 +41,7 @@
 #include <vesta/FixedPointTrajectory.h>
 #include <vesta/WorldGeometry.h>
 #include <vesta/Units.h>
+#include <vesta/StarsLayer.h>
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
 #include <algorithm>
@@ -208,6 +209,23 @@ Cosmographia::Cosmographia() :
     connect(plotTrajectoryObserverAction, SIGNAL(triggered()), this, SLOT(plotTrajectoryObserver()));
     connect(infoTextAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setInfoText(bool)));
 
+    /*** Star style menu ***/
+    QMenu* starStyleMenu = new QMenu("Star style");
+    QActionGroup* starStyleGroup = new QActionGroup(starStyleMenu);
+    QAction* pointStarsAction = new QAction("&Points", starStyleGroup);
+    pointStarsAction->setCheckable(true);
+    pointStarsAction->setData(0);
+    starStyleMenu->addAction(pointStarsAction);
+    QAction* gaussianStarsAction = new QAction("&Gaussian", starStyleGroup);
+    gaussianStarsAction->setCheckable(true);
+    gaussianStarsAction->setChecked(true);
+    gaussianStarsAction->setData(1);
+    starStyleMenu->addAction(gaussianStarsAction);
+    QAction* diffractionSpikeStarsAction = new QAction("Gaussian with &diffraction spikes", starStyleGroup);
+    diffractionSpikeStarsAction->setCheckable(true);
+    diffractionSpikeStarsAction->setData(2);
+    starStyleMenu->addAction(diffractionSpikeStarsAction);
+
     /*** Graphics menu ***/
     QMenu* graphicsMenu = new QMenu("&Graphics", this);
     QAction* normalMapAction = new QAction("&Normal map", graphicsMenu);
@@ -226,9 +244,8 @@ Cosmographia::Cosmographia() :
     QAction* realisticPlanetsAction = new QAction("Realistic &planets", graphicsMenu);
     realisticPlanetsAction->setCheckable(true);
     graphicsMenu->addAction(realisticPlanetsAction);
-    QAction* ambientLightAction = new QAction("Ambient &light", graphicsMenu);
+    QAction* ambientLightAction = new QAction("Extra &light", graphicsMenu);
     ambientLightAction->setCheckable(true);
-    ambientLightAction->setChecked(true);
     graphicsMenu->addAction(ambientLightAction);
     QAction* reflectionsAction = new QAction("&Reflections", graphicsMenu);
     reflectionsAction->setCheckable(true);
@@ -237,13 +254,7 @@ Cosmographia::Cosmographia() :
     milkyWayAction->setCheckable(true);
     milkyWayAction->setShortcut(QKeySequence("Ctrl+M"));
     graphicsMenu->addAction(milkyWayAction);
-    QAction* asteroidsAction = new QAction("As&teroids", graphicsMenu);
-    asteroidsAction->setCheckable(true);
-    asteroidsAction->setShortcut(QKeySequence("Ctrl+Shift+T"));
-    graphicsMenu->addAction(asteroidsAction);
-    QAction* highlightAsteroidsAction = new QAction("Highlight asteroid family", graphicsMenu);
-    highlightAsteroidsAction->setShortcut(QKeySequence("Ctrl+Alt+T"));
-    graphicsMenu->addAction(highlightAsteroidsAction);
+    graphicsMenu->addMenu(starStyleMenu);
     graphicsMenu->addSeparator();
     m_fullScreenAction = new QAction("Full Screen", graphicsMenu);
     m_fullScreenAction->setShortcut(QKeySequence("Ctrl+F"));
@@ -265,9 +276,8 @@ Cosmographia::Cosmographia() :
     connect(ambientLightAction,     SIGNAL(triggered(bool)), m_view3d, SLOT(setAmbientLight(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));
     connect(milkyWayAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setMilkyWayVisibility(bool)));
-    connect(asteroidsAction,        SIGNAL(triggered(bool)), m_view3d, SLOT(setAsteroidVisibility(bool)));
-    connect(highlightAsteroidsAction, SIGNAL(triggered()),   m_view3d, SLOT(highlightAsteroidFamily()));
     connect(anaglyphAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setAnaglyphStereo(bool)));
+    connect(starStyleGroup,         SIGNAL(selected(QAction*)), this, SLOT(setStarStyle(QAction*)));
 
     /*** Help menu ***/
     QMenu* helpMenu = new QMenu("Help", this);
@@ -534,7 +544,7 @@ Cosmographia::plotTrajectoryObserver()
 
 
 void
-Cosmographia::setPlanetOrbitsVisibility(bool enabled)
+Cosmographia::setPlanetOrbitsVisibility(bool /* enabled */)
 {
     const char* planetNames[] = {
         "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon"
@@ -792,3 +802,31 @@ Cosmographia::processReceivedResource(QNetworkReply* reply)
         m_loader->processUpdates();
     }
 }
+
+
+void
+Cosmographia::setStarStyle(QAction *action)
+{
+    StarsLayer* stars = dynamic_cast<StarsLayer*>(m_view3d->universe()->layer("stars"));
+    if (stars)
+    {
+        int mode = action->data().toInt();
+        switch (mode)
+        {
+        case 0:
+            stars->setStyle(StarsLayer::PointStars);
+            break;
+        case 1:
+            stars->setStyle(StarsLayer::GaussianStars);
+            stars->setDiffractionSpikeBrightness(0.0f);
+            break;
+        case 2:
+            stars->setStyle(StarsLayer::GaussianStars);
+            stars->setDiffractionSpikeBrightness(0.3f);
+            break;
+        default:
+            break;
+        }
+    }
+}
+

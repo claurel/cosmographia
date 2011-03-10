@@ -40,10 +40,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "58.646225199061172d",
+              "inclination" : 28.55,
+              "ascendingNode" : 11.01,
+              "meridianAngle" : 329.548
           },
 
           "geometry" :
@@ -69,10 +69,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "243.018483985891967d",
+              "inclination" : 157.16,
+              "ascendingNode" : 182.76,
+              "meridianAngle" : 160.20
           },
 
           "geometry" :
@@ -167,10 +167,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "24.6229h",
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "24.622962155909364h",
+              "inclination" : 37.1135,
+              "ascendingNode" : 47.68143,
+              "meridianAngle" : 176.630
           },
 
           "geometry" :
@@ -196,16 +196,16 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "9.924912500121965h",
+              "inclination" : 25.57,
+              "ascendingNode" : 358.05,
+              "meridianAngle" : 284.95
           },
 
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 69911,
+              "radii" : [ 71492, 71492, 66854 ],
               "baseMap" : "textures/jupiter.jpg"
           }
         },
@@ -225,16 +225,16 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "10.656222221732387h",
+              "inclination" : 6.463,
+              "ascendingNode" : 130.589,
+              "meridianAngle" : 38.90
           },
 
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 58232,
+              "radii" : [ 60268, 60268, 54364 ],
               "baseMap" : "textures/saturn.jpg",
               "ringSystem" : 
               {
@@ -260,16 +260,16 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "17.240000000255407h",
+              "inclination" : 74.825,
+              "ascendingNode" : 167.311,
+              "meridianAngle" : 203.81
           },
 
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 25362,
+              "radii" : [ 25559, 25559, 24973 ],
               "baseMap" : "textures/uranus.jpg",
               "ringSystem" : 
               {
@@ -295,16 +295,16 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
-              "inclination" : 115.60,
-              "ascendingNode" : 228.34,
-              "meridianAngle" : 320.75
+              "period" : "16.109999998858875h",
+              "inclination" : 46.54,
+              "ascendingNode" : 19.36,
+              "meridianAngle" : 253.18
           },
 
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 24622,
+              "radii" : [ 24764, 24764, 24341 ],
               "baseMap" : "textures/neptune.jpg"
           }
         },
@@ -336,6 +336,128 @@
               "radius" : 1195,
               "baseMap" : "pluto.jpg"
           }
+        },
+
+        {
+          "name" : "Io",
+          "label" : { "color" : [ 1.0, 1.0, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Jupiter",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Io"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "1.769137799754121d",
+              "inclination" : 25.50,
+              "ascendingNode" : 358.05,
+              "meridianAngle" : 200.39
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1821.6,
+              "baseMap" : "textures/io.dds"
+          }
+
+        },
+
+        {
+          "name" : "Europa",
+          "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Jupiter",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Europa"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "3.551181079177d",
+              "inclination" : 25.49,
+              "ascendingNode" : 358.08,
+              "meridianAngle" : 36.022
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1560.8,
+              "baseMap" : "textures/europa.dds"
+          }
+        },
+
+        {
+          "name" : "Ganymede",
+          "label" : { "color" : [ 0.9, 0.8, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Jupiter",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Ganymede"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "7.154553119547032d",
+              "inclination" : 25.43,
+              "ascendingNode" : 358.20,
+              "meridianAngle" : 44.064
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 2631.2,
+              "baseMap" : "textures/ganymede.dds"
+          }
+        },
+
+        {
+          "name" : "Callisto",
+          "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Jupiter",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Callisto"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 2410.3,
+              "baseMap" : "textures/callisto.dds"
+          }
+
         }
 
     ]

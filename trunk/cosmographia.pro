@@ -33,6 +33,7 @@ APP_SOURCES = \
     $$MAIN_PATH/astro/IAULunarRotationModel.cpp \
     $$MAIN_PATH/astro/Nutation.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
+    $$MAIN_PATH/astro/L1.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp
@@ -59,6 +60,7 @@ APP_HEADERS = \
     $$MAIN_PATH/astro/Nutation.h \
     $$MAIN_PATH/astro/Precession.h \
     $$MAIN_PATH/astro/Rotation.h \
+    $$MAIN_PATH/astro/L1.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
     $$MAIN_PATH/compatibility/Scanner.h \
     $$MAIN_PATH/compatibility/TransformCatalog.h
@@ -469,7 +471,11 @@ macx {
         data/textures/neptune.jpg \
         data/textures/sun.jpg \
         data/textures/saturn-rings.png \
-        data/textures/uranus-rings.png
+        data/textures/uranus-rings.png \
+        data/textures/io.dds \
+        data/textures/europa.dds \
+        data/textures/ganymede.dds \
+        data/textures/callisto.dds
 
 
     QMAKE_BUNDLE_DATA += TEXTURES

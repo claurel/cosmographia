@@ -16,6 +16,16 @@ texture was created by Grant Hutchison from Cassini images and opacities
 derived from stellar transit measurements: 
 http://pds-rings.arc.nasa.gov/ringocc/ringocc.html
 
+The Io and Europa maps are from Steve Albers and NOAA's "Science on a Sphere"
+project. The web page http://laps.noaa.gov/albers/sos/sos.html has all of
+his maps and a complete list of original data sources.
+
+The Ganymede and Callisto maps are by Bjorn Jonsson. All of his planetary maps
+can be found at http://www.mmedia.is/~bjj/planetary_maps.html
+
+
+
+
 
 
 

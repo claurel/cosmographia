@@ -88,6 +88,9 @@ enum DistanceUnit
 
 static const double AU = 149597870.691;
 
+static const double DefaultStartTime = 0.0;                       // 12:00:00 1 Jan 2000
+static const double DefaultEndTime   = daysToSeconds(36525);      // 12:00:00 1 Jan 2100
+
 QString ValueUnitsRegexpString("^\\s*([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\\s*([A-Za-z]+)?\\s*$");
 
 
@@ -845,7 +848,7 @@ static double dateValue(QVariant v, bool* ok)
     if (v.type() == QVariant::String)
     {
         QString dateString = v.toString();
-        QDateTime d = QDateTime::fromString(dateString);
+        QDateTime d = QDateTime::fromString(dateString, Qt::ISODate);
         if (d.isValid())
         {
             *ok = true;
@@ -1514,7 +1517,8 @@ UniverseLoader::loadFrame(const QVariantMap& map,
 
 vesta::Arc*
 UniverseLoader::loadArc(const QVariantMap& map,
-                        const UniverseCatalog* catalog)
+                        const UniverseCatalog* catalog,
+                        double startTime)
 {
     vesta::Arc* arc = new vesta::Arc();
 
@@ -1523,8 +1527,6 @@ UniverseLoader::loadArc(const QVariantMap& map,
     QVariant rotationModelData = map.value("rotationModel");
     QVariant trajectoryFrameData = map.value("trajectoryFrame");
     QVariant bodyFrameData = map.value("bodyFrame");
-
-    arc->setDuration(daysToSeconds(100 * 365.25));
 
     if (centerData.type() == QVariant::String)
     {
@@ -1592,7 +1594,62 @@ UniverseLoader::loadArc(const QVariantMap& map,
         }
     }
 
+    QVariant endTimeVar = map.value("endTime");
+    double endTime = DefaultEndTime;
+    if (endTimeVar.isValid())
+    {
+        bool ok = false;
+        endTime = dateValue(endTimeVar, &ok);
+        if (!ok)
+        {
+            qDebug() << "Invalid endTime specified.";
+            delete arc;
+            return NULL;
+        }
+    }
+
+    if (endTime <= startTime)
+    {
+        qDebug() << "End time must be after the start time";
+        delete arc;
+        return NULL;
+    }
+
+    arc->setDuration(endTime - startTime);
+
     return arc;
+}
+
+
+QList<counted_ptr<vesta::Arc> >
+UniverseLoader::loadChronology(const QVariantList& list,
+                               const UniverseCatalog* catalog,
+                               double startTime)
+{
+    QList<counted_ptr<vesta::Arc> > arcs;
+    double nextStartTime = startTime;
+
+    foreach (QVariant v, list)
+    {
+        if (v.type() != QVariant::Map)
+        {
+            qDebug() << "Invalid arc in arcs list.";
+            arcs.clear();
+            break;
+        }
+
+        QVariantMap map = v.toMap();
+        vesta::Arc* arc = loadArc(map, catalog, nextStartTime);
+        if (!arc)
+        {
+            arcs.clear();
+            break;
+        }
+
+        arcs << counted_ptr<vesta::Arc>(arc);
+    }
+
+    return arcs;
 }
 
 
@@ -2529,7 +2586,7 @@ QStringList
 UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                                 UniverseCatalog* catalog)
 {
-    qDebug() << contents["name"];
+    qDebug() << "Loading catalog " << contents["name"].toString();
 
     QStringList bodyNames;
 
@@ -2562,9 +2619,14 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                 QString bodyName = item.value("name").toString();
                 m_currentBodyName = bodyName;
 
+                bool newBody = false;
+                bool valid = true;
+
                 vesta::Body* body = dynamic_cast<Body*>(catalog->find(bodyName));
                 if (body == NULL)
                 {
+                    newBody = true;
+
                     // No body with this name exists, so create it
                     body = new vesta::Body();
                     body->setName(bodyName.toUtf8().data());
@@ -2573,51 +2635,102 @@ UniverseLoader::loadSolarSystem(const QVariantMap& contents,
                     // frames.
                     catalog->addBody(bodyName, body);
                 }
-                else
-                {
-                    // Body with the given name already exists; clear all information about
-                    // it and reload.
-                    body->setLightSource(NULL);
-                    body->setGeometry(NULL);
-                    body->setVisible(true);
-                    body->chronology()->clearArcs();
-                }
+
+                // The following values will be assigned to the body *if* it
+                // can be successfully loaded.
+                counted_ptr<vesta::Geometry> geometry;
+                double startTime = DefaultStartTime;
+                QList<counted_ptr<vesta::Arc> > arcs;
 
                 if (item.contains("geometry"))
                 {
                     QVariant geometryValue = item.value("geometry");
                     if (geometryValue.type() == QVariant::Map)
                     {
-                        vesta::Geometry* geometry = loadGeometry(geometryValue.toMap(), catalog);
-                        if (geometry)
-                        {
-                            body->setGeometry(geometry);
-                        }
+                        geometry = loadGeometry(geometryValue.toMap(), catalog);
                     }
                     else
                     {
                         qDebug() << "Invalid geometry for body.";
+                        valid = false;
                     }
                 }
 
-                vesta::Arc* arc = loadArc(item, catalog);
-
-                if (!arc)
+                QVariant startTimeVar = item.value("startTime");
+                if (startTimeVar.isValid())
                 {
-                    delete body;
+                    bool ok = false;
+                    startTime = dateValue(startTimeVar, &ok);
+                    if (!ok)
+                    {
+                        qDebug() << "Invalid startTime specified";
+                        valid = false;
+                    }
+                }
+
+                // A list of arcs may be provided
+                QVariant arcsVar = item.value("arcs");
+                if (arcsVar.isValid())
+                {
+                    if (arcsVar.type() != QVariant::List)
+                    {
+                        qDebug() << "Arcs must be an array";
+                    }
+                    else
+                    {
+                        arcs = loadChronology(arcsVar.toList(), catalog, startTime);
+                    }
                 }
                 else
                 {
-                    body->chronology()->addArc(arc);
+                    // No list provided; just read the properties for a single arc
+                    vesta::Arc* arc = loadArc(item, catalog, startTime);
+                    if (arc)
+                    {
+                        arcs << counted_ptr<vesta::Arc>(arc);
+                    }
                 }
 
-                // Visible property
-                body->setVisible(item.value("visible", true).toBool());
+                // At least one arc is required
+                if (arcs.isEmpty())
+                {
+                    valid = false;
+                }
 
-                BodyInfo* info = loadBodyInfo(item);
-                catalog->setBodyInfo(bodyName, info);
+                // If we successfully loaded a new body, add it to the list if it's new
+                // or replace it otherwise.
+                //
+                // If we failed then leave any existing body with the same name alone.
+                if (valid)
+                {
+                    BodyInfo* info = loadBodyInfo(item);
+                    catalog->setBodyInfo(bodyName, info);
 
-                bodyNames << bodyName;
+                    // Set all information about a body to the default state
+                    body->setLightSource(NULL);
+                    body->setGeometry(NULL);
+                    body->setVisible(true);
+                    body->chronology()->clearArcs();
+
+                    // Visible property
+                    body->setVisible(item.value("visible", true).toBool());
+                    body->setGeometry(geometry.ptr());
+                    body->chronology()->setBeginning(startTime);
+                    foreach (counted_ptr<vesta::Arc> arc, arcs)
+                    {
+                        body->chronology()->addArc(arc.ptr());
+                    }
+
+                    bodyNames << bodyName;
+                }
+                else
+                {
+                    qDebug() << "Skipping body " << bodyName << " because of errors.";
+                    if (newBody)
+                    {
+                        catalog->removeBody(bodyName);
+                    }
+                }
             }
             else if (type == "Visualizer")
             {

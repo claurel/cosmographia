@@ -30,6 +30,7 @@
 #include "compatibility/CatalogParser.h"
 #include "compatibility/TransformCatalog.h"
 #include "astro/IAULunarRotationModel.h"
+#include "astro/L1.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -374,6 +375,12 @@ Cosmographia::initialize()
         // position: -2.649903422886233E+07  1.327574176646856E+08  5.755671744790662E+07
         // velocity: -2.979426004836674E+01 -5.018052460415045E+00 -2.175393728607054E+00
         //std::cout << "Earth @ J2000: " << earthTrajectory->position(0.0).transpose().format(16) << std::endl;
+
+        // Galilean satellites
+        m_loader->addBuiltinOrbit("Io", L1Orbit::Create(L1Orbit::Io));
+        m_loader->addBuiltinOrbit("Europa", L1Orbit::Create(L1Orbit::Europa));
+        m_loader->addBuiltinOrbit("Ganymede", L1Orbit::Create(L1Orbit::Ganymede));
+        m_loader->addBuiltinOrbit("Callisto", L1Orbit::Create(L1Orbit::Callisto));
     }
 
     // Set up builtin rotation models

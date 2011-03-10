@@ -1060,7 +1060,6 @@ L1Orbit::state(double tdbSec) const
     double f = sqrt(1.0 - e * e);
 
     double mu = l1_bodies[(int) m_satellite].mu * (pow(AU, 3.0) / pow(daysToSeconds(1.0), 2.0));
-    cerr << (int) m_satellite << ", " << mu << endl;
     double n = sqrt(mu / (a * a * a));          // mean motion
     double edot = n / (1 - e * cosE);
 

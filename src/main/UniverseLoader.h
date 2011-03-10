@@ -83,8 +83,13 @@ private:
     vesta::Geometry* loadSwarmGeometry(const QVariantMap& map);
     vesta::Geometry* loadParticleSystemGeometry(const QVariantMap& map);
 
+    QList<vesta::counted_ptr<vesta::Arc> > loadChronology(const QVariantList& list,
+                                                          const UniverseCatalog* catalog,
+                                                          double startTime);
+
     vesta::Arc* loadArc(const QVariantMap& map,
-                        const UniverseCatalog* catalog);
+                        const UniverseCatalog* catalog,
+                        double startTime);
     vesta::Frame* loadFrame(const QVariantMap& map,
                             const UniverseCatalog* catalog);
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);

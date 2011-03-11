@@ -1,0 +1,30 @@
+#summary Defining particle systems in catalog files
+
+= Introduction =
+
+Example of a ParticleSystem geometry definition:
+
+{{{
+"geometry" :
+{
+    "type" : "ParticleSystem",
+    "emitters" :
+    [
+      {
+        "texture" : "gaussian.jpg",
+        "generator" :
+        {
+          "type" : "Point",
+          "velocity" : [ 0, 0, 0.1 ]
+        },
+        "velocityVariation" : 2.5,
+        "spawnRate" : 100,
+        "lifetime" : 10.0,
+        "startSize" : 0.0,
+        "endSize" : 5.0,
+        "colors" : [ "#10eeff", 0.6, "blue", 0.0 ],
+        "endTime" : 3451545.0
+      }
+   ]
+}
+}}}

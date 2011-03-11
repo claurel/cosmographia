@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Example of a ParticleSystem geometry definition:
+Example of a !ParticleSystem geometry definition:
 
 {{{
 "geometry" :

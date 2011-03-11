@@ -551,7 +551,7 @@ Cosmographia::plotTrajectoryObserver()
 
 
 void
-Cosmographia::setPlanetOrbitsVisibility(bool /* enabled */)
+Cosmographia::setPlanetOrbitsVisibility(bool enabled)
 {
     const char* planetNames[] = {
         "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon"
@@ -562,7 +562,14 @@ Cosmographia::setPlanetOrbitsVisibility(bool /* enabled */)
         Entity* planet = m_catalog->find(planetNames[i]);
         BodyInfo* info = m_catalog->findInfo(planetNames[i]);
 
-        m_view3d->plotTrajectory(planet, info);
+        if (enabled)
+        {
+            m_view3d->plotTrajectory(planet, info);
+        }
+        else
+        {
+            m_view3d->clearTrajectory(planet);
+        }
     }
 }
 

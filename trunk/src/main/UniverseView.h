@@ -133,6 +133,7 @@ public slots:
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
     void plotTrajectoryObserver(const BodyInfo* info);
+    void clearTrajectory(vesta::Entity* body);
     void gotoSelectedObject();
 
 protected:

@@ -1698,7 +1698,12 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
         return;
     }
 
-    vesta::Arc* arc = body->chronology()->firstArc();
+    vesta::Arc* arc = body->chronology()->activeArc(m_simulationTime);
+    if (!arc)
+    {
+        return;
+    }
+
     string visName = string("traj - ") + body->name();
     Visualizer* oldVisualizer = arc->center()->visualizer(visName);
 
@@ -1770,6 +1775,27 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
     }
 
     m_trajectoryPlots.push_back(plotEntry);
+}
+
+
+void
+UniverseView::clearTrajectory(Entity* body)
+{
+    if (!body)
+    {
+        return;
+    }
+
+    // Clear all trajectory visualizers (there may be one per trajectory arc)
+    for (unsigned int i = 0; i < body->chronology()->arcCount(); ++i)
+    {
+        vesta::Arc* arc = body->chronology()->arc(i);
+        string visName = string("traj - ") + body->name();
+        if (arc->center())
+        {
+            arc->center()->removeVisualizer(visName);
+        }
+    }
 }
 
 
@@ -2089,7 +2115,12 @@ UniverseView::gotoSelectedObject()
         }
         else if (f == Frame_Synodic)
         {
-            targetFrame = new TwoBodyRotatingFrame(center->chronology()->firstArc()->center(), center);
+            vesta::Arc* arc = center->chronology()->activeArc(m_simulationTime);
+            if (!arc)
+            {
+                arc = center->chronology()->firstArc();
+            }
+            targetFrame = new TwoBodyRotatingFrame(arc->center(), center);
         }
         else
         {

@@ -73,7 +73,7 @@ A body is identified by setting the value of type to "body"; this is the value a
  * trajectory - describes the position of the object over time
  * rotationModel - describes the orientation of the object over time
 
-*Note:* The center, frames, trajectory, and rotation model collectively comprise an _arc_. The catalog file format will soon be updated to support multiple arcs for a body.
+*Note:* The center, frames, trajectory, and rotation model collectively comprise an _arc_. If more than one arc is required, use the _arcs_ property to provide a list of them.
 
 The default values for arc properties are:
  * trajectoryFrame and bodyFrame - ICRF (International Celestial Reference Frame)
@@ -288,6 +288,50 @@ The available inertial frames are:
         "observer" : "CubeSat",
         "target" : "Ceres"
     }
+}
+}}}
+
+= Arcs =
+
+The arcs property can be used to create bodies with complex trajectories with multiple reference frames. For example, a rocket may defined with two arcs: one pre-launch arc, where it is at a fixed position in an Earth-fixed frame, and a flight arc where the trajectory is given in an inertial frame.
+
+{{{
+{
+    "name" : "Huygens",
+
+    "startTime" : "1997-10-15 09:27",
+
+    "arcs" : [
+       {
+         "center" : "Cassini",
+         "trajectoryFrame" : { "type" : "BodyFixed", "body" : "Cassini" },
+         "trajectory" : { "type" : "FixedPoint", "position" : [ 0, 0, 0 ] },
+         "bodyFrame" : { "type" : "BodyFixed", "body" : "Cassini" },
+         "endTime" : "2004-12-25 02:01:05"
+        },
+
+        {
+          "center" : "Titan",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" : {
+            "type" : "InterpolatedStates",
+            "source" : "cassini-solstice.xyzv"
+          },
+          "bodyFrame" : "EclipticJ2000",
+          "rotationModel" : {
+            "type" : "Interpolated",
+            "source" : "huygens-attitude.q"
+          }
+          "endTime" : "2005-01-14 09:07:00",
+        }
+    ],
+          
+     "geometry" :
+     {
+         "type" : "Mesh",
+         "size" : "1m",
+         "source" : "models/huygens.obj"
+     }
 }
 }}}
 

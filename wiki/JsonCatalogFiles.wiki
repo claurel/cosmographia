@@ -47,6 +47,15 @@ Examples:
     semiMajorAxis : "1 au"
 }}}
 
+= Dates =
+
+Dates may be specified as Julian day numbers or as ISO 8601 date and time strings. Some examples:
+ * "2000-01-01 12:00:00"
+ * 2451545.0 _(Julian day number representing the above date)_
+ * "2011-03-11" _(time may be omitted indicating midnight on the given date)_
+
+Dates are always interpreted in the TDB time system; as of 2011, this is 66 seconds ahead of UTC.
+
 = Catalog File Properties =
 
  * version - version number of the catalog file (always 1.0 for now)

@@ -141,6 +141,35 @@ This is a specialized geometry type used for representing large numbers of point
 }
 }}}
 
+== ParticleSystem ==
+
+An example is given below, but check the separate [Particle Systems] page.
+
+{{{
+"geometry" :
+{
+    "type" : "ParticleSystem",
+    "emitters" :
+    [
+      {
+        "texture" : "gaussian.jpg",
+        "generator" :
+        {
+          "type" : "Point",
+          "velocity" : [ 0, 0, 0.1 ]
+        },
+        "velocityVariation" : 2.5,
+        "spawnRate" : 100,
+        "lifetime" : 10.0,
+        "startSize" : 0.0,
+        "endSize" : 5.0,
+        "colors" : [ "#10eeff", 0.6, "blue", 0.0 ],
+        "endTime" : 3451545.0
+      }
+   ]
+}
+}}}
+
 = Trajectory Types =
 
 == Fixed Point ==

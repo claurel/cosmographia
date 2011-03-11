@@ -143,7 +143,7 @@ This is a specialized geometry type used for representing large numbers of point
 
 == ParticleSystem ==
 
-An example is given below, but check the separate [Particle Systems] page.
+An example is given below, but check the separate [ParticleSystem Particle Systems] page.
 
 {{{
 "geometry" :

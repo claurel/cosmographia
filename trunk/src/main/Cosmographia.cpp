@@ -64,10 +64,17 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction(NULL),
     m_networkManager(NULL)
 {
+    QPalette newPalette = palette();
+    newPalette.setColor(QPalette::Window, Qt::black);
+    setPalette(newPalette);
+
+    initializeUniverse();
+
     m_catalog = new UniverseCatalog();
-    m_view3d = new UniverseView();
+    m_view3d = new UniverseView(this, m_universe.ptr());
     m_loader = new UniverseLoader();
 
+    m_view3d->setPalette(newPalette);
     setCentralWidget(m_view3d);
 
     setWindowTitle(tr("Cosmographia"));
@@ -229,9 +236,6 @@ Cosmographia::Cosmographia() :
 
     /*** Graphics menu ***/
     QMenu* graphicsMenu = new QMenu("&Graphics", this);
-    QAction* normalMapAction = new QAction("&Normal map", graphicsMenu);
-    normalMapAction->setCheckable(true);
-    graphicsMenu->addAction(normalMapAction);
     QAction* shadowsAction = new QAction("&Shadows", graphicsMenu);
     shadowsAction->setCheckable(true);
     graphicsMenu->addAction(shadowsAction);
@@ -269,7 +273,6 @@ Cosmographia::Cosmographia() :
 
     this->menuBar()->addMenu(graphicsMenu);
 
-    connect(normalMapAction,        SIGNAL(triggered(bool)), m_view3d, SLOT(setNormalMaps(bool)));
     connect(shadowsAction,          SIGNAL(triggered(bool)), m_view3d, SLOT(setShadows(bool)));
     connect(atmospheresAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setAtmospheres(bool)));
     //connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayerVisibility(bool)));
@@ -307,6 +310,69 @@ Cosmographia::Cosmographia() :
 Cosmographia::~Cosmographia()
 {
     saveSettings();
+}
+
+
+void
+Cosmographia::initializeUniverse()
+{
+    m_universe = new Universe();
+    m_universe->addRef();
+
+    double duration = daysToSeconds(365.25);
+
+    vesta::Arc* arc = NULL;
+
+    // Create the solar system barycenter
+    Entity* ssb = new Entity();
+    arc = new vesta::Arc();
+    arc->setDuration(duration);
+    ssb->chronology()->addArc(arc);
+    m_universe->addEntity(ssb);
+
+    // Create the Sun
+    Body* sun = new Body();
+    sun->setName("Sun");
+
+    arc = new vesta::Arc();
+    arc->setCenter(ssb);
+    arc->setDuration(daysToSeconds(365.25 * 200.0));
+    sun->chronology()->setBeginning(0.0);
+    sun->chronology()->addArc(arc);
+
+    m_universe->addEntity(sun);
+
+    QFile starFile("tycho2.stars");
+    if (starFile.open(QFile::ReadOnly))
+    {
+        StarCatalog* stars = new StarCatalog();
+        QDataStream in(&starFile);
+        in.setVersion(QDataStream::Qt_4_4);
+        in.setByteOrder(QDataStream::BigEndian);
+
+        bool ok = true;
+        while (ok)
+        {
+            quint32 id = 0;
+            float ra = 0.0f;
+            float dec = 0.0f;
+            float vmag = 0.0f;
+            float bv = 0.0f;
+            in >> id >> ra >> dec >> vmag >> bv;
+
+            if (in.status() == QDataStream::Ok)
+            {
+                stars->addStar(id, (float) toRadians(ra), (float) toRadians(dec), vmag, bv);
+            }
+            else
+            {
+                ok = false;
+            }
+        }
+
+        stars->buildCatalogIndex();
+        m_universe->setStarCatalog(stars);
+    }
 }
 
 

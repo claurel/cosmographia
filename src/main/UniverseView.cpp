@@ -21,11 +21,7 @@
 #include "UniverseView.h"
 #include "NetworkTextureLoader.h"
 #include "WMSRequester.h"
-#include "TleTrajectory.h"
-#include "ChebyshevPolyTrajectory.h"
 #include "InterpolatedStateTrajectory.h"
-#include "JPLEphemeris.h"
-#include "KeplerianSwarm.h"
 #include "WMSTiledMap.h"
 #include "MultiWMSTiledMap.h"
 
@@ -107,8 +103,6 @@ static const QString EarthRealisticTextureSource = "bm-earth-may-water.png";
 
 static const unsigned int ShadowMapSize = 2048;
 static const unsigned int ReflectionMapSize = 512;
-
-static JPLEphemeris* g_jplEph = NULL;
 
 static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
 
@@ -311,21 +305,17 @@ private:
 };
 
 
-static void SafeRelease(Object* obj)
+static string TrajectoryVisualizerName(Entity* entity)
 {
-    if (obj)
-    {
-        obj->release();
-    }
+    return string("traj - ") + entity->name();
 }
 
 
-UniverseView::UniverseView(QWidget *parent) :
+UniverseView::UniverseView(QWidget *parent, Universe* universe) :
     QGLWidget(parent),
     m_mouseMovement(0),
     m_universe(NULL),
     m_observer(NULL),
-    m_spacecraftObserver(NULL),
     m_controller(new ObserverController()),
     m_renderer(NULL),
     m_observerFrame(Frame_Inertial),
@@ -353,6 +343,7 @@ UniverseView::UniverseView(QWidget *parent) :
     m_infoTextVisible(true),
     m_videoEncoder(NULL)
 {
+    m_universe = universe;
     m_textureLoader = new NetworkTextureLoader(this);
     m_renderer = new UniverseRenderer();
 
@@ -360,8 +351,7 @@ UniverseView::UniverseView(QWidget *parent) :
     m_titleFont = new TextureFont();
     m_spacecraftIcon = m_textureLoader->loadTexture(":/icons/disk.png", TextureProperties(TextureProperties::Clamp));
 
-    initPlanetEphemeris();
-    initializeUniverse();
+    initializeObserver();
     initializeSkyLayers();
 
     // Initialize the base time that will be used as a reference for calculating
@@ -388,11 +378,6 @@ UniverseView::UniverseView(QWidget *parent) :
 UniverseView::~UniverseView()
 {
     makeCurrent();
-
-    SafeRelease(m_universe);
-    SafeRelease(m_observer);
-    SafeRelease(m_spacecraftObserver);
-
     delete m_renderer;
 }
 
@@ -502,15 +487,6 @@ void UniverseView::initializeGL()
 }
 
 
-bool
-UniverseView::initPlanetEphemeris()
-{
-    g_jplEph = JPLEphemeris::load("de406_1800-2100.dat");
-
-    return g_jplEph != NULL;
-}
-
-
 void
 UniverseView::initNetwork()
 {
@@ -613,7 +589,7 @@ void UniverseView::paintGL()
 
     updateTrajectoryPlots();
 
-    m_renderer->beginViewSet(m_universe, m_simulationTime);
+    m_renderer->beginViewSet(m_universe.ptr(), m_simulationTime);
 
     if (m_reflectionsEnabled && !m_reflectionMap.isNull())
     {
@@ -689,7 +665,7 @@ void UniverseView::paintGL()
     }
     else
     {
-        m_renderer->renderView(&lighting, m_observer, m_fovY, mainViewport);
+        m_renderer->renderView(&lighting, m_observer.ptr(), m_fovY, mainViewport);
     }
 
 #define ZOOM_INSET 0
@@ -1014,13 +990,6 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
     StarsLayer* stars = dynamic_cast<StarsLayer*>(m_universe->layer("stars"));
     if (stars)
     {
-        static unsigned int earthLayer = 0;
-        const char* EarthLayerNames[] = {
-            "bmng-jan-nb", "bmng-feb-nb", "bmng-mar-nb",
-            "bmng-apr-nb", "bmng-may-nb", "bmng-jun-nb",
-            "bmng-jul-nb", "bmng-aug-nb", "bmng-sep-nb",
-            "bmng-oct-nb", "bmng-nov-nb", "bmng-dec-nb",
-        };
         if (event->text() == "[")
         {
             stars->setLimitingMagnitude(max(3.0f, stars->limitingMagnitude() - 0.2f));
@@ -1028,23 +997,6 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
         else if (event->text() == "]")
         {
             stars->setLimitingMagnitude(min(13.0f, stars->limitingMagnitude() + 0.2f));
-        }
-        else if (event->text() == ")")
-        {
-            earthLayer = (earthLayer + 1) % 12;
-            setPlanetMap("Earth", new WMSTiledMap(m_textureLoader.ptr(), EarthLayerNames[earthLayer], 512, 7));
-        }
-        else if (event->text() == "(")
-        {
-            if (earthLayer == 0)
-            {
-                earthLayer = 11;
-            }
-            else
-            {
-                earthLayer--;
-            }
-            setPlanetMap("Earth", new WMSTiledMap(m_textureLoader.ptr(), EarthLayerNames[earthLayer], 512, 7));
         }
     }
 }
@@ -1092,6 +1044,9 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
             earthDirectionAction = menu->addAction(tr("Earth direction"));
         }
 
+        menu->addSeparator();
+        QAction* plotTrajectoryAction = menu->addAction("Plot trajectory");
+
         bodyAxesAction->setCheckable(true);
         bodyAxesAction->setChecked(body->visualizer("body axes") != NULL);
         frameAxesAction->setCheckable(true);
@@ -1107,6 +1062,20 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         {
             earthDirectionAction->setCheckable(true);
             earthDirectionAction->setChecked(body->visualizer("earth direction") != NULL);
+        }
+
+        plotTrajectoryAction->setCheckable(true);
+        vesta::Arc* arc = body->chronology()->activeArc(m_simulationTime);
+        if (arc)
+        {
+            Entity* center = arc->center();
+            if (center)
+            {
+                if (center->visualizer(TrajectoryVisualizerName(body)))
+                {
+                    plotTrajectoryAction->setChecked(true);
+                }
+            }
         }
 
         QAction* chosenAction = menu->exec(event->globalPos(), bodyAxesAction);
@@ -1179,6 +1148,17 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
                 body->removeVisualizer("earth direction");
             }
         }
+        else if (chosenAction == plotTrajectoryAction)
+        {
+            if (plotTrajectoryAction->isChecked())
+            {
+                //plotTrajectory(body);
+            }
+            else
+            {
+                clearTrajectory(body);
+            }
+        }
     }
 }
 
@@ -1242,6 +1222,7 @@ UniverseView::updateTrajectoryPlots()
 }
 
 
+#if 0
 static MeshGeometry*
 loadMeshFile(const string& fileName, TextureMapLoader* textureLoader)
 {
@@ -1261,27 +1242,7 @@ loadMeshFile(const string& fileName, TextureMapLoader* textureLoader)
 
     return meshGeometry;
 }
-
-
-/** Create a new planet
-  * @param rotationPeriod rotation period in hours
-  */
-static Body* createPlanet(const QString& name,
-                          Entity* parent,
-                          double rotationPeriod)
-{
-    Body* body = new Body();
-    body->setName(name.toUtf8().data());
-
-    vesta::Arc* arc = new vesta::Arc();
-    arc->setCenter(parent);
-    arc->setDuration(daysToSeconds(365.25 * 200.0));
-    arc->setRotationModel(new UniformRotationModel(Vector3d::UnitZ(), toRadians(360.0 / (rotationPeriod * 3600)), 0.0, 0.0));
-    body->chronology()->setBeginning(StartOfTime);
-    body->chronology()->addArc(arc);
-
-    return body;
-}
+#endif
 
 
 TextureMap*
@@ -1291,77 +1252,15 @@ UniverseView::loadTexture(const QString& location, const TextureProperties& texP
 }
 
 
-void UniverseView::initializeUniverse()
+void
+UniverseView::initializeObserver()
 {
-    m_universe = new Universe();
-    m_universe->addRef();
-
-    double duration = daysToSeconds(365.25);
-
-    vesta::Arc* arc = NULL;
-
-    // Create the solar system barycenter
-    Entity* ssb = new Entity();
-    arc = new vesta::Arc();
-    arc->setDuration(duration);
-    ssb->chronology()->addArc(arc);
-    m_universe->addEntity(ssb);
-
-    // Create the Sun
-    Body* sun = createPlanet("Sun", ssb, 25.58 * 24.0);
-    sun->chronology()->firstArc()->setTrajectory(new FixedPointTrajectory(Vector3d(50.0, 0.0, 0.0)));
-    WorldGeometry* sunSphere = new WorldGeometry();
-    sunSphere->setSphere(695000.0);
-    sunSphere->setBaseMap(loadTexture("sun.jpg", PlanetTextureProperties()));
-    sunSphere->setEmissive(true);
-    sun->setGeometry(sunSphere);
-
-    m_universe->addEntity(sun);
-
     Entity* center = new Entity();
     m_observer = new Observer(center);
     m_observer->addRef();
     m_observer->setPosition(Vector3d(0.0, 0.0, 1.0e9));
 
-    m_controller->setObserver(m_observer);
-
-    QFile starFile("tycho2.stars");
-    if (starFile.open(QFile::ReadOnly))
-    {
-        StarCatalog* stars = new StarCatalog();
-        QDataStream in(&starFile);
-        in.setVersion(QDataStream::Qt_4_4);
-        in.setByteOrder(QDataStream::BigEndian);
-
-        bool ok = true;
-        while (ok)
-        {
-            quint32 id = 0;
-            float ra = 0.0f;
-            float dec = 0.0f;
-            float vmag = 0.0f;
-            float bv = 0.0f;
-            in >> id >> ra >> dec >> vmag >> bv;
-
-            if (in.status() == QDataStream::Ok)
-            {
-                stars->addStar(id, (float) toRadians(ra), (float) toRadians(dec), vmag, bv);
-            }
-            else
-            {
-                ok = false;
-            }
-        }
-
-        stars->buildCatalogIndex();
-        m_universe->setStarCatalog(stars);
-    }
-
-    m_defaultSpacecraftMesh = loadMeshFile("models/jason.obj", m_textureLoader.ptr());
-    if (m_defaultSpacecraftMesh.isValid())
-    {
-        m_defaultSpacecraftMesh->setMeshScale(0.004f / m_defaultSpacecraftMesh->boundingSphereRadius());
-    }
+    m_controller->setObserver(m_observer.ptr());
 }
 
 
@@ -1569,6 +1468,7 @@ UniverseView::setAsteroidVisibility(bool checked)
 void
 UniverseView::highlightAsteroidFamily()
 {
+#if 0
     unsigned int familyCount = sizeof(AsteroidFamilyNames) / sizeof(AsteroidFamilyNames[0]);
 
     Entity* asteroids = m_universe->findFirst(AsteroidFamilyNames[m_highlightedAsteroidFamily]);
@@ -1601,6 +1501,7 @@ UniverseView::highlightAsteroidFamily()
             }
         }
     }
+#endif
 }
 
 
@@ -1704,7 +1605,7 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
         return;
     }
 
-    string visName = string("traj - ") + body->name();
+    string visName = TrajectoryVisualizerName(body);
     Visualizer* oldVisualizer = arc->center()->visualizer(visName);
 
     TrajectoryGeometry* plot = new TrajectoryGeometry();
@@ -1790,10 +1691,9 @@ UniverseView::clearTrajectory(Entity* body)
     for (unsigned int i = 0; i < body->chronology()->arcCount(); ++i)
     {
         vesta::Arc* arc = body->chronology()->arc(i);
-        string visName = string("traj - ") + body->name();
         if (arc->center())
         {
-            arc->center()->removeVisualizer(visName);
+            arc->center()->removeVisualizer(TrajectoryVisualizerName(body));
         }
     }
 }
@@ -1847,7 +1747,7 @@ UniverseView::plotTrajectoryObserver(const BodyInfo* info)
     {
         Entity* center = m_observer->center();
         Frame* frame = m_observer->positionFrame();
-        string visName = string("traj - ") + m_selectedBody->name();
+        string visName = TrajectoryVisualizerName(m_selectedBody.ptr());
         Visualizer* vis = center->visualizer(visName);
         if (!vis)
         {
@@ -1866,31 +1766,6 @@ UniverseView::plotTrajectoryObserver(const BodyInfo* info)
             plotEntry.generator = new BodyPositionSampleGenerator(m_selectedBody.ptr(), center, frame);
             plotEntry.sampleCount = 300;
             m_trajectoryPlots.push_back(plotEntry);
-        }
-    }
-}
-
-
-void
-UniverseView::setNormalMaps(bool enable)
-{
-    Entity* body = m_universe->findFirst("Earth");
-    if (body)
-    {
-        WorldGeometry* world = dynamic_cast<WorldGeometry*>(body->geometry());
-        if (world)
-        {
-            if (enable)
-            {
-                TextureProperties planetTexProperties;
-                planetTexProperties.addressS = TextureProperties::Wrap;
-                planetTexProperties.addressT = TextureProperties::Clamp;
-                world->setNormalMap(loadTexture("earth-normal.jpg", planetTexProperties));
-            }
-            else
-            {
-                world->setNormalMap(NULL);
-            }
         }
     }
 }
@@ -1979,50 +1854,6 @@ UniverseView::setInfoText(bool enable)
 
 
 void
-UniverseView::addTleObject(const QString& name, const QString& line1, const QString& line2)
-{
-    TleTrajectory* tleTrajectory = TleTrajectory::Create(line1.toAscii().data(), line2.toAscii().data());
-    if (!tleTrajectory)
-    {
-        qDebug() << "Failed: " << name;
-        return;
-    }
-
-    string bodyName = name.toUtf8().data();
-
-    Body* spacecraft = new Body();
-    spacecraft->setName(bodyName);
-
-    Entity* earth = m_universe->findFirst("Earth");
-    double month = daysToSeconds(30.0);
-    vesta::Arc* arc = new vesta::Arc();
-    arc->setTrajectory(tleTrajectory);
-    arc->setCenter(earth);
-    arc->setDuration(month * 2.0);
-    arc->setBodyFrame(new TwoBodyRotatingFrame(earth, spacecraft));
-
-    spacecraft->chronology()->setBeginning(tleTrajectory->epoch() - month);
-    spacecraft->chronology()->addArc(arc);
-
-    string labelText = bodyName;
-    Spectrum labelColor = Spectrum::White();
-
-    LabelGeometry* label = new LabelGeometry(labelText, m_labelFont.ptr(), labelColor, 6.0f);
-    label->setFadeSize(tleTrajectory->boundingSphereRadius());
-    label->setFadeRange(new FadeRange(40.0f, 20.0f));
-    label->setIcon(m_spacecraftIcon.ptr());
-    label->setIconColor(labelColor);
-    spacecraft->setVisualizer("label", new Visualizer(label));
-
-    spacecraft->setGeometry(m_defaultSpacecraftMesh.ptr());
-
-    qDebug() << labelText.c_str();
-
-    m_universe->addEntity(spacecraft);
-}
-
-
-void
 UniverseView::startVideoRecording(QVideoEncoder* encoder)
 {
     m_videoEncoder = encoder;
@@ -2033,21 +1864,6 @@ void
 UniverseView::finishVideoRecording()
 {
     m_videoEncoder = NULL;
-}
-
-
-void
-UniverseView::setPlanetMap(const QString& planetName, vesta::TiledMap* tiledMap)
-{
-    Entity* planet = m_universe->findFirst(planetName.toUtf8().data());
-    if (planet)
-    {
-        WorldGeometry* world = dynamic_cast<WorldGeometry*>(planet->geometry());
-        if (world)
-        {
-            world->setBaseMap(tiledMap);
-        }
-    }
 }
 
 

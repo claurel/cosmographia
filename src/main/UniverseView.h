@@ -55,7 +55,7 @@ class UniverseView : public QGLWidget
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    UniverseView(QWidget *parent = 0);
+    UniverseView(QWidget *parent, vesta::Universe* universe);
     ~UniverseView();
 
     QSize minimumSizeHint() const;
@@ -90,7 +90,7 @@ public:
 
     vesta::Universe* universe() const
     {
-        return m_universe;
+        return m_universe.ptr();
     }
 
     vesta::TextureMapLoader* textureLoader() const
@@ -123,7 +123,6 @@ public slots:
     void setEquatorialPlaneVisibility(bool checked);
     void setPlanetographicGridVisibility(bool checked);
     void setTrajectoryVisibility(bool enable);
-    void setNormalMaps(bool enable);
     void setShadows(bool enable);
     void setAtmospheres(bool enable);
     void setAmbientLight(bool enable);
@@ -158,17 +157,15 @@ private:
 
     void setCenterAndFrame(vesta::Entity* center, FrameType f);
     void initializeSkyLayers();
-    void initializeUniverse();
+    //void initializeUniverse();
+    void initializeObserver();
     double secondsFromBaseTime() const;
     vesta::TextureMap* loadTexture(const QString& location, const vesta::TextureProperties& texProps);
 
-    void addTleObject(const QString& name, const QString& line1, const QString& line2);
     void initNetwork();
     bool initPlanetEphemeris();
 
     void updateTrajectoryPlots();
-
-    void setPlanetMap(const QString& planetName, vesta::TiledMap* tiledMap);
 
     vesta::Entity* pickObject(const QPoint& point);
 
@@ -176,9 +173,8 @@ private:
     int m_mouseMovement;
     QPoint m_mouseDownPosition;
     QPoint m_lastMousePosition;
-    vesta::Universe* m_universe;
-    vesta::Observer* m_observer;
-    vesta::Observer* m_spacecraftObserver;
+    vesta::counted_ptr<vesta::Universe> m_universe;
+    vesta::counted_ptr<vesta::Observer> m_observer;
     vesta::counted_ptr<vesta::ObserverController> m_controller;
     vesta::UniverseRenderer* m_renderer;
     FrameType m_observerFrame;

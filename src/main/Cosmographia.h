@@ -18,6 +18,7 @@
 #ifndef _COSMOGRAPHIA_H_
 #define _COSMOGRAPHIA_H_
 
+#include <vesta/Universe.h>
 #include <QMainWindow>
 #include <QNetworkAccessManager>
 
@@ -60,12 +61,16 @@ private slots:
     void loadCatalog();
 
 private:
+    void initializeUniverse();
+
     void loadSettings();
     void saveSettings();
 
     void loadCatalogFile(const QString& fileName);
 
 private:
+    vesta::counted_ptr<vesta::Universe> m_universe;
+
     UniverseCatalog *m_catalog;
     UniverseView *m_view3d;
     UniverseLoader *m_loader;

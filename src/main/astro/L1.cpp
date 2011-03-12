@@ -50,67 +50,30 @@ using namespace Eigen;
 using namespace std;
 
 
-// AU definition from JPL DE405 ephemeris.
-
-
-L1Orbit*
-L1Orbit::Create(Satellite satellite)
-{
-    L1Orbit* orbit = new L1Orbit(satellite);
-
-    switch (satellite)
-    {
-    case Io:
-        orbit->m_boundingRadius = 4.3e5;
-        break;
-    case Europa:
-        orbit->m_boundingRadius = 6.8e5;
-        break;
-    case Ganymede:
-        orbit->m_boundingRadius = 1.1e6;
-        break;
-    case Callisto:
-        orbit->m_boundingRadius = 1.9e6;
-        break;
-    }
-
-    int index = (int) satellite;
-    orbit->m_period = daysToSeconds(l1_bodies[index].l);
-
-    Vector3d testPosition = Vector3d(L1TestStates[index][0], L1TestStates[index][1], L1TestStates[index][2]) * AU;
-    StateVector result = orbit->state(0.0);
-    Vector3d position = result.position();
-
-    cerr << "L1Orbit test for sat #" << index << ": " << (position - testPosition).norm() << endl;
-    cerr << (result.position() / AU).transpose().format(16) << endl;
-
-    return orbit;
-}
-
-
-#include <cmath>
-#include <iostream>
-
-using namespace std;
-
-
 //  Series for ephemerides of Galilean satellites from L1.2 theory
 //  2433282.5d0   = T0  and  fundamental arguments [ = phase (rd) + frequency (rd/d) x (T-T0)] :
-
 static const double L1_T0 = 2433282.5;
 
+// AU definition from JPL DE405 ephemeris.
 static const double AU = 149597870.691;
-static const double PI = M_PI;
+
+/*
+ masses [G x (Jupiter + satellite)], (AU^3/day^2)
+   0.2824894284338140e-06   0.2824832743928930e-06   0.2824981841847230e-06   0.2824921448899090e-06
+*/
+
 
 static const int N_ARGS = 17;
 
-struct L1Fundamental
+struct L1FundamentalArg
 {
     double phase;
     double frequency;
 };
 
-static struct L1Fundamental L1FundamentalArguments[N_ARGS] =
+
+#if 0
+static struct L1FundamentalArg L1FundamentalArguments[N_ARGS] =
 {
     { 0.144621329602122e+01,  0.355155228618240e+01 }, //   L1  mean longitudes
     {-0.373526343747136e+00,  0.176932271112347e+01 }, //   L2
@@ -130,24 +93,8 @@ static struct L1Fundamental L1FundamentalArguments[N_ARGS] =
     { 0.241339207100000e+01,  0.000000000000000e+00 }, //   n0
     { 0.556067199647900e+01,  0.145018374908000e-02 }  //   Ls
 };
+#endif
 
-
-/*
- masses [G x (Jupiter + satellite)], (AU^3/day^2)
-   0.2824894284338140e-06   0.2824832743928930e-06   0.2824981841847230e-06   0.2824921448899090e-06
-*/
-
-/*
- rotations from jovian equatorial coordinates to Earth mean equinox and equator J2000 : angles Psi and I (rd)
-   0.6249501830657150e+01   0.4450947364976650e+00
-*/
-
-/*
-   amplitude (AU or rd)      phase (rd)          frequency (rd/d)       (km)       1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  Dfrq(rd/d)   Dphas(rd)
-
- sat 1  var  a   :
- 38 terms
-*/
 
 struct L1Term
 {
@@ -155,8 +102,8 @@ struct L1Term
     double amplitude;
     double phase;
     double frequency;
-    double km;
-    double intComb[17];
+    double ampKm;
+    double i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16;//intComb[17];
     double dphase;
     double x;
 };
@@ -167,6 +114,9 @@ struct L1TermList {
 };
 
 
+/*  Terms are:
+ *  amplitude (AU)  phase (rad)  frequency (rad/d)  (km)       1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  Dfrq(rd/d)   Dphas(rd)
+ */
 struct L1Term Io_a[38] =
 {
 { 1,  0.0028210960212903,  0.00000000000000e+00,  0.00000000000000e+00,   422029.956,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0.000e+00,   0.000e+00 },
@@ -902,42 +852,6 @@ static L1Body L1Bodies[4] =
 };
 
 
-struct Vector3d
-{
-    Vector3d(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
-    Vector3d() : x(0.0), y(0.0), z(0.0) {}
-
-    Vector3d operator+(const Vector3d& v)
-    {
-        return Vector3d(x + v.x, y + v.y, z + v.z);
-    }
-
-    Vector3d operator-(const Vector3d& v)
-    {
-        return Vector3d(x - v.x, y - v.y, z - v.z);
-    }
-
-    Vector3d operator*(double s)
-    {
-        return Vector3d(x * s, y * s, z * s);
-    }
-
-    double norm() const { return sqrt(x * x + y * y + z * z); }
-
-    double x, y, z;
-};
-
-
-struct StateVector
-{
-    StateVector(const Vector3d& _p, const Vector3d _v) :
-        position(_p), velocity(_v) {}
-
-    Vector3d position;
-    Vector3d velocity;
-};
-
-
 const double L1toJ2000[9] = {
    9.994327653386544723e-01, 3.039594289062820484e-02,-1.449945596633516053e-02,
   -3.367710746976384242e-02, 9.020579123528089974e-01,-4.302991694091006926e-01,
@@ -1004,36 +918,14 @@ static StateVector EllipticalToCartesian(double elements[6], double mu)
 
 
 
-static void computeElements(unsigned int satIndex,
-                            double t,
-                            const double* args,
-                            double elements[6])
+static void ComputeL1Elements(unsigned int satIndex,
+                              double t,
+                              double elements[6])
 {
-/*
-    if( AccurateEphem ) then
-        a= T1    !  -819.727638594856D0
-        b= T2    !   812.721806990360D0
-        x=(T/365.25D0-0.5D0*(b+a))/(0.5D0*(b-a))
-        if(abs(x).gt.1.d0) then
-           write(*,*)'date',T,' out of interval of validity'
-           return
-        end if
-        TN(0)=1.D0
-        TN(1)=x
-        do it=2,8
-           TN(it)=2.D0*x*TN(it-1)-TN(it-2)
-        end do
-        do nv=1,5
-           do it=0,8
-              val(nv)=val(nv)+c(it+1,nv,ks)*TN(it)
-           end do
-           val(nv)=val(nv)-0.5D0*c(1,nv,ks)
-        end do
-     end if
-*/
     const L1Body* body = &L1Bodies[satIndex];
 
-    // Apply corrections with Chebyshev polynomials
+    // Calculate corrections with Chebyshev polynomials.
+    // TODO: This should only be done in the allowed date range
     double corrections[5] = { 0.0, 0.0, 0.0, 0.0, 0.0 };
     if (true)
     {
@@ -1063,13 +955,7 @@ static void computeElements(unsigned int satIndex,
         }
     }
 
-/*
-    do k=1,nbterm(ks,kv)
-                   arg=phasc(k,ks,kv)+freqc(k,ks,kv)*T
-                   s=s+ampl(k,ks,kv)*cos(arg)
-                   end do
-                   elem(1)=s
-*/
+    // Semi-major axis
     double a = 0.0;
     for (unsigned int i = 0; i < body->listSizes[0]; ++i)
     {
@@ -1077,6 +963,7 @@ static void computeElements(unsigned int satIndex,
         a += body->lists[0][i].amplitude * cos(arg);
     }
 
+    // Mean longitude
     double L = body->l0 + body->l1 * t;
     for (unsigned int i = 0; i < body->listSizes[1]; ++i)
     {
@@ -1085,6 +972,7 @@ static void computeElements(unsigned int satIndex,
     }
     L += corrections[0];
 
+    // z = ecc*exp(i*w)
     double reZ = 0.0;
     double imZ = 0.0;
     for (unsigned int i = 0; i < body->listSizes[2]; ++i)
@@ -1096,6 +984,7 @@ static void computeElements(unsigned int satIndex,
     reZ += corrections[1];
     imZ += corrections[2];
 
+    // zeta = sin(inc/2)*exp(i*Om)
     double reZeta = 0.0;
     double imZeta = 0.0;
     for (unsigned int i = 0; i < body->listSizes[3]; ++i)
@@ -1116,96 +1005,34 @@ static void computeElements(unsigned int satIndex,
 }
 
 
-Vector3d transform(const double m[9], Vector3d v)
+// Rotations from Jovian equatorial coordinates to Earth mean equinox and equator of J2000
+Vector3d TransformL1ToEMEJ2000(Vector3d v)
 {
-    double ome    = 6.249501830657150;
-    double ainc   = 0.4450947364976650;
+    const double ome    = 6.249501830657150;
+    const double ainc   = 0.4450947364976650;
 
-    double px = v.x * cos(ome)  - v.y * sin(ome) * cos(ainc) + v.z * sin(ainc) * sin(ome);
-    double py = v.x * sin(ome)  + v.y * cos(ome) * cos(ainc) - v.z * sin(ainc) * cos(ome);
-    double pz =                   v.y * sin(ainc) + v.z * cos(ainc);
+    double px = v.x() * cos(ome)  - v.y() * sin(ome) * cos(ainc) + v.z() * sin(ainc) * sin(ome);
+    double py = v.x() * sin(ome)  + v.y() * cos(ome) * cos(ainc) - v.z() * sin(ainc) * cos(ome);
+    double pz =                     v.y() * sin(ainc)            + v.z() * cos(ainc);
 
     return Vector3d(px, py, pz);
-/*
-    return Vector3d(m[0] * v.x + m[1] * v.y + m[2] * v.z,
-                    m[3] * v.x + m[4] * v.y + m[5] * v.z,
-                    m[6] * v.x + m[7] * v.y + m[8] * v.z);
-*/
 }
 
 
-static StateVector computeState(unsigned int satIndex, double jd)
+static StateVector
+ComputeL1State(unsigned int satIndex, double jd)
 {
     double t = jd - L1_T0;
 
+    // Fundamental arguments not required
+    /*
     double args[17];
     for (unsigned int i = 0; i < N_ARGS; ++i)
     {
-        const L1Fundamental& arg = L1FundamentalArguments[i];
+        const L1FundamentalArg& arg = L1FundamentalArguments[i];
         args[i] = arg.phase + arg.frequency * t;
     }
-
-    double elements[6];
-    computeElements(satIndex, t, args, elements);
-
-
-    double mu = L1Bodies[satIndex].mu * (pow(AU, 3.0) / pow(86400.0, 2.0));
-
-    StateVector state = EllipticalToCartesian(elements, mu);
-
-    Vector3d p = transform(L1toJ2000, state.position);
-    Vector3d v = transform(L1toJ2000, state.velocity);
-
-    return StateVector(p, v);
-}
-
-
-double TestStates[4][6] =
-{
-    { 0.2671998720e-02, 0.7644016540e-03, 0.4087343813e-03,
-      -0.3116203721e-02, 0.8645680627e-02, 0.4066210829e-02 },
-    { -0.3751376363e-02, -0.2136181405e-02, -0.1056765926e-02,
-      0.4310590286e-02, -0.6143197914e-02, -0.2800433389e-02 },
-    { -0.5490036250e-02, -0.4112229248e-02, -0.2033821278e-02,
-      0.4036147912e-02, -0.4364866691e-02, -0.2037111499e-02 },
-    { 0.2172082907e-02, 0.1118792302e-01, 0.5322275059e-02,
-      -0.4662583659e-02, 0.7976685330e-03, 0.3092058747e-03 }
-};
-
-
-int main(int argc, char* argv)
-{
-    for (int sat = 0; sat < 4; ++sat)
-    {
-        StateVector state = computeState(sat, 2451545.0);
-        Vector3d p = state.position;
-        Vector3d v = state.velocity;
-
-        cout.precision(16);
-        cout << p.x / AU << " " << p.y / AU << " " << p.z / AU << endl;
-
-        double AUd = AU / 86400.0;
-        cout << v.x / AUd << " " << v.y / AUd << " " << v.z / AUd << endl;
-
-        Vector3d testPos(TestStates[sat][0], TestStates[sat][1], TestStates[sat][2]);
-        cout << "Diff: " << (p - testPos * AU).norm() << endl;
-        //cout << "Ratio: " << p.norm() / (testPos.norm() * AU) << endl;
-
-
-        cout << endl;
-    }
-
-    return 0;
-}
-
-
-
-StateVector
-L1Orbit::state(double tdbSec) const
-{
-    // Compute the time as Julian days since midnight 1/1/1950 (TT)
-    const double JD1950 = 2433282.5;
-    double t = secondsToDays(tdbSec) + (J2000 - JD1950);
+    */
 
     /* After the call to CalcL1Elem, the elements array will be filled with the following
      * values:
@@ -1218,6 +1045,41 @@ L1Orbit::state(double tdbSec) const
      *         longitude of ascending node
      */
     double elements[6];
+    ComputeL1Elements(satIndex, t, elements);
+
+    double mu = L1Bodies[satIndex].mu * (pow(AU, 3.0) / pow(86400.0, 2.0));
+
+    StateVector state = EllipticalToCartesian(elements, mu);
+    Vector3d p = TransformL1ToEMEJ2000(state.position());
+    Vector3d v = TransformL1ToEMEJ2000(state.velocity());
+
+    return StateVector(p, v);
+}
+
+
+static double L1TestStates[4][6] =
+{
+    { 0.2671998720e-02, 0.7644016540e-03, 0.4087343813e-03,
+      -0.3116203721e-02, 0.8645680627e-02, 0.4066210829e-02 },
+    { -0.3751376363e-02, -0.2136181405e-02, -0.1056765926e-02,
+      0.4310590286e-02, -0.6143197914e-02, -0.2800433389e-02 },
+    { -0.5490036250e-02, -0.4112229248e-02, -0.2033821278e-02,
+      0.4036147912e-02, -0.4364866691e-02, -0.2037111499e-02 },
+    { 0.2172082907e-02, 0.1118792302e-01, 0.5322275059e-02,
+      -0.4662583659e-02, 0.7976685330e-03, 0.3092058747e-03 }
+};
+
+
+StateVector
+L1Orbit::state(double tdbSec) const
+{
+    return ComputeL1State((int) m_satellite, secondsToDays(tdbSec) + J2000);
+#if 0
+    // Compute the time as Julian days since midnight 1/1/1950 (TT)
+    const double JD1950 = 2433282.5;
+    double t = secondsToDays(tdbSec) + (J2000 - JD1950);
+
+    double elements[6];
     CalcL1Elem(t, (int) m_satellite, elements);
 
     Vector3d position(x1 * p2 + y1 * pq,
@@ -1229,7 +1091,7 @@ L1Orbit::state(double tdbSec) const
 
     Matrix3d toJ2000 = Matrix3d(L1toJ2000).transpose();
     return StateVector(toJ2000 * position, toJ2000 * velocity);
-
+#endif
     /* This is the code from which the L1 to J2000 matrix was drived.
      */
     /*
@@ -1287,3 +1149,47 @@ L1Orbit::state(double tdbSec) const
     return StateVector(R * position, R * velocity);
 #endif
 }
+
+
+L1Orbit::L1Orbit(Satellite satellite) :
+    m_satellite(satellite),
+    m_boundingRadius(0.0),
+    m_period(1.0)
+{
+}
+
+
+L1Orbit*
+L1Orbit::Create(Satellite satellite)
+{
+    L1Orbit* orbit = new L1Orbit(satellite);
+
+    switch (satellite)
+    {
+    case Io:
+        orbit->m_boundingRadius = 4.3e5;
+        break;
+    case Europa:
+        orbit->m_boundingRadius = 6.8e5;
+        break;
+    case Ganymede:
+        orbit->m_boundingRadius = 1.1e6;
+        break;
+    case Callisto:
+        orbit->m_boundingRadius = 1.9e6;
+        break;
+    }
+
+    int index = (int) satellite;
+    orbit->m_period = daysToSeconds(PI * 2.0 / L1Bodies[index].l1);
+
+    Vector3d testPosition = Vector3d(L1TestStates[index][0], L1TestStates[index][1], L1TestStates[index][2]) * AU;
+    StateVector result = orbit->state(0.0);
+    Vector3d position = result.position();
+
+    cerr << "L1Orbit test for sat #" << index << ": " << (position - testPosition).norm() << endl;
+    cerr << (result.position() / AU).transpose().format(16) << endl;
+
+    return orbit;
+}
+

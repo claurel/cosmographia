@@ -146,6 +146,18 @@ Cosmographia::Cosmographia() :
 
     /*** Camera Menu ***/
     QMenu* cameraMenu = new QMenu("&Camera", this);
+
+    QAction* findAction = new QAction("&Find Object...", cameraMenu);
+    findAction->setShortcut(QKeySequence("Ctrl+F"));
+    cameraMenu->addAction(findAction);
+    QAction* centerAction = new QAction("Set &Center", cameraMenu);
+    centerAction->setShortcut(QKeySequence("Ctrl+C"));
+    cameraMenu->addAction(centerAction);
+    QAction* gotoAction = new QAction("&Goto Selected Object", cameraMenu);
+    gotoAction->setShortcut(QKeySequence("Ctrl+G"));
+    gotoAction->setDisabled(true); // NOT YET IMPLEMENTED
+    cameraMenu->addAction(gotoAction);
+
     QActionGroup* cameraFrameGroup = new QActionGroup(cameraMenu);
     QAction* inertialAction = new QAction("&Inertial Frame", cameraFrameGroup);
     inertialAction->setShortcut(QKeySequence("Ctrl+I"));
@@ -160,21 +172,15 @@ Cosmographia::Cosmographia() :
     synodicAction->setShortcut(QKeySequence("Ctrl+Y"));
     synodicAction->setCheckable(true);
     cameraMenu->addAction(synodicAction);
-    QAction* centerAction = new QAction("Set &Center", cameraMenu);
-    centerAction->setShortcut(QKeySequence("Ctrl+C"));
-    cameraMenu->addAction(centerAction);
-    QAction* gotoAction = new QAction("&Goto Selected Object", cameraMenu);
-    gotoAction->setShortcut(QKeySequence("Ctrl+G"));
-    gotoAction->setDisabled(true); // NOT YET IMPLEMENTED
-    cameraMenu->addAction(gotoAction);
 
     this->menuBar()->addMenu(cameraMenu);
 
+    connect(findAction,      SIGNAL(triggered()),     this,     SLOT(findObject()));
+    connect(centerAction,    SIGNAL(triggered()),     m_view3d, SLOT(setObserverCenter()));
+    connect(gotoAction,      SIGNAL(triggered()),     m_view3d, SLOT(gotoSelectedObject()));
     connect(inertialAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(inertialObserver(bool)));
     connect(bodyFixedAction, SIGNAL(triggered(bool)), m_view3d, SLOT(bodyFixedObserver(bool)));
     connect(synodicAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(synodicObserver(bool)));
-    connect(centerAction,    SIGNAL(triggered()),     m_view3d, SLOT(setObserverCenter()));
-    connect(gotoAction,      SIGNAL(triggered()),     m_view3d, SLOT(gotoSelectedObject()));
 
     /*** Visual aids menu ***/
     QMenu* visualAidsMenu = new QMenu("&Visual Aids", this);
@@ -262,7 +268,7 @@ Cosmographia::Cosmographia() :
     graphicsMenu->addMenu(starStyleMenu);
     graphicsMenu->addSeparator();
     m_fullScreenAction = new QAction("Full Screen", graphicsMenu);
-    m_fullScreenAction->setShortcut(QKeySequence("Ctrl+F"));
+    m_fullScreenAction->setShortcut(QKeySequence("Ctrl+Shift+F"));
     m_fullScreenAction->setCheckable(true);
     graphicsMenu->addAction(m_fullScreenAction);
     connect(m_fullScreenAction, SIGNAL(toggled(bool)), this, SLOT(setFullScreen(bool)));
@@ -476,10 +482,51 @@ qtDateToVestaDate(const QDateTime& d)
 
 
 void
+Cosmographia::findObject()
+{
+    QDialog findDialog(this);
+    findDialog.setWindowTitle(tr("Find Object"));
+    QComboBox* nameEntry = new QComboBox(&findDialog);
+    nameEntry->setEditable(true);
+
+    QVBoxLayout* vbox = new QVBoxLayout(&findDialog);
+    findDialog.setLayout(vbox);
+
+    QHBoxLayout* hbox = new QHBoxLayout();
+    hbox->addWidget(new QLabel("Object name: ", &findDialog));
+    hbox->addWidget(nameEntry);
+
+    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &findDialog);
+    vbox->addItem(hbox);
+    vbox->addWidget(buttons);
+
+    connect(buttons, SIGNAL(accepted()), &findDialog, SLOT(accept()));
+    connect(buttons, SIGNAL(rejected()), &findDialog, SLOT(reject()));
+
+    // TODO: If we need to support extremely large numbers of objects, we should
+    // use a abstract item model instead of a completer.
+    QCompleter* completer = new QCompleter(m_catalog->names(), nameEntry);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    nameEntry->setCompleter(completer);
+
+    findDialog.move((width() - findDialog.width()) / 2, 0);
+    if (findDialog.exec() == QDialog::Accepted)
+    {
+        QString name = completer->currentCompletion();
+        Entity* body = m_catalog->find(name);
+        if (body)
+        {
+            m_view3d->setSelectedBody(body);
+        }
+    }
+}
+
+
+void
 Cosmographia::setTime()
 {
     QDialog timeDialog;
-    timeDialog.setWindowTitle("Set Time and Date");
+    timeDialog.setWindowTitle(tr("Set Time and Date"));
     QDateTimeEdit* timeEdit = new QDateTimeEdit(&timeDialog);
 
     QVBoxLayout* vbox = new QVBoxLayout(&timeDialog);

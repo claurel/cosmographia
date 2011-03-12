@@ -79,3 +79,11 @@ void UniverseCatalog::setBodyInfo(const QString& name, BodyInfo* info)
         m_info[name] = info;
     }
 }
+
+
+/** Return a list of the names of all objects in the catalog.
+  */
+QStringList UniverseCatalog::names() const
+{
+    return m_bodies.keys();
+}

@@ -21,6 +21,7 @@
 #include <vesta/Entity.h>
 #include <vesta/Spectrum.h>
 #include <QString>
+#include <QStringList>
 #include <QMap>
 
 
@@ -60,6 +61,8 @@ public:
     vesta::Entity* find(const QString& name) const;
     BodyInfo* findInfo(const QString& name) const;
     bool contains(const QString& name) const;
+
+    QStringList names() const;
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Entity> > m_bodies;

@@ -38,6 +38,7 @@ public:
     void initialize();
 
 public slots:
+    void findObject();
     void setTime();
     void faster();
     void slower();

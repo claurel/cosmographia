@@ -71,7 +71,7 @@ Cosmographia::Cosmographia() :
     initializeUniverse();
 
     m_catalog = new UniverseCatalog();
-    m_view3d = new UniverseView(this, m_universe.ptr());
+    m_view3d = new UniverseView(this, m_universe.ptr(), m_catalog);
     m_loader = new UniverseLoader();
 
     m_view3d->setPalette(newPalette);
@@ -295,15 +295,6 @@ Cosmographia::Cosmographia() :
     setCursor(QCursor(Qt::CrossCursor));
 
     loadSettings();
-
-    Matrix3d m = InertialFrame::equatorJ2000()->orientation().toRotationMatrix();
-    std::cout << m.format(8) << std::endl;
-
-    Vector3d pole = m * Vector3d::UnitZ();
-    double obl = acos(pole.z());
-    Vector3d equinox = m * Vector3d::UnitY();
-    double eq = acos(equinox.y());
-    std::cout << "pole: " << radiansToArcsec(obl) << ", equinox: " << radiansToArcsec(eq) << std::endl;
 }
 
 
@@ -790,7 +781,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
             return;
         }
 
-        QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+        QStringList bodyNames = m_loader->loadCatalogItems(contents, m_catalog);
         foreach (QString name, bodyNames)
         {
             Entity* e = m_catalog->find(name);
@@ -839,7 +830,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         contents.insert("name", fileName);
         contents.insert("items", items);
 
-        QStringList bodyNames = m_loader->loadSolarSystem(contents, m_catalog);
+        QStringList bodyNames = m_loader->loadCatalogItems(contents, m_catalog);
         foreach (QString name, bodyNames)
         {
             Entity* e = m_catalog->find(name);

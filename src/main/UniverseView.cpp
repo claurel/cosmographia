@@ -19,11 +19,8 @@
 
 #include <vesta/OGLHeaders.h>
 #include "UniverseView.h"
-#include "NetworkTextureLoader.h"
-#include "WMSRequester.h"
+
 #include "InterpolatedStateTrajectory.h"
-#include "WMSTiledMap.h"
-#include "MultiWMSTiledMap.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -311,11 +308,10 @@ static string TrajectoryVisualizerName(Entity* entity)
 }
 
 
-UniverseView::UniverseView(QWidget *parent, Universe* universe) :
+UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog* catalog) :
     QGLWidget(parent),
     m_mouseMovement(0),
-    m_universe(NULL),
-    m_observer(NULL),
+    m_catalog(catalog),
     m_controller(new ObserverController()),
     m_renderer(NULL),
     m_observerFrame(Frame_Inertial),
@@ -339,7 +335,6 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe) :
     m_framesPerSecond(0.0),
     m_reflectionsEnabled(false),
     m_anaglyphEnabled(false),
-    m_highlightedAsteroidFamily(0),
     m_infoTextVisible(true),
     m_videoEncoder(NULL)
 {
@@ -1152,7 +1147,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         {
             if (plotTrajectoryAction->isChecked())
             {
-                //plotTrajectory(body);
+                plotTrajectory(body, m_catalog->findInfo(QString::fromUtf8(body->name().c_str())));
             }
             else
             {
@@ -1220,29 +1215,6 @@ UniverseView::updateTrajectoryPlots()
         }
     }
 }
-
-
-#if 0
-static MeshGeometry*
-loadMeshFile(const string& fileName, TextureMapLoader* textureLoader)
-{
-    MeshGeometry* meshGeometry = MeshGeometry::loadFromFile(fileName, textureLoader);
-    if (!meshGeometry)
-    {
-        QMessageBox::warning(NULL, "Missing mesh file", QString("Error opening mesh file %1.").arg(fileName.c_str()));
-    }
-    else
-    {
-        // Optimize the mesh. The optimizations can be expensive for large meshes, but they can dramatically
-        // improve rendering performance. The best solution is to use mesh files that are already optimized, but
-        // the average model loaded off the web benefits from some preprocessing at load time.
-        meshGeometry->mergeSubmeshes();
-        meshGeometry->uniquifyVertices();
-    }
-
-    return meshGeometry;
-}
-#endif
 
 
 TextureMap*
@@ -1446,62 +1418,6 @@ UniverseView::synodicObserver(bool checked)
     {
         setCenterAndFrame(m_observer->center(), Frame_Synodic);
     }
-}
-
-
-void
-UniverseView::setAsteroidVisibility(bool checked)
-{
-    unsigned int familyCount = sizeof(AsteroidFamilyNames) / sizeof(AsteroidFamilyNames[0]);
-
-    for (unsigned int i = 0; i < familyCount; ++i)
-    {
-        Entity* asteroids = m_universe->findFirst(AsteroidFamilyNames[i]);
-        if (asteroids)
-        {
-            asteroids->setVisible(checked);
-        }
-    }
-}
-
-
-void
-UniverseView::highlightAsteroidFamily()
-{
-#if 0
-    unsigned int familyCount = sizeof(AsteroidFamilyNames) / sizeof(AsteroidFamilyNames[0]);
-
-    Entity* asteroids = m_universe->findFirst(AsteroidFamilyNames[m_highlightedAsteroidFamily]);
-
-    // Unhighlight the current group
-    if (asteroids)
-    {
-        KeplerianSwarm* swarmGeometry = dynamic_cast<KeplerianSwarm*>(asteroids->geometry());
-        if (swarmGeometry)
-        {
-            swarmGeometry->setColor(Spectrum(0.7f, 0.5f, 0.3f));
-            swarmGeometry->setOpacity(0.15f);
-            swarmGeometry->setPointSize(1.0f);
-        }
-    }
-
-    m_highlightedAsteroidFamily = (m_highlightedAsteroidFamily + 1) % familyCount;
-
-    if (m_highlightedAsteroidFamily != 0)
-    {
-        asteroids = m_universe->findFirst(AsteroidFamilyNames[m_highlightedAsteroidFamily]);
-        if (asteroids)
-        {
-            KeplerianSwarm* swarmGeometry = dynamic_cast<KeplerianSwarm*>(asteroids->geometry());
-            if (swarmGeometry)
-            {
-                swarmGeometry->setColor(Spectrum(1.0f, 0.2f, 0.1f));
-                swarmGeometry->setOpacity(0.9f);
-                swarmGeometry->setPointSize(3.0f);
-            }
-        }
-    }
-#endif
 }
 
 

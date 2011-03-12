@@ -45,8 +45,8 @@ public:
     UniverseLoader();
     ~UniverseLoader();
 
-    QStringList loadSolarSystem(const QVariantMap& contents,
-                                UniverseCatalog* catalog);
+    QStringList loadCatalogItems(const QVariantMap& contents,
+                                 UniverseCatalog* catalog);
 
     vesta::TextureMapLoader* textureLoader() const
     {

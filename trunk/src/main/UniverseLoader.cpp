@@ -2583,8 +2583,8 @@ loadBodyInfo(const QVariantMap& item)
 
 
 QStringList
-UniverseLoader::loadSolarSystem(const QVariantMap& contents,
-                                UniverseCatalog* catalog)
+UniverseLoader::loadCatalogItems(const QVariantMap& contents,
+                                 UniverseCatalog* catalog)
 {
     qDebug() << "Loading catalog " << contents["name"].toString();
 

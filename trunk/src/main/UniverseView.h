@@ -30,10 +30,6 @@
 #include <vesta/Visualizer.h>
 #include <vesta/TiledMap.h>
 
-// TODO: move this into main app
-class QNetworkReply;
-class QNetworkAccessManager;
-
 class QVideoEncoder;
 
 namespace vesta
@@ -55,7 +51,7 @@ class UniverseView : public QGLWidget
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    UniverseView(QWidget *parent, vesta::Universe* universe);
+    UniverseView(QWidget *parent, vesta::Universe* universe, UniverseCatalog* catalog);
     ~UniverseView();
 
     QSize minimumSizeHint() const;
@@ -116,8 +112,6 @@ public slots:
     void synodicObserver(bool checked);
     void setObserverCenter();
     void setMilkyWayVisibility(bool checked);
-    void setAsteroidVisibility(bool checked);
-    void highlightAsteroidFamily();
     void setEquatorialGridVisibility(bool checked);
     void setEclipticVisibility(bool checked);
     void setEquatorialPlaneVisibility(bool checked);
@@ -174,6 +168,7 @@ private:
     QPoint m_mouseDownPosition;
     QPoint m_lastMousePosition;
     vesta::counted_ptr<vesta::Universe> m_universe;
+    UniverseCatalog* m_catalog;
     vesta::counted_ptr<vesta::Observer> m_observer;
     vesta::counted_ptr<vesta::ObserverController> m_controller;
     vesta::UniverseRenderer* m_renderer;
@@ -226,7 +221,6 @@ private:
     };
     std::vector<TrajectoryPlotEntry> m_trajectoryPlots;
 
-    unsigned int m_highlightedAsteroidFamily;
     bool m_infoTextVisible;
 
     QVideoEncoder* m_videoEncoder;

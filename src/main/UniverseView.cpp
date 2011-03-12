@@ -1784,6 +1784,13 @@ UniverseView::finishVideoRecording()
 
 
 void
+UniverseView::setSelectedBody(Entity* body)
+{
+    m_selectedBody = body;
+}
+
+
+void
 UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
 {
     Entity* existingBody = m_universe->findFirst(entity->name());

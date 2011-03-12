@@ -99,6 +99,8 @@ public:
         return m_selectedBody.ptr();
     }
 
+    void setSelectedBody(vesta::Entity* body);
+
     void replaceEntity(vesta::Entity* entity, const BodyInfo* info);
 
 public slots:

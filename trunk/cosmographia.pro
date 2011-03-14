@@ -34,6 +34,7 @@ APP_SOURCES = \
     $$MAIN_PATH/astro/Nutation.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
     $$MAIN_PATH/astro/L1.cpp \
+    $$MAIN_PATH/astro/TASS17.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp
@@ -61,6 +62,7 @@ APP_HEADERS = \
     $$MAIN_PATH/astro/Precession.h \
     $$MAIN_PATH/astro/Rotation.h \
     $$MAIN_PATH/astro/L1.h \
+    $$MAIN_PATH/astro/TASS17.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
     $$MAIN_PATH/compatibility/Scanner.h \
     $$MAIN_PATH/compatibility/TransformCatalog.h
@@ -465,7 +467,7 @@ macx {
         data/textures/mercury.jpg \
         data/textures/venus.jpg \
         data/textures/mars.jpg \
-        data/textures/jupiter.jpg \
+        data/textures/jupiter.dds \
         data/textures/saturn.jpg \
         data/textures/uranus.jpg \
         data/textures/neptune.jpg \

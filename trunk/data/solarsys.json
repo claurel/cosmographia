@@ -125,6 +125,7 @@
         {
           "name" : "Moon",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
 
           "center" : "Earth",
           "trajectory" :
@@ -206,7 +207,7 @@
           {
               "type" : "Globe",
               "radii" : [ 71492, 71492, 66854 ],
-              "baseMap" : "textures/jupiter.jpg"
+              "baseMap" : "textures/jupiter.dds"
           }
         },
 
@@ -456,6 +457,247 @@
               "type" : "Globe",
               "radius" : 2410.3,
               "baseMap" : "textures/callisto.dds"
+          }
+
+        },
+
+        {
+          "name" : "Mimas",
+          "label" : { "color" : [ 0.6, 0.5, 0.4 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Mimas"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 209.1, 196.2, 191.4 ],
+              "baseMap" : "textures/mimas.dds"
+          }
+        },
+
+        {
+          "name" : "Enceladus",
+          "label" : { "color" : [ 0.8, 0.8, 0.9 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Enceladus"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 256.3, 247.3, 244.6 ],
+              "baseMap" : "textures/enceladus.dds"
+          }
+        },
+
+        {
+          "name" : "Tethys",
+          "label" : { "color" : [ 0.4, 0.4, 0.4 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Tethys"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 535.6, 528.2, 525.8 ],
+              "baseMap" : "textures/tethys.dds"
+          }
+        },
+
+        {
+          "name" : "Dione",
+          "label" : { "color" : [ 0.6, 0.7, 0.6 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Dione"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 560,
+              "baseMap" : "textures/dione.dds"
+          }
+        },
+
+        {
+          "name" : "Rhea",
+          "label" : { "color" : [ 0.4, 0.6, 0.2 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Rhea"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 764,
+              "baseMap" : "textures/rhea.dds"
+          }
+        },
+
+        {
+          "name" : "Titan",
+          "label" : { "color" : [ 0.8, 0.6, 0.4 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Titan"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 2575,
+              "baseMap" : "textures/titan.dds"
+          }
+        },
+
+        {
+          "name" : "Hyperion",
+          "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Hyperion"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 164, 130, 107 ],
+              "baseMap" : "textures/hyperion.dds"
+          }
+        },
+
+        {
+          "name" : "Iapetus",
+          "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Iapetus"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.689017974837272d",
+              "inclination" : 25.17,
+              "ascendingNode" : 358.72,
+              "meridianAngle" : 259.51
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 718,
+              "baseMap" : "textures/iapetus.dds"
           }
 
         }

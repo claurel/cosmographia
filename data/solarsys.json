@@ -477,10 +477,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "0.942421810174755d",
+              "inclination" : 6.48,
+              "ascendingNode" : 130.66,
+              "meridianAngle" : 337.46
           },
 
           "geometry" :
@@ -507,10 +507,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "1.370218083712283d",
+              "inclination" : 6.48,
+              "ascendingNode" : 130.66,
+              "meridianAngle" : 2.82
           },
 
           "geometry" :
@@ -537,10 +537,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "1.887802560771137d",
+              "inclination" : 6.48,
+              "ascendingNode" : 130.66,
+              "meridianAngle" : 10.45
           },
 
           "geometry" :
@@ -567,10 +567,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "2.736915552552733d",
+              "inclination" : 6.48,
+              "ascendingNode" : 130.66,
+              "meridianAngle" : 357.00
           },
 
           "geometry" :
@@ -597,10 +597,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "4.517502623458083d",
+              "inclination" : 6.45,
+              "ascendingNode" : 140.38,
+              "meridianAngle" : 235.16
           },
 
           "geometry" :
@@ -627,10 +627,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "15.945447576488629d",
+              "inclination" : 6.06,
+              "ascendingNode" : 126.41,
+              "meridianAngle" : 189.64
           },
 
           "geometry" :
@@ -657,10 +657,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "15.945447576488629d",
+              "inclination" : 6.48,
+              "ascendingNode" : 130.66,
+              "meridianAngle" : 337.46
           },
 
           "geometry" :
@@ -687,10 +687,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "16.689017974837272d",
-              "inclination" : 25.17,
-              "ascendingNode" : 358.72,
-              "meridianAngle" : 259.51
+              "period" : "79.330849572578604d",
+              "inclination" : 14.97,
+              "ascendingNode" : 48.16,
+              "meridianAngle" : 350.20
           },
 
           "geometry" :

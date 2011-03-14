@@ -88,8 +88,8 @@ enum DistanceUnit
 
 static const double AU = 149597870.691;
 
-static const double DefaultStartTime = 0.0;                       // 12:00:00 1 Jan 2000
-static const double DefaultEndTime   = daysToSeconds(36525);      // 12:00:00 1 Jan 2100
+static const double DefaultStartTime = daysToSeconds(-36525.0);      // 12:00:00 1 Jan 1900
+static const double DefaultEndTime   = daysToSeconds( 36525.0);      // 12:00:00 1 Jan 2100
 
 QString ValueUnitsRegexpString("^\\s*([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\\s*([A-Za-z]+)?\\s*$");
 
@@ -1645,6 +1645,8 @@ UniverseLoader::loadChronology(const QVariantList& list,
             arcs.clear();
             break;
         }
+
+        nextStartTime += arc->duration();
 
         arcs << counted_ptr<vesta::Arc>(arc);
     }

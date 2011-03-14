@@ -6,9 +6,10 @@ work as long as you correctlt attribute it.)
 mars.jpg, neptune.jpg, uranus.jpg - Created by James Hastings-Trew. Hosted
 here: http://planetpixelemporium.com/planets.html
 
-mercury.jpg - Created by Steve Albers for the Science on a Sphere project.
+mercury.jpg, jupiter.dds - Created by Steve Albers for the Science on a
+Sphere project.
 
-venus.jpg, saturn.jpg, jupiter.jpg - Created by Bj�rn J�nsson and available at
+venus.jpg, saturn.jpg - Created by Bj�rn J�nsson and available at
 http://www.mmedia.is/~bjj/
 
 The Saturn and Uranus ring textures are from Celestia 1.6.0. The Saturn ring

@@ -31,6 +31,7 @@
 #include "compatibility/TransformCatalog.h"
 #include "astro/IAULunarRotationModel.h"
 #include "astro/L1.h"
+#include "astro/TASS17.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -444,6 +445,16 @@ Cosmographia::initialize()
         m_loader->addBuiltinOrbit("Europa", L1Orbit::Create(L1Orbit::Europa));
         m_loader->addBuiltinOrbit("Ganymede", L1Orbit::Create(L1Orbit::Ganymede));
         m_loader->addBuiltinOrbit("Callisto", L1Orbit::Create(L1Orbit::Callisto));
+
+        // Saturnian satellites
+        m_loader->addBuiltinOrbit("Mimas",     TASS17Orbit::Create(TASS17Orbit::Mimas));
+        m_loader->addBuiltinOrbit("Enceladus", TASS17Orbit::Create(TASS17Orbit::Enceladus));
+        m_loader->addBuiltinOrbit("Tethys",    TASS17Orbit::Create(TASS17Orbit::Tethys));
+        m_loader->addBuiltinOrbit("Dione",     TASS17Orbit::Create(TASS17Orbit::Dione));
+        m_loader->addBuiltinOrbit("Rhea",      TASS17Orbit::Create(TASS17Orbit::Rhea));
+        m_loader->addBuiltinOrbit("Titan",     TASS17Orbit::Create(TASS17Orbit::Titan));
+        m_loader->addBuiltinOrbit("Hyperion",  TASS17Orbit::Create(TASS17Orbit::Hyperion));
+        m_loader->addBuiltinOrbit("Iapetus",   TASS17Orbit::Create(TASS17Orbit::Iapetus));
     }
 
     // Set up builtin rotation models

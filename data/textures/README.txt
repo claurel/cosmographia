@@ -24,6 +24,12 @@ his maps and a complete list of original data sources.
 The Ganymede and Callisto maps are by Bjorn Jonsson. All of his planetary maps
 can be found at http://www.mmedia.is/~bjj/planetary_maps.html
 
+The maps of Mimas, Enceladus, Tethys, Dione, Rhea, Titan, and Iapetus are
+from CICLOPS (Cassini Imaging Central Library for OPerations):
+http://www.ciclops.org/maps.php
+
+
+
 
 
 

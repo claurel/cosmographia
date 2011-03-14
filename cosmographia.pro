@@ -477,7 +477,13 @@ macx {
         data/textures/io.dds \
         data/textures/europa.dds \
         data/textures/ganymede.dds \
-        data/textures/callisto.dds
+        data/textures/callisto.dds \
+        data/textures/mimas.dds \
+        data/textures/enceladus.dds \
+        data/textures/dione.dds \
+        data/textures/tethys.dds \
+        data/textures/rhea.dds \
+        data/textures/titan.dds
 
 
     QMAKE_BUNDLE_DATA += TEXTURES

@@ -18,8 +18,8 @@
 #include <QtGui>
 
 #include "UniverseView.h"
-#include "UniverseCatalog.h"
-#include "UniverseLoader.h"
+#include "catalog/UniverseCatalog.h"
+#include "catalog/UniverseLoader.h"
 #include "Cosmographia.h"
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <QDateTimeEdit>
 #include <QBoxLayout>
+#include <QStackedLayout>
 #include <QDialogButtonBox>
 
 #include <QNetworkDiskCache>
@@ -58,13 +59,42 @@ using namespace vesta;
 using namespace Eigen;
 
 
+class ControlWidget : public QWidget
+{
+public:
+    ControlWidget(QWidget* parent = NULL) :
+        QWidget(parent)
+    {
+        m_findCombo = new QComboBox(this);
+        m_findCombo->setEditable(true);
+
+        QHBoxLayout* layout = new QHBoxLayout(this);
+        setLayout(layout);
+        layout->setContentsMargins(QMargins(2, 2, 2, 2));
+        layout->addWidget(new QLabel("Find Object", this));
+        layout->addWidget(m_findCombo);
+        layout->addStretch(1);
+        setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
+    }
+
+public:
+    QComboBox* m_findCombo;
+};
+
+
 Cosmographia::Cosmographia() :
+    QMainWindow(NULL),
     m_catalog(NULL),
     m_view3d(NULL),
     m_loader(NULL),
+    m_control(NULL),
     m_fullScreenAction(NULL),
     m_networkManager(NULL)
 {
+    setAttribute(Qt::WA_NoSystemBackground);
+    setAttribute(Qt::WA_OpaquePaintEvent);
+    setAutoFillBackground(false);
+    setBackgroundRole(QPalette::Window);
     QPalette newPalette = palette();
     newPalette.setColor(QPalette::Window, Qt::black);
     setPalette(newPalette);
@@ -75,7 +105,6 @@ Cosmographia::Cosmographia() :
     m_view3d = new UniverseView(this, m_universe.ptr(), m_catalog);
     m_loader = new UniverseLoader();
 
-    m_view3d->setPalette(newPalette);
     setCentralWidget(m_view3d);
 
     setWindowTitle(tr("Cosmographia"));
@@ -302,6 +331,17 @@ Cosmographia::Cosmographia() :
     setCursor(QCursor(Qt::CrossCursor));
 
     loadSettings();
+
+#if 0
+    // Ellipse tests
+    GeneralEllipse e(Vector3d::Zero(), Vector3d(1.0, 1.0, 1.0), Vector3d(1.0, -1.0, 1.0));
+    Matrix<double, 2, 3> axes = e.principalSemiAxes();
+    std::cout << axes.row(0) << std::endl << axes.row(1) << std::endl;
+
+    e = AlignedEllipsoid(Vector3d(2.0, 3.0, 2.0)).limb(Vector3d(0.0, 0.0, 30.0));
+    axes = e.principalSemiAxes();
+    std::cout << "limb: " << e.center().transpose() << ", axes: " << axes.row(0) << ", " << axes.row(1) << std::endl;
+#endif
 }
 
 
@@ -495,6 +535,7 @@ qtDateToVestaDate(const QDateTime& d)
 void
 Cosmographia::findObject()
 {
+#if 1
     QDialog findDialog(this);
     findDialog.setWindowTitle(tr("Find Object"));
     QComboBox* nameEntry = new QComboBox(&findDialog);
@@ -530,6 +571,24 @@ Cosmographia::findObject()
             m_view3d->setSelectedBody(body);
         }
     }
+#else
+    m_control->setVisible(!m_control->isVisible());
+
+    if (m_control->isVisible())
+    {
+        m_control->raise();
+        // TODO: If we need to support extremely large numbers of objects, we should
+        // use a abstract item model instead of a completer.
+        QCompleter* completer = new QCompleter(m_catalog->names(), m_control->m_findCombo);
+        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        m_control->m_findCombo->setCompleter(completer);
+        m_control->m_findCombo->setFocus();
+    }
+    else
+    {
+
+    }
+#endif
 }
 
 

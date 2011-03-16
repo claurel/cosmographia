@@ -26,6 +26,7 @@
 class UniverseView;
 class UniverseCatalog;
 class UniverseLoader;
+class ControlWidget;
 
 class Cosmographia : public QMainWindow
 {
@@ -75,6 +76,7 @@ private:
     UniverseCatalog *m_catalog;
     UniverseView *m_view3d;
     UniverseLoader *m_loader;
+    ControlWidget* m_control;
 
     QAction* m_fullScreenAction;
 

@@ -111,16 +111,6 @@ static TextureProperties PlanetTextureProperties()
     return props;
 }
 
-static const char* AsteroidFamilyNames[] =
-{
-    "Main Belt Asteroids",
-    "Hilda Asteroids",
-    "Jupiter Trojans",
-    "Kuiper Belt",
-    "Near Earth Objects"
-};
-
-
 const char* CloseApproachers[] =
 {
 #if 0
@@ -308,6 +298,8 @@ static string TrajectoryVisualizerName(Entity* entity)
 }
 
 
+static QGraphicsScene* m_guiScene;
+
 UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog* catalog) :
     QGLWidget(parent),
     m_mouseMovement(0),
@@ -323,7 +315,6 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_timer(NULL),
     m_realTime(0.0),
     m_simulationTime(0.0),
-    m_earthAtmosphere(NULL),
     m_firstTick(true),
     m_lastTickTime(0.0),
     m_timeScale(1.0),
@@ -338,6 +329,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_infoTextVisible(true),
     m_videoEncoder(NULL)
 {
+    setAutoFillBackground(false);
+
     m_universe = universe;
     m_textureLoader = new NetworkTextureLoader(this);
     m_renderer = new UniverseRenderer();
@@ -348,6 +341,11 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
     initializeObserver();
     initializeSkyLayers();
+
+    m_guiScene = new QGraphicsScene(this);
+    m_guiScene->addWidget(new QPushButton("Big Button"));
+    m_guiScene->addEllipse(QRectF(200.0f, 150.0f, 300.0f, 200.0f), QPen(Qt::red), QBrush(Qt::blue));
+    m_guiScene->setBackgroundBrush(Qt::white);
 
     // Initialize the base time that will be used as a reference for calculating
     // the elapsed time.
@@ -422,6 +420,7 @@ static void labelBody(Entity* planet, const QString& labelText, TextureFont* fon
 
 void UniverseView::initializeGL()
 {
+    qDebug() << "InitializeGL";
     // Initialize the renderer. This must be done *after* an OpenGL context
     // has been created, otherwise information about OpenGL capabilities is
     // not available.
@@ -558,6 +557,33 @@ UniverseView::initNetwork()
                               "http://onmars.jpl.nasa.gov/wms.cgi?request=GetMap&layers=mars,moc_na&srs=IAU2000:49900&format=image/jpeg&styles=",
                               WMSRequester::LatLongBoundingBox(-180.0, -166.0, 76.0, 90.0),
                               512, 512);
+}
+
+
+void UniverseView::paintEvent(QPaintEvent *event)
+{
+    makeCurrent();
+    paintGL();
+
+    QPainter painter(this);
+#if 0
+    painter.fillRect(0, 0, 500, 500, QBrush(Qt::green));
+
+    //painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::red);
+    painter.fillRect(0, 0, 500, 500, QBrush(Qt::green));
+
+    if (m_guiScene)
+    {
+        //m_guiScene->render(&painter, QRectF(0.0f, 0.0f, 400.0f, 400.0f), m_guiScene->sceneRect());
+    }
+
+    painter.drawText(100, 100, GregorianDate::UTCDateFromTDBSec(m_simulationTime).toString().c_str());
+    painter.drawText(200, 200, "This is a test");
+    painter.drawLine(QPointF(100, 100), QPointF(200, 200));
+    painter.drawEllipse(QPoint(200, 200), 150, 150);
+#endif
+    painter.end();
 }
 
 
@@ -1320,7 +1346,7 @@ UniverseView::tick()
 
     m_controller->tick(dt);
 
-    repaint();
+    update();//repaint();
 }
 
 
@@ -1702,42 +1728,8 @@ UniverseView::setReflections(bool enable)
 
 
 void
-UniverseView::setAtmospheres(bool enable)
+UniverseView::setAtmospheres(bool /* enable */)
 {
-    Entity* body = m_universe->findFirst("Earth");
-    if (body)
-    {
-        WorldGeometry* world = dynamic_cast<WorldGeometry*>(body->geometry());
-        if (world)
-        {
-            if (enable)
-            {
-                if (!m_earthAtmosphere)
-                {
-
-                    QFile atmFile("earth.atmscat");
-                    if (atmFile.open(QIODevice::ReadOnly))
-                    {
-                        QByteArray data = atmFile.readAll();
-                        DataChunk chunk(data.data(), data.size());
-                        m_earthAtmosphere = Atmosphere::LoadAtmScat(&chunk);
-                    }
-
-                    if (m_earthAtmosphere)
-                    {
-                        m_earthAtmosphere->generateTextures();
-                        m_earthAtmosphere->addRef();
-                    }
-                }
-
-                world->setAtmosphere(m_earthAtmosphere);
-            }
-            else
-            {
-                world->setAtmosphere(NULL);
-            }
-        }
-    }
 }
 
 

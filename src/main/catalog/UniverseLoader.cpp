@@ -16,15 +16,15 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "UniverseLoader.h"
-#include "TleTrajectory.h"
-#include "InterpolatedStateTrajectory.h"
-#include "InterpolatedRotation.h"
-#include "TwoVectorFrame.h"
-#include "WMSTiledMap.h"
-#include "MultiWMSTiledMap.h"
-#include "KeplerianSwarm.h"
-#include "compatibility/Scanner.h"
-#include "astro/Rotation.h"
+#include "../TleTrajectory.h"
+#include "../InterpolatedStateTrajectory.h"
+#include "../InterpolatedRotation.h"
+#include "../TwoVectorFrame.h"
+#include "../WMSTiledMap.h"
+#include "../MultiWMSTiledMap.h"
+#include "../KeplerianSwarm.h"
+#include "../compatibility/Scanner.h"
+#include "../astro/Rotation.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>

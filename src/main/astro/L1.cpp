@@ -39,6 +39,7 @@
  */
 
 #include "L1.h"
+#include "Constants.h"
 #include <vesta/Units.h>
 #include <vesta/OrbitalElements.h>
 #include <cmath>
@@ -49,13 +50,12 @@ using namespace vesta;
 using namespace Eigen;
 using namespace std;
 
+#define TEST_L1 0
+
 
 //  Series for ephemerides of Galilean satellites from L1.2 theory
 //  2433282.5d0   = T0  and  fundamental arguments [ = phase (rd) + frequency (rd/d) x (T-T0)] :
 static const double L1_T0 = 2433282.5;
-
-// AU definition from JPL DE405 ephemeris.
-static const double AU = 149597870.691;
 
 /*
  masses [G x (Jupiter + satellite)], (AU^3/day^2)
@@ -865,7 +865,7 @@ static StateVector EllipticalToCartesian(double elements[6], double mu)
     double h = elements[3];
     double q = elements[4];
     double p = elements[5];
-    double a = elements[0] * AU;
+    double a = elements[0] * astro::AU;
     double L = elements[1];
 
     L = fmod(L, 2.0 * PI);
@@ -1047,7 +1047,7 @@ ComputeL1State(unsigned int satIndex, double jd)
     double elements[6];
     ComputeL1Elements(satIndex, t, elements);
 
-    double mu = L1Bodies[satIndex].mu * (pow(AU, 3.0) / pow(86400.0, 2.0));
+    double mu = L1Bodies[satIndex].mu * (pow(astro::AU, 3.0) / pow(86400.0, 2.0));
 
     StateVector state = EllipticalToCartesian(elements, mu);
     Vector3d p = TransformL1ToEMEJ2000(state.position());
@@ -1057,6 +1057,7 @@ ComputeL1State(unsigned int satIndex, double jd)
 }
 
 
+#if TEST_L1
 // Test states from HORIZONS:
 // 2451545.000000000 = A.D. 2000-Jan-01 12:00:00.0000 (CT)
 //   2.671924590488177E-03  7.644377681999238E-04  4.091156513042138E-04
@@ -1075,6 +1076,7 @@ static double L1TestStates[4][6] =
     { 0.2172082907e-02, 0.1118792302e-01, 0.5322275059e-02,
       -0.4662583659e-02, 0.7976685330e-03, 0.3092058747e-03 }
 };
+#endif // TEST_L1
 
 
 StateVector
@@ -1190,12 +1192,14 @@ L1Orbit::Create(Satellite satellite)
     int index = (int) satellite;
     orbit->m_period = daysToSeconds(PI * 2.0 / L1Bodies[index].l1);
 
-    Vector3d testPosition = Vector3d(L1TestStates[index][0], L1TestStates[index][1], L1TestStates[index][2]) * AU;
+#if TEST_L1
+    Vector3d testPosition = Vector3d(L1TestStates[index][0], L1TestStates[index][1], L1TestStates[index][2]) * astro::AU;
     StateVector result = orbit->state(0.0);
     Vector3d position = result.position();
 
     cerr << "L1Orbit test for sat #" << index << ": " << (position - testPosition).norm() << endl;
-    cerr << (result.position() / AU).transpose().format(16) << endl;
+    cerr << (result.position() / astro::AU).transpose().format(16) << endl;
+#endif // TEST_L1
 
     return orbit;
 }

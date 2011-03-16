@@ -28,11 +28,13 @@ APP_SOURCES = \
     $$MAIN_PATH/WMSRequester.cpp \
     $$MAIN_PATH/WMSTiledMap.cpp \
     $$MAIN_PATH/MultiWMSTiledMap.cpp \
+    $$MAIN_PATH/astro/Constants.cpp \
     $$MAIN_PATH/astro/IAULunarRotationModel.cpp \
     $$MAIN_PATH/astro/Nutation.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
     $$MAIN_PATH/astro/L1.cpp \
     $$MAIN_PATH/astro/TASS17.cpp \
+    $$MAIN_PATH/catalog/AstorbLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
@@ -55,12 +57,14 @@ APP_HEADERS = \
     $$MAIN_PATH/WMSRequester.h \
     $$MAIN_PATH/WMSTiledMap.h \
     $$MAIN_PATH/MultiWMSTiledMap.h \
+    $$MAIN_PATH/astro/Constants.h \
     $$MAIN_PATH/astro/IAULunarRotationModel.h \
     $$MAIN_PATH/astro/Nutation.h \
     $$MAIN_PATH/astro/Precession.h \
     $$MAIN_PATH/astro/Rotation.h \
     $$MAIN_PATH/astro/L1.h \
     $$MAIN_PATH/astro/TASS17.h \
+    $$MAIN_PATH/catalog/AstorbLoader.h \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \

@@ -19,7 +19,7 @@
 #define _UNIVERSE_VIEW_H_
 
 #include "NetworkTextureLoader.h"
-#include "UniverseCatalog.h"
+#include "catalog/UniverseCatalog.h"
 #include <QGLWidget>
 #include <QTimer>
 #include <QDateTime>
@@ -142,6 +142,7 @@ protected:
     void keyPressEvent(QKeyEvent* event);
     void keyReleaseEvent(QKeyEvent* event);
     void contextMenuEvent(QContextMenuEvent* event);
+    void paintEvent(QPaintEvent* event);
 
 private:
     enum FrameType
@@ -185,8 +186,6 @@ private:
     QTimer* m_timer;
     double m_realTime;
     double m_simulationTime;
-
-    vesta::Atmosphere* m_earthAtmosphere;
 
     QDateTime m_baseTime;
     bool m_firstTick;

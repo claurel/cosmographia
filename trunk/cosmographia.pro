@@ -24,8 +24,6 @@ APP_SOURCES = \
     $$MAIN_PATH/KeplerianSwarm.cpp \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
-    $$MAIN_PATH/UniverseCatalog.cpp \
-    $$MAIN_PATH/UniverseLoader.cpp \
     $$MAIN_PATH/TwoVectorFrame.cpp \
     $$MAIN_PATH/WMSRequester.cpp \
     $$MAIN_PATH/WMSTiledMap.cpp \
@@ -35,6 +33,8 @@ APP_SOURCES = \
     $$MAIN_PATH/astro/Precession.cpp \
     $$MAIN_PATH/astro/L1.cpp \
     $$MAIN_PATH/astro/TASS17.cpp \
+    $$MAIN_PATH/catalog/UniverseCatalog.cpp \
+    $$MAIN_PATH/catalog/UniverseLoader.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp
@@ -52,8 +52,6 @@ APP_HEADERS = \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/TleTrajectory.h \
     $$MAIN_PATH/TwoVectorFrame.h \
-    $$MAIN_PATH/UniverseCatalog.h \
-    $$MAIN_PATH/UniverseLoader.h \
     $$MAIN_PATH/WMSRequester.h \
     $$MAIN_PATH/WMSTiledMap.h \
     $$MAIN_PATH/MultiWMSTiledMap.h \
@@ -63,6 +61,8 @@ APP_HEADERS = \
     $$MAIN_PATH/astro/Rotation.h \
     $$MAIN_PATH/astro/L1.h \
     $$MAIN_PATH/astro/TASS17.h \
+    $$MAIN_PATH/catalog/UniverseCatalog.h \
+    $$MAIN_PATH/catalog/UniverseLoader.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
     $$MAIN_PATH/compatibility/Scanner.h \
     $$MAIN_PATH/compatibility/TransformCatalog.h
@@ -75,6 +75,7 @@ NORADTLE_PATH = thirdparty/noradtle
 QJSON_PATH = thirdparty/qjson
 
 VESTA_SOURCES = \
+    $$VESTA_PATH/AlignedEllipsoid.cpp \
     $$VESTA_PATH/Arc.cpp \
     $$VESTA_PATH/ArrowGeometry.cpp \
     $$VESTA_PATH/ArrowVisualizer.cpp \
@@ -97,6 +98,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/FixedRotationModel.cpp \
     $$VESTA_PATH/Frame.cpp \
     $$VESTA_PATH/Framebuffer.cpp \
+    $$VESTA_PATH/GeneralEllipse.cpp \
     $$VESTA_PATH/Geometry.cpp \
     $$VESTA_PATH/GregorianDate.cpp \
     $$VESTA_PATH/HierarchicalTiledMap.cpp \
@@ -148,6 +150,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/internal/ObjLoader.cpp
 
 VESTA_HEADERS = \
+    $$VESTA_PATH/AlignedEllipsoid.h \
     $$VESTA_PATH/Arc.h \
     $$VESTA_PATH/ArrowGeometry.h \
     $$VESTA_PATH/ArrowVisualizer.h \
@@ -167,6 +170,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/DataChunk.h \
     $$VESTA_PATH/Debug.h \
     $$VESTA_PATH/DDSLoader.h \
+    $$VESTA_PATH/Ellipsoid.h \
     $$VESTA_PATH/Entity.h \
     $$VESTA_PATH/FadeRange.h \
     $$VESTA_PATH/Frame.h \
@@ -175,6 +179,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/FixedPointTrajectory.h \
     $$VESTA_PATH/FixedRotationModel.h \
     $$VESTA_PATH/Geometry.h \
+    $$VESTA_PATH/GeneralEllipse.h \
     $$VESTA_PATH/GregorianDate.h \
     $$VESTA_PATH/HierarchicalTiledMap.h \
     $$VESTA_PATH/InertialFrame.h \

@@ -61,6 +61,7 @@ My modifications are:
 ****************************************************************/
 
 #include "TASS17.h"
+#include "Constants.h"
 #include <vesta/Units.h>
 #include <vesta/InertialFrame.h>
 #include <cmath>
@@ -69,9 +70,7 @@ using namespace vesta;
 using namespace Eigen;
 using namespace std;
 
-
-// AU definition from JPL DE405 ephemeris.
-static const double AU = 149597870.691;
+#define TEST_TASS17 0
 
 
 struct Tass17Term {
@@ -3057,6 +3056,7 @@ const struct Tass17Body tass17bodies[8] = {
 };
 
 
+#if TEST_TASS17
 // Test data from TASS17.f: layout is Julian Date, position, velocity
 static double TASS17TestData[8][7] =
 {
@@ -3069,6 +3069,7 @@ static double TASS17TestData[8][7] =
     { 2445815.1, -0.017991225601,  0.016226098290, -0.000297129845, -0.445084401, -0.467243031,  0.201864213 }, // Iapetus
     { 2445720.1, -0.009125543940,  0.005859877071, -0.001998155741, -0.489992916, -0.704007020,  0.411842188 }, // Hyperion
 };
+#endif // TEST_TASS17
 
 
 static void
@@ -3233,7 +3234,8 @@ EllipticToRectangular(const double a,const double n,
 
 
 void EllipticToRectangularN(double mu,const double elem[6],double dt,
-                            double xyz[]) {
+                            double xyz[])
+{
   const double n = elem[0];
   const double a = pow(mu / (n * n), 1.0 / 3.0);
   EllipticToRectangular(a,n,elem,dt,xyz);
@@ -3265,8 +3267,8 @@ TASS17Orbit::state(double tdbSec) const
     // Transform the state vector from the Saturn equatorial coordinate system
     // to EMEJ2000 and convert units (position from AU to km, velocity from
     // AU/year to km/sec)
-    Vector3d position = r * Vector3d(x[0], x[1], x[2]) * AU;
-    Vector3d velocity = r * Vector3d(x[3], x[4], x[5]) * AU / daysToSeconds(1.0);
+    Vector3d position = r * Vector3d(x[0], x[1], x[2]) * astro::AU;
+    Vector3d velocity = r * Vector3d(x[3], x[4], x[5]) * astro::AU / daysToSeconds(1.0);
 
     return StateVector(position, velocity);
 }
@@ -3316,9 +3318,9 @@ TASS17Orbit::Create(Satellite satellite)
     int index = (int) satellite;
     orbit->m_period = daysToSeconds(PI * 2.0 / tass17bodies[index].aam);
 
+#if TEST_TASS17
     // Test code for TASS17 theory. Compares calculated results with test results from original
     // FORTRAN code.
-    /*
     double jd = TASS17TestData[index][0];
     Vector3d testPosition = Vector3d(TASS17TestData[index][1], TASS17TestData[index][2], TASS17TestData[index][3]) * AU;
     StateVector result = orbit->state(daysToSeconds(jd - J2000));
@@ -3327,7 +3329,7 @@ TASS17Orbit::Create(Satellite satellite)
     cerr << "TASS17Orbit test for sat #" << index << " at JD " << jd << ": " << (position - testPosition).norm() << endl;
     cerr << (result.position() / AU).transpose().format(16) << endl;
     cerr << result.velocity().norm() << endl << endl;
-    */
+#endif // TEST_TASS17
 
     return orbit;
 }

@@ -637,7 +637,8 @@
           {
               "type" : "Globe",
               "radius" : 2575,
-              "baseMap" : "textures/titan.dds"
+              "baseMap" : "textures/titan.dds",
+              "atmosphere" : "titan.atmscat"
           }
         },
 

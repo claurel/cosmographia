@@ -1,5 +1,5 @@
 /*
- * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
+ * $Revision: 575 $ $Date: 2011-03-16 16:39:49 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -85,3 +85,30 @@ void ArrowVisualizer::setLabelText(std::string text)
     arrow->setLabelText(text, ArrowGeometry::XAxis);
 }
 
+
+/** Get the font used for the label text.
+  */
+TextureFont* ArrowVisualizer::labelFont() const
+{
+    ArrowGeometry* arrow = dynamic_cast<ArrowGeometry*>( geometry() );
+    if (arrow)
+    {
+        return arrow->labelFont();
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+
+/** Sets a font for the label text.
+  */
+void ArrowVisualizer::setLabelFont(TextureFont* font)
+{
+    ArrowGeometry* arrow = dynamic_cast<ArrowGeometry*>( geometry() );
+    if (arrow)
+    {
+        arrow->setLabelFont(font);
+    }
+}

@@ -48,6 +48,13 @@ public:
         return m_semiAxes.cwise().square().cwise().inverse().asDiagonal() * v;
     }
 
+    /** Get the length of the semi-major axis.
+      */
+    double semiMajorAxisLength() const
+    {
+        return m_semiAxes.maxCoeff();
+    }
+
     GeneralEllipse intersection(const Eigen::Hyperplane<double, 3>& plane, bool* foundIntersection) const;
     GeneralEllipse limb(const Eigen::Vector3d& p) const;
 

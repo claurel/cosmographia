@@ -1,5 +1,5 @@
 /*
- * $Revision: 402 $ $Date: 2010-08-03 13:00:55 -0700 (Tue, 03 Aug 2010) $
+ * $Revision: 570 $ $Date: 2011-03-14 21:48:24 -0700 (Mon, 14 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -50,12 +50,12 @@ public:
 
     const Chronology* chronology() const
     {
-        return &*m_chronology;
+        return m_chronology.ptr();
     }
 
     Chronology* chronology()
     {
-        return &*m_chronology;
+        return m_chronology.ptr();
     }
 
     /** Return true if this entity's visible attribute is set.

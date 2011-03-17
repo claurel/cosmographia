@@ -1,5 +1,5 @@
 /*
- * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
+ * $Revision: 575 $ $Date: 2011-03-16 16:39:49 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -39,6 +39,9 @@ public:
     /** Sets the text of the label for an arrow specified by which
       */
     void setLabelText(std::string text, unsigned int which);
+
+    TextureFont* labelFont() const;
+    void setLabelFont(TextureFont* font);
 
 private:
     AxesType m_axesType;

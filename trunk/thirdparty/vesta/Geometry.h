@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 572 $ $Date: 2011-03-16 15:28:27 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -13,6 +13,7 @@
 
 #include "Object.h"
 #include "PickResult.h"
+#include "AlignedEllipsoid.h"
 
 
 namespace vesta
@@ -101,6 +102,23 @@ public:
       * translucent geometry should override this method and report true.
       */
     virtual bool isOpaque() const { return true; }
+
+    /** Returns true if this geometry can be well approximated by an
+      * ellipsoid. This affects shadow rendering: light occlusion is computed
+      * analytically for ellipsoidal objects instead of by rendering the
+      * geometry into a shadow buffer. The default implementation of
+      * isEllipsoidal returns false.
+      */
+    virtual bool isEllipsoidal() const { return false; }
+
+    /** Get the ellipsoid that approximates the shape of this geometry.
+      * The result is meaningful only for geometry that reports true
+      * for the isEllipsoidal() method.
+      */
+    virtual AlignedEllipsoid ellipsoid() const
+    {
+        return AlignedEllipsoid(Eigen::Vector3d::Zero());
+    }
 
     /** Return whether this geometry is splittable. See setSplittable() for
       * an explanation.

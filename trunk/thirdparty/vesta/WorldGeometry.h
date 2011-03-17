@@ -1,5 +1,5 @@
 /*
- * $Revision: 510 $ $Date: 2010-09-24 19:17:53 -0700 (Fri, 24 Sep 2010) $
+ * $Revision: 577 $ $Date: 2011-03-16 17:40:22 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -98,6 +98,15 @@ public:
     void setSphere(float radius);
     void setSpheroid(float radius, float oblateness);
     void setEllipsoid(const Eigen::Vector3f& axes);
+
+    /** isEllipsoidal always returns true for WorldGeometry.
+      */
+    virtual bool isEllipsoidal() const { return true; }
+
+    virtual AlignedEllipsoid ellipsoid() const
+    {
+        return AlignedEllipsoid(m_ellipsoidAxes.cast<double>() * 0.5);
+    }
 
     /** Get the global base texture.
       */

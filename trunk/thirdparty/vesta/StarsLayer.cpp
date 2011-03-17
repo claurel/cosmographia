@@ -147,7 +147,7 @@ StarsLayer::StarsLayer(StarCatalog* starCatalog) :
 
 StarsLayer::~StarsLayer()
 {
-    if (!m_vertexArray)
+    if (m_vertexArray)
     {
         delete[] m_vertexArray;
     }
@@ -350,7 +350,7 @@ StarsLayer::render(RenderContext& rc)
     }
     else if (m_vertexArray)
     {
-        rc.bindVertexArray(VertexSpec::PositionColor, m_vertexArray, sizeof(StarCatalog::StarRecord));
+        rc.bindVertexArray(VertexSpec::PositionColor, m_vertexArray, VertexSpec::PositionColor.size());
     }
     else
     {
@@ -358,7 +358,13 @@ StarsLayer::render(RenderContext& rc)
         return;
     }
 
-    bool useStarShader = m_style == GaussianStars && m_starShader.isValid() && m_starShaderSRGB.isValid();
+    // Note that vertex buffers are _required_ in order to use the star shader
+    // There should be no drivers that support GLSL shaders but not VBs, since
+    // the latter is a GL 1.5 feature, while GLSL is GL 2.0.
+    bool useStarShader = m_style == GaussianStars &&
+                         m_starShader.isValid() &&
+                         m_starShaderSRGB.isValid() &&
+                         m_vertexBuffer.isValid();
     bool enableSRGBExt = GLEW_EXT_framebuffer_sRGB == GL_TRUE;
 
     Material starMaterial;
@@ -483,7 +489,7 @@ StarsLayer::updateVertexBuffer()
     }
     else
     {
-        if (!m_vertexArray)
+        if (m_vertexArray)
         {
             delete[] m_vertexArray;
             m_vertexArray = NULL;

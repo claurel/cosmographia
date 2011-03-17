@@ -24,154 +24,6 @@ using namespace Eigen;
 using namespace std;
 
 
-#if 0
-namespace vesta
-{
-
-// The SensorFrustumGeometry class is used exclusively by SensorVisualizer, and
-// thus is not currently available to other classes.
-//
-// The sensor geometry has three parts:
-//    Footprint - a ring or polygon showing the intersection of the sensor frustum
-//                with the target body.
-//    Frustum   - bounding surface of the frustum, truncated at the intersection with
-//                the target body.
-//    Grid      - grid lines drawn within the frustum to provide additional visual
-//                about its three dimensional shape.
-class SensorFrustumGeometry : public Geometry
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    SensorFrustumGeometry() :
-        m_orientation(Quaterniond::Identity()),
-        m_range(1.0),
-        m_color(1.0f, 1.0f, 1.0f),
-        m_opacity(1.0f),
-        m_footprintOpacity(1.0f),
-        m_gridOpacity(0.15f),
-        m_frustumShape(SensorVisualizer::Elliptical),
-        m_frustumHorizontalAngle(toRadians(5.0)),
-        m_frustumVerticalAngle(toRadians(5.0))
-    {
-        setClippingPolicy(Geometry::SplitToPreventClipping);
-    }
-
-    ~SensorFrustumGeometry()
-    {
-    }
-
-    virtual void render(RenderContext& rc,
-                        double currentTime) const;
-
-    float boundingSphereRadius() const
-    {
-        return float(m_range);
-    }
-
-    virtual bool isOpaque() const
-    {
-        return m_opacity > 0.99f;
-    }
-
-    Quaterniond sensorOrientation() const
-    {
-        return m_orientation;
-    }
-
-    void setSensorOrientation(const Eigen::Quaterniond& orientation)
-    {
-        m_orientation = orientation;
-    }
-
-    double range() const
-    {
-        return m_range;
-    }
-
-    void setRange(double range)
-    {
-        m_range = range;
-    }
-
-    Spectrum color() const
-    {
-        return m_color;
-    }
-
-    void setColor(const Spectrum& color)
-    {
-        m_color = color;
-    }
-
-    float opacity() const
-    {
-        return m_opacity;
-    }
-
-    void setOpacity(float opacity)
-    {
-        m_opacity = opacity;
-    }
-
-    Entity* source() const
-    {
-        return m_source.ptr();
-    }
-
-    void setSource(Entity* source)
-    {
-        m_source = source;
-    }
-
-    Entity* target() const
-    {
-        return m_target.ptr();
-    }
-
-    void setTarget(Entity* target)
-    {
-        m_target = target;
-    }
-
-    SensorVisualizer::FrustumShape frustumShape() const
-    {
-        return m_frustumShape;
-    }
-
-    void setFrustumShape(SensorVisualizer::FrustumShape shape)
-    {
-        m_frustumShape = shape;
-    }
-
-    void setFrustumAngles(double horizontal, double vertical)
-    {
-        m_frustumHorizontalAngle = horizontal;
-        m_frustumVerticalAngle = vertical;
-    }
-
-private:
-    Quaterniond m_orientation;
-
-    double m_range;
-    Spectrum m_color;
-    float m_opacity;
-    float m_footprintOpacity;
-    float m_gridOpacity;
-    counted_ptr<Entity> m_source;
-    counted_ptr<Entity> m_target;
-    SensorVisualizer::FrustumShape m_frustumShape;
-    double m_frustumHorizontalAngle;
-    double m_frustumVerticalAngle;
-
-    // TODO: Eliminate this once streaming vertex array is exposed by
-    // RenderContext.
-    mutable vector<Vector3d> m_frustumPoints;
-};
-
-}
-#endif
-
 
 /** Create a new SensorVisualizer.
   */
@@ -300,7 +152,7 @@ SensorVisualizer::frustumShape() const
 
 
 /** Set the shape of the sensor frustum. Currently, only
-  * elliptical frustums are supported.
+  * elliptical and rectangular frustums are supported.
   */
 void
 SensorVisualizer::setFrustumShape(FrustumShape shape)
@@ -312,6 +164,9 @@ SensorVisualizer::setFrustumShape(FrustumShape shape)
 
 
 /** Set the frustum angles.
+  *
+  * \param horizontal horizontal frustum angle in radians
+  * \param vertical vertical frustum angle in radians
   */
 void
 SensorVisualizer::setFrustumAngles(double horizontal, double vertical)
@@ -322,7 +177,7 @@ SensorVisualizer::setFrustumAngles(double horizontal, double vertical)
 
 // Implementation of Visualizer::orientation()
 Eigen::Quaterniond
-SensorVisualizer::orientation(const Entity* /* parent */, double /* t */) const
+SensorVisualizer::orientation(const Entity* parent, double t) const
 {
-    return Quaterniond::Identity();
+    return parent->orientation(t);
 }

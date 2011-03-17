@@ -1,5 +1,5 @@
 /*
- * $Revision: 455 $ $Date: 2010-08-24 17:00:53 -0700 (Tue, 24 Aug 2010) $
+ * $Revision: 576 $ $Date: 2011-03-16 17:39:24 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -170,7 +170,7 @@ public:
                            unsigned int viewAngleSamples,
                            unsigned int sunAngleSamples);
 
-    void SaveAtmScat(char* filename);
+    void SaveAtmScat(const char* filename);
 
     static const double IndexOfRefraction_Air_0;
     static const double IndexOfRefraction_Air_15;

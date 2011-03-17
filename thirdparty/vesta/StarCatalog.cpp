@@ -1,5 +1,5 @@
 /*
- * $Revision: 558 $ $Date: 2010-11-17 12:20:58 +0100 (Wed, 17 Nov 2010) $
+ * $Revision: 558 $ $Date: 2010-11-17 03:20:58 -0800 (Wed, 17 Nov 2010) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *

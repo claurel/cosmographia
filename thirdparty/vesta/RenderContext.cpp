@@ -1,5 +1,5 @@
 /*
- * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
+ * $Revision: 568 $ $Date: 2011-03-08 09:33:54 -0800 (Tue, 08 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -28,6 +28,11 @@
 using namespace vesta;
 using namespace Eigen;
 using namespace std;
+
+// Set to true in order to enable a more physically correct specular highlights.
+static const bool PhongNormalization = false;
+
+static const float INV_PI = float(1.0 / PI);
 
 
 namespace vesta
@@ -600,7 +605,7 @@ void
 RenderContext::unbindVertexBuffer()
 {
     unbindVertexArray();
-    if (GLEW_ARB_vertex_buffer_object == GL_TRUE)
+    if (GLBufferObject::supported())
     {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
@@ -1035,7 +1040,8 @@ RenderContext::setShaderMaterial(const Material* material)
     }
     else
     {
-        shader->setConstant("color", material->diffuse());
+        float normFactor = PhongNormalization ? INV_PI : 1.0f;
+        shader->setConstant("color", material->diffuse() * normFactor);
     }
 
     shader->setConstant("opacity", material->opacity());
@@ -1127,8 +1133,12 @@ RenderContext::setShaderMaterial(const Material* material)
 
     if (model == ShaderInfo::BlinnPhong)
     {
+        // Using Blinn-Phong normalization factor from http://www.farbrausch.de/~fg/articles/phong.pdf
+        float normFactor = PhongNormalization ? (material->phongExponent() + 8) * (INV_PI * 0.125f) : 1.0f;
+
         shader->setConstant("specularColor", material->specular());
         shader->setConstant("phongExponent", material->phongExponent());
+        shader->setConstant("phongNorm",     normFactor);
     }
 
     if (shaderInfo.hasFresnelFalloff())

@@ -1,5 +1,5 @@
 /*
- * $Revision: 561 $ $Date: 2011-01-28 12:11:17 -0800 (Fri, 28 Jan 2011) $
+ * $Revision: 575 $ $Date: 2011-03-16 16:39:49 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -120,6 +120,15 @@ void ArrowGeometry::setLabelEnabled(bool state, unsigned int which)
         break;
     }
 }
+
+
+/** Sets a font for the label text.
+  */
+void ArrowGeometry::setLabelFont(TextureFont* font)
+{
+    m_font = font;
+}
+
 
 /** Sets the text of the label for an arrow specified by which
   */
@@ -313,7 +322,7 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
     float cameraDistance;
     float pixelSize;
 
-    if(m_font == NULL || !m_labelsEnabled[which])
+    if (m_font.isNull() || !m_labelsEnabled[which])
     {
         return;
     }
@@ -345,15 +354,15 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
     cameraDistance = rc.modelview().translation().norm();
     pixelSize = 0.5 * m_scale / (rc.pixelSize() * cameraDistance);
 
-    if(pixelSize < 10.0){
-        return;
+    if (pixelSize >= 10.0)
+    {
+        rc.drawText(labelPositionScreenSpace, m_labels[which], m_font.ptr(), m_arrowColors[which], m_opacity);
     }
-
-    rc.drawText( labelPositionScreenSpace, m_labels[which], m_font, m_arrowColors[which], m_opacity);
 }
 
-void ArrowGeometry::readTxfFile(){
 
+void ArrowGeometry::readTxfFile()
+{
     ifstream txfFile;
     char* data;
     int fileSize;

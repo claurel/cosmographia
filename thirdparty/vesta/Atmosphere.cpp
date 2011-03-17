@@ -1,5 +1,5 @@
 /*
- * $Revision: 437 $ $Date: 2010-08-17 05:04:14 -0700 (Tue, 17 Aug 2010) $
+ * $Revision: 578 $ $Date: 2011-03-17 10:10:30 -0700 (Thu, 17 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -243,7 +243,12 @@ Atmosphere::generateTransmittanceTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    // Do not enable mipmapping, as it causes artifacts in some atmospheres (e.g. Titan)
+    // at the outer edge. This could probably be resolved with a custom mipmap generation
+    // algorithm, but for now, we'll just leave mipmaps off.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
     m_transmittanceTexture = new TextureMap(texId, TextureProperties(TextureProperties::Clamp));
 
     if (GLEW_EXT_framebuffer_object)
@@ -416,8 +421,8 @@ Atmosphere::transmittance(float r, float cosZenithAngle) const
 //   0 <= t <= 1
 //
 //   height:             h(t) = t^2 * transparentHeight
-//   cos(view angle):    mu(t) =
-//   cos(sun angle):     muS(t) =
+//   cos(view angle):    mu(t) = toCosViewAngle()
+//   cos(sun angle):     muS(t) = toCosSunAngle()
 //
 // Inverse mappings:
 //   height:             t = sqrt(h / transparentHeight)
@@ -429,6 +434,15 @@ Atmosphere::transmittance(float r, float cosZenithAngle) const
 //
 
 // Map a value in [0, 1] to the cosine of the viewing angle
+// This function replaces the parametrization used in Bruneton's paper:
+//     mu = -0.15f + tan(1.5f * v) / tan(1.5f) * 1.15f
+//
+// The change avoids an expensive arctangent function in the shader
+// code.
+//
+// The mapping may be tuned by adjusting the value of the parameter b.
+// b of 0.15 works well for Earth; a larger value should be chosen when the
+// atmosphere extends higher relative to the planet radius.
 static inline float toCosViewAngle(float u)
 {
     float x = u * 2.0f - 1.0f;
@@ -444,9 +458,6 @@ static inline float toCosSunAngle(float u)
     // ratios (e.g. Titan)
     return (log(1.0f - u * (1.0f - exp(-2.6f))) + 0.6f) / -2.0f;
 }
-
-// b of 0.15 works well for Earth; a larger value should be chosen when the
-// atmosphere extends higher relative to the planet radius.
 
 // Fill a table with transmittance values.
 //
@@ -486,7 +497,6 @@ Atmosphere::computeTransmittanceTable(unsigned int heightSamples,
         for (unsigned int j = 0; j < viewAngleSamples; ++j)
         {
             float u = float(j) / float(viewAngleSamples - 1);
-            //float mu = 0.0f; //float mu = -0.15f + tan(1.5f * v) / tan(1.5f) * 1.15f;
             float mu = toCosViewAngle(u);
 
             // Calculate the view direction from mu
@@ -847,7 +857,7 @@ Atmosphere::LoadAtmScat(const DataChunk* data)
   * scattering table (width * height * depth * 4 floats)
   */
 void
-Atmosphere::SaveAtmScat(char* filename)
+Atmosphere::SaveAtmScat(const char* filename)
 {
     filebuf fb;
     fb.open (filename,ios::out | ios::binary);

@@ -1,5 +1,5 @@
 /*
- * $Revision: 559 $ $Date: 2010-12-13 06:33:07 -0800 (Mon, 13 Dec 2010) $
+ * $Revision: 575 $ $Date: 2011-03-16 16:39:49 -0700 (Wed, 16 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -17,6 +17,8 @@
 
 namespace vesta
 {
+
+class TextureFont;
 
 /** The abstract base class for all visualizers which show a single
   * arrow. Subclasses override the direction method to compute the
@@ -49,6 +51,8 @@ public:
       */
     void setLabelText(std::string text);
 
+    TextureFont* labelFont() const;
+    void setLabelFont(TextureFont* font);
 };
 
 }

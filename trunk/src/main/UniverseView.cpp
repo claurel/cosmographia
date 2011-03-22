@@ -86,6 +86,7 @@
 #include <QNetworkReply>
 #include <QNetworkDiskCache>
 #include <QDesktopServices>
+#include <QLocale>
 
 using namespace vesta;
 using namespace Eigen;
@@ -587,6 +588,28 @@ void UniverseView::paintEvent(QPaintEvent *event)
 }
 
 
+static
+QString readableNumber(double value, int significantDigits)
+{
+    double roundValue = value;
+    int useDigits = 1;
+
+    if (value != 0.0)
+    {
+        double n = log10(abs(value));
+        useDigits = max(0, significantDigits - (int) n - 1);
+        double m = pow(10.0, floor(n) - significantDigits + 1);
+        roundValue = floor(value / m + 0.5) * m;
+    }
+    else
+    {
+        useDigits = significantDigits;
+    }
+
+    return QLocale::system().toString(roundValue, 'f', useDigits);
+}
+
+
 void UniverseView::paintGL()
 {
     // Update the frame counter
@@ -734,8 +757,10 @@ void UniverseView::paintGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
 
-    glColor4f(0.2f, 0.4f, 1.0f, max(0.0f, min(1.0f, float((m_realTime - 5.0) / 5.0))));
-    // Show the title
+    glColor4f(0.3f, 0.7f, 1.0f, max(0.0f, min(1.0f, float((m_realTime - 5.0) / 5.0))));
+
+    QLocale locale = QLocale::system();
+
     if (m_infoTextVisible)
     {
         if (m_titleFont.isValid())
@@ -765,26 +790,29 @@ void UniverseView::paintGL()
                 Vector3d r = m_observer->absolutePosition(m_simulationTime) - m_selectedBody->position(m_simulationTime);
                 double distance = r.norm();
 
-                WorldGeometry* world = dynamic_cast<WorldGeometry*>(m_selectedBody->geometry());
-                if (world)
+                bool isEllipsoidal = m_selectedBody->geometry() && m_selectedBody->geometry()->isEllipsoidal();
+                if (isEllipsoidal)
                 {
-                    distance -= dynamic_cast<WorldGeometry*>(m_selectedBody->geometry())->maxRadius();
+                    distance -= m_selectedBody->geometry()->ellipsoid().semiMajorAxisLength();
                 }
 
-                QString distanceString = QString("Distance: %1 km").arg(distance);
+                QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
                 m_labelFont->render(distanceString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 35.0f));
 
-                if (world)
+                // Display the subpoint for ellipsoidal bodies that are sufficiently close
+                // to the observer.
+                if (isEllipsoidal && distance < m_selectedBody->geometry()->ellipsoid().semiMajorAxisLength() * 100)
                 {
                     Vector3d q = m_selectedBody->orientation(m_simulationTime).conjugate() * r;
                     q = q.normalized();
                     double latitude = toDegrees(asin(q.z()));
                     double longitude = toDegrees(atan2(q.y(), q.x()));
-                    QString coordString = QString("Subpoint: %1, %2").arg(latitude).arg(longitude);
+                    QString coordString = QString("Subpoint: %1, %2").arg(latitude, 0, 'f', 3).arg(longitude, 0, 'f', 3);
                     m_labelFont->render(coordString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 50.0f));
                 }
             }
 
+            // Show the globe tile download status
             {
                 unsigned int tileCount = 0;
 
@@ -807,12 +835,12 @@ void UniverseView::paintGL()
 
             if (m_paused)
             {
-                QString timeScaleString = QString("%1x (paused)").arg(m_timeScale);
+                QString timeScaleString = QString("%1x (paused)").arg(m_timeScale, 0, 'f');
                 m_labelFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
             }
             else
             {
-                QString timeScaleString = QString("%1x").arg(m_timeScale);
+                QString timeScaleString = QString("%1x").arg(m_timeScale, 0, 'f');
                 m_labelFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
             }
         }
@@ -1721,6 +1749,13 @@ UniverseView::setShadows(bool enable)
 
 
 void
+UniverseView::setEclipseShadows(bool enable)
+{
+    m_renderer->setEclipseShadowsEnabled(enable);
+}
+
+
+void
 UniverseView::setReflections(bool enable)
 {
     m_reflectionsEnabled = enable;
@@ -1729,6 +1764,12 @@ UniverseView::setReflections(bool enable)
 
 void
 UniverseView::setAtmospheres(bool /* enable */)
+{
+}
+
+
+void
+UniverseView::setCloudLayers(bool /* enable */)
 {
 }
 

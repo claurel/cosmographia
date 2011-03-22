@@ -120,6 +120,8 @@ public slots:
     void setPlanetographicGridVisibility(bool checked);
     void setTrajectoryVisibility(bool enable);
     void setShadows(bool enable);
+    void setEclipseShadows(bool enable);
+    void setCloudLayers(bool enable);
     void setAtmospheres(bool enable);
     void setAmbientLight(bool enable);
     void setRealisticPlanets(bool enable);

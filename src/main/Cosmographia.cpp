@@ -150,11 +150,17 @@ Cosmographia::Cosmographia() :
     QAction* slower2Action = new QAction("2x Slower", timeMenu);
     slower2Action->setShortcut(QKeySequence("Ctrl+Shift+K"));
     timeMenu->addAction(slower2Action);
-    QAction* backYearAction = new QAction("Back one year", timeMenu);
-    backYearAction->setShortcut(QKeySequence("Ctrl+["));
+    QAction* backDayAction = new QAction("Back One Day", timeMenu);
+    backDayAction->setShortcut(QKeySequence("Ctrl+["));
+    timeMenu->addAction(backDayAction);
+    QAction* forwardDayAction = new QAction("Forward One Day", timeMenu);
+    forwardDayAction->setShortcut(QKeySequence("Ctrl+]"));
+    timeMenu->addAction(forwardDayAction);
+    QAction* backYearAction = new QAction("Back One Year", timeMenu);
+    backYearAction->setShortcut(QKeySequence("Ctrl+Shift+["));
     timeMenu->addAction(backYearAction);
-    QAction* forwardYearAction = new QAction("Forward one year", timeMenu);
-    forwardYearAction->setShortcut(QKeySequence("Ctrl+]"));
+    QAction* forwardYearAction = new QAction("Forward One Year", timeMenu);
+    forwardYearAction->setShortcut(QKeySequence("Ctrl+Shift+]"));
     timeMenu->addAction(forwardYearAction);
     QAction* reverseAction = new QAction("&Reverse", timeMenu);
     reverseAction->setShortcut(QKeySequence("Ctrl+J"));
@@ -169,6 +175,8 @@ Cosmographia::Cosmographia() :
     connect(slowerAction,  SIGNAL(triggered()),     this,     SLOT(slower()));
     connect(faster2Action,  SIGNAL(triggered()),     this,     SLOT(faster2()));
     connect(slower2Action,  SIGNAL(triggered()),     this,     SLOT(slower2()));
+    connect(backDayAction,  SIGNAL(triggered()),     this,     SLOT(backDay()));
+    connect(forwardDayAction,  SIGNAL(triggered()),     this,     SLOT(forwardDay()));
     connect(backYearAction,  SIGNAL(triggered()),     this,     SLOT(backYear()));
     connect(forwardYearAction,  SIGNAL(triggered()),     this,     SLOT(forwardYear()));
     connect(reverseAction, SIGNAL(triggered()),     this,     SLOT(reverseTime()));
@@ -275,17 +283,17 @@ Cosmographia::Cosmographia() :
     QAction* shadowsAction = new QAction("&Shadows", graphicsMenu);
     shadowsAction->setCheckable(true);
     graphicsMenu->addAction(shadowsAction);
+    QAction* eclipsesAction = new QAction("&Eclipse Shadows", graphicsMenu);
+    eclipsesAction->setCheckable(true);
+    graphicsMenu->addAction(eclipsesAction);
     QAction* atmospheresAction = new QAction("&Atmosphere", graphicsMenu);
     atmospheresAction->setCheckable(true);
     atmospheresAction->setShortcut(QKeySequence("Ctrl+A"));
     graphicsMenu->addAction(atmospheresAction);
-    QAction* cloudLayerAction = new QAction("&Cloud layer", graphicsMenu);
+    QAction* cloudLayerAction = new QAction("&Cloud Layers", graphicsMenu);
     cloudLayerAction->setCheckable(true);
     graphicsMenu->addAction(cloudLayerAction);
-    QAction* realisticPlanetsAction = new QAction("Realistic &planets", graphicsMenu);
-    realisticPlanetsAction->setCheckable(true);
-    graphicsMenu->addAction(realisticPlanetsAction);
-    QAction* ambientLightAction = new QAction("Extra &light", graphicsMenu);
+    QAction* ambientLightAction = new QAction("Extra &Light", graphicsMenu);
     ambientLightAction->setCheckable(true);
     graphicsMenu->addAction(ambientLightAction);
     QAction* reflectionsAction = new QAction("&Reflections", graphicsMenu);
@@ -302,7 +310,7 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction->setCheckable(true);
     graphicsMenu->addAction(m_fullScreenAction);
     connect(m_fullScreenAction, SIGNAL(toggled(bool)), this, SLOT(setFullScreen(bool)));
-    QAction* anaglyphAction = new QAction("Anaglyph stereo", graphicsMenu);
+    QAction* anaglyphAction = new QAction("Anaglyph Stereo", graphicsMenu);
     anaglyphAction->setShortcut(QKeySequence("Ctrl+Shift+A"));
     anaglyphAction->setCheckable(true);
     graphicsMenu->addAction(anaglyphAction);
@@ -310,9 +318,9 @@ Cosmographia::Cosmographia() :
     this->menuBar()->addMenu(graphicsMenu);
 
     connect(shadowsAction,          SIGNAL(triggered(bool)), m_view3d, SLOT(setShadows(bool)));
+    connect(eclipsesAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipseShadows(bool)));
     connect(atmospheresAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setAtmospheres(bool)));
-    //connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayerVisibility(bool)));
-    connect(realisticPlanetsAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setRealisticPlanets(bool)));
+    connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayers(bool)));
     connect(ambientLightAction,     SIGNAL(triggered(bool)), m_view3d, SLOT(setAmbientLight(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));
     connect(milkyWayAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setMilkyWayVisibility(bool)));
@@ -670,6 +678,20 @@ Cosmographia::slower2()
     else if (t < 0.0)
         t = std::min(-1.0e-3, t);
     m_view3d->setTimeScale(t);
+}
+
+
+void
+Cosmographia::backDay()
+{
+    m_view3d->setSimulationTime(m_view3d->simulationTime() - daysToSeconds(1.0));
+}
+
+
+void
+Cosmographia::forwardDay()
+{
+    m_view3d->setSimulationTime(m_view3d->simulationTime() + daysToSeconds(1.0));
 }
 
 

@@ -45,6 +45,8 @@ public slots:
     void slower();
     void faster2();
     void slower2();
+    void backDay();
+    void forwardDay();
     void backYear();
     void forwardYear();
     void reverseTime();

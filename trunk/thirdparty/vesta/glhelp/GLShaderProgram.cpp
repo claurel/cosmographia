@@ -255,6 +255,19 @@ GLShaderProgram::setConstantArray(const char* name, const float values[], unsign
 }
 
 
+/** Set the value of a GLSL shader program uniform with a vec2 array type.
+  */
+void
+GLShaderProgram::setConstantArray(const char* name, const Eigen::Vector2f values[], unsigned int count)
+{
+    GLint location = glGetUniformLocationARB(m_handle, name);
+    if (location >= 0)
+    {
+        glUniform2fv(location, count, values[0].data());
+    }
+}
+
+
 /** Set the value of a GLSL shader program uniform with a vec3 array type.
   */
 void
@@ -264,6 +277,19 @@ GLShaderProgram::setConstantArray(const char* name, const Eigen::Vector3f values
     if (location >= 0)
     {
         glUniform3fv(location, count, values[0].data());
+    }
+}
+
+
+/** Set the value of a GLSL shader program uniform with a vec4 array type.
+  */
+void
+GLShaderProgram::setConstantArray(const char* name, const Eigen::Vector4f values[], unsigned int count)
+{
+    GLint location = glGetUniformLocationARB(m_handle, name);
+    if (location >= 0)
+    {
+        glUniform4fv(location, count, values[0].data());
     }
 }
 

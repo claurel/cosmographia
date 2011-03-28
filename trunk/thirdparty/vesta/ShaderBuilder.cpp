@@ -1,5 +1,5 @@
 /*
- * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
+ * $Revision: 588 $ $Date: 2011-03-26 12:51:23 -0700 (Sat, 26 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -163,6 +163,19 @@ static void declareCubeMapShadowFunc(ostream& out)
     out << "    return lightFragDistance < lightShadowDistance ? 1.0 : 0.0;" << endl;
     out << "}" << endl;
     out << endl;
+}
+
+static void declareEclipseShadowFunc(ostream& out)
+{
+    out << "float eclipseShadow(vec4 shadowCoord, vec2 shadowSlopes)" << endl;
+    out << "{" << endl;
+    out << "    float umbra = 1.0 + shadowSlopes.x * shadowCoord.z;" << endl;
+    out << "    float penumbra = 1.0 + shadowSlopes.y * shadowCoord.z;" << endl;
+    out << "    float x = length(shadowCoord.xy);" << endl;
+    out << "    return clamp((x - umbra) / (penumbra - umbra), 0.0, 1.0);" << endl;
+    out << "}" << endl;
+    out << endl;
+
 }
 
 static string arrayIndex(const string& arrayName, unsigned int index)
@@ -364,6 +377,11 @@ static void declareHelperFunctions(ostream& fragment, const ShaderInfo& shaderIn
         declareCubeMapShadowFunc(fragment);
     }
 
+    if (shaderInfo.hasEclipseShadows())
+    {
+        declareEclipseShadowFunc(fragment);
+    }
+
     if (shaderInfo.hasScattering())
     {
         declareScatteringFunc(fragment);
@@ -466,6 +484,14 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         declareShadowSamplers(fragment, shaderInfo);
     }
 
+    if (shaderInfo.hasEclipseShadows())
+    {
+        unsigned int count = shaderInfo.eclipseShadowCount();
+        declareUniformArray(vertex, "mat4", "eclipseShadowMatrix", count);
+        declareUniformArray(fragment, "vec2", "eclipseShadowSlopes", count);
+        declareVaryingArray(vertex, fragment, "vec4", "eclipseShadowCoord", count);
+    }
+
     if (shaderInfo.hasScattering())
     {
         fragment << "uniform sampler2D transmittanceTex;" << endl;
@@ -540,6 +566,16 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
             vertex << "    shadowCoord[" << i << "] = shadowMatrix[" << i << "] * gl_Vertex;" << endl;
         }
     }
+
+    // Output shadow coordinates for shaders that have eclipse shadows
+    if (shaderInfo.hasEclipseShadows())
+    {
+        for (unsigned int i = 0; i < shaderInfo.eclipseShadowCount(); ++i)
+        {
+            vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * gl_Vertex;" << endl;
+        }
+    }
+
 
     // Position is always required
     vertex << "    gl_Position = ftransform();" << endl;
@@ -638,11 +674,20 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
 
         fragment << "        float d = max(0.0, dot(N, " << lightDirection << "));" << endl;
 
-        // Presently, a maximum of one directional shadow and three omnidirectional shadows are supported.
-        if (!isPointLight && shaderInfo.shadowCount() != 0)
+        // Presently, a maximum of one directional shadow, three omnidirectional shadows, and seven eclipse shadows are supported.
+        if (!isPointLight && (shaderInfo.shadowCount() != 0 || shaderInfo.eclipseShadowCount() != 0))
         {
-            unsigned int shadowIndex = 0;
-            fragment << "        float shadow = shadowPCF(shadowTex" << shadowIndex << ", shadowCoord[" << shadowIndex << "]);" << endl;
+            fragment << "        float shadow = 1.0;" << endl;
+            if (shaderInfo.shadowCount() > 0)
+            {
+                unsigned int shadowIndex = 0;
+                fragment << "        shadow *= shadowPCF(shadowTex" << shadowIndex << ", shadowCoord[" << shadowIndex << "]);" << endl;
+            }
+
+            for (unsigned int i = 0; i < shaderInfo.eclipseShadowCount(); ++i)
+            {
+                fragment << "        shadow *= eclipseShadow(eclipseShadowCoord[" << i << "], eclipseShadowSlopes[" << i << "]);" << endl;
+            }
         }
         else if (isPointLight && light - shaderInfo.directionalLightCount() < shaderInfo.omniShadowCount())
         {
@@ -994,12 +1039,12 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
         generateBlinnPhongShader(vertex, fragment, shaderInfo);
     }
 
-    VESTA_LOG("Creating shader:  model: %u, textures 0x%x, lights: %u/%u, shadows: %u/%u, scattering: %d, fresnel: %d, vertexColors: %d",
+    VESTA_LOG("Creating shader:  model: %u, textures 0x%x, lights: %u/%u, shadows: %u/%u/%u, scattering: %d, fresnel: %d, vertexColors: %d",
               (int) shaderInfo.reflectanceModel(),
               shaderInfo.textures(),
               shaderInfo.directionalLightCount(),
               shaderInfo.pointLightCount(),
-              shaderInfo.shadowCount(), shaderInfo.omniShadowCount(),
+              shaderInfo.shadowCount(), shaderInfo.omniShadowCount(), shaderInfo.eclipseShadowCount(),
               shaderInfo.hasScattering() ? 1 : 0,
               shaderInfo.hasFresnelFalloff() ? 1 : 0,
               shaderInfo.hasVertexColors() ? 1 : 0);

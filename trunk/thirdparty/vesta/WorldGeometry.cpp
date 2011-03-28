@@ -1,5 +1,5 @@
 /*
- * $Revision: 510 $ $Date: 2010-09-24 19:17:53 -0700 (Fri, 24 Sep 2010) $
+ * $Revision: 581 $ $Date: 2011-03-18 18:02:35 -0700 (Fri, 18 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -54,6 +54,8 @@ WorldGeometry::WorldGeometry() :
     m_tileAllocator(NULL)
 {
     setClippingPolicy(Geometry::PreventClipping);
+    setShadowCaster(true);
+
     m_material = new Material();
     m_material->setDiffuse(Spectrum(1.0f, 1.0f, 1.0f));
 
@@ -1217,6 +1219,19 @@ void
 WorldGeometry::setNormalMap(TextureMap* normalMap)
 {
     m_normalMap = normalMap;
+}
+
+
+/** Set whether this globe is self-luminous. If true, it
+  * will not have any shading applied. Emissive true is the
+  * appropriate setting for the Sun. Note that setting emissive
+  * to true will *not* make the object a light source.
+  */
+void
+WorldGeometry::setEmissive(bool emissive)
+{
+    m_emissive = emissive;
+    setShadowCaster(!emissive);
 }
 
 

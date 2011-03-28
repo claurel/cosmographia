@@ -1,5 +1,5 @@
 /*
- * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
+ * $Revision: 586 $ $Date: 2011-03-24 14:01:57 -0700 (Thu, 24 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -28,6 +28,7 @@ class Observer;
 class RenderContext;
 class Framebuffer;
 class CubeMapFramebuffer;
+class EclipseShadowVolumeSet;
 
 /** UniverseRenderer draws views of a VESTA Universe using a 3D rendering
   * library. Views are drawn as sets at a particular time. A typical usage
@@ -122,7 +123,17 @@ public:
     {
         return m_shadowsEnabled;
     }
+
+    /** Return true if this renderer has eclipse shadows enabled
+      */
+    bool eclipseShadowsEnabled() const
+    {
+        return m_eclipseShadowsEnabled;
+    }
+
     void setShadowsEnabled(bool enable);
+    void setEclipseShadowsEnabled(bool enable);
+
     bool shadowsSupported() const;
     bool omniShadowsSupported() const;
 
@@ -162,6 +173,7 @@ public:
     {
         const LightSource* lightSource;
         Eigen::Vector3d position;
+        double radius;
     };
 
     struct VisibleLightSourceItem
@@ -203,6 +215,7 @@ private:
                                           const DepthBufferSpan& span,
                                           const LightSource* light,
                                           const Eigen::Vector3d& lightPosition);
+    void setupEclipseShadows(const VisibleItem& item);
     void addVisibleItem(const Entity* entity,
                         const Geometry* geometry,
                         const Eigen::Vector3d& position,
@@ -237,6 +250,7 @@ private:
     std::vector<counted_ptr<CubeMapFramebuffer> > m_omniShadowMaps;
 
     bool m_shadowsEnabled;
+    bool m_eclipseShadowsEnabled;
     bool m_visualizersEnabled;
     bool m_skyLayersEnabled;
     float m_depthRangeFront;
@@ -250,6 +264,10 @@ private:
 
     const LightingEnvironment* m_lighting;
     counted_ptr<LightSource> m_sun;
+
+    counted_ptr<EclipseShadowVolumeSet> m_eclipseShadows;
+
+    bool m_viewIndependentInitializationRequired;
 };
 
 }

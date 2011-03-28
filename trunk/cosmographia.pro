@@ -149,6 +149,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/Visualizer.cpp \
     $$VESTA_PATH/WorldGeometry.cpp \
     $$VESTA_PATH/interaction/ObserverController.cpp \
+    $$VESTA_PATH/internal/EclipseShadowVolumeSet.cpp \
     $$VESTA_PATH/internal/InputDataStream.cpp \
     $$VESTA_PATH/internal/OutputDataStream.cpp \
     $$VESTA_PATH/internal/ObjLoader.cpp
@@ -247,6 +248,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/WorldGeometry.h \
     $$VESTA_PATH/interaction/ObserverController.h \
     $$VESTA_PATH/internal/AtomicInt.h \
+    $$VESTA_PATH/internal/EclipseShadowVolumeSet.h \
     $$VESTA_PATH/internal/InputDataStream.h \
     $$VESTA_PATH/internal/OutputDataStream.h \
     $$VESTA_PATH/internal/ObjLoader.h
@@ -492,7 +494,8 @@ macx {
         data/textures/dione.dds \
         data/textures/tethys.dds \
         data/textures/rhea.dds \
-        data/textures/titan.dds
+        data/textures/titan.dds \
+        data/textures/iapetus.dds
 
 
     QMAKE_BUNDLE_DATA += TEXTURES
@@ -514,7 +517,8 @@ macx {
         data/sans-24.txf \
         data/sans-light-24.txf \
         data/de406_1800-2100.dat \
-        data/earth.atmscat
+        data/earth.atmscat \
+        data/titan.atmscat
 
     QMAKE_BUNDLE_DATA += DATA
 

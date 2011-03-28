@@ -1,5 +1,5 @@
 //
-// $Revision: 567 $ $Date: 2011-02-24 13:28:02 -0800 (Thu, 24 Feb 2011) $
+// $Revision: 582 $ $Date: 2011-03-18 18:05:03 -0700 (Fri, 18 Mar 2011) $
 //
 // Copyright by Astos Solutions GmbH, Germany
 //  
@@ -2096,6 +2096,7 @@ public:
 
     bool shadowsEnabled() const;
     void setShadowsEnabled(bool enable);
+    void setEclipseShadowsEnabled(bool enable);
     bool shadowsSupported() const;    
     bool omniShadowsSupported() const;
 };

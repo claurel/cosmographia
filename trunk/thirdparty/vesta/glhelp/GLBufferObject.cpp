@@ -218,5 +218,13 @@ GLBufferObject::mapReadWrite()
 bool
 GLBufferObject::supported()
 {
-    return GLEW_ARB_vertex_buffer_object == GL_TRUE;
+    // Require OpenGL version 1.5 for vertex buffer support. There are some
+    // some pre-1.5 drivers could support vertex buffers with the GLEW_ARB_vertex_buffer_object
+    // extension, but these are very now.
+
+    // The following test detects the ARB extension; however, all of the buffer object
+    // functions would need to be changed to their ARB equivalents if we relied this test.
+    //return GLEW_ARB_vertex_buffer_object == GL_TRUE;
+
+    return GLEW_VERSION_1_5 == GL_TRUE;
 }

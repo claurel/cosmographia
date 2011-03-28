@@ -34,25 +34,45 @@ public:
                    const Eigen::Vector3d& v1) :
         m_center(center)
     {
-        m_generatingVectors.row(0) = v0;
-        m_generatingVectors.row(1) = v1;
+        m_generatingVectors.col(0) = v0;
+        m_generatingVectors.col(1) = v1;
     }
+
+    /** Create an origin centered unit circle in the xy plane..
+      */
+    GeneralEllipse() :
+        m_center(Eigen::Vector3d::Zero())
+    {
+        m_generatingVectors.col(0) = Eigen::Vector3d::UnitX();
+        m_generatingVectors.col(1) = Eigen::Vector3d::UnitY();
+    }
+
 
     Eigen::Vector3d center() const
     {
         return m_center;
     }
 
-    Eigen::Matrix<double, 2, 3> generatingVectors() const
+    Eigen::Vector3d v0() const
+    {
+        return m_generatingVectors.col(0);
+    }
+
+    Eigen::Vector3d v1() const
+    {
+        return m_generatingVectors.col(1);
+    }
+
+    Eigen::Matrix<double, 3, 2> generatingVectors() const
     {
         return m_generatingVectors;
     }
 
-    Eigen::Matrix<double, 2, 3> principalSemiAxes() const;
+    Eigen::Matrix<double, 3, 2> principalSemiAxes() const;
 
 private:
     Eigen::Vector3d m_center;
-    Eigen::Matrix<double, 2, 3> m_generatingVectors;
+    Eigen::Matrix<double, 3, 2> m_generatingVectors;
 };
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Revision: 547 $ $Date: 2010-10-21 14:15:29 -0700 (Thu, 21 Oct 2010) $
+ * $Revision: 588 $ $Date: 2011-03-26 12:51:23 -0700 (Sat, 26 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -148,7 +148,8 @@ public:
 
     enum
     {
-        MaxLights = 4
+        MaxLights = 4,
+        MaxEclipseShadows = 7,
     };
 
     enum RendererOutput
@@ -172,6 +173,9 @@ public:
         counted_ptr<GLFramebuffer> m_shadowMaps[MaxLights];
         unsigned int m_omniShadowMapCount;
         counted_ptr<TextureMap> m_omniShadowMaps[MaxLights];
+        unsigned int m_eclipseShadowCount;
+        Eigen::Matrix4f m_eclipseShadowMatrices[MaxEclipseShadows];
+        Eigen::Vector2f m_eclipseShadowSlopes[MaxEclipseShadows];
 
         bool m_scatteringEnabled;
         ScatteringParameters m_scattering;
@@ -300,6 +304,8 @@ public:
     void setShadowMap(unsigned int index, GLFramebuffer* shadowMap);
     void setOmniShadowMapCount(unsigned int shadowCount);
     void setOmniShadowMap(unsigned int index, TextureMap* shadowCubeMap);
+    void setEclipseShadowCount(unsigned int shadowCount);
+    void setEclipseShadowMatrix(unsigned int index, const Eigen::Matrix4f& shadowMatrix, float umbraSlope, float penumbraSlope);
 
     void setScattering(bool enabled);
     void setScatteringParameters(const ScatteringParameters& scatteringParams);

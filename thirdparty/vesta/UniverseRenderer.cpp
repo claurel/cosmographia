@@ -1,5 +1,5 @@
 /*
- * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
+ * $Revision: 590 $ $Date: 2011-03-28 11:47:34 -0700 (Mon, 28 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -21,6 +21,7 @@
 #include "CubeMapFramebuffer.h"
 #include "glhelp/GLFramebuffer.h"
 #include "Units.h"
+#include "internal/EclipseShadowVolumeSet.h"
 #include <Eigen/Geometry>
 #include <algorithm>
 
@@ -34,7 +35,6 @@ using namespace std;
 #define DEBUG_OMNI_SHADOW_MAP 0
 #define DEBUG_DEPTH_SPANS     0
 
-
 const float UniverseRenderer::MinimumNearDistance = 0.00001f;  // 1 centimeter
 const float UniverseRenderer::MaximumFarDistance = 1.0e12; // one trillion km (~6700 AU)
 
@@ -42,6 +42,9 @@ static const float MinimumNearPlaneDistance = 0.00001f;  // 1 centimeter
 static const float MaximumFarPlaneDistance = 1.0e12; // one trillion km (~6700 AU)
 static const float MinimumNearFarRatio = 0.001f;
 static const float PreferredNearFarRatio = 0.002f;
+
+// Solar radius is used to set the size of the default light source
+static const double SolarRadius = 6.96e5;
 
 // Camera rotations used for drawing to the faces of a cube map
 static const Quaterniond Z180 = Quaterniond(AngleAxisd(toRadians(180.0), Vector3d::UnitZ()));
@@ -67,12 +70,15 @@ UniverseRenderer::UniverseRenderer() :
     m_universe(NULL),
     m_currentTime(0.0),
     m_shadowsEnabled(false),
+    m_eclipseShadowsEnabled(false),
     m_visualizersEnabled(true),
     m_skyLayersEnabled(true),
-    m_renderViewport(1, 1)
+    m_renderViewport(1, 1),
+    m_viewIndependentInitializationRequired(true)
 {
     m_sun = new LightSource();
     m_sun->setLightType(LightSource::Sun);
+    m_eclipseShadows = new EclipseShadowVolumeSet();
 }
 
 
@@ -103,7 +109,8 @@ UniverseRenderer::omniShadowsSupported() const
 }
 
 
-/** Enable or disable the drawing of shadows.
+/** Enable or disable the drawing of shadows. Note that eclipse shadows
+  * cast by planets and moons are enabled separately.
   */
 void
 UniverseRenderer::setShadowsEnabled(bool enable)
@@ -112,6 +119,17 @@ UniverseRenderer::setShadowsEnabled(bool enable)
     {
         m_shadowsEnabled = enable;
     }
+}
+
+
+/** Enable or disable the drawing of eclipse shadows. Any object with an
+  * ellipsoidal geometry is treated specially with regard to shadow. Ellipsoidal
+  * objects will only cast shadows when the eclipse shadows flag is enabled.
+  */
+void
+UniverseRenderer::setEclipseShadowsEnabled(bool enable)
+{
+    m_eclipseShadowsEnabled = enable;
 }
 
 
@@ -317,9 +335,10 @@ UniverseRenderer::beginViewSet(const Universe* universe, double tsec)
     m_universe = universe;
     m_currentTime = tsec;
 
-    // Build the light source list
     // TODO: maintain a bounding sphere hierarchy in order to avoid having to do a linear
     // traversal of all objects.
+
+    // Build the light source list
     m_lightSources.clear();
 
     // Add a light source for the Sun
@@ -327,6 +346,7 @@ UniverseRenderer::beginViewSet(const Universe* universe, double tsec)
     LightSourceItem sunItem;
     sunItem.lightSource = m_sun.ptr();
     sunItem.position = Vector3d::Zero();
+    sunItem.radius = SolarRadius;
     m_lightSources.push_back(sunItem);
 
     const vector<Entity*>& entities = m_universe->entities();
@@ -342,9 +362,15 @@ UniverseRenderer::beginViewSet(const Universe* universe, double tsec)
             LightSourceItem lsi;
             lsi.lightSource = light;
             lsi.position = position;
+            lsi.radius = entity->geometry() ? entity->geometry()->boundingSphereRadius() : 0.0;
             m_lightSources.push_back(lsi);
         }
     }
+
+    m_eclipseShadows->clear();
+
+    // Set a flag indicating that we haven't rendered any views in this set yet
+    m_viewIndependentInitializationRequired = true;
 
     return RenderOk;
 }
@@ -575,8 +601,9 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
 
     buildVisibleLightSourceList(cameraPosition);
 
-    // Simply scan through all entities in the universe. For much better performance with
-    // many entities, we should maintain a bounding sphere hierarchy.
+    // Simply scan through all entities in the universe.
+    // TODO: For better performance with many entities, we could maintain a
+    // bounding sphere hierarchy.
     for (vector<Entity*>::const_iterator iter = entities.begin(); iter != entities.end(); ++iter)
     {
         const Entity* entity = *iter;
@@ -619,6 +646,27 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
                                nearPlaneFovAdjustment);
             }
 
+            // Add an eclipse shadow volume for this body if it is ellipsoidal. We only
+            // need to do this for the first view in the set; subsequent views can reuse
+            // the shadow volume set because shadow volumes are not view dependent.
+            if (m_eclipseShadowsEnabled &&
+                m_viewIndependentInitializationRequired &&
+                entity->geometry() &&
+                entity->geometry()->isEllipsoidal() &&
+                entity->geometry()->isShadowCaster() &&
+                !entity->lightSource())
+            {
+                // Add the shadow volume (except when no sun light source is defined.)
+                if (!m_lightSources.empty() && m_lightSources.front().lightSource->lightType() == LightSource::Sun)
+                {
+                    m_eclipseShadows->addShadow(entity,
+                                                position,
+                                                entity->orientation(m_currentTime).cast<float>(),
+                                                m_lightSources.front().position,
+                                                m_lightSources.front().radius);
+                }
+            }
+
             if (entity->hasVisualizers() && m_visualizersEnabled)
             {
                 for (Entity::VisualizerTable::const_iterator iter = entity->visualizers()->begin();
@@ -659,6 +707,27 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
 
     splitDepthBuffer();
     coalesceDepthBuffer();
+
+    // Expand the non-empty depth buffer spans slightly so that small geometry
+    // (such as labels, which have very small extent in z) doesn't get clipped
+    // when positioned at the back of a span. The symptom of this problem is
+    // flickering geometry.
+    for (unsigned int i = 0; i < m_mergedDepthBufferSpans.size(); ++i)
+    {
+        if (m_mergedDepthBufferSpans[i].itemCount > 0)
+        {
+            if (i == 0)
+            {
+                // This is the farthest span
+                m_mergedDepthBufferSpans[i].farDistance *= 1.01f;
+            }
+            else if (m_mergedDepthBufferSpans[i - 1].itemCount == 0)
+            {
+                // TODO: Possibly expand this span into an adjacent empty span
+            }
+        }
+    }
+
 
     // If there is splittable geometry, we need to add extra depth spans
     // at the front and back, otherwise it may be clipped.
@@ -729,6 +798,11 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
     cerr << endl;
 #endif // DEBUG_DEPTH_SPANS
 
+    if (m_eclipseShadowsEnabled)
+    {
+        m_eclipseShadows->frustumCull(projection.frustum());
+    }
+
     // Draw depth buffer spans from back to front
     unsigned int spanIndex = m_mergedDepthBufferSpans.size() - 1;
     float spanRange = 1.0f;
@@ -768,6 +842,8 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
 
     // Don't hold on to the lighting environment pointer
     m_lighting = NULL;
+
+    m_viewIndependentInitializationRequired = false;
 
     return RenderOk;
 }
@@ -1327,6 +1403,8 @@ void UniverseRenderer::renderDepthBufferSpan(const DepthBufferSpan& span, const 
                     m_renderContext->setOmniShadowMapCount(0);
                 }
 
+                m_renderContext->setEclipseShadowCount(0);
+
                 if (m_lighting && !m_lighting->reflectionRegions().empty())
                 {
                     m_renderContext->setEnvironmentMap(m_lighting->reflectionRegions().front().cubeMap);
@@ -1402,7 +1480,7 @@ UniverseRenderer::renderDepthBufferSpanShadows(unsigned int shadowIndex,
             shadowReceiverBounds.merge(BoundingSphere<float>(item.cameraRelativePosition.cast<float>(), item.boundingRadius));
         }
 
-        if (geometry->isShadowCaster())
+        if (geometry->isShadowCaster() && !geometry->isEllipsoidal())
         {
             shadowCastersPresent = true;
         }
@@ -1438,7 +1516,8 @@ UniverseRenderer::renderDepthBufferSpanShadows(unsigned int shadowIndex,
         const VisibleItem& item = m_visibleItems[span.backItemIndex - i];
         const Geometry* geometry = item.geometry;
 
-        if (geometry->isShadowCaster())
+        // Note that shadows of ellipsoidal bodies are handled specially by the eclipse shadow code
+        if (geometry->isShadowCaster() && !geometry->isEllipsoidal())
         {
             Vector3f itemPosition = item.cameraRelativePosition.cast<float>();
             m_renderContext->pushModelView();
@@ -1479,7 +1558,6 @@ UniverseRenderer::renderDepthBufferSpanOmniShadows(unsigned int shadowIndex,
                                                    const LightSource* light,
                                                    const Vector3d& lightPosition)
 {
-    static int frameCount = 0;
     // Check for shadow support
     if (!Framebuffer::supported() || !m_shadowsEnabled)
     {
@@ -1504,7 +1582,7 @@ UniverseRenderer::renderDepthBufferSpanOmniShadows(unsigned int shadowIndex,
             shadowReceiverBounds.merge(BoundingSphere<float>(item.cameraRelativePosition.cast<float>(), item.boundingRadius));
         }
 
-        if (geometry->isShadowCaster())
+        if (geometry->isShadowCaster() && !geometry->isEllipsoidal())
         {
             shadowCastersPresent = true;
         }
@@ -1568,7 +1646,8 @@ UniverseRenderer::renderDepthBufferSpanOmniShadows(unsigned int shadowIndex,
                 const VisibleItem& item = m_visibleItems[span.backItemIndex - i];
                 const Geometry* geometry = item.geometry;
 
-                if (geometry->isShadowCaster())
+                // Note that shadows of ellipsoidal bodies are handled specially by the eclipse shadow code
+                if (geometry->isShadowCaster() && !geometry->isEllipsoidal())
                 {
                     Vector3f itemPosition = (item.cameraRelativePosition - lightPosition).cast<float>();
                     Vector3f cameraSpacePosition = toCameraSpace * itemPosition;
@@ -1611,9 +1690,75 @@ UniverseRenderer::renderDepthBufferSpanOmniShadows(unsigned int shadowIndex,
 }
 
 
+// Check for any eclipse shadows that affect an item and set the shadow
+// state in the render context appropriately.
+void
+UniverseRenderer::setupEclipseShadows(const VisibleItem &item)
+{
+    if (m_eclipseShadows->findIntersectingShadows(item.entity, item.position, item.boundingRadius))
+    {
+        // The object is affected by at least one shadow
+
+        if (m_eclipseShadows->insideUmbra())
+        {
+            // The object is completely shadowed; don't bother with eclipse shadows in the shader,
+            // just turn off the light source.
+            const VisibleLightSourceItem& light = m_visibleLightSources.front();
+            m_renderContext->setLight(0, RenderContext::Light(RenderContext::DirectionalLight,
+                                                              light.cameraRelativePosition.cast<float>(),
+                                                              Spectrum::Black(),
+                                                              1.0));
+        }
+        else
+        {
+            // The object is only partly shadowed. Set up the lighting.
+            const vector<EclipseShadowVolumeSet::EclipseShadow>& shadows = m_eclipseShadows->intersectingShadows();
+
+            unsigned int shadowCount = min((unsigned int) RenderContext::MaxEclipseShadows, (unsigned int) shadows.size());
+            Matrix4f invCameraTransform = Transform3f(m_renderContext->cameraOrientation()).matrix();
+
+            for (unsigned int i = 0; i < shadowCount; ++i)
+            {
+                const EclipseShadowVolumeSet::EclipseShadow& shadow = shadows[i];
+
+                // The shadow rotation matrix transforms a point in world space to shadow space. In shadow space,
+                // the z-axis points away from the light source along the central shadow axis. The x- and y-axes
+                // are the principal axes of an elliptical slice of the shadow cone. They are always perpendicular
+                // to each other and the z-axis.
+
+                // In order to avoid precision problems, we'll scale the z-axis so that its length is closer to
+                // the range of the x- and y-axis lengths
+                float zscale = shadow.projection.v0().norm();
+
+                Matrix3f shadowRotation;
+                shadowRotation << shadow.projection.v0().cast<float>() / float(shadow.projection.v0().squaredNorm()),
+                                  shadow.projection.v1().cast<float>() / float(shadow.projection.v1().squaredNorm()),
+                                  shadow.direction.cast<float>() / zscale;
+
+                // Get the position of the shadow center relative to the camera
+                Vector3f shadowCenter = (shadow.position - item.position + item.cameraRelativePosition).cast<float>();
+
+                Matrix4f shadowTransform = Matrix4f::Identity();
+                shadowTransform.corner<3, 3>(TopLeft) = shadowRotation.transpose();
+                shadowTransform = shadowTransform * Transform3f(Translation3f(-shadowCenter)).matrix() * invCameraTransform;
+                zscale = 1.0f;
+                m_renderContext->setEclipseShadowMatrix(i, shadowTransform, shadow.umbraSlope / zscale, shadow.penumbraSlope / zscale);
+            }
+            m_renderContext->setEclipseShadowCount(shadowCount);
+        }
+    }
+
+}
+
+
 void
 UniverseRenderer::drawItem(const VisibleItem& item)
 {       
+    if (item.outsideFrustum)
+    {
+        return;
+
+    }
     m_renderContext->setModelTranslation(m_renderContext->modelview().linear().cast<double>() * item.cameraRelativePosition);
 
     // Set up the light sources
@@ -1654,10 +1799,14 @@ UniverseRenderer::drawItem(const VisibleItem& item)
     m_renderContext->translateModelView(item.cameraRelativePosition.cast<float>());
     m_renderContext->rotateModelView(item.orientation);
 
-    if (!item.outsideFrustum)
+    // TODO: Remove special case for ellipsoidal objects; we should just be able to make
+    // WorldGeometry shadow receivers.
+    if (m_eclipseShadowsEnabled && (item.geometry->isShadowReceiver() || item.geometry->isEllipsoidal()))
     {
-        item.geometry->render(*m_renderContext, m_currentTime);
+        setupEclipseShadows(item);
     }
+
+    item.geometry->render(*m_renderContext, m_currentTime);
 
     m_renderContext->popModelView();
 }

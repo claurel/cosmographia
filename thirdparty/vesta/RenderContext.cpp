@@ -1,5 +1,5 @@
 /*
- * $Revision: 568 $ $Date: 2011-03-08 09:33:54 -0800 (Tue, 08 Mar 2011) $
+ * $Revision: 588 $ $Date: 2011-03-26 12:51:23 -0700 (Sat, 26 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -926,6 +926,7 @@ computeShaderInfo(const Material* material,
         shaderInfo.setPointLightCount(pointLightCount);
         shaderInfo.setShadowCount(std::min(directionalLightCount, environment.m_shadowMapCount));
         shaderInfo.setOmniShadowCount(std::min(pointLightCount, environment.m_omniShadowMapCount));
+        shaderInfo.setEclipseShadowCount(environment.m_eclipseShadowCount);
     }
 
     // Set the texture properties for the shader. All textures
@@ -1260,7 +1261,7 @@ RenderContext::updateShaderTransformConstants()
         m_modelViewMatrixCurrent = true;
         if (m_shaderCapability != FixedFunction && m_rendererOutput == FragmentColor)
         {
-            // The shadow matrix must be updated whenever the modelview matrix changes; it is
+            // The shadow matrices must be updated whenever the modelview matrix changes; they are
             // the product of the model-to-world and world-to-shadow matrixes.
             if (m_currentShaderInfo.hasShadows())
             {
@@ -1270,6 +1271,17 @@ RenderContext::updateShaderTransformConstants()
                     shadowMatrices[i] = m_environment.m_shadowMapMatrices[i] * modelview();
                 }
                 m_currentShader->setConstantArray("shadowMatrix", shadowMatrices, m_environment.m_shadowMapCount);
+            }
+
+            if (m_currentShaderInfo.hasEclipseShadows())
+            {
+                Matrix4f shadowMatrices[MaxEclipseShadows];
+                for (unsigned int i = 0; i < m_environment.m_eclipseShadowCount; ++i)
+                {
+                    shadowMatrices[i] = m_environment.m_eclipseShadowMatrices[i] * modelview();
+                }
+                m_currentShader->setConstantArray("eclipseShadowMatrix", shadowMatrices, m_environment.m_eclipseShadowCount);
+                m_currentShader->setConstantArray("eclipseShadowSlopes", m_environment.m_eclipseShadowSlopes, m_environment.m_eclipseShadowCount);
             }
 
             // No special handling required for omnidirectional shadows; they're stored in
@@ -1465,6 +1477,31 @@ RenderContext::setOmniShadowMap(unsigned int index, TextureMap* shadowCubeMap)
     if (index < MaxLights)
     {
         m_environment.m_omniShadowMaps[index] = shadowCubeMap;
+    }
+}
+
+
+void
+RenderContext::setEclipseShadowCount(unsigned int count)
+{
+    if (count <= MaxEclipseShadows)
+    {
+        if (count != m_environment.m_eclipseShadowCount)
+        {
+            m_environment.m_eclipseShadowCount = count;
+            invalidateShaderState();
+        }
+    }
+}
+
+
+void
+RenderContext::setEclipseShadowMatrix(unsigned int index, const Eigen::Matrix4f& shadowMatrix, float umbraSlope, float penumbraSlope)
+{
+    if (index < MaxEclipseShadows)
+    {
+        m_environment.m_eclipseShadowMatrices[index] = shadowMatrix;
+        m_environment.m_eclipseShadowSlopes[index] = Vector2f(umbraSlope, penumbraSlope);
     }
 }
 

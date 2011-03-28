@@ -21,13 +21,13 @@ using namespace std;
   * are the rows of the returned matrix. Note that there is no
   * ordering of semi-major or semi-minor axes.
   */
-Matrix<double, 2, 3>
+Matrix<double, 3, 2>
 GeneralEllipse::principalSemiAxes() const
 {
     Matrix2d S;
-    double s00 = m_generatingVectors.row(0).dot(m_generatingVectors.row(0));
-    double s01 = m_generatingVectors.row(0).dot(m_generatingVectors.row(1));
-    double s11 = m_generatingVectors.row(1).dot(m_generatingVectors.row(1));
+    double s00 = m_generatingVectors.col(0).dot(m_generatingVectors.col(0));
+    double s01 = m_generatingVectors.col(0).dot(m_generatingVectors.col(1));
+    double s11 = m_generatingVectors.col(1).dot(m_generatingVectors.col(1));
     double s10 = s01;
     S << s00, s01, s10, s11;
 
@@ -35,9 +35,9 @@ GeneralEllipse::principalSemiAxes() const
     Vector2d e = solver.eigenvalues();
     Matrix2d ev = solver.eigenvectors();
 
-    Matrix<double, 2, 3> result;
-    result.row(0) = ev(0, 0) * m_generatingVectors.row(0) + ev(1, 0) * m_generatingVectors.row(1);
-    result.row(1) = ev(0, 1) * m_generatingVectors.row(0) + ev(1, 1) * m_generatingVectors.row(1);
+    Matrix<double, 3, 2> result;
+    result.col(0) = ev(0, 0) * m_generatingVectors.col(0) + ev(1, 0) * m_generatingVectors.col(1);
+    result.col(1) = ev(0, 1) * m_generatingVectors.col(0) + ev(1, 1) * m_generatingVectors.col(1);
 
     return result;
 }

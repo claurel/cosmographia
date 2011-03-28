@@ -1,5 +1,5 @@
 /*
- * $Revision: 577 $ $Date: 2011-03-16 17:40:22 -0700 (Wed, 16 Mar 2011) $
+ * $Revision: 581 $ $Date: 2011-03-18 18:02:35 -0700 (Fri, 18 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -147,15 +147,7 @@ public:
         return m_emissive;
     }
 
-    /** Set whether this globe is self-luminous. If true, it
-      * will not have any shading applied. Emissive true is the
-      * appropriate setting for the Sun. Note that setting emissive
-      * to true will *not* make the object a light source.
-      */
-    void setEmissive(bool emissive)
-    {
-        m_emissive = emissive;
-    }
+    void setEmissive(bool emissive);
 
     Atmosphere* atmosphere() const;
 

@@ -1,5 +1,5 @@
 /*
- * $Revision: 560 $ $Date: 2010-12-14 11:48:28 -0800 (Tue, 14 Dec 2010) $
+ * $Revision: 585 $ $Date: 2011-03-23 20:18:25 -0700 (Wed, 23 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -169,6 +169,21 @@ public:
         m_data |= ((count << OmniShadowCountMaskShift) & OmniShadowCountMask);
     }
 
+    unsigned int eclipseShadowCount() const
+    {
+        return (m_data & EclipseShadowCountMask) >> EclipseShadowCountMaskShift;
+    }
+
+    bool hasEclipseShadows() const
+    {
+        return eclipseShadowCount() > 0;
+    }
+
+    void setEclipseShadowCount(unsigned int count)
+    {
+        m_data |= ((count << EclipseShadowCountMaskShift) & EclipseShadowCountMask);
+    }
+
     bool hasVertexColors() const
     {
         return (m_data & VertexColorMask) != 0;
@@ -255,6 +270,7 @@ private:
         SpecularInAlphaMask       = 0x0400000,
         FresnelFalloffMask        = 0x0800000,
         CompressedNormalMapMask   = 0x1000000,
+        EclipseShadowCountMask    = 0xe000000,
     };
 
     enum
@@ -264,6 +280,7 @@ private:
         PointLightCountMaskShift       = 12,
         ShadowCountMaskShift           = 14,
         OmniShadowCountMaskShift       = 16,
+        EclipseShadowCountMaskShift    = 25,
     };
 
 private:

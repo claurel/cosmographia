@@ -58,6 +58,8 @@ public:
     GeneralEllipse intersection(const Eigen::Hyperplane<double, 3>& plane, bool* foundIntersection) const;
     GeneralEllipse limb(const Eigen::Vector3d& p) const;
 
+    GeneralEllipse orthogonalProjection(const Eigen::Vector3d& planeNormal) const;
+
 private:
     Eigen::Vector3d m_semiAxes;
 };

@@ -2295,6 +2295,10 @@ UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* cata
     {
         geometry = loadParticleSystemGeometry(map);
     }
+    else if (type == "Rings")
+    {
+        geometry = loadRingSystemGeometry(map);
+    }
     else
     {
         qDebug() << "Unknown type " << type << " for geometry.";

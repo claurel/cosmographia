@@ -236,13 +236,26 @@
           {
               "type" : "Globe",
               "radii" : [ 60268, 60268, 54364 ],
-              "baseMap" : "textures/saturn.jpg",
-              "ringSystem" : 
-              {
-                  "innerRadius" : 74660,
-                  "outerRadius" : 140220,
-                  "texture" : "textures/saturn-rings.png"
-              }
+              "baseMap" : "textures/saturn.jpg"
+          }
+        },
+
+        {
+          "name" : "Saturn Rings",
+
+          "center" : "Saturn",
+          "bodyFrame" : 
+          {
+              "type" : "BodyFixed",
+              "body" : "Saturn"
+          },
+
+          "geometry" :
+          {
+              "type" : "Rings",
+              "innerRadius" : 74660,
+              "outerRadius" : 140220,
+              "texture" : "textures/saturn-rings.png"
           }
         },
 
@@ -271,13 +284,26 @@
           {
               "type" : "Globe",
               "radii" : [ 25559, 25559, 24973 ],
-              "baseMap" : "textures/uranus.jpg",
-              "ringSystem" : 
-              {
-                  "innerRadius" : 41837,
-                  "outerRadius" : 51179,
-                  "texture" : "textures/uranus-rings.png"
-              }
+              "baseMap" : "textures/uranus.jpg"
+          }
+        },
+
+        {
+          "name" : "Uranus Rings",
+
+          "center" : "Uranus",
+          "bodyFrame" : 
+          {
+              "type" : "BodyFixed",
+              "body" : "Uranus"
+          },
+
+          "geometry" :
+          {
+              "type" : "Rings",
+              "innerRadius" : 41837,
+              "outerRadius" : 51179,
+              "texture" : "textures/uranus-rings.png"
           }
         },
 

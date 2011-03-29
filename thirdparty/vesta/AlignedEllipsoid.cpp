@@ -192,7 +192,6 @@ AlignedEllipsoid::orthogonalProjection(const Vector3d& planeNormal) const
     DiagonalMatrix<Vector3d> invM = m_semiAxes.asDiagonal();
     plane_v0     = invM * (plane_v0);
     plane_v1     = invM * (plane_v1);
-    std::cerr << "lengths: " << plane_v0.norm() << ", " << plane_v1.norm() << endl;
 
     return GeneralEllipse(Vector3d::Zero(), plane_v0, plane_v1);
 }

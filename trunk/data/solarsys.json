@@ -701,6 +701,44 @@
               "baseMap" : "textures/iapetus.dds"
           }
 
+        },
+
+        {
+          "name" : "Phoebe",
+          "label" : { "color" : [ 0.5, 0.6, 0.6 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Saturn",
+
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 1.291706619152029e+07,
+              "eccentricity" : 0.1529205834767106,
+              "period" : "550.31d",
+              "inclination" : 173.2125147283394,
+              "ascendingNode" : 263.5588224738930,
+              "argumentOfPeriapsis" : 2.526767601517598,
+              "meanAnomaly" : 31.16726590242600,
+              "epoch" : "2004-06-11 00:00:00"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "9.282000000103133h",
+              "inclination" : 21.30,
+              "ascendingNode" : 85.0,
+              "meridianAngle" : 304.70
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 115, 110, 105 ]
+          }
+
         }
 
     ]

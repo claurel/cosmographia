@@ -1657,24 +1657,32 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
 }
 
 
-static MeshGeometry*
-loadMeshFile(const QString& fileName, TextureMapLoader* textureLoader)
+Geometry*
+UniverseLoader::loadMeshFile(const QString& fileName)
 {
-    MeshGeometry* meshGeometry = MeshGeometry::loadFromFile(fileName.toUtf8().data(), textureLoader);
-    if (!meshGeometry)
+    Geometry* geometry = NULL;
+
+    // Check the cache first
+    if (m_geometryCache.contains(fileName))
     {
-        //QMessageBox::warning(NULL, "Missing mesh file", QString("Error opening mesh file %1.").arg(fileName));
+        geometry = m_geometryCache.find(fileName)->ptr();
     }
     else
     {
-        // Optimize the mesh. The optimizations can be expensive for large meshes, but they can dramatically
-        // improve rendering performance. The best solution is to use mesh files that are already optimized, but
-        // the average model loaded off the web benefits from some preprocessing at load time.
-        meshGeometry->mergeSubmeshes();
-        meshGeometry->uniquifyVertices();
+        MeshGeometry* meshGeometry = MeshGeometry::loadFromFile(fileName.toUtf8().data(), m_textureLoader.ptr());
+        if (meshGeometry)
+        {
+            // Optimize the mesh. The optimizations can be expensive for large meshes, but they can dramatically
+            // improve rendering performance. The best solution is to use mesh files that are already optimized, but
+            // the average model loaded off the web benefits from some preprocessing at load time.
+            meshGeometry->mergeSubmeshes();
+            meshGeometry->uniquifyVertices();
+            m_geometryCache.insert(fileName, vesta::counted_ptr<Geometry>(meshGeometry));
+            geometry = meshGeometry;
+        }
     }
 
-    return meshGeometry;
+    return geometry;
 }
 
 
@@ -1861,8 +1869,6 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
 Geometry*
 UniverseLoader::loadMeshGeometry(const QVariantMap& map)
 {
-    MeshGeometry* mesh = NULL;
-
     // We permit two methods of scaling the mesh:
     //    1. Specifying the size will scale the mesh to fit in a sphere of that size
     //    2. Specifying scale will apply a scaling factor
@@ -1872,10 +1878,11 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
     double radius = distanceValue(map.value("size"), Unit_Kilometer, 1.0);
     double scale = doubleValue(map.value("scale"), 0.0);
 
+    MeshGeometry* mesh = NULL;
     if (map.contains("source"))
     {
         QString sourceName = map.value("source").toString();
-        mesh = loadMeshFile(modelFileName(sourceName), m_textureLoader.ptr());
+        mesh = dynamic_cast<MeshGeometry*>(loadMeshFile(modelFileName(sourceName)));
         if (mesh)
         {
             if (scale != 0.0)
@@ -2753,6 +2760,22 @@ QString
 UniverseLoader::modelFileName(const QString& fileName)
 {
     return m_modelSearchPath + "/" + fileName;
+}
+
+
+void
+UniverseLoader::cleanGeometryCache()
+{
+    // Remove items from the geometry cache that are only referenced
+    // in the cache.
+    foreach (QString resourcePath, m_geometryCache.keys())
+    {
+        Geometry* geometry = m_geometryCache.find(resourcePath)->ptr();
+        if (geometry && geometry->refCount() == 1)
+        {
+            m_geometryCache.remove(resourcePath);
+        }
+    }
 }
 
 

@@ -109,6 +109,10 @@ private:
     QString textureFileName(const QString& fileName);
     QString modelFileName(const QString& fileName);
 
+    void cleanGeometryCache();
+    vesta::Geometry* loadMeshFile(const QString& fileName);
+
+
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
     QMap<QString, vesta::counted_ptr<vesta::RotationModel> > m_builtinRotations;
@@ -131,6 +135,8 @@ private:
     QMultiHash<QString, vesta::counted_ptr<TleTrajectory> > m_tleTrajectories;
     QList<TleRecord> m_tleUpdates;
     QSet<QString> m_resourceRequests;
+
+    QHash<QString, vesta::counted_ptr<vesta::Geometry> > m_geometryCache;
 };
 
 #endif // _UNIVERSE_LOADER_H_

@@ -1,5 +1,5 @@
 /*
- * $Revision: 534 $ $Date: 2010-10-15 12:09:37 -0700 (Fri, 15 Oct 2010) $
+ * $Revision: 593 $ $Date: 2011-03-30 16:32:13 -0700 (Wed, 30 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -53,8 +53,24 @@ public:
     AddressMode addressS;
     AddressMode addressT;
     TextureUsage usage;
+
+    /** useMipmaps determines whether mipmapping will be used to improve texture filtering
+      * quality and performance. Enabled by default, and appropriate for most textures.
+      */
     bool useMipmaps;
+
+    /** The maximum level of anistropic filtering to apply. Modern GPUs generally support
+      * up to 16. The default value is 1. Using higher values will result in better filtering
+      * quality when textures are viewed near edge-on; the trade-off is that enabling
+      * anisotropic filtering can slow down rendering, especially when graphics memory
+      * bandwidth is the bottleneck.
+      */
     unsigned int maxAnisotropy;
+
+    /** The maximum level of mipmap to generate. The default is 1000, meaning that a full
+      * mipmap chain will be used. This property is ignored when useMipmaps is false.
+      */
+    unsigned int maxMipmapLevel;
 };
 
 

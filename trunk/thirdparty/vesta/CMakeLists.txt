@@ -1,5 +1,5 @@
 #
-# $Revision: 581 $ $Date: 2011-03-18 18:02:35 -0700 (Fri, 18 Mar 2011) $
+# $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
 #
 # Copyright by Astos Solutions GmbH, Germany
 #
@@ -99,6 +99,7 @@ set (SRCS
     VertexSpec.cpp
     Visualizer.cpp
     WorldGeometry.cpp
+    internal/DefaultFont.cpp
     internal/EclipseShadowVolumeSet.cpp
     internal/InputDataStream.cpp
     internal/OutputDataStream.cpp

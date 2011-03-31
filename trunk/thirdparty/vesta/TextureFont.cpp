@@ -1,5 +1,5 @@
 /*
- * $Revision: 521 $ $Date: 2010-10-04 15:44:05 -0700 (Mon, 04 Oct 2010) $
+ * $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -12,6 +12,7 @@
 #include "DataChunk.h"
 #include "Debug.h"
 #include "internal/InputDataStream.h"
+#include "internal/DefaultFont.h"
 #include <GL/glew.h>
 #include <algorithm>
 
@@ -21,6 +22,9 @@ using namespace std;
 
 
 static const unsigned int InvalidGlyphIndex = ~0u;
+
+
+counted_ptr<TextureFont> TextureFont::ms_defaultFont;
 
 
 /** Create a new texture font with no glyphs and an undefined 
@@ -341,7 +345,38 @@ TextureFont::LoadTxf(const DataChunk* data)
     else
     {
         delete font;
+        font = NULL;
     }
 
     return font;
+}
+
+
+/** Get the default font. This will always be available provided that
+  * an OpenGL has been initialized (or more precisely, that there is a current
+  * and valid OpenGL context.)
+  */
+TextureFont*
+TextureFont::GetDefaultFont()
+{
+    if (ms_defaultFont.isNull())
+    {
+        VESTA_LOG("Creating default font...");
+        DataChunk* data = GetDefaultFontData();
+        if (data == NULL)
+        {
+            VESTA_WARNING("Internal error occurred when creating default font.");
+        }
+        else
+        {
+            TextureFont* font = LoadTxf(data);
+            if (!font)
+            {
+                VESTA_WARNING("Failed to create default font. Font data is not valid.");
+            }
+            ms_defaultFont = font;
+        }
+    }
+
+    return ms_defaultFont.ptr();
 }

@@ -1,5 +1,5 @@
 /*
- * $Revision: 586 $ $Date: 2011-03-24 14:01:57 -0700 (Thu, 24 Mar 2011) $
+ * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -29,6 +29,7 @@ class RenderContext;
 class Framebuffer;
 class CubeMapFramebuffer;
 class EclipseShadowVolumeSet;
+class TextureFont;
 
 /** UniverseRenderer draws views of a VESTA Universe using a 3D rendering
   * library. Views are drawn as sets at a particular time. A typical usage
@@ -153,6 +154,9 @@ public:
     }
     void setSkyLayersEnabled(bool enable);
 
+    TextureFont* defaultFont() const;
+    void setDefaultFont(TextureFont* font);
+
 public:
     struct VisibleItem
     {
@@ -268,6 +272,8 @@ private:
     counted_ptr<EclipseShadowVolumeSet> m_eclipseShadows;
 
     bool m_viewIndependentInitializationRequired;
+
+    counted_ptr<TextureFont> m_defaultFont;
 };
 
 }

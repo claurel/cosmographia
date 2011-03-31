@@ -1,5 +1,5 @@
 /*
- * $Revision: 547 $ $Date: 2010-10-21 14:15:29 -0700 (Thu, 21 Oct 2010) $
+ * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -74,8 +74,8 @@ LabelGeometry::render(RenderContext& rc, double /* clock */) const
         // to the distance from the eye.
         float distanceScale = rc.modelview().translation().norm();
 
-        // Draw the label string as long as it's not empty and we have a valid font
-        if (!m_text.empty() && !m_font.isNull())
+        // Draw the label string as long as it's not empty
+        if (!m_text.empty())
         {
             rc.drawText(labelOffset, m_text, m_font.ptr(), m_color, opacity);
         }

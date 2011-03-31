@@ -1,5 +1,5 @@
 /*
- * $Revision: 581 $ $Date: 2011-03-18 18:02:35 -0700 (Fri, 18 Mar 2011) $
+ * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -174,6 +174,15 @@ AtmosphereShellDistance(const Vector3f& eyePosition, const Vector3f& ellipsoidAx
 void
 WorldGeometry::render(RenderContext& rc, double clock) const
 {
+    if (rc.pass() == RenderContext::TranslucentPass)
+    {
+        if (m_ringSystem.isValid())
+        {
+            m_ringSystem->render(rc, clock);
+        }
+        return;
+    }
+
     // Determine the level of detail
     float radius = maxRadius();
 
@@ -539,11 +548,6 @@ WorldGeometry::render(RenderContext& rc, double clock) const
 #endif // DEBUG_QUADTREE
 
     rc.popModelView();
-
-    if (m_ringSystem.isValid())
-    {
-        m_ringSystem->render(rc, clock);
-    }
 }
 
 
@@ -1163,6 +1167,22 @@ WorldGeometry::nearPlaneDistance(const Eigen::Vector3f& cameraPosition) const
 }
 
 
+bool
+WorldGeometry::isOpaque() const
+{
+    // Rings are the only translucent part of a world (we'll ignore the
+    // atmosphere for now.)
+    if (m_ringSystem.isValid())
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
 /** Set the shape of the world to be a perfect sphere with the specified
   * radius.
   */
@@ -1327,6 +1347,11 @@ WorldGeometry::setCloudMap(TextureMap* cloudMap)
 
 /** Set the ring system. Setting it to null indicates that the planet has no
   * ring system (the default state.)
+  *
+  * This method is retained for compatibility only. It is recommended instead
+  * to create a separate entity for rings rather setting them as a property
+  * of WorldGeometry. Rings will only cast shadows correctly when they are
+  * separate entities.
   */
 void
 WorldGeometry::setRingSystem(PlanetaryRings* rings)

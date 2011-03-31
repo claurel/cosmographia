@@ -1,5 +1,5 @@
 /*
- * $Revision: 575 $ $Date: 2011-03-16 16:39:49 -0700 (Wed, 16 Mar 2011) $
+ * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -46,7 +46,6 @@ ArrowGeometry::ArrowGeometry(float shaftLength,
     m_arrowColors[1] = Spectrum(0.0f, 1.0f, 0.0f);
     m_arrowColors[2] = Spectrum(0.0f, 0.0f, 1.0f);
     buildArrowGeometry(shaftLength, shaftRadius, headLength, headRadius);
-    readTxfFile();
 
     m_labels[0] = "X";
     m_labels[1] = "Y";
@@ -321,8 +320,13 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
     Vector3f labelPositionScreenSpace;
     float cameraDistance;
     float pixelSize;
+    counted_ptr<TextureFont> font = m_font;
+    if (font.isNull())
+    {
+        font = rc.defaultFont();
+    }
 
-    if (m_font.isNull() || !m_labelsEnabled[which])
+    if (font.isNull() || !m_labelsEnabled[which])
     {
         return;
     }
@@ -341,14 +345,14 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
     // move the label to the left, otherwise the label will be drawn on top of the arrow
     if(labelPositionScreenSpace.x() < 0)
     {
-        labelPositionScreenSpace.x() -= m_font->textWidth(m_labels[which]);
+        labelPositionScreenSpace.x() -= font->textWidth(m_labels[which]);
     }
 
     // move the label downwards, otherwise the label will be drawn on top of the arrow
     // two times the textWidth of the uppercase character A is sufficent
     if(labelPositionScreenSpace.y() < 0)
     {
-        labelPositionScreenSpace.y() -= 2.0 * m_font->textWidth("A");
+        labelPositionScreenSpace.y() -= 2.0 * font->textWidth("A");
     }
 
     cameraDistance = rc.modelview().translation().norm();
@@ -356,29 +360,6 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
 
     if (pixelSize >= 10.0)
     {
-        rc.drawText(labelPositionScreenSpace, m_labels[which], m_font.ptr(), m_arrowColors[which], m_opacity);
-    }
-}
-
-
-void ArrowGeometry::readTxfFile()
-{
-    ifstream txfFile;
-    char* data;
-    int fileSize;
-
-
-    txfFile.open("sans-12.txf", ios::in | ios::binary | ios::ate);
-    if( txfFile.is_open() )
-    {
-        fileSize = txfFile.tellg();
-        data = new char [fileSize];
-        txfFile.seekg (0, ios::beg);
-        txfFile.read (data, fileSize);
-        txfFile.close();
-
-        DataChunk chunk(data, fileSize);
-        m_font = TextureFont::LoadTxf(&chunk);
-        delete data;
+        rc.drawText(labelPositionScreenSpace, m_labels[which], font.ptr(), m_arrowColors[which], m_opacity);
     }
 }

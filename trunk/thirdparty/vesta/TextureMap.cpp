@@ -1,5 +1,5 @@
 /*
- * $Revision: 534 $ $Date: 2010-10-15 12:09:37 -0700 (Fri, 15 Oct 2010) $
+ * $Revision: 593 $ $Date: 2011-03-30 16:32:13 -0700 (Wed, 30 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -131,7 +131,8 @@ TextureProperties::TextureProperties() :
     addressT(Wrap),
     usage(ColorTexture),
     useMipmaps(true),
-    maxAnisotropy(1)
+    maxAnisotropy(1),
+    maxMipmapLevel(1000)
 {
 }
 
@@ -144,7 +145,8 @@ TextureProperties::TextureProperties(TextureProperties::AddressMode stAddress) :
     addressT(stAddress),
     usage(ColorTexture),
     useMipmaps(true),
-    maxAnisotropy(1)
+    maxAnisotropy(1),
+    maxMipmapLevel(1000)
 {
 }
 
@@ -327,6 +329,11 @@ TextureMap::generate(const unsigned char imageData[],
 
     if (m_properties.useMipmaps)
     {
+        if (m_properties.maxMipmapLevel < 1000)
+        {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, m_properties.maxMipmapLevel);
+        }
+
         if (GLEW_EXT_framebuffer_object)
         {
             // Fast path uses glGenerateMipmap() when driver/hardware supports it.

@@ -1,5 +1,5 @@
 /*
- * $Revision: 521 $ $Date: 2010-10-04 15:44:05 -0700 (Mon, 04 Oct 2010) $
+ * $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -61,12 +61,15 @@ public:
     bool loadTxf(const DataChunk* data);
 
     static TextureFont* LoadTxf(const DataChunk* data);
+    static TextureFont* GetDefaultFont();
 
 private:
     counted_ptr<TextureMap> m_glyphTexture;
     std::vector<Glyph> m_glyphs;
     std::vector<unsigned int> m_characterSet;
     unsigned int m_maxCharacterId;
+
+    static counted_ptr<TextureFont> ms_defaultFont;
 };
 
 }

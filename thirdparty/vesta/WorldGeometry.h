@@ -1,5 +1,5 @@
 /*
- * $Revision: 581 $ $Date: 2011-03-18 18:02:35 -0700 (Fri, 18 Mar 2011) $
+ * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -49,6 +49,8 @@ public:
     float boundingSphereRadius() const;
 
     virtual float nearPlaneDistance(const Eigen::Vector3f& cameraPosition) const;
+
+    virtual bool isOpaque() const;
 
     /** Get the lengths of the axes of the globe in kilometers. Note that these are
       * diameters, not radii.

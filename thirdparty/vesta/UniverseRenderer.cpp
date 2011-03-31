@@ -1,5 +1,5 @@
 /*
- * $Revision: 590 $ $Date: 2011-03-28 11:47:34 -0700 (Mon, 28 Mar 2011) $
+ * $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -16,9 +16,11 @@
 #include "BoundingSphere.h"
 #include "PlanarProjection.h"
 #include "Visualizer.h"
+#include "PlanetaryRings.h"
 #include "OGLHeaders.h"
 #include "Framebuffer.h"
 #include "CubeMapFramebuffer.h"
+#include "TextureFont.h"
 #include "glhelp/GLFramebuffer.h"
 #include "Units.h"
 #include "internal/EclipseShadowVolumeSet.h"
@@ -171,6 +173,20 @@ UniverseRenderer::initializeGraphics()
     }
 
     m_renderContext = RenderContext::Create();
+    if (m_renderContext)
+    {
+        // If there's a default font set, we need to tell the render
+        // context about it.
+        if (m_defaultFont.isValid())
+        {
+            m_renderContext->setDefaultFont(m_defaultFont.ptr());
+            m_defaultFont = NULL;
+        }
+        else
+        {
+            m_renderContext->setDefaultFont(TextureFont::GetDefaultFont());
+        }
+    }
 
     return m_renderContext != NULL;
 }
@@ -1404,6 +1420,7 @@ void UniverseRenderer::renderDepthBufferSpan(const DepthBufferSpan& span, const 
                 }
 
                 m_renderContext->setEclipseShadowCount(0);
+                m_renderContext->setRingShadowCount(0);
 
                 if (m_lighting && !m_lighting->reflectionRegions().empty())
                 {
@@ -1717,34 +1734,105 @@ UniverseRenderer::setupEclipseShadows(const VisibleItem &item)
             unsigned int shadowCount = min((unsigned int) RenderContext::MaxEclipseShadows, (unsigned int) shadows.size());
             Matrix4f invCameraTransform = Transform3f(m_renderContext->cameraOrientation()).matrix();
 
+            unsigned int ellipsoidShadowCount = 0;
             for (unsigned int i = 0; i < shadowCount; ++i)
             {
                 const EclipseShadowVolumeSet::EclipseShadow& shadow = shadows[i];
 
-                // The shadow rotation matrix transforms a point in world space to shadow space. In shadow space,
-                // the z-axis points away from the light source along the central shadow axis. The x- and y-axes
-                // are the principal axes of an elliptical slice of the shadow cone. They are always perpendicular
-                // to each other and the z-axis.
-
-                // In order to avoid precision problems, we'll scale the z-axis so that its length is closer to
-                // the range of the x- and y-axis lengths
-                float zscale = shadow.projection.v0().norm();
-
-                Matrix3f shadowRotation;
-                shadowRotation << shadow.projection.v0().cast<float>() / float(shadow.projection.v0().squaredNorm()),
-                                  shadow.projection.v1().cast<float>() / float(shadow.projection.v1().squaredNorm()),
-                                  shadow.direction.cast<float>() / zscale;
-
                 // Get the position of the shadow center relative to the camera
                 Vector3f shadowCenter = (shadow.position - item.position + item.cameraRelativePosition).cast<float>();
 
-                Matrix4f shadowTransform = Matrix4f::Identity();
-                shadowTransform.corner<3, 3>(TopLeft) = shadowRotation.transpose();
-                shadowTransform = shadowTransform * Transform3f(Translation3f(-shadowCenter)).matrix() * invCameraTransform;
-                zscale = 1.0f;
-                m_renderContext->setEclipseShadowMatrix(i, shadowTransform, shadow.umbraSlope / zscale, shadow.penumbraSlope / zscale);
+                if (shadow.occluder->geometry()->ellipsoid().isDegenerate())
+                {
+                    // This special case for planetary rings is a bit of a hack; the alternative is
+                    // to add more specialized methods to the Geometry base class.
+                    PlanetaryRings* rings = dynamic_cast<PlanetaryRings*>(shadow.occluder->geometry());
+                    if (rings && rings->texture() && rings->texture()->makeResident())
+                    {
+                        const GeneralEllipse& ringEllipse = shadow.projection;
+                        double radius = ringEllipse.v0().norm();
+                        float radius2 = float(radius * radius);
+
+                        Vector3d planeNormal = (ringEllipse.v0() / radius).cross(ringEllipse.v1() / radius);
+                        double cosLightAngle = planeNormal.dot(shadow.direction);
+                        if (cosLightAngle < 0.0)
+                        {
+                            planeNormal = -planeNormal;
+                        }
+                        else
+                        {
+                            cosLightAngle = -cosLightAngle;
+                        }
+
+                        double shear = 0.0;
+                        if (abs(cosLightAngle) < 0.0001)
+                        {
+                            // Prevent division by zero when rings are nearly edge-on to light source
+                            cosLightAngle = ((cosLightAngle < 0) ? -0.0001 : 0.0001);
+                            shear = 1.0 / cosLightAngle;
+                        }
+                        else
+                        {
+                            //double sinLightAngle = sqrt(max(0.0, 1.0 - cosLightAngle * cosLightAngle));
+                            shear = 1.0 / cosLightAngle;
+                        }
+
+                        // Transformation to rotate from world space into ring plane space
+                        Matrix3f shadowRotation;
+                        shadowRotation << ringEllipse.v0().cast<float>() / radius2,
+                                          ringEllipse.v1().cast<float>() / radius2,
+                                          planeNormal.cast<float>() / float(radius);
+
+                        // Get the position of the light vector in ring plane space
+                        Vector3f l = (shadowRotation.transpose() * shadow.direction.cast<float>()).normalized();
+                        Matrix4f shadowShear;
+                        shadowShear << 1.0f, 0.0f, l.x() * float(shear), 0.0f,
+                                       0.0f, 1.0f, l.y() * float(shear), 0.0f,
+                                       0.0f, 0.0f, 1.0f,                 0.0f,
+                                       0.0f, 0.0f, 0.0f,                 1.0f;
+
+                        Matrix4f shadowTransform = Matrix4f::Identity();
+                        shadowTransform.corner<3, 3>(TopLeft) = shadowRotation.transpose();
+                        shadowTransform = shadowShear * shadowTransform * Transform3f(Translation3f(-shadowCenter)).matrix() * invCameraTransform;
+                        m_renderContext->setRingShadowMatrix(0, shadowTransform, rings->innerRadius() / rings->outerRadius());
+                        m_renderContext->setRingShadowTexture(0, rings->texture());
+                        m_renderContext->setRingShadowCount(1);
+
+                        // Force the border color of ring textures to transparent in order to avoid
+                        // mipmapping artifacts.
+                        glBindTexture(GL_TEXTURE_2D, rings->texture()->id());
+                        float transparent[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+                        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, transparent);
+                        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER_ARB);
+                        glBindTexture(GL_TEXTURE_2D, 0);
+                    }
+                }
+                else
+                {
+                    // The shadow rotation matrix transforms a point in world space to shadow space. In shadow space,
+                    // the z-axis points away from the light source along the central shadow axis. The x- and y-axes
+                    // are the principal axes of an elliptical slice of the shadow cone. They are always perpendicular
+                    // to each other and the z-axis.
+
+                    // In order to avoid precision problems, we'll scale the z-axis so that its length is closer to
+                    // the range of the x- and y-axis lengths
+                    float zscale = shadow.projection.v0().norm();
+
+                    Matrix3f shadowRotation;
+                    shadowRotation << shadow.projection.v0().cast<float>() / float(shadow.projection.v0().squaredNorm()),
+                                      shadow.projection.v1().cast<float>() / float(shadow.projection.v1().squaredNorm()),
+                                      shadow.direction.cast<float>() / zscale;
+
+                    Matrix4f shadowTransform = Matrix4f::Identity();
+                    shadowTransform.corner<3, 3>(TopLeft) = shadowRotation.transpose();
+                    shadowTransform = shadowTransform * Transform3f(Translation3f(-shadowCenter)).matrix() * invCameraTransform;
+                    zscale = 1.0f;
+                    m_renderContext->setEclipseShadowMatrix(ellipsoidShadowCount, shadowTransform, shadow.umbraSlope / zscale, shadow.penumbraSlope / zscale);
+
+                    ++ellipsoidShadowCount;
+                }
             }
-            m_renderContext->setEclipseShadowCount(shadowCount);
+            m_renderContext->setEclipseShadowCount(ellipsoidShadowCount);
         }
     }
 
@@ -1899,5 +1987,43 @@ UniverseRenderer::setupShadowRendering(const Framebuffer* shadowMap,
     return shadowBias() * shadowProjection.matrix() * modelView;
 }
 
+
+/** Get the default font used for labels.
+  */
+TextureFont*
+UniverseRenderer::defaultFont() const
+{
+    // The default font is actually stored in the render context. However,
+    // it's possible to set the default font before the render context has been
+    // created (via initializeGraphics). In that case, we return the value
+    // of the default font temporarily stored in UniverseRenderer
+    if (m_renderContext)
+    {
+        return m_renderContext->defaultFont();
+    }
+    else
+    {
+        return m_defaultFont.ptr();
+    }
+}
+
+
+/** Set the default font to be used for labels.
+  */
+void
+UniverseRenderer::setDefaultFont(TextureFont* font)
+{
+    if (m_renderContext)
+    {
+        // We have an initialized render context, so set the font there
+        m_renderContext->setDefaultFont(font);
+    }
+    else
+    {
+        // The render context hasn't been initialized yet. Keep track of the
+        // font and set it in the render context when it is eventually initialized.
+        m_defaultFont = font;
+    }
+}
 
 

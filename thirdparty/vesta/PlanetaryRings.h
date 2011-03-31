@@ -42,6 +42,16 @@ public:
         return false;
     }
 
+    /** Planetary rings are treated as ellipsoidal even though the geometry
+      * is a degenerate ellipsoid.
+      */
+    virtual bool isEllipsoidal() const
+    {
+        return true;
+    }
+
+    virtual AlignedEllipsoid ellipsoid() const;
+
     /** Get the radius of the inner edge of the ring system (in kilometers)
       */
     float innerRadius() const
@@ -77,15 +87,7 @@ public:
         return m_texture.ptr();
     }
 
-    /** Set the rings texture map. The texture is applied so that the inner edge of the
-      * rings is assigned texture coordinate (0, 0) and the outer edge is assigned
-      * (1, 0). The second texture coordinate is always zero, thus it is appropriate
-      * to use a texture map with a height of 1.
-      */
-    void setTexture(TextureMap* texture)
-    {
-        m_texture = texture;
-    }
+    void setTexture(TextureMap* texture);
 
 private:
     float m_innerRadius;

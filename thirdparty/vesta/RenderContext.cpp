@@ -1,5 +1,5 @@
 /*
- * $Revision: 588 $ $Date: 2011-03-26 12:51:23 -0700 (Sat, 26 Mar 2011) $
+ * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -67,6 +67,7 @@ static const unsigned int ScatterTextureUnit       = 7;
 static const unsigned int ReflectionTextureUnit    = 8;
 static const unsigned int OmniShadowTextureUnit1   = 9;
 static const unsigned int OmniShadowTextureUnit2   = 10;
+static const unsigned int RingShadowTextureUnit    = 11;
 
 static const unsigned int OmniShadowTextureUnits[3] =
 {
@@ -108,7 +109,10 @@ RenderContext::Environment::Environment() :
     m_ambientLight(0.0f, 0.0f, 0.0f),
     m_shadowMapCount(0),
     m_omniShadowMapCount(0),
-    m_scatteringEnabled(false)
+    m_eclipseShadowCount(0),
+    m_ringShadowCount(0),
+    m_scatteringEnabled(false),
+    m_sphericalGeometry(false)
 {
 }
 
@@ -927,6 +931,10 @@ computeShaderInfo(const Material* material,
         shaderInfo.setShadowCount(std::min(directionalLightCount, environment.m_shadowMapCount));
         shaderInfo.setOmniShadowCount(std::min(pointLightCount, environment.m_omniShadowMapCount));
         shaderInfo.setEclipseShadowCount(environment.m_eclipseShadowCount);
+        if (environment.m_ringShadowCount > 0)
+        {
+            shaderInfo.setRingShadows(true);
+        }
     }
 
     // Set the texture properties for the shader. All textures
@@ -1079,6 +1087,14 @@ RenderContext::setShaderMaterial(const Material* material)
         // matrix by the inverse of the camera transformation.
         Matrix3f objToWorldMat = (m_cameraOrientation.toRotationMatrix() * modelview().linear());
         shader->setConstant("objToWorldMat", objToWorldMat);
+    }
+
+    if (shaderInfo.hasRingShadows() && m_environment.m_ringShadowTextures[0].isValid())
+    {
+        glActiveTexture(GL_TEXTURE0 + RingShadowTextureUnit);
+        glBindTexture(GL_TEXTURE_2D, m_environment.m_ringShadowTextures[0]->id());
+        glActiveTexture(GL_TEXTURE0);
+        shader->setSampler("ringShadowTex", RingShadowTextureUnit);
     }
 
     // TODO: It might be more efficient to maintain the inverse modelview
@@ -1282,6 +1298,17 @@ RenderContext::updateShaderTransformConstants()
                 }
                 m_currentShader->setConstantArray("eclipseShadowMatrix", shadowMatrices, m_environment.m_eclipseShadowCount);
                 m_currentShader->setConstantArray("eclipseShadowSlopes", m_environment.m_eclipseShadowSlopes, m_environment.m_eclipseShadowCount);
+            }
+
+            if (m_currentShaderInfo.hasRingShadows())
+            {
+                Matrix4f shadowMatrices[MaxRingShadows];
+                for (unsigned int i = 0; i < m_environment.m_ringShadowCount; ++i)
+                {
+                    shadowMatrices[i] = m_environment.m_ringShadowMatrices[i] * modelview();
+                }
+                m_currentShader->setConstantArray("ringShadowMatrix", shadowMatrices, m_environment.m_ringShadowCount);
+                m_currentShader->setConstantArray("ringShadowRadii", m_environment.m_ringShadowRadii, m_environment.m_ringShadowCount);
             }
 
             // No special handling required for omnidirectional shadows; they're stored in
@@ -1507,6 +1534,48 @@ RenderContext::setEclipseShadowMatrix(unsigned int index, const Eigen::Matrix4f&
 
 
 void
+RenderContext::setRingShadowCount(unsigned int count)
+{
+    if (count <= MaxRingShadows)
+    {
+        if (count != m_environment.m_ringShadowCount)
+        {
+            m_environment.m_ringShadowCount = count;
+            invalidateShaderState();
+        }
+    }
+}
+
+
+/** Set the matrix that maps from world coordinates to 'ring space', where the rings
+  * occupy a unit circle in the xy plane. The innerRadius is specified as a fraction
+  * of the radius of the outer boundary of the rings.
+  */
+void
+RenderContext::setRingShadowMatrix(unsigned int index, const Eigen::Matrix4f& shadowMatrix, float innerRadius)
+{
+    if (index < MaxRingShadows)
+    {
+        m_environment.m_ringShadowMatrices[index] = shadowMatrix;
+
+        // The x component of ringShadowRadii is the ring inner radius / outer radius. The
+        // y component is used to map from to te interval [0, 1] for texture mapping.
+        m_environment.m_ringShadowRadii[index] = Vector2f(innerRadius, 1.0f / (1.0f - innerRadius));
+    }
+}
+
+
+void
+RenderContext::setRingShadowTexture(unsigned int index, TextureMap* texture)
+{
+    if (index < MaxRingShadows)
+    {
+        m_environment.m_ringShadowTextures[index] = texture;
+    }
+}
+
+
+void
 RenderContext::setScattering(bool enabled)
 {
     if (enabled != m_environment.m_scatteringEnabled)
@@ -1589,6 +1658,18 @@ RenderContext::drawBillboard(const Vector3f& position, float size)
 void
 RenderContext::drawText(const Vector3f& position, const std::string& text, const TextureFont* font, const Spectrum& color, float opacity)
 {
+    if (!font)
+    {
+        // Use the default font if no font is specified
+        font = m_defaultFont.ptr();
+
+        // Abort if a default font hasn't been set
+        if (!font)
+        {
+            return;
+        }
+    }
+
     Material material;
     material.setDiffuse(color);
     material.setOpacity(opacity);
@@ -1902,4 +1983,14 @@ RenderContext::setRendererOutput(RendererOutput output)
             m_cameraDistanceShader->bind();
         }
     }
+}
+
+
+/** Set the default font. This font is used for all drawText calls that
+  * specify a NULL font.
+  */
+void
+RenderContext::setDefaultFont(TextureFont* font)
+{
+    m_defaultFont = font;
 }

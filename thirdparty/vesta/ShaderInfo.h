@@ -1,5 +1,5 @@
 /*
- * $Revision: 585 $ $Date: 2011-03-23 20:18:25 -0700 (Wed, 23 Mar 2011) $
+ * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -184,6 +184,16 @@ public:
         m_data |= ((count << EclipseShadowCountMaskShift) & EclipseShadowCountMask);
     }
 
+    bool hasRingShadows() const
+    {
+        return (m_data & RingShadowMask) != 0;
+    }
+
+    void setRingShadows(bool enable)
+    {
+        m_data = (m_data & ~RingShadowMask) | (enable ? RingShadowMask : 0x0);
+    }
+
     bool hasVertexColors() const
     {
         return (m_data & VertexColorMask) != 0;
@@ -257,20 +267,21 @@ public:
 private:
     enum
     {
-        ReflectanceModelMask      = 0x000000f,
-        TextureUsageMask          = 0x00001f0,
-        DirectionalLightCountMask = 0x0000e00,
-        PointLightCountMask       = 0x0003000,
-        ShadowCountMask           = 0x000c000,
-        OmniShadowCountMask       = 0x0030000,
-        VertexColorMask           = 0x0040000,
-        AlphaTextureMask          = 0x0080000,
-        ScatteringMask            = 0x0100000,
-        SphericalGeometryMask     = 0x0200000,
-        SpecularInAlphaMask       = 0x0400000,
-        FresnelFalloffMask        = 0x0800000,
-        CompressedNormalMapMask   = 0x1000000,
-        EclipseShadowCountMask    = 0xe000000,
+        ReflectanceModelMask      = 0x0000000f,
+        TextureUsageMask          = 0x000001f0,
+        DirectionalLightCountMask = 0x00000e00,
+        PointLightCountMask       = 0x00003000,
+        ShadowCountMask           = 0x0000c000,
+        OmniShadowCountMask       = 0x00030000,
+        VertexColorMask           = 0x00040000,
+        AlphaTextureMask          = 0x00080000,
+        ScatteringMask            = 0x00100000,
+        SphericalGeometryMask     = 0x00200000,
+        SpecularInAlphaMask       = 0x00400000,
+        FresnelFalloffMask        = 0x00800000,
+        CompressedNormalMapMask   = 0x01000000,
+        EclipseShadowCountMask    = 0x0e000000,
+        RingShadowMask            = 0x10000000,
     };
 
     enum

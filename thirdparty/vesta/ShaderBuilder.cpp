@@ -1,5 +1,5 @@
 /*
- * $Revision: 592 $ $Date: 2011-03-29 12:42:01 -0700 (Tue, 29 Mar 2011) $
+ * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -108,6 +108,11 @@ static void declareShadowSamplers(ostream& out, const ShaderInfo& shaderInfo)
     {
         out << "uniform samplerCube shadowCubeMap" << i << ";\n";
     }
+
+    if (shaderInfo.hasRingShadows())
+    {
+        out << "uniform sampler2D ringShadowTex;" << endl;
+    }
 }
 
 static void declareVarying(ostream& vertexOut, ostream& fragOut, const char* type, const char* name)
@@ -176,8 +181,19 @@ static void declareEclipseShadowFunc(ostream& out)
     out << "    return shadowCoord.z < 0.0 ? 1.0 : clamp((x - umbra) / (penumbra - umbra), 0.0, 1.0);" << endl;
     out << "}" << endl;
     out << endl;
-
 }
+
+static void declareRingShadowFunc(ostream& out)
+{
+    out << "float ringShadow(vec4 shadowCoord, vec2 ringRadii)" << endl;
+    out << "{" << endl;
+    out << "    float x = length(shadowCoord.xy);" << endl;
+    out << "    x = (x - ringRadii.x) * ringRadii.y;" << endl;
+    out << "    return shadowCoord.z < 0.0 ? 1.0 : 1.0 - texture2D(ringShadowTex, vec2(x, 0.0)).a;" << endl;
+    out << "}" << endl;
+    out << endl;
+}
+
 
 static string arrayIndex(const string& arrayName, unsigned int index)
 {
@@ -383,6 +399,11 @@ static void declareHelperFunctions(ostream& fragment, const ShaderInfo& shaderIn
         declareEclipseShadowFunc(fragment);
     }
 
+    if (shaderInfo.hasRingShadows())
+    {
+        declareRingShadowFunc(fragment);
+    }
+
     if (shaderInfo.hasScattering())
     {
         declareScatteringFunc(fragment);
@@ -474,7 +495,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     declareUniform(fragment, "float", "opacity");
     declareUniform(fragment, "vec3", "ambientLight");
 
-    if (shaderInfo.hasShadows() || shaderInfo.hasOmniShadows())
+    if (shaderInfo.hasShadows() || shaderInfo.hasOmniShadows() || shaderInfo.hasRingShadows())
     {
         if (shaderInfo.hasShadows())
         {
@@ -491,6 +512,15 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         declareUniformArray(vertex, "mat4", "eclipseShadowMatrix", count);
         declareUniformArray(fragment, "vec2", "eclipseShadowSlopes", count);
         declareVaryingArray(vertex, fragment, "vec4", "eclipseShadowCoord", count);
+    }
+
+    if (shaderInfo.hasRingShadows())
+    {
+        unsigned int count = 1;
+        declareUniformArray(vertex, "mat4", "ringShadowMatrix", count);
+        declareUniformArray(fragment, "vec2", "ringShadowRadii", count);
+        // Ring shadow texture
+        declareVaryingArray(vertex, fragment, "vec4", "ringShadowCoord", count);
     }
 
     if (shaderInfo.hasScattering())
@@ -574,6 +604,16 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         for (unsigned int i = 0; i < shaderInfo.eclipseShadowCount(); ++i)
         {
             vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * gl_Vertex;" << endl;
+        }
+    }
+
+    // Output shadow coordinates for shaders that have eclipse shadows
+    if (shaderInfo.hasRingShadows())
+    {
+        unsigned int ringShadowCount = 1;
+        for (unsigned int i = 0; i < ringShadowCount; ++i)
+        {
+            vertex << "    ringShadowCoord[" << i << "] = ringShadowMatrix[" << i << "] * gl_Vertex;" << endl;
         }
     }
 
@@ -676,7 +716,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         fragment << "        float d = max(0.0, dot(N, " << lightDirection << "));" << endl;
 
         // Presently, a maximum of one directional shadow, three omnidirectional shadows, and seven eclipse shadows are supported.
-        if (!isPointLight && (shaderInfo.shadowCount() != 0 || shaderInfo.eclipseShadowCount() != 0))
+        if (!isPointLight && (shaderInfo.shadowCount() != 0 || shaderInfo.eclipseShadowCount() != 0 || shaderInfo.hasRingShadows()))
         {
             fragment << "        float shadow = 1.0;" << endl;
             if (shaderInfo.shadowCount() > 0)
@@ -688,6 +728,13 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
             for (unsigned int i = 0; i < shaderInfo.eclipseShadowCount(); ++i)
             {
                 fragment << "        shadow *= eclipseShadow(eclipseShadowCoord[" << i << "], eclipseShadowSlopes[" << i << "]);" << endl;
+            }
+
+            // Just one ring shadow supported right now
+            unsigned int ringShadowCount = shaderInfo.hasRingShadows() ? 1 : 0;
+            for (unsigned int i = 0; i < ringShadowCount; ++i)
+            {
+                fragment << "        shadow *= ringShadow(ringShadowCoord[" << i << "], ringShadowRadii[" << i << "]);" << endl;
             }
         }
         else if (isPointLight && light - shaderInfo.directionalLightCount() < shaderInfo.omniShadowCount())
@@ -844,7 +891,7 @@ static void generateParticulateShader(ostream& vertex, ostream& fragment, const 
     declareUniform(fragment, "float", "opacity");
     declareUniform(fragment, "vec3", "ambientLight");
 
-    if (shaderInfo.hasShadows() || shaderInfo.hasOmniShadows())
+    if (shaderInfo.hasShadows() || shaderInfo.hasOmniShadows() || shaderInfo.hasRingShadows())
     {
         if (shaderInfo.hasShadows())
         {
@@ -1068,12 +1115,12 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
         generateBlinnPhongShader(vertex, fragment, shaderInfo);
     }
 
-    VESTA_LOG("Creating shader:  model: %u, textures 0x%x, lights: %u/%u, shadows: %u/%u/%u, scattering: %d, fresnel: %d, vertexColors: %d",
+    VESTA_LOG("Creating shader:  model: %u, textures 0x%x, lights: %u/%u, shadows: %u/%u/%u/%u, scattering: %d, fresnel: %d, vertexColors: %d",
               (int) shaderInfo.reflectanceModel(),
               shaderInfo.textures(),
               shaderInfo.directionalLightCount(),
               shaderInfo.pointLightCount(),
-              shaderInfo.shadowCount(), shaderInfo.omniShadowCount(), shaderInfo.eclipseShadowCount(),
+              shaderInfo.shadowCount(), shaderInfo.omniShadowCount(), shaderInfo.eclipseShadowCount(), shaderInfo.hasRingShadows() ? 1 : 0,
               shaderInfo.hasScattering() ? 1 : 0,
               shaderInfo.hasFresnelFalloff() ? 1 : 0,
               shaderInfo.hasVertexColors() ? 1 : 0);

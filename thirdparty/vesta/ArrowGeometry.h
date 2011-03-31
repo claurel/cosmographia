@@ -1,5 +1,5 @@
 /*
- * $Revision: 575 $ $Date: 2011-03-16 16:39:49 -0700 (Wed, 16 Mar 2011) $
+ * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -117,8 +117,6 @@ public:
     }
 
 private:
-    void readTxfFile();
-
     void buildArrowGeometry(float shaftLength,
                             float shaftRadius,
                             float headLength,

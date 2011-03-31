@@ -171,22 +171,38 @@ EclipseShadowVolumeSet::findIntersectingShadows(const Entity* entity, const Vect
         ConicShadowVolume* cone = *iter;
         if (entity != cone->occluder && coneIntersectsSphere(*cone, sphereCenter, sphereRadius))
         {
+            bool planarOccluder = cone->occluder->geometry()->ellipsoid().isDegenerate();
+
             // Only compute the ellipse the first time that it's needed; for most shadow volumes,
             // ellipse will never be required because no objects will lie within cone.
             if (!cone->ellipseComputed)
             {
-                // Calculate the limb of the occluding body as seen from the apex of
-                // the shadow cone. We rotate the apex into the fixed frame of the occluder,
-                // compute the limb ellipse, then rotate that ellipse back into the ICRF.
                 Matrix3d r = cone->orientation.cast<double>().toRotationMatrix();
-                Vector3d p = r.transpose() * (cone->apex - cone->center);
-                GeneralEllipse projection = cone->occluder->geometry()->ellipsoid().orthogonalProjection(p.normalized());
 
-                projection = GeneralEllipse(r * projection.center(), r * projection.v0(), r * projection.v1());
-                Matrix<double, 3, 2> projAxes = projection.principalSemiAxes();
-                cone->ellipse = GeneralEllipse(projection.center() + cone->center,
-                                               projAxes.col(0),
-                                               projAxes.col(1));
+                if (planarOccluder)
+                {
+                    // For planar occluders, we'll just store the actual ellipse rather
+                    // than the projection. For now, we assume the occluder lies in the
+                    // xy-plane.
+                    const AlignedEllipsoid& ellipsoid = cone->occluder->geometry()->ellipsoid();
+                    cone->ellipse = GeneralEllipse(cone->center,
+                                                   r * (Vector3d::UnitX() * ellipsoid.semiAxes().x()),
+                                                   r * (Vector3d::UnitY() * ellipsoid.semiAxes().y()));
+                }
+                else
+                {
+                    // Calculate the limb of the occluding body as seen from the apex of
+                    // the shadow cone. We rotate the apex into the fixed frame of the occluder,
+                    // compute the limb ellipse, then rotate that ellipse back into the ICRF.
+                    Vector3d p = r.transpose() * (cone->apex - cone->center);
+                    GeneralEllipse projection = cone->occluder->geometry()->ellipsoid().orthogonalProjection(p.normalized());
+
+                    projection = GeneralEllipse(r * projection.center(), r * projection.v0(), r * projection.v1());
+                    Matrix<double, 3, 2> projAxes = projection.principalSemiAxes();
+                    cone->ellipse = GeneralEllipse(projection.center() + cone->center,
+                                                   projAxes.col(0),
+                                                   projAxes.col(1));
+                }
 
                 cone->ellipseComputed = true;
             }
@@ -206,7 +222,10 @@ EclipseShadowVolumeSet::findIntersectingShadows(const Entity* entity, const Vect
 
             // Check whether the object lies completely inside the shadow umbra, i.e. it
             // receives no light at all from the light source.
-            if (coneContainsSphere(cone->center + cone->umbraLength * cone->direction,
+            // We treat degenerate ellipsoids specially; they are used to represent ring
+            // shadows, which will not completely obscure light.
+            if (!planarOccluder &&
+                coneContainsSphere(cone->center + cone->umbraLength * cone->direction,
                                    -cone->direction,
                                    cone->umbraLength,
                                    cone->cosUmbraConeAngle,

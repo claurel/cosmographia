@@ -55,6 +55,15 @@ public:
         return m_semiAxes.maxCoeff();
     }
 
+    /** Return true if one or more of the ellipsoid axes is zero length.
+      * This is the case when the "ellipsoid" is actually an ellipse,
+      * line segment, or point.
+      */
+    bool isDegenerate() const
+    {
+        return m_semiAxes.x() <= 0.0 || m_semiAxes.y() <= 0.0 || m_semiAxes.z() <= 0.0;
+    }
+
     GeneralEllipse intersection(const Eigen::Hyperplane<double, 3>& plane, bool* foundIntersection) const;
     GeneralEllipse limb(const Eigen::Vector3d& p) const;
 

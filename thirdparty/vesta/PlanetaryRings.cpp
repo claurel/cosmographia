@@ -24,7 +24,7 @@ PlanetaryRings::PlanetaryRings(float innerRadius, float outerRadius) :
     m_innerRadius(innerRadius),
     m_outerRadius(outerRadius)
 {
-    setShadowReceiver(true);
+    setShadowCaster(true);
 }
 
 
@@ -82,6 +82,7 @@ PlanetaryRings::render(RenderContext& rc,
         vb->unmap();
         rc.bindVertexBuffer(VertexSpec::PositionTex, vb, 5 * 4);
         rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::TriangleStrip, ringSections * 2, 0));
+        rc.unbindVertexBuffer();
 
         glEnable(GL_CULL_FACE);
     }
@@ -92,5 +93,27 @@ float
 PlanetaryRings::boundingSphereRadius() const
 {
     return m_outerRadius;
+}
+
+
+/** Set the rings texture map. The texture is applied so that the inner edge of the
+  * rings is assigned texture coordinate (0, 0) and the outer edge is assigned
+  * (1, 0). The second texture coordinate is always zero, thus it is appropriate
+  * to use a texture map with a height of 1.
+  */
+void
+PlanetaryRings::setTexture(TextureMap* texture)
+{
+    m_texture = texture;
+}
+
+
+/** Planetary rings are treated as ellipsoidal even though the geometry
+  * is a degenerate ellipsoid.
+  */
+AlignedEllipsoid
+PlanetaryRings::ellipsoid() const
+{
+    return AlignedEllipsoid(Eigen::Vector3d(m_outerRadius, m_outerRadius, 0.0));
 }
 

@@ -149,6 +149,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/Visualizer.cpp \
     $$VESTA_PATH/WorldGeometry.cpp \
     $$VESTA_PATH/interaction/ObserverController.cpp \
+    $$VESTA_PATH/internal/DefaultFont.cpp \
     $$VESTA_PATH/internal/EclipseShadowVolumeSet.cpp \
     $$VESTA_PATH/internal/InputDataStream.cpp \
     $$VESTA_PATH/internal/OutputDataStream.cpp \
@@ -248,6 +249,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/WorldGeometry.h \
     $$VESTA_PATH/interaction/ObserverController.h \
     $$VESTA_PATH/internal/AtomicInt.h \
+    $$VESTA_PATH/internal/DefaultFont.h \
     $$VESTA_PATH/internal/EclipseShadowVolumeSet.h \
     $$VESTA_PATH/internal/InputDataStream.h \
     $$VESTA_PATH/internal/OutputDataStream.h \

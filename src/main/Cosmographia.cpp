@@ -30,6 +30,7 @@
 #include "compatibility/CatalogParser.h"
 #include "compatibility/TransformCatalog.h"
 #include "astro/IAULunarRotationModel.h"
+#include "astro/MarsSat.h"
 #include "astro/L1.h"
 #include "astro/TASS17.h"
 #include <vesta/GregorianDate.h>
@@ -221,7 +222,7 @@ Cosmographia::Cosmographia() :
     connect(synodicAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(synodicObserver(bool)));
 
     /*** Visual aids menu ***/
-    QMenu* visualAidsMenu = new QMenu("&Visual Aids", this);
+    QMenu* visualAidsMenu = new QMenu("&Visualization", this);
 
     QAction* eqGridAction = new QAction("E&quatorial grid", visualAidsMenu);
     eqGridAction->setCheckable(true);
@@ -230,10 +231,12 @@ Cosmographia::Cosmographia() :
     eclipticAction->setCheckable(true);
     visualAidsMenu->addAction(eclipticAction);
     visualAidsMenu->addSeparator();
+    QAction* labelsAction = new QAction("&Labels", visualAidsMenu);
+    labelsAction->setCheckable(true);
+    labelsAction->setChecked(true);
+    visualAidsMenu->addAction(labelsAction);
+    visualAidsMenu->addSeparator();
 
-    QAction* trajectoriesAction = new QAction("&Trajectories", visualAidsMenu);
-    trajectoriesAction->setCheckable(true);
-    visualAidsMenu->addAction(trajectoriesAction);
     QAction* planetOrbitsAction = new QAction("Planet &orbits", visualAidsMenu);
     planetOrbitsAction->setShortcut(QKeySequence("Ctrl+O"));
     planetOrbitsAction->setCheckable(true);
@@ -253,9 +256,10 @@ Cosmographia::Cosmographia() :
 
     this->menuBar()->addMenu(visualAidsMenu);
 
-    connect(eqGridAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
+    connect(eqGridAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
-    connect(trajectoriesAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setTrajectoryVisibility(bool)));
+    connect(labelsAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setLabelVisibility(bool)));
+
     connect(planetOrbitsAction, SIGNAL(triggered(bool)), this, SLOT(setPlanetOrbitsVisibility(bool)));
     connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));
     connect(plotTrajectoryObserverAction, SIGNAL(triggered()), this, SLOT(plotTrajectoryObserver()));
@@ -339,17 +343,6 @@ Cosmographia::Cosmographia() :
     setCursor(QCursor(Qt::CrossCursor));
 
     loadSettings();
-
-#if 0
-    // Ellipse tests
-    GeneralEllipse e(Vector3d::Zero(), Vector3d(1.0, 1.0, 1.0), Vector3d(1.0, -1.0, 1.0));
-    Matrix<double, 2, 3> axes = e.principalSemiAxes();
-    std::cout << axes.row(0) << std::endl << axes.row(1) << std::endl;
-
-    e = AlignedEllipsoid(Vector3d(2.0, 3.0, 2.0)).limb(Vector3d(0.0, 0.0, 30.0));
-    axes = e.principalSemiAxes();
-    std::cout << "limb: " << e.center().transpose() << ", axes: " << axes.row(0) << ", " << axes.row(1) << std::endl;
-#endif
 }
 
 
@@ -487,6 +480,10 @@ Cosmographia::initialize()
         // position: -2.649903422886233E+07  1.327574176646856E+08  5.755671744790662E+07
         // velocity: -2.979426004836674E+01 -5.018052460415045E+00 -2.175393728607054E+00
         //std::cout << "Earth @ J2000: " << earthTrajectory->position(0.0).transpose().format(16) << std::endl;
+
+        // Martian satellites
+        m_loader->addBuiltinOrbit("Phobos", MarsSatOrbit::Create(MarsSatOrbit::Phobos));
+        m_loader->addBuiltinOrbit("Deimos", MarsSatOrbit::Create(MarsSatOrbit::Deimos));
 
         // Galilean satellites
         m_loader->addBuiltinOrbit("Io", L1Orbit::Create(L1Orbit::Io));
@@ -788,8 +785,10 @@ Cosmographia::about()
 {
     QMessageBox::about(this,
                        "Cosmographia",
-                       "Cosmographia: "
-                       "A celebration of solar system exploration.");
+                       "Copyright (C) 2011 by Chris Laurel<br><br>"
+                       "Cosmographia includes code from the following libraries: <br>"
+                       "VESTA engine for 3D rendering. Copyright (C) Astos Solutions Gmbh<br>"
+                       );
 }
 
 

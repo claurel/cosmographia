@@ -7,6 +7,8 @@ DESTDIR = build
 QT += opengl
 QT += network
 
+#QTPLUGIN += qjpeg
+
 #### App sources ####
 
 MAIN_PATH = src/Main
@@ -23,6 +25,7 @@ APP_SOURCES = \
     $$MAIN_PATH/JPLEphemeris.cpp \
     $$MAIN_PATH/KeplerianSwarm.cpp \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
+    $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
     $$MAIN_PATH/TwoVectorFrame.cpp \
     $$MAIN_PATH/WMSRequester.cpp \
@@ -33,6 +36,7 @@ APP_SOURCES = \
     $$MAIN_PATH/astro/Nutation.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
     $$MAIN_PATH/astro/L1.cpp \
+    $$MAIN_PATH/astro/MarsSat.cpp \
     $$MAIN_PATH/astro/TASS17.cpp \
     $$MAIN_PATH/catalog/AstorbLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
@@ -52,6 +56,7 @@ APP_HEADERS = \
     $$MAIN_PATH/JPLEphemeris.h \
     $$MAIN_PATH/KeplerianSwarm.h \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
+    $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/TleTrajectory.h \
     $$MAIN_PATH/TwoVectorFrame.h \
     $$MAIN_PATH/WMSRequester.h \
@@ -59,6 +64,7 @@ APP_HEADERS = \
     $$MAIN_PATH/MultiWMSTiledMap.h \
     $$MAIN_PATH/astro/Constants.h \
     $$MAIN_PATH/astro/IAULunarRotationModel.h \
+    $$MAIN_PATH/astro/MarsSat.h \
     $$MAIN_PATH/astro/Nutation.h \
     $$MAIN_PATH/astro/Precession.h \
     $$MAIN_PATH/astro/Rotation.h \
@@ -109,6 +115,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/InertialFrame.cpp \
     $$VESTA_PATH/KeplerianTrajectory.cpp \
     $$VESTA_PATH/LabelGeometry.cpp \
+    $$VESTA_PATH/LabelVisualizer.cpp \
     $$VESTA_PATH/LightSource.cpp \
     $$VESTA_PATH/MapLayer.cpp \
     $$VESTA_PATH/MeshGeometry.cpp \
@@ -176,7 +183,6 @@ VESTA_HEADERS = \
     $$VESTA_PATH/DataChunk.h \
     $$VESTA_PATH/Debug.h \
     $$VESTA_PATH/DDSLoader.h \
-    $$VESTA_PATH/Ellipsoid.h \
     $$VESTA_PATH/Entity.h \
     $$VESTA_PATH/FadeRange.h \
     $$VESTA_PATH/Frame.h \
@@ -194,6 +200,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/JavaCallbackTrajectory.h \
     $$VESTA_PATH/KeplerianTrajectory.h \
     $$VESTA_PATH/LabelGeometry.h \
+    $$VESTA_PATH/LabelVisualizer.h \
     $$VESTA_PATH/LightSource.h \
     $$VESTA_PATH/MapLayer.h \
     $$VESTA_PATH/Material.h \
@@ -400,59 +407,65 @@ RESOURCES = resources/icons.qrc
 
 INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 
+#CONFIG += ffmpeg
 
-# ##############################################################################
-# ##############################################################################
-# FFMPEG: START OF CONFIGURATION BELOW ->
-# Copy these lines into your own project
-# Make sure to set the path variables for:
-# 1) QTFFmpegWrapper sources (i.e. where the QVideoEncoder.cpp and QVideoDecoder.cpp lie),
-# 2) FFMPEG include path (i.e. where the directories libavcodec, libavutil, etc. lie),
-# 3) the binary FFMPEG libraries (that must be compiled separately).
-# Under Linux path 2 and 3 may not need to be set as these are usually in the standard include and lib path.
-# Under Windows, path 2 and 3 must be set to the location where you placed the FFMPEG includes and compiled binaries
-# Note that the FFMPEG dynamic librairies (i.e. the .dll files) must be in the PATH
-# ##############################################################################
-# ##############################################################################
-# ##############################################################################
-# Modify here: set FFMPEG_LIBRARY_PATH and FFMPEG_INCLUDE_PATH
-# ##############################################################################
-# Set QTFFMPEGWRAPPER_SOURCE_PATH to point to the directory containing the QTFFmpegWrapper sources
-#QTFFMPEGWRAPPER_SOURCE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
+ffmpeg {
+    message("Using FFMPEG")
 
-# Set FFMPEG_LIBRARY_PATH to point to the directory containing the FFmpeg import libraries (if needed - typically for Windows), i.e. the dll.a files
-#FFMPEG_LIBRARY_PATH = ../trunk/lib/macosx/ffmpeg
+    # ##############################################################################
+    # ##############################################################################
+    # FFMPEG: START OF CONFIGURATION BELOW ->
+    # Copy these lines into your own project
+    # Make sure to set the path variables for:
+    # 1) QTFFmpegWrapper sources (i.e. where the QVideoEncoder.cpp and QVideoDecoder.cpp lie),
+    # 2) FFMPEG include path (i.e. where the directories libavcodec, libavutil, etc. lie),
+    # 3) the binary FFMPEG libraries (that must be compiled separately).
+    # Under Linux path 2 and 3 may not need to be set as these are usually in the standard include and lib path.
+    # Under Windows, path 2 and 3 must be set to the location where you placed the FFMPEG includes and compiled binaries
+    # Note that the FFMPEG dynamic librairies (i.e. the .dll files) must be in the PATH
+    # ##############################################################################
+    # ##############################################################################
+    # ##############################################################################
+    # Modify here: set FFMPEG_LIBRARY_PATH and FFMPEG_INCLUDE_PATH
+    # ##############################################################################
+    # Set QTFFMPEGWRAPPER_SOURCE_PATH to point to the directory containing the QTFFmpegWrapper sources
+    QTFFMPEGWRAPPER_SOURCE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
 
-# Set FFMPEG_INCLUDE_PATH to point to the directory containing the FFMPEG includes (if needed - typically for Windows)
-#FFMPEG_INCLUDE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
+    # Set FFMPEG_LIBRARY_PATH to point to the directory containing the FFmpeg import libraries (if needed - typically for Windows), i.e. the dll.a files
+    FFMPEG_LIBRARY_PATH = ../trunk/lib/macosx/ffmpeg
 
-# ##############################################################################
-# Do not modify: FFMPEG default settings
-# ##############################################################################
-# Sources for QT wrapper
-#SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
-#    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
-#HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
-#    $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
+    # Set FFMPEG_INCLUDE_PATH to point to the directory containing the FFMPEG includes (if needed - typically for Windows)
+    FFMPEG_INCLUDE_PATH = thirdparty/QTFFmpegWrapper/QTFFmpegWrapper
 
-# Set list of required FFmpeg libraries
-#LIBS += \
-#    -lavutil \
-#    -lavcodec \
-#    -lavformat \
-#    -lswscale \
-#    -lz \
-#    -lbz2
+    # ##############################################################################
+    # Do not modify: FFMPEG default settings
+    # ##############################################################################
+    # Sources for QT wrapper
+    SOURCES += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.cpp \
+        $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.cpp
+    HEADERS += $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoEncoder.h \
+        $$QTFFMPEGWRAPPER_SOURCE_PATH/QVideoDecoder.h
 
-# Add the path
-#LIBS += -L$$FFMPEG_LIBRARY_PATH
-#INCLUDEPATH += QVideoEncoder
-#INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
+    # Set list of required FFmpeg libraries
+    LIBS += \
+        -lavutil \
+        -lavcodec \
+        -lavformat \
+        -lswscale \
+        -lz \
+        -lbz2
 
-# ##############################################################################
-# FFMPEG: END OF CONFIGURATION
-# ##############################################################################
+    # Add the path
+    LIBS += -L$$FFMPEG_LIBRARY_PATH
+    INCLUDEPATH += QVideoEncoder
+    INCLUDEPATH += $$FFMPEG_INCLUDE_PATH
 
+    DEFINES += FFMPEG_SUPPORT=1
+
+    # ##############################################################################
+    # FFMPEG: END OF CONFIGURATION
+    # ##############################################################################
+}
 
 DEFINES += EIGEN_USE_NEW_STDVECTOR
 DEFINES += QJSON_EXPORT=
@@ -504,6 +517,8 @@ macx {
 
     MODELS.path = Contents/Resources/data/models
     MODELS.files = \
+        data/models/phobos.obj \
+        data/models/deimos.obj \
         data/models/jason.obj \
         data/models/jason.mtl \
         data/models/jas_solr.png \
@@ -517,6 +532,8 @@ macx {
         data/solarsys.json \
         data/sans-12.txf \
         data/sans-24.txf \
+        data/csans-16.txf \
+        data/csans-28.txf \
         data/sans-light-24.txf \
         data/de406_1800-2100.dat \
         data/earth.atmscat \
@@ -524,7 +541,7 @@ macx {
 
     QMAKE_BUNDLE_DATA += DATA
 
-    CONFIG += x86
+    # CONFIG += x86
     # QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.5.sdk
 
     QMAKE_LFLAGS += -framework CoreFoundation

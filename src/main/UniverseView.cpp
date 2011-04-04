@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
 //
 // Eigen is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@
 #include <vesta/OGLHeaders.h>
 #include "UniverseView.h"
 
+#include "ObserverAction.h"
 #include "InterpolatedStateTrajectory.h"
 
 #if FFMPEG_SUPPORT
@@ -53,7 +54,7 @@
 #include <vesta/NadirVisualizer.h>
 #include <vesta/BodyDirectionVisualizer.h>
 #include <vesta/SensorVisualizer.h>
-#include <vesta/LabelGeometry.h>
+#include <vesta/LabelVisualizer.h>
 #include <vesta/BillboardGeometry.h>
 #include <vesta/TrajectoryGeometry.h>
 #include <vesta/TextureFont.h>
@@ -95,151 +96,18 @@ using namespace std;
 
 static const double KeyboardRotationAcceleration = 3.5;
 
-static const QString CloudTextureSource = "earth-clouds-alpha.png";
-static const QString EarthTextureSource = "earth.jpg";
-static const QString EarthRealisticTextureSource = "bm-earth-may-water.png";
-
 static const unsigned int ShadowMapSize = 2048;
 static const unsigned int ReflectionMapSize = 512;
 
 static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
 
-static TextureProperties PlanetTextureProperties()
+static TextureProperties SkyLayerTextureProperties()
 {
     TextureProperties props;
     props.addressS = TextureProperties::Wrap;
     props.addressT = TextureProperties::Clamp;
     return props;
 }
-
-const char* CloseApproachers[] =
-{
-#if 0
-    "2009 SC170",
-    "2009 SP104",
-    "2009 SN103",
-    "2009 SH2",
-    "2009 TB",
-    "2009 SU104",
-    "2009 TD17",
-    "2009 TU",
-    "2009 TM8",
-    "2009 TH8",
-    "2009 UE",
-    "2009 UD",
-    "2009 UU1",
-    "2009 UW87",
-    "2009 VA",
-    "2009 VT1",
-    "2009 VX",
-    "2009 VZ39",
-    "2009 WP6",
-    "2009 WU25",
-    "2009 WQ6",
-    "2009 WX7",
-    "2009 WR52",
-    "2009 WW7",
-    "2009 WJ6",
-    "2009 WD54",
-    "2009 WG106",
-    "2009 WV51",
-    "2009 WQ52",
-    "2009 WV25",
-    "2009 YS",
-    "2009 XR1",
-    "2009 YR",
-    "2010 AH3",
-    "2010 AR1",
-    "2010 AN60",
-    "2010 AL30",
-    "2010 AG30",
-    "2010 AF40",
-    "2010 CB19",
-    "2010 CS19",
-    "2010 CK19",
-    "2010 CJ18",
-    "2010 DJ1",
-    "2010 DE2",
-    "2010 DU1",
-    "2010 ES12",
-    "2010 FS",
-    "2010 FD6",
-    "2010 FM",
-    "2010 FU9",
-    "2010 FW9",
-    "2010 GH7",
-    "2010 GV23",
-    "2010 GF7",
-    "2010 GA6",
-    "2010 GM23",
-    "2010 HP20",
-    "2010 HF",
-    "2010 JW34",
-    "2010 JA",
-    "2010 JO33",
-    "2010 JL88",
-    "2010 KK37",
-    "2010 KO10",
-    "2010 KV39",
-    "2010 NH",
-    "2010 NN",
-    "2010 PJ9",
-    "2010 RZ11",
-    "2010 QG2",
-    "2010 RB12",
-    "2010 RM80",
-    "2010 RX30",
-    "2010 RF12",
-    "2010 RS80",
-    "2010 RM82",
-#endif
-    "2010 SP3",
-    "Cruithne",
-    "1998 UP1",
-};
-
-struct TLESet
-{
-    QString name;
-    QUrl url;
-};
-
-TLESet s_TLESets[] =
-{
-    { "brightest", QString("http://www.celestrak.com/NORAD/elements/visual.txt") },
-    //{ "iridium",   QString("http://www.celestrak.com/NORAD/elements/iridium.txt") },
-    // { "iridium 33 debris", QString("http://www.celestrak.com/NORAD/elements/iridium-33-debris.txt") },
-    //{ "geostationary", QString("http://www.celestrak.com/NORAD/elements/geo.txt") },
-    { "gps", QString("http://www.celestrak.com/NORAD/elements/gps-ops.txt") },
-};
-
-
-
-
-class FrameVisualizer : public Visualizer
-{
-public:
-    FrameVisualizer(Geometry* geometry, Frame* frame) :
-        Visualizer(geometry),
-        m_frame(frame)
-    {
-    }
-
-    Quaterniond orientation(const Entity* /* parent */, double t) const
-    {
-        if (m_frame.isValid())
-        {
-            return m_frame->orientation(t);
-        }
-        else
-        {
-            return Quaterniond::Identity();
-        }
-    }
-
-private:
-    counted_ptr<Frame> m_frame;
-};
 
 
 // LocalTiledMap loads texture tiles from a directory structure on
@@ -328,6 +196,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_reflectionsEnabled(false),
     m_anaglyphEnabled(false),
     m_infoTextVisible(true),
+    m_labelsVisible(true),
     m_videoEncoder(NULL)
 {
     setAutoFillBackground(false);
@@ -389,33 +258,62 @@ QSize UniverseView::sizeHint() const
 
 
 
-static void labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color)
+static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, bool visible)
 {
-    if (planet && planet->isVisible())
+    if (!planet || !planet->isVisible())
     {
-        LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
-        label->setIcon(icon);
-        label->setIconColor(color);
-
-        // Set up the labels to fade when the labeled object is very close or very distant
-        float geometrySize = 1.0f;
-        if (planet->geometry())
-        {
-            geometrySize = planet->geometry()->boundingSphereRadius();
-        }
-
-        float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
-        float minPixels = 20.0f;
-        float maxPixels = 20.0f * orbitSize / geometrySize;
-
-        if (planet->name() != "Sun")
-        {
-            label->setFadeSize(orbitSize);
-            label->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
-        }
-
-        planet->setVisualizer("label", new Visualizer(label));
+        return NULL;
     }
+
+#if 0
+    LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
+    label->setIcon(icon);
+    label->setIconColor(color);
+
+    // Set up the labels to fade when the labeled object is very close or very distant
+    float geometrySize = 1.0f;
+    if (planet->geometry())
+    {
+        geometrySize = planet->geometry()->boundingSphereRadius();
+    }
+
+    float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
+    float minPixels = 20.0f;
+    float maxPixels = 20.0f * orbitSize / geometrySize;
+
+    if (planet->name() != "Sun")
+    {
+        label->setFadeSize(orbitSize);
+        label->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
+    }
+
+    planet->setVisualizer("label", new Visualizer(label));
+#endif
+    LabelVisualizer* vis = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
+    vis->label()->setIcon(icon);
+    vis->label()->setIconColor(color);
+
+    // Set up the labels to fade when the labeled object is very close or very distant
+    float geometrySize = 1.0f;
+    if (planet->geometry())
+    {
+        geometrySize = planet->geometry()->boundingSphereRadius();
+    }
+
+    float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
+    float minPixels = 20.0f;
+    float maxPixels = 20.0f * orbitSize / geometrySize;
+
+    if (planet->name() != "Sun")
+    {
+        vis->label()->setFadeSize(orbitSize);
+        vis->label()->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
+    }
+
+    planet->setVisualizer("label", vis);
+    vis->setVisibility(visible);
+
+    return vis;
 }
 
 
@@ -435,7 +333,7 @@ void UniverseView::initializeGL()
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_CULL_FACE);
 
-    QFile fontFile("sans-light-24.txf");
+    QFile fontFile("csans-28.txf");
     if (fontFile.open(QIODevice::ReadOnly))
     {
         QByteArray data = fontFile.readAll();
@@ -447,7 +345,7 @@ void UniverseView::initializeGL()
         qDebug() << "missing font";
     }
 
-    QFile labelFontFile("sans-12.txf");
+    QFile labelFontFile("csans-16.txf");
     if (labelFontFile.open(QIODevice::ReadOnly))
     {
         QByteArray data = labelFontFile.readAll();
@@ -561,7 +459,7 @@ UniverseView::initNetwork()
 }
 
 
-void UniverseView::paintEvent(QPaintEvent *event)
+void UniverseView::paintEvent(QPaintEvent* /* event */)
 {
     makeCurrent();
     paintGL();
@@ -607,6 +505,19 @@ QString readableNumber(double value, int significantDigits)
     }
 
     return QLocale::system().toString(roundValue, 'f', useDigits);
+}
+
+
+static
+QString formatDate(const GregorianDate& date)
+{
+    return QString("%1-%2-%3 %4:%5:%6 UTC")
+            .arg(date.year())
+            .arg(QLocale::system().monthName(date.month(), QLocale::ShortFormat))
+            .arg(date.day(), 2, 10, QChar('0'))
+            .arg(date.hour(), 2, 10, QChar('0'))
+            .arg(date.minute(), 2, 10, QChar('0'))
+            .arg(date.second(), 2, 10, QChar('0'));
 }
 
 
@@ -757,12 +668,17 @@ void UniverseView::paintGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
 
-    glColor4f(0.3f, 0.7f, 1.0f, max(0.0f, min(1.0f, float((m_realTime - 5.0) / 5.0))));
+    float alpha = max(0.0f, min(1.0f, float((m_realTime - 5.0) / 5.0)));
+    Vector4f textColor(0.3f, 0.5f, 1.0f, alpha);
+    Vector4f titleColor(0.45f, 0.75f, 1.0f, alpha);
+
+    glColor4fv(textColor.data());
 
     QLocale locale = QLocale::system();
 
     if (m_infoTextVisible)
     {
+#if 0
         if (m_titleFont.isValid())
         {
             m_titleFont->bind();
@@ -771,6 +687,7 @@ void UniverseView::paintGL()
             int titleWidth = m_titleFont->textWidth(title);
             m_titleFont->render(title, Vector2f(floor((viewportWidth - titleWidth) / 2.0f), viewportHeight - 30.0f));
         }
+#endif
 
         if (m_labelFont.isValid())
         {
@@ -778,7 +695,8 @@ void UniverseView::paintGL()
             GregorianDate date = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
 
             m_labelFont->bind();
-            m_labelFont->render(date.toString(), Vector2f(10.0f, 10.0f));
+
+            m_labelFont->render(formatDate(date).toUtf8().data(), Vector2f(10.0f, 10.0f));
 
             QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
             m_labelFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
@@ -786,7 +704,14 @@ void UniverseView::paintGL()
             // Display information about the selection
             if (m_selectedBody.isValid())
             {
-                m_labelFont->render(m_selectedBody->name(), Vector2f(10.0f, viewportHeight - 20.0f));
+                const int titleFontHeight = 30;
+                const int textFontHeight = 20;
+                m_titleFont->bind();
+                glColor4fv(titleColor.data());
+                m_titleFont->render(m_selectedBody->name(), Vector2f(10.0f, float(viewportHeight - titleFontHeight)));
+                glColor4fv(textColor.data());
+                m_labelFont->bind();
+
                 Vector3d r = m_observer->absolutePosition(m_simulationTime) - m_selectedBody->position(m_simulationTime);
                 double distance = r.norm();
 
@@ -797,7 +722,7 @@ void UniverseView::paintGL()
                 }
 
                 QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
-                m_labelFont->render(distanceString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 35.0f));
+                m_labelFont->render(distanceString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - titleFontHeight));
 
                 // Display the subpoint for ellipsoidal bodies that are sufficiently close
                 // to the observer.
@@ -808,7 +733,7 @@ void UniverseView::paintGL()
                     double latitude = toDegrees(asin(q.z()));
                     double longitude = toDegrees(atan2(q.y(), q.x()));
                     QString coordString = QString("Subpoint: %1, %2").arg(latitude, 0, 'f', 3).arg(longitude, 0, 'f', 3);
-                    m_labelFont->render(coordString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 50.0f));
+                    m_labelFont->render(coordString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
                 }
             }
 
@@ -829,7 +754,7 @@ void UniverseView::paintGL()
             }
 
             {
-                QString fovInfo = QString("FOV: %1").arg(toDegrees(m_fovY), 6, 'f', 1);
+                QString fovInfo = QString("FOV: %1\260").arg(toDegrees(m_fovY), 6, 'f', 1);
                 m_labelFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
             }
 
@@ -897,6 +822,20 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
             // Right click invokes the context menu
             QContextMenuEvent menuEvent(QContextMenuEvent::Other, event->pos(), event->globalPos());
             QCoreApplication::sendEvent(this, &menuEvent);
+        }
+    }
+}
+
+
+void UniverseView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        Entity* clickedObject = pickObject(event->pos());
+        if (clickedObject != NULL)
+        {
+            setObserverCenter();
+            m_observerAction = new CenterObserverAction(m_observer.ptr(), clickedObject, 1.0, secondsFromBaseTime(), m_simulationTime);
         }
     }
 }
@@ -1315,7 +1254,7 @@ UniverseView::initializeSkyLayers()
     milkyWayLayer->setVisibility(true);
     milkyWayLayer->setOpacity(0.3f);
     milkyWayLayer->setDrawOrder(-1);
-    milkyWayLayer->setTexture(m_textureLoader->loadTexture("textures/milkyway.jpg", PlanetTextureProperties()));
+    milkyWayLayer->setTexture(m_textureLoader->loadTexture("textures/milkyway.jpg", SkyLayerTextureProperties()));
     milkyWayLayer->setOrientation(InertialFrame::galactic()->orientation());
     m_universe->setLayer("milky way", milkyWayLayer);
     milkyWayLayer->setVisibility(false);
@@ -1348,6 +1287,14 @@ UniverseView::tick()
     double dt = t - m_lastTickTime;
     m_lastTickTime = t;
 
+#if FFMPEG_SUPPORT
+    if (m_videoEncoder)
+    {
+        // Lock time step when recording video
+        dt = 1.0 / 30.0;
+    }
+#endif
+
     m_realTime += dt;
 
     if (!isPaused())
@@ -1374,7 +1321,16 @@ UniverseView::tick()
 
     m_controller->tick(dt);
 
-    update();//repaint();
+    if (m_observerAction.isValid())
+    {
+        bool complete = m_observerAction->updateObserver(m_observer.ptr(), t, m_simulationTime);
+        if (complete)
+        {
+            m_observerAction = NULL;
+        }
+    }
+
+    update();
 }
 
 
@@ -1556,8 +1512,21 @@ UniverseView::setPlanetographicGridVisibility(bool enable)
 
 
 void
-UniverseView::setTrajectoryVisibility(bool /* enable */)
+UniverseView::setLabelVisibility(bool enable)
 {
+    m_labelsVisible = enable;
+    foreach (QString name, m_catalog->names())
+    {
+        Entity* body = m_catalog->find(name);
+        if (body)
+        {
+            Visualizer* vis = body->visualizer("label");
+            if (vis)
+            {
+                vis->setVisibility(enable);
+            }
+        }
+    }
 }
 
 
@@ -1846,30 +1815,8 @@ UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
     {
         color = info->labelColor;
     }
-    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color);
+    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, m_labelsVisible);
 }
-
-
-#if 0
-class GotoAction
-{
-public:
-    GotoAction(const Observer* observer, const Frame* targetFrame, double targetDistance)
-    {
-
-    }
-
-    void updateObserver(Observer* observer, double tsec)
-    {
-        double t = tsec / m_duration;
-
-    }
-
-private:
-    counted_ptr<Frame> m_targetFrame;
-    double m_duration;
-};
-#endif
 
 
 void

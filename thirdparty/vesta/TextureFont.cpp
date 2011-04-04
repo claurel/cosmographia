@@ -1,5 +1,5 @@
 /*
- * $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 600 $ $Date: 2011-03-31 18:37:21 -0700 (Thu, 31 Mar 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -71,7 +71,10 @@ TextureFont::render(const string& text, const Vector2f& startPosition) const
     glBegin(GL_QUADS);
     for (unsigned int i = 0; i < text.length(); ++i)
     {
-        const Glyph* glyph = lookupGlyph(text[i]);
+        // The cast to unsigned char is critical for glyph lookup to work correctly;
+        // otherwise, extended characters will generate negative indices.
+        const Glyph* glyph = lookupGlyph((unsigned char) text[i]);
+
         if (glyph)
         {
             Vector2f p = currentPosition + glyph->offset;
@@ -103,7 +106,7 @@ TextureFont::textWidth(const string& text) const
 
     for (unsigned int i = 0; i < text.length(); ++i)
     {
-        const Glyph* glyph = lookupGlyph(text[i]);
+        const Glyph* glyph = lookupGlyph((unsigned char) text[i]);
         if (glyph)
         {
             width += glyph->advance;

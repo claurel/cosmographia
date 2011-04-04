@@ -1874,9 +1874,9 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
     //    2. Specifying scale will apply a scaling factor
     //
     // scale overrides size when it's present. If neither size nor scale is given, a default
-    // size of 1.0 is used.
-    double radius = distanceValue(map.value("size"), Unit_Kilometer, 1.0);
-    double scale = doubleValue(map.value("scale"), 0.0);
+    // scale of 1.0 is used.
+    double radius = distanceValue(map.value("size"), Unit_Kilometer, 0.0);
+    double scale = doubleValue(map.value("scale"), 1.0);
 
     MeshGeometry* mesh = NULL;
     if (map.contains("source"))
@@ -1885,13 +1885,13 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
         mesh = dynamic_cast<MeshGeometry*>(loadMeshFile(modelFileName(sourceName)));
         if (mesh)
         {
-            if (scale != 0.0)
+            if (radius > 0.0)
             {
-                mesh->setMeshScale(float(scale));
+                mesh->setMeshScale(radius / mesh->boundingSphereRadius());
             }
             else
             {
-                mesh->setMeshScale(radius / mesh->boundingSphereRadius());
+                mesh->setMeshScale(float(scale));
             }
         }
     }

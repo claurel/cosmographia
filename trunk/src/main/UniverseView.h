@@ -31,6 +31,7 @@
 #include <vesta/TiledMap.h>
 
 class QVideoEncoder;
+class ObserverAction;
 
 namespace vesta
 {
@@ -118,7 +119,7 @@ public slots:
     void setEclipticVisibility(bool checked);
     void setEquatorialPlaneVisibility(bool checked);
     void setPlanetographicGridVisibility(bool checked);
-    void setTrajectoryVisibility(bool enable);
+    void setLabelVisibility(bool enable);
     void setShadows(bool enable);
     void setEclipseShadows(bool enable);
     void setCloudLayers(bool enable);
@@ -139,6 +140,7 @@ protected:
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent* event);
     void keyPressEvent(QKeyEvent* event);
@@ -225,6 +227,9 @@ private:
     std::vector<TrajectoryPlotEntry> m_trajectoryPlots;
 
     bool m_infoTextVisible;
+    bool m_labelsVisible;
+
+    vesta::counted_ptr<ObserverAction> m_observerAction;
 
     QVideoEncoder* m_videoEncoder;
 };

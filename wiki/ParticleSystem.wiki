@@ -27,6 +27,7 @@ Example of a !ParticleSystem geometry definition:
           "velocity" : [ 0, 0, 0.1 ]
         },
         "velocityVariation" : 2.5,
+        "force" : [ 0, 0, 0 ],
         "spawnRate" : 100,
         "lifetime" : 10.0,
         "startSize" : 0.0,
@@ -38,6 +39,19 @@ Example of a !ParticleSystem geometry definition:
 }
 }}}
 
+= Emitter Properties =
+
+  * texture
+  * generator
+  * velocityVariation - magnitude of random variations in initial particle velocity
+  * force - constant force affecting all particles (typically set to the local direction of gravity)
+  * spawnRate - the number of particles emitted per second
+  * lifetime - the lifetime of a particle in seconds
+  * startSize - size of particles when they are generated (in kilometers)
+  * endSize - the size of particles at the end of their lifetimes
+  * colors - a list of color and opacity values
+  * startTime
+  * endTime
 = Generators =
 
 == Point ==

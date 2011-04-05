@@ -174,6 +174,7 @@ private:
     int m_mouseMovement;
     QPoint m_mouseDownPosition;
     QPoint m_lastMousePosition;
+    double m_lastDoubleClickTime;
     vesta::counted_ptr<vesta::Universe> m_universe;
     UniverseCatalog* m_catalog;
     vesta::counted_ptr<vesta::Observer> m_observer;

@@ -276,10 +276,17 @@ An example is given below, but check the separate [ParticleSystem Particle Syste
 
 == Inertial ==
 
-Built-in inertial frames are specified by providing the name of the frame:
+Built-in inertial frames can be specified by providing the name of the frame:
 {{{
 "trajectoryFrame" : "EclipticJ2000"
 }}}
+
+They can also be specified using the slightly more verbose obect syntax:
+{{{
+"trajectoryFrame" : { "type": "EclipticJ2000" }
+}}}
+
+The second syntax is more consistent with the style used for describing non-inertial frames.
 
 The available inertial frames are:
  * ICRF (the default)

@@ -2,6 +2,15 @@
 
 = Introduction =
 
+Particle systems can be used to represent a wide range of phenomena:
+  * Rocket engine exhaust
+  * Smoke
+  * Explosions
+  * Volcanoes and geysers
+  * Aurora
+
+A particle system consists of one or more particle _emitters_. Each emitter has a _generator_ that determines the initial positions and velocities of the randomly generated particles. Other emitter properties specify how long each particle persists after it is generated and the appearance of the particle over its lifetime. The particle size changes from startSize to endSize, and the color and opacity is interpolated between the values in the colors list.
+
 Example of a !ParticleSystem geometry definition:
 
 {{{

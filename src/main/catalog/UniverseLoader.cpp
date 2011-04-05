@@ -1413,7 +1413,15 @@ UniverseLoader::loadFrame(const QVariantMap& map,
     }
     else
     {
-        qDebug() << "Unknown frame type " << type;
+        Frame* frame = loadInertialFrame(type);
+        if (!frame)
+        {
+            qDebug() << "Unknown frame type " << type;
+        }
+        else
+        {
+            return frame;
+        }
     }
 
     return NULL;
@@ -2093,6 +2101,7 @@ loadParticleEmitter(const QVariantMap& map)
     QVariant colorsVar = map.value("colors");
     QVariant generatorVar = map.value("generator");
     QVariant velocityVariationVar = map.value("velocityVariation");
+    QVariant forceVar = map.value("force");
 
     // Get the required parameters: lifetime and spawn rate
     double lifetime = 0.0;
@@ -2171,6 +2180,15 @@ loadParticleEmitter(const QVariantMap& map)
     if (velocityVariationVar.isValid())
     {
         emitter->setVelocityVariation(velocityVariationVar.toFloat());
+    }
+
+    if (forceVar.isValid())
+    {
+        Vector3d force = vec3Value(forceVar, &ok);
+        if (ok)
+        {
+            emitter->setForce(force.cast<float>());
+        }
     }
 
     // Load the color ramp. This is an array of values arranged

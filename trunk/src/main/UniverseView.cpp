@@ -172,6 +172,7 @@ static QGraphicsScene* m_guiScene;
 UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog* catalog) :
     QGLWidget(parent),
     m_mouseMovement(0),
+    m_lastDoubleClickTime(0.0),
     m_catalog(catalog),
     m_controller(new ObserverController()),
     m_renderer(NULL),
@@ -230,6 +231,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer->setInterval(10);
     m_timer->start();
 
     setFocusPolicy(Qt::StrongFocus);
@@ -265,30 +267,6 @@ static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFo
         return NULL;
     }
 
-#if 0
-    LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
-    label->setIcon(icon);
-    label->setIconColor(color);
-
-    // Set up the labels to fade when the labeled object is very close or very distant
-    float geometrySize = 1.0f;
-    if (planet->geometry())
-    {
-        geometrySize = planet->geometry()->boundingSphereRadius();
-    }
-
-    float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
-    float minPixels = 20.0f;
-    float maxPixels = 20.0f * orbitSize / geometrySize;
-
-    if (planet->name() != "Sun")
-    {
-        label->setFadeSize(orbitSize);
-        label->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
-    }
-
-    planet->setVisualizer("label", new Visualizer(label));
-#endif
     LabelVisualizer* vis = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
     vis->label()->setIcon(icon);
     vis->label()->setIconColor(color);
@@ -701,11 +679,12 @@ void UniverseView::paintGL()
             QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
             m_labelFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
 
+            const int titleFontHeight = 30;
+            const int textFontHeight = 20;
+
             // Display information about the selection
             if (m_selectedBody.isValid())
             {
-                const int titleFontHeight = 30;
-                const int textFontHeight = 20;
                 m_titleFont->bind();
                 glColor4fv(titleColor.data());
                 m_titleFont->render(m_selectedBody->name(), Vector2f(10.0f, float(viewportHeight - titleFontHeight)));
@@ -749,7 +728,7 @@ void UniverseView::paintGL()
                 if (tileCount > 0)
                 {
                     QString tileCountString = QString("Loading tiles: %1").arg(tileCount);
-                    m_labelFont->render(tileCountString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 65.0f));
+                    m_labelFont->render(tileCountString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight * 2)));
                 }
             }
 
@@ -815,7 +794,12 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
     {        
         if (event->button() == Qt::LeftButton)
         {
-            m_selectedBody = pickObject(event->pos());
+            // Mouse double click events can also generate release events; throw away release
+            // events that occur too close to the last double click.
+            if (secondsFromBaseTime() - m_lastDoubleClickTime > 0.2)
+            {
+                m_selectedBody = pickObject(event->pos());
+            }
         }
         else if (event->button() == Qt::RightButton)
         {
@@ -831,11 +815,14 @@ void UniverseView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton)
     {
+        double t = secondsFromBaseTime();
+        m_lastDoubleClickTime = t;
         Entity* clickedObject = pickObject(event->pos());
         if (clickedObject != NULL)
         {
+            m_selectedBody = clickedObject;
             setObserverCenter();
-            m_observerAction = new CenterObserverAction(m_observer.ptr(), clickedObject, 1.0, secondsFromBaseTime(), m_simulationTime);
+            m_observerAction = new CenterObserverAction(m_observer.ptr(), clickedObject, 1.0, t, m_simulationTime);
         }
     }
 }

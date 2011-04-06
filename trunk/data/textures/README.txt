@@ -12,6 +12,11 @@ Sphere project.
 venus.jpg, saturn.jpg - Created by Bj�rn J�nsson and available at
 http://www.mmedia.is/~bjj/
 
+earth-clouds.dds - Earth cloud map from NASA's Blue Marble data set:
+http://visibleearth.nasa.gov/view_rec.php?id=2432
+The image was converted from TIFF to a DXT5 compressed texture, but it is
+otherwise unchanged from the original.
+
 The Saturn and Uranus ring textures are from Celestia 1.6.0. The Saturn ring
 texture was created by Grant Hutchison from Cassini images and opacities
 derived from stellar transit measurements: 

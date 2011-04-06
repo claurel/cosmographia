@@ -557,9 +557,9 @@ static void
 EllipticToRectangularN(double mu,const double elem[6],double dt,
                        double xyz[])
 {
-  const double n = elem[0];
-  const double a = pow(mu / (n * n), 1.0 / 3.0);
-  EllipticToRectangular(a,n,elem,dt,xyz);
+    const double n = elem[0];
+    const double a = pow(mu / (n * n), 1.0 / 3.0);
+    EllipticToRectangular(a,n,elem,dt,xyz);
 }
 
 
@@ -581,7 +581,7 @@ Gust86Orbit::state(double tdbSec) const
     double x[6];
     EllipticToRectangularN(gust86_rmu[satIndex], elements, 0.0, x);
 
-    const Matrix3d r(GUST86toJ2000);
+    const Matrix3d r = Matrix3d(GUST86toJ2000).transpose();
 
     // Transform the state vector from the Uranus equatorial coordinate system
     // to EMEJ2000 and convert units (position from AU to km, velocity from
@@ -604,13 +604,8 @@ Gust86Orbit::Gust86Orbit(Satellite satellite) :
 #define TEST_GUST86 0
 
 #if TEST_GUST86
-/* Test data from ftp://ftp.imcce.fr/pub/ephem/satel/martian/README.txt
- * for Julian Date 2451545.0 ET
- */
-static double TestStates[2][6] =
+static double TestStates[5][6] =
 {
-   { -0.000013308157, -0.000058444725, -0.000021266023,  0.001064512701, -0.000025102894, -0.000588113378 },
-   {  0.000069313218, -0.000105248430, -0.000093221981,  0.000601144991,  0.000487226467, -0.000103180111 },
 };
 #endif
 

@@ -33,6 +33,7 @@
 #include "astro/MarsSat.h"
 #include "astro/L1.h"
 #include "astro/TASS17.h"
+#include "astro/Gust86.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -500,6 +501,13 @@ Cosmographia::initialize()
         m_loader->addBuiltinOrbit("Titan",     TASS17Orbit::Create(TASS17Orbit::Titan));
         m_loader->addBuiltinOrbit("Hyperion",  TASS17Orbit::Create(TASS17Orbit::Hyperion));
         m_loader->addBuiltinOrbit("Iapetus",   TASS17Orbit::Create(TASS17Orbit::Iapetus));
+
+        // Uranian satellites
+        m_loader->addBuiltinOrbit("Miranda",   Gust86Orbit::Create(Gust86Orbit::Miranda));
+        m_loader->addBuiltinOrbit("Ariel",     Gust86Orbit::Create(Gust86Orbit::Ariel));
+        m_loader->addBuiltinOrbit("Umbriel",   Gust86Orbit::Create(Gust86Orbit::Umbriel));
+        m_loader->addBuiltinOrbit("Titania",   Gust86Orbit::Create(Gust86Orbit::Titania));
+        m_loader->addBuiltinOrbit("Oberon",    Gust86Orbit::Create(Gust86Orbit::Oberon));
     }
 
     // Set up builtin rotation models

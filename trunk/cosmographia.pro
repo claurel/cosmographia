@@ -32,6 +32,7 @@ APP_SOURCES = \
     $$MAIN_PATH/WMSTiledMap.cpp \
     $$MAIN_PATH/MultiWMSTiledMap.cpp \
     $$MAIN_PATH/astro/Constants.cpp \
+    $$MAIN_PATH/astro/Gust86.cpp \
     $$MAIN_PATH/astro/IAULunarRotationModel.cpp \
     $$MAIN_PATH/astro/Nutation.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
@@ -63,6 +64,7 @@ APP_HEADERS = \
     $$MAIN_PATH/WMSTiledMap.h \
     $$MAIN_PATH/MultiWMSTiledMap.h \
     $$MAIN_PATH/astro/Constants.h \
+    $$MAIN_PATH/astro/Gust86.h \
     $$MAIN_PATH/astro/IAULunarRotationModel.h \
     $$MAIN_PATH/astro/MarsSat.h \
     $$MAIN_PATH/astro/Nutation.h \

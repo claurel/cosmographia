@@ -28,15 +28,25 @@ The maps of Mimas, Enceladus, Tethys, Dione, Rhea, Titan, and Iapetus are
 from CICLOPS (Cassini Imaging Central Library for OPerations):
 http://www.ciclops.org/maps.php
 
+== Uranian satellite maps ==
 
+All of the maps of the moons of Uranus are based on Voyager 2 images.  Only
+half of each moon was illuminated during the flyby, thus there are large
+blank areas in each map. The maps are modified from the originals by
+filling in the black regions with a midtone constant color. No attempt has
+been made to add artificial details.
 
+The map of Miranda is from JPL: http://maps.jpl.nasa.gov/uranus.html
 
+The map of Ariel is from Ted Stryk. Some of the regions in this map are only
+visible because they were illuminated by Uranus-shine during the Voyager 2
+encounter. This abstract describes the reprocessing of the Voyager images:
+http://www.lpi.usra.edu/meetings/lpsc2008/pdf/1362.pdf
 
+The map of Umbriel is from Phil Stooke. The original is here:
+http://www.unmannedspaceflight.com/index.php?act=Attach&type=post&id=4701
 
-
-
-
-
+The maps of Titania and Oberon are from Ted Stryk and Steve Albers.
 
 
 

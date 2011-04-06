@@ -512,7 +512,13 @@ macx {
         data/textures/tethys.dds \
         data/textures/rhea.dds \
         data/textures/titan.dds \
-        data/textures/iapetus.dds
+        data/textures/iapetus.dds \
+        data/textures/miranda.dds \
+        data/textures/ariel.dds \
+        data/textures/umbriel.dds \
+        data/textures/titania.dds \
+        data/textures/oberon.dds \
+        data/textures/earth-clouds.dds
 
 
     QMAKE_BUNDLE_DATA += TEXTURES

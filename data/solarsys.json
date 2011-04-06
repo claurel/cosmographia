@@ -117,7 +117,7 @@
                   "detailLevelCount" : 13,
                   "tileSize" : 480
               },
-              "cloudMap" : "earth-clouds.png",
+              "cloudMap" : "textures/earth-clouds.dds",
               "atmosphere" : "earth.atmscat"
           }
         },
@@ -277,7 +277,7 @@
               "period" : "17.240000000255407h",
               "inclination" : 74.825,
               "ascendingNode" : 167.311,
-              "meridianAngle" : 203.81
+              "meridianAngle" : 336.19
           },
 
           "geometry" :
@@ -823,6 +823,164 @@
               "radii" : [ 115, 110, 105 ]
           }
 
+        },
+
+        {
+          "name" : "Miranda",
+          "label" : { "color" : [ 0.6, 0.6, 0.6 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Uranus",
+
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Miranda"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "1.41347923291104d",
+              "inclination" : 74.92,
+              "ascendingNode" : 164.43,
+              "meridianAngle" : 149.30
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 240.4, 234.2, 232.9 ],
+              "baseMap" : "textures/miranda.dds"
+          }
+
+        },
+
+        {
+          "name" : "Ariel",
+          "label" : { "color" : [ 0.5, 0.7, 0.7 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Uranus",
+
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Ariel"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "2.52037887166924d",
+              "inclination" : 75.90,
+              "ascendingNode" : 167.43,
+              "meridianAngle" : 23.78
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 581.1, 577.9, 577.7 ],
+              "baseMap" : "textures/ariel.dds"
+          }
+
+        },
+
+        {
+          "name" : "Umbriel",
+          "label" : { "color" : [ 0.6, 0.5, 0.3 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Uranus",
+
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Umbriel"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "4.144176246161251d",
+              "inclination" : 75.90,
+              "ascendingNode" : 167.43,
+              "meridianAngle" : 71.95
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 584.7,
+              "baseMap" : "textures/umbriel.dds"
+          }
+
+        },
+
+        {
+          "name" : "Titania",
+          "label" : { "color" : [ 0.3, 0.7, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Uranus",
+
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Titania"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "8.70586545787208d",
+              "inclination" : 75.90,
+              "ascendingNode" : 167.43,
+              "meridianAngle" : 102.26
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 788.9,
+              "baseMap" : "textures/titania.dds"
+          }
+        },
+
+        {
+          "name" : "Oberon",
+          "label" : { "color" : [ 0.6, 0.6, 0.8 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Uranus",
+
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Oberon"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "13.463231980776659d",
+              "inclination" : 75.90,
+              "ascendingNode" : 167.43,
+              "meridianAngle" : 173.23
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 761.4,
+              "baseMap" : "textures/oberon.dds"
+          }
         }
 
     ]

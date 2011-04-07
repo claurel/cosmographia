@@ -17,6 +17,7 @@
 
 #include "ObserverAction.h"
 #include <algorithm>
+#include <cmath>
 
 using namespace vesta;
 using namespace Eigen;
@@ -31,10 +32,12 @@ static double smoothstep(double x)
 
 // Version of smoothstep that is second order continuous at x = 0 and x = 1
 // From Ken Perlin
+/*
 static double smoothstep2(double x)
 {
     return x * x * x * (x* (x * 6 - 15) + 10);
 }
+*/
 
 
 Quaterniond lookRotation(const Eigen::Vector3d& from,
@@ -140,11 +143,8 @@ public:
 
     double operator()(double x) const
     {
-        // local s = startSpeed
-        // local c = accelTime
-        // return (-x + s * (-1 + math.exp(c * x) * (1 + x - c * x))) / x
-
-        return (-x + m_startSpeed * (-1 + exp(m_accelerationFraction * x) * (1 + x - m_accelerationFraction * x))) / x;
+        double c = exp(m_accelerationFraction * x);
+        return (m_startSpeed / x) * (c - 1.0) + (1.0 - m_accelerationFraction) * m_startSpeed * c - 1.0;
     }
 
 private:
@@ -168,15 +168,15 @@ private:
 static double
 expInterp(double t, double v0, double accelerationTime)
 {
-    // No analytical solution; solve numerically
+    // No analytical solution; solve numerically. We want to find b such that the interpolation function is 1 at t = 1
     double b = SolveBisection(ExponentialAcceleration(v0, accelerationTime), 1.0e-4, 100.0 / accelerationTime, 1.0e-12);
     double a = v0 / b;
 
     // Peak velocity is reached when t = acceleration time
-    double peakVelocity = a * b * exp(b * accelerationTime);
+    double peakVelocity = v0 * exp(b * accelerationTime);
 
     // dist1 is the distance covered in the acceleration phase
-    double dist1 = a * (exp(b * min(t, accelerationTime) - 1.0));
+    double dist1 = a * (exp(b * min(t, accelerationTime)) - 1.0);
 
     // dist2 is the distance covered in the constant velocity phase
     double dist2 = max(0.0, t - accelerationTime) * peakVelocity;
@@ -267,9 +267,6 @@ GotoObserverAction::updateObserver(Observer* observer, double realTime, double s
     {
         // Switch to the target frame
         observer->updateCenter(m_target.ptr(), simTime);
-        //observer->updatePositionFrame(m_targetFrame.ptr(), simTime);
-        //Vector3d position = observer->absolutePosition(simTime);
-        //Quaterniond orientation = observer->absoluteOrientation(simTime);
         m_switchedFrames = true;
     }
 

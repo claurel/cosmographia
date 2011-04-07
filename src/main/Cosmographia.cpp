@@ -195,7 +195,6 @@ Cosmographia::Cosmographia() :
     cameraMenu->addAction(centerAction);
     QAction* gotoAction = new QAction("&Goto Selected Object", cameraMenu);
     gotoAction->setShortcut(QKeySequence("Ctrl+G"));
-    gotoAction->setDisabled(true); // NOT YET IMPLEMENTED
     cameraMenu->addAction(gotoAction);
 
     QActionGroup* cameraFrameGroup = new QActionGroup(cameraMenu);

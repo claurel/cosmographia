@@ -1002,6 +1002,8 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         QAction* nameAction = menu->addAction(QString::fromUtf8(body->name().c_str()));
         nameAction->setEnabled(false);
 
+        QAction* gotoAction = menu->addAction(tr("Go to"));
+
         // Add actions for displaying reference vectors
         menu->addSeparator();
         QAction* bodyAxesAction = menu->addAction(tr("Body axes"));
@@ -1054,7 +1056,23 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         }
 
         QAction* chosenAction = menu->exec(event->globalPos(), bodyAxesAction);
-        if (chosenAction == bodyAxesAction)
+        if (chosenAction == gotoAction)
+        {
+            double distanceFromTarget = 500.0;
+            if (body->geometry())
+            {
+                distanceFromTarget = body->geometry()->boundingSphereRadius() * 3.0;
+            }
+
+            m_observerAction = new GotoObserverAction(m_observer.ptr(),
+                                                      body,
+                                                      6.0,
+                                                      secondsFromBaseTime(),
+                                                      m_simulationTime,
+                                                      distanceFromTarget);
+
+        }
+        else if (chosenAction == bodyAxesAction)
         {
             if (bodyAxesAction->isChecked())
             {
@@ -1811,28 +1829,19 @@ UniverseView::gotoSelectedObject()
 {
     if (m_selectedBody.isValid())
     {
-        FrameType f = m_observerFrame;
-        Entity* center = m_selectedBody.ptr();
-
-        Frame* targetFrame = NULL;
-        if (f == Frame_BodyFixed)
+        Entity* body = m_selectedBody.ptr();
+        double distanceFromTarget = 500.0;
+        if (body->geometry())
         {
-            targetFrame = new BodyFixedFrame(center);
-        }
-        else if (f == Frame_Synodic)
-        {
-            vesta::Arc* arc = center->chronology()->activeArc(m_simulationTime);
-            if (!arc)
-            {
-                arc = center->chronology()->firstArc();
-            }
-            targetFrame = new TwoBodyRotatingFrame(arc->center(), center);
-        }
-        else
-        {
-            targetFrame = InertialFrame::equatorJ2000();
+            distanceFromTarget = body->geometry()->boundingSphereRadius() * 3.0;
         }
 
+        m_observerAction = new GotoObserverAction(m_observer.ptr(),
+                                                  body,
+                                                  6.0,
+                                                  secondsFromBaseTime(),
+                                                  m_simulationTime,
+                                                  distanceFromTarget);
     }
 }
 

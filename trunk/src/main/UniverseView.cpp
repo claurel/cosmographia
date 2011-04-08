@@ -821,8 +821,11 @@ void UniverseView::mouseDoubleClickEvent(QMouseEvent* event)
         if (clickedObject != NULL)
         {
             m_selectedBody = clickedObject;
-            setObserverCenter();
-            m_observerAction = new CenterObserverAction(m_observer.ptr(), clickedObject, 1.0, t, m_simulationTime);
+            gotoSelectedObject();
+
+            // Alternate double click behavior to center selection:
+            // setObserverCenter();
+            // m_observerAction = new CenterObserverAction(m_observer.ptr(), clickedObject, 1.0, t, m_simulationTime);
         }
     }
 }

@@ -7,7 +7,6 @@ DESTDIR = build
 QT += opengl
 QT += network
 
-#QTPLUGIN += qjpeg
 
 #### App sources ####
 
@@ -518,6 +517,7 @@ macx {
         data/textures/umbriel.dds \
         data/textures/titania.dds \
         data/textures/oberon.dds \
+        data/textures/pluto.png \
         data/textures/earth-clouds.dds
 
 

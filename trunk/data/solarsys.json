@@ -361,7 +361,7 @@
           {
               "type" : "Globe",
               "radius" : 1195,
-              "baseMap" : "pluto.jpg"
+              "baseMap" : "textures/pluto.png"
           }
         },
 

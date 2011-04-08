@@ -53,5 +53,10 @@ http://www.unmannedspaceflight.com/index.php?act=Attach&type=post&id=4701
 
 The maps of Titania and Oberon are from Ted Stryk and Steve Albers.
 
+The map of Pluto is derived from a map created by Marc Buie from Hubble
+Space Telescope images. The black area of the map was filled in with a
+flat color, but it is otherwise unmodified from Buie's original:
+http://www.boulder.swri.edu/~buie/pluto/hrcmap.html
+
 
 

@@ -246,7 +246,7 @@ GotoObserverAction::updateObserver(Observer* observer, double realTime, double s
     double travelDistance = distanceFromStart - m_finalDistanceFromTarget;
 
     // Interpolation factor for rotation
-    double rt = smoothstep(t);
+    double rt = smoothstep(min(1.0, t * 4.0));
 
     // Interpolation factor for position
     double pt = smoothStepExp(t, 0.1 / travelDistance, 0.5);

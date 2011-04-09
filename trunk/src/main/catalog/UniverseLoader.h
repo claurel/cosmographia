@@ -68,6 +68,8 @@ public:
     QSet<QString> resourceRequests() const;
     void clearResourceRequests();
 
+    void setCatalogLoaded(const QString& catalogFileName);
+
 public slots:
     void processUpdates();
     void processTleSet(const QString& source, QTextStream& stream);
@@ -104,6 +106,10 @@ private:
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
                                       const UniverseCatalog* catalog);
 
+    QStringList loadCatalogItems(const QVariantMap& contents,
+                                 UniverseCatalog* catalog,
+                                 unsigned int requireDepth);
+
 private:
     QString dataFileName(const QString& fileName);
     QString textureFileName(const QString& fileName);
@@ -111,6 +117,10 @@ private:
 
     void cleanGeometryCache();
     vesta::Geometry* loadMeshFile(const QString& fileName);
+
+    QStringList loadCatalogFile(const QString& fileName,
+                                UniverseCatalog* catalog,
+                                unsigned int requireDepth);
 
 
 private:
@@ -137,6 +147,8 @@ private:
     QSet<QString> m_resourceRequests;
 
     QHash<QString, vesta::counted_ptr<vesta::Geometry> > m_geometryCache;
+
+    QSet<QString> m_loadedCatalogFiles;
 };
 
 #endif // _UNIVERSE_LOADER_H_

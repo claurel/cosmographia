@@ -23,6 +23,7 @@
 #include "../TwoVectorFrame.h"
 #include "../WMSTiledMap.h"
 #include "../MultiWMSTiledMap.h"
+#include "../MeshInstanceGeometry.h"
 #include "../compatibility/Scanner.h"
 #include "../astro/Rotation.h"
 #include <vesta/Units.h>
@@ -41,7 +42,6 @@
 #include <vesta/Atmosphere.h>
 #include <vesta/DataChunk.h>
 #include <vesta/ArrowGeometry.h>
-#include <vesta/MeshGeometry.h>
 #include <vesta/PlanetaryRings.h>
 #include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
@@ -55,8 +55,12 @@
 #include <vesta/particlesys/BoxGenerator.h>
 #include <vesta/particlesys/DiscGenerator.h>
 
+#include <qjson/parser.h>
+#include <qjson/serializer.h>
+
 #include <QDateTime>
 #include <QFile>
+#include <QFileInfo>
 #include <QColor>
 #include <QRegExp>
 #include <QDebug>
@@ -1886,25 +1890,27 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
     double radius = distanceValue(map.value("size"), Unit_Kilometer, 0.0);
     double scale = doubleValue(map.value("scale"), 1.0);
 
-    MeshGeometry* mesh = NULL;
+    MeshInstanceGeometry* meshInstance = NULL;
     if (map.contains("source"))
     {
         QString sourceName = map.value("source").toString();
-        mesh = dynamic_cast<MeshGeometry*>(loadMeshFile(modelFileName(sourceName)));
+        MeshGeometry* mesh = dynamic_cast<MeshGeometry*>(loadMeshFile(modelFileName(sourceName)));
+
         if (mesh)
         {
+            meshInstance = new MeshInstanceGeometry(mesh);
             if (radius > 0.0)
             {
-                mesh->setMeshScale(radius / mesh->boundingSphereRadius());
+                meshInstance->setScale(radius / mesh->boundingSphereRadius());
             }
             else
             {
-                mesh->setMeshScale(float(scale));
+                meshInstance->setScale(float(scale));
             }
         }
     }
 
-    return mesh;
+    return meshInstance;
 }
 
 
@@ -2522,13 +2528,108 @@ QStringList
 UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                                  UniverseCatalog* catalog)
 {
+    return loadCatalogItems(contents, catalog, 0);
+}
+
+
+QStringList
+UniverseLoader::loadCatalogFile(const QString& fileName,
+                                UniverseCatalog* catalog,
+                                unsigned int requireDepth)
+{
+    QStringList bodyNames;
+
+    QString path = dataFileName(fileName);
+
+    QFileInfo info(path);
+    path = info.canonicalFilePath();
+
+    if (m_loadedCatalogFiles.contains(path))
+    {
+        // File is already loaded
+        return bodyNames;
+    }
+
+    if (requireDepth > 10)
+    {
+        qDebug() << "'require' is nested too deeply (recursive requires?)";
+        return bodyNames;
+    }
+
+    QFile catalogFile(path);
+    if (!catalogFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << QString("Cannot open required file %1").arg(path);
+        return bodyNames;
+    }
+
+    QJson::Parser parser;
+
+    bool parseOk = false;
+    QVariant result = parser.parse(&catalogFile, &parseOk);
+    if (!parseOk)
+    {
+        qDebug() << QString("Error in %1, line %2: %3").arg(path).arg(parser.errorLine()).arg(parser.errorString());
+        return bodyNames;
+    }
+
+    QVariantMap contents = result.toMap();
+    if (contents.empty())
+    {
+        qDebug() << "Solar system file is empty.";
+        return bodyNames;
+    }
+
+    // Save search paths
+    QString searchPath = info.absolutePath();
+    QString saveDataSearchPath = m_dataSearchPath;
+    QString saveTextureSearchPath = m_textureSearchPath;
+    QString saveModelSearchPath = m_modelSearchPath;
+    setDataSearchPath(searchPath);
+    setTextureSearchPath(searchPath);
+    setModelSearchPath(searchPath);
+
+    bodyNames = loadCatalogItems(contents, catalog, requireDepth + 1);
+
+    // Restore search paths
+    setDataSearchPath(saveDataSearchPath);
+    setTextureSearchPath(saveTextureSearchPath);
+    setModelSearchPath(saveModelSearchPath);
+
+    return bodyNames;
+}
+
+
+QStringList
+UniverseLoader::loadCatalogItems(const QVariantMap& contents,
+                                 UniverseCatalog* catalog,
+                                 unsigned int requireDepth)
+{
     qDebug() << "Loading catalog " << contents["name"].toString();
 
     QStringList bodyNames;
+    if (contents.contains("require"))
+    {
+        QVariant requireVar = contents.value("require");
+        if (requireVar.type() == QVariant::List)
+        {
+            QVariantList requireList = requireVar.toList();
+            foreach (QVariant v, requireList)
+            {
+                if (v.type() == QVariant::String)
+                {
+                    bodyNames << loadCatalogFile(v.toString(), catalog, requireDepth);
+                }
+            }
+        }
+        else
+        {
+            qDebug() << "Require property must be a list of filenames";
+        }
+    }
 
     if (!contents.contains("items"))
     {
-        qDebug() << "No items defined.";
         return bodyNames;
     }
 

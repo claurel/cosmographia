@@ -260,7 +260,7 @@ QSize UniverseView::sizeHint() const
 
 
 
-static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, bool visible)
+static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, double fadeSize, bool visible)
 {
     if (!planet || !planet->isVisible())
     {
@@ -279,12 +279,16 @@ static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFo
     }
 
     float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
+    if (fadeSize == 0.0)
+    {
+        fadeSize = orbitSize;
+    }
     float minPixels = 20.0f;
-    float maxPixels = 20.0f * orbitSize / geometrySize;
+    float maxPixels = 20.0f * fadeSize / geometrySize;
 
     if (planet->name() != "Sun")
     {
-        vis->label()->setFadeSize(orbitSize);
+        vis->label()->setFadeSize(fadeSize);
         vis->label()->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
     }
 
@@ -1819,11 +1823,13 @@ UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
     }
 
     Spectrum color = Spectrum::White();
+    double fadeSize = 0.0;
     if (info)
     {
         color = info->labelColor;
+        fadeSize = info->labelFadeSize;
     }
-    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, m_labelsVisible);
+    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, fadeSize, m_labelsVisible);
 }
 
 

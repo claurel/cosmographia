@@ -32,6 +32,7 @@ public:
 
     BodyInfo() :
         labelColor(vesta::Spectrum::White()),
+        labelFadeSize(0.0),
         trajectoryPlotDuration(0.0),
         trajectoryPlotSamples(100),
         trajectoryPlotColor(vesta::Spectrum::White()),
@@ -41,6 +42,7 @@ public:
     }
 
     vesta::Spectrum labelColor;
+    double labelFadeSize;
     double trajectoryPlotDuration;
     unsigned int trajectoryPlotSamples;
     vesta::Spectrum trajectoryPlotColor;

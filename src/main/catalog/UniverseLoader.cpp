@@ -2489,10 +2489,16 @@ void
 loadLabelInfo(BodyInfo* info, const QVariantMap& map)
 {
     QVariant colorVar = map.value("color");
+    QVariant labelFadeSizeVar = map.value("fadeSize");
 
     if (colorVar.isValid())
     {
         info->labelColor = colorValue(colorVar, Spectrum::White());
+    }
+
+    if (labelFadeSizeVar.isValid())
+    {
+        info->labelFadeSize = doubleValue(labelFadeSizeVar, 0.0);
     }
 }
 

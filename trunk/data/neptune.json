@@ -1,0 +1,36 @@
+{
+    "version": "1.0",
+    "name": "Neptune",
+
+    "items" :
+    [
+        {
+          "name" : "Neptune",
+          "label" : { "color" : [ 0.5, 0.5, 1.0 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Neptune"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "16.109999998858875h",
+              "inclination" : 46.54,
+              "ascendingNode" : 19.36,
+              "meridianAngle" : 253.18
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 24764, 24764, 24341 ],
+              "baseMap" : "textures/neptune.jpg"
+          }
+        }
+    ]
+}

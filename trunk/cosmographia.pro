@@ -540,6 +540,16 @@ macx {
     DATA.files = \
         data/tycho2.stars \
         data/solarsys.json \
+        data/sun.json \
+        data/mercury.json \
+        data/venus.json \
+        data/earth.json \
+        data/mars.json \
+        data/jupiter.json \
+        data/saturn.json \
+        data/uranus.json \
+        data/neptune.json \
+        data/pluto.json \
         data/sans-12.txf \
         data/sans-24.txf \
         data/csans-16.txf \

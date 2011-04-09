@@ -1,0 +1,77 @@
+{
+    "version": "1.0",
+    "name": "Earth",
+
+    "items" :
+    [
+        {
+          "name" : "Earth",
+          "label" : { "color" : [ 0.7, 0.8, 1 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Earth"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.997269632262793,
+              "inclination" : 0.0,
+              "ascendingNode" : 0.0,
+              "meridianAngle" : 280.147
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 6378.1,
+              "baseMap" :
+              {
+                  "type" : "MultiWMS",
+                  "baseLayer" : "bmng-feb-nb",
+                  "baseLevelCount" : 7,
+                  "detailLayer" : "earth-global-mosaic",
+                  "detailLevelCount" : 13,
+                  "tileSize" : 480
+              },
+              "cloudMap" : "textures/earth-clouds.dds",
+              "atmosphere" : "earth.atmscat"
+          }
+        },
+
+        {
+          "name" : "Moon",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Earth",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Moon"
+          },
+          "rotationModel" :
+          {
+              "type" : "Builtin",
+              "name" : "IAU Moon"
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1737.1,
+              "baseMap" :
+              {
+                  "type" : "WMS",
+                  "layer" : "moon-clementine",
+                  "levelCount" : 6,
+                  "tileSize" : 512
+              }
+          }
+        }
+    ]
+}

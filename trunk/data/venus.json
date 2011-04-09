@@ -1,0 +1,36 @@
+{
+    "version": "1.0",
+    "name": "Venus",
+
+    "items" :
+    [
+        {
+          "name" : "Venus",
+          "label" : { "color" : [ 1.0, 1.0, 0.9 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Venus"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "243.018483985891967d",
+              "inclination" : 157.16,
+              "ascendingNode" : 182.76,
+              "meridianAngle" : 160.20
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 6051.8,
+              "baseMap" : "textures/venus.jpg"
+          }
+        }
+    ]
+}

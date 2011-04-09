@@ -24,6 +24,7 @@ APP_SOURCES = \
     $$MAIN_PATH/JPLEphemeris.cpp \
     $$MAIN_PATH/KeplerianSwarm.cpp \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
+    $$MAIN_PATH/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
     $$MAIN_PATH/TwoVectorFrame.cpp \
@@ -56,6 +57,7 @@ APP_HEADERS = \
     $$MAIN_PATH/JPLEphemeris.h \
     $$MAIN_PATH/KeplerianSwarm.h \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
+    $$MAIN_PATH/MeshInstanceGeometry.h \
     $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/TleTrajectory.h \
     $$MAIN_PATH/TwoVectorFrame.h \

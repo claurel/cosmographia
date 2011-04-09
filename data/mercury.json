@@ -1,0 +1,37 @@
+{
+    "version": "1.0",
+    "name": "Mercury",
+
+    "items" :
+    [
+        {
+          "name" : "Mercury",
+          "label" : { "color" : [ 0.8, 0.4, 0.1 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Mercury"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "58.646225199061172d",
+              "inclination" : 28.55,
+              "ascendingNode" : 11.01,
+              "meridianAngle" : 329.548
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 2439,
+              "baseMap" : "textures/mercury.jpg"
+          }
+        }
+    ]
+}
+

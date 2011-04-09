@@ -1,0 +1,95 @@
+{
+    "version": "1.0",
+    "name": "Mars",
+
+    "items" :
+    [
+        {
+          "name" : "Mars",
+          "label" : { "color" : [ 0.8, 0.4, 0.3 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Mars"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "24.622962155909364h",
+              "inclination" : 37.1135,
+              "ascendingNode" : 47.68143,
+              "meridianAngle" : 176.630
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 3389,
+              "baseMap" : "textures/mars.jpg"
+          }
+        },
+
+        {
+          "name" : "Phobos",
+          "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Mars",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Phobos"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "7.653843686551413h",
+              "inclination" : 37.10,
+              "ascendingNode" : 47.68,
+              "meridianAngle" : 35.06
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/phobos.obj"
+          }
+        },
+
+        {
+          "name" : "Deimos",
+          "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Mars",
+
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Deimos"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "30.298578074054543h",
+              "inclination" : 36.48,
+              "ascendingNode" : 46.65,
+              "meridianAngle" : 79.41
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/deimos.obj"
+          }
+        }
+
+    ]
+}

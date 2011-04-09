@@ -1,0 +1,36 @@
+{
+    "version": "1.0",
+    "name": "Pluto",
+
+    "items" :
+    [
+        {
+          "name" : "Pluto",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectory" :
+          {
+              "type" : "Builtin",
+              "name" : "Pluto"
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 6.387206,
+              "inclination" : 115.60,
+              "ascendingNode" : 228.34,
+              "meridianAngle" : 320.75
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1195,
+              "baseMap" : "textures/pluto.png"
+          }
+        }
+    ]
+}

@@ -5,21 +5,81 @@
     "items" :
     [
         {
-          "name" : "Pluto",
+          "name" : "Pluto System Barycenter",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+          "visible" : false,
 
           "center" : "Sun",
           "trajectory" :
           {
               "type" : "Builtin",
               "name" : "Pluto"
+          }
+        },
+
+        {
+          "name" : "Pluto",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ], "fadeSize" : 6.0e9 },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Pluto System Barycenter",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 2043.1,
+              "eccentricity" : 0.003484,
+              "period" : "6.387206d",
+              "inclination" : 96.1680,
+              "ascendingNode" : 223.0359,
+              "argumentOfPeriapsis" : 337.92,
+              "meanAnomaly" : 236.9861,
+              "epoch" : "2002-11-02 00:00:00"
           },
+
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 6.387206,
+              "period" : "6.387206d",
+              "inclination" : 99.09,
+              "ascendingNode" : 223.02,
+              "meridianAngle" : 303.23
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1195,
+              "baseMap" : "textures/pluto.png"
+          }
+        },
+
+        {
+          "name" : "Charon",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Pluto System Barycenter",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 17527.4,
+              "eccentricity" : 0.003484,
+              "period" : "6.387206d",
+              "inclination" : 96.1680,
+              "ascendingNode" : 223.0359,
+              "argumentOfPeriapsis" : 157.92,
+              "meanAnomaly" : 236.9861,
+              "epoch" : "2002-11-02 00:00:00"
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "6.387206d",
               "inclination" : 115.60,
               "ascendingNode" : 228.34,
               "meridianAngle" : 320.75
@@ -28,8 +88,7 @@
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 1195,
-              "baseMap" : "textures/pluto.png"
+              "radius" : 593
           }
         }
     ]

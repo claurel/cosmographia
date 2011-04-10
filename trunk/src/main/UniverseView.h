@@ -200,6 +200,7 @@ private:
     bool m_paused;
 
     vesta::counted_ptr<vesta::TextureFont> m_titleFont;
+    vesta::counted_ptr<vesta::TextureFont> m_textFont;
     vesta::counted_ptr<vesta::TextureFont> m_labelFont;
     vesta::counted_ptr<vesta::TextureMap> m_spacecraftIcon;
 

@@ -207,6 +207,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_renderer = new UniverseRenderer();
 
     m_labelFont = new TextureFont();
+    m_textFont = new TextureFont();
     m_titleFont = new TextureFont();
     m_spacecraftIcon = m_textureLoader->loadTexture(":/icons/disk.png", TextureProperties(TextureProperties::Clamp));
 
@@ -322,12 +323,16 @@ void UniverseView::initializeGL()
         DataChunk chunk(data.data(), data.size());
         m_titleFont->loadTxf(&chunk);
     }
-    else
+
+    QFile textFontFile("csans-16.txf");
+    if (textFontFile.open(QIODevice::ReadOnly))
     {
-        qDebug() << "missing font";
+        QByteArray data = textFontFile.readAll();
+        DataChunk chunk(data.data(), data.size());
+        m_textFont->loadTxf(&chunk);
     }
 
-    QFile labelFontFile("csans-16.txf");
+    QFile labelFontFile("csans-14.txf");
     if (labelFontFile.open(QIODevice::ReadOnly))
     {
         QByteArray data = labelFontFile.readAll();
@@ -671,17 +676,17 @@ void UniverseView::paintGL()
         }
 #endif
 
-        if (m_labelFont.isValid())
+        if (m_textFont.isValid())
         {
             // Show the current simulation time
             GregorianDate date = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
 
-            m_labelFont->bind();
+            m_textFont->bind();
 
-            m_labelFont->render(formatDate(date).toUtf8().data(), Vector2f(10.0f, 10.0f));
+            m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(10.0f, 10.0f));
 
             QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
-            m_labelFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
+            m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
 
             const int titleFontHeight = 30;
             const int textFontHeight = 20;
@@ -693,7 +698,7 @@ void UniverseView::paintGL()
                 glColor4fv(titleColor.data());
                 m_titleFont->render(m_selectedBody->name(), Vector2f(10.0f, float(viewportHeight - titleFontHeight)));
                 glColor4fv(textColor.data());
-                m_labelFont->bind();
+                m_textFont->bind();
 
                 Vector3d r = m_observer->absolutePosition(m_simulationTime) - m_selectedBody->position(m_simulationTime);
                 double distance = r.norm();
@@ -705,7 +710,7 @@ void UniverseView::paintGL()
                 }
 
                 QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
-                m_labelFont->render(distanceString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - titleFontHeight));
+                m_textFont->render(distanceString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - titleFontHeight));
 
                 // Display the subpoint for ellipsoidal bodies that are sufficiently close
                 // to the observer.
@@ -716,7 +721,7 @@ void UniverseView::paintGL()
                     double latitude = toDegrees(asin(q.z()));
                     double longitude = toDegrees(atan2(q.y(), q.x()));
                     QString coordString = QString("Subpoint: %1, %2").arg(latitude, 0, 'f', 3).arg(longitude, 0, 'f', 3);
-                    m_labelFont->render(coordString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
+                    m_textFont->render(coordString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
                 }
             }
 
@@ -732,24 +737,24 @@ void UniverseView::paintGL()
                 if (tileCount > 0)
                 {
                     QString tileCountString = QString("Loading tiles: %1").arg(tileCount);
-                    m_labelFont->render(tileCountString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight * 2)));
+                    m_textFont->render(tileCountString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight * 2)));
                 }
             }
 
             {
                 QString fovInfo = QString("FOV: %1\260").arg(toDegrees(m_fovY), 6, 'f', 1);
-                m_labelFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
+                m_textFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
             }
 
             if (m_paused)
             {
                 QString timeScaleString = QString("%1x (paused)").arg(m_timeScale, 0, 'f');
-                m_labelFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
+                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
             }
             else
             {
                 QString timeScaleString = QString("%1x").arg(m_timeScale, 0, 'f');
-                m_labelFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
+                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
             }
         }
     }

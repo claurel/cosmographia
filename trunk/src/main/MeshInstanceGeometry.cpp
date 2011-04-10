@@ -25,6 +25,8 @@ using namespace Eigen;
 MeshInstanceGeometry::MeshInstanceGeometry(vesta::MeshGeometry* mesh) :
     m_mesh(mesh)
 {
+    setShadowReceiver(true);
+    setShadowCaster(true);
 }
 
 

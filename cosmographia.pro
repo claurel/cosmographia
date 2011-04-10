@@ -552,6 +552,7 @@ macx {
         data/pluto.json \
         data/sans-12.txf \
         data/sans-24.txf \
+        data/csans-14.txf \
         data/csans-16.txf \
         data/csans-28.txf \
         data/sans-light-24.txf \

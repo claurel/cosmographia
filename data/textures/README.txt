@@ -3,7 +3,7 @@ brightnesses of stars in the USNO's NOMAD catalog. Licensed under the
 Create Commons Attribution 3.0 (i.e. you're free to share and remix the
 work as long as you correctlt attribute it.)
 
-mars.jpg, neptune.jpg, uranus.jpg - Created by James Hastings-Trew. Hosted
+neptune.jpg, uranus.jpg - Created by James Hastings-Trew. Hosted
 here: http://planetpixelemporium.com/planets.html
 
 mercury.jpg, jupiter.dds - Created by Steve Albers for the Science on a
@@ -16,6 +16,10 @@ earth-clouds.dds - Earth cloud map from NASA's Blue Marble data set:
 http://visibleearth.nasa.gov/view_rec.php?id=2432
 The image was converted from TIFF to a DXT5 compressed texture, but it is
 otherwise unchanged from the original.
+
+The Mars map is derived from the Viking merged color mosaic, available here:
+http://www.mars.asu.edu/data/mdim_color/  The original was globally
+desaturated and color adjusted to produce the compressed texture map mars.dds.
 
 The Saturn and Uranus ring textures are from Celestia 1.6.0. The Saturn ring
 texture was created by Grant Hutchison from Cassini images and opacities

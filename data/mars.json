@@ -29,7 +29,7 @@
           {
               "type" : "Globe",
               "radius" : 3389,
-              "baseMap" : "textures/mars.jpg"
+              "baseMap" : "textures/mars.dds"
           }
         },
 

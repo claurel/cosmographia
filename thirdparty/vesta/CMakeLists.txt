@@ -1,5 +1,5 @@
 #
-# $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
+# $Revision: 603 $ $Date: 2011-04-13 17:06:42 -0700 (Wed, 13 Apr 2011) $
 #
 # Copyright by Astos Solutions GmbH, Germany
 #
@@ -54,11 +54,13 @@ set (SRCS
     Framebuffer.cpp
     GeneralEllipse.cpp
     Geometry.cpp
+    GlareOverlay.cpp
     GregorianDate.cpp
     HierarchicalTiledMap.cpp
     InertialFrame.cpp
     KeplerianTrajectory.cpp
     LabelGeometry.cpp
+    LabelVisualizer.cpp
     LightingEnvironment.cpp
     LightSource.cpp
     MapLayer.cpp

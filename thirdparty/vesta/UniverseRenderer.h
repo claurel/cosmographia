@@ -1,5 +1,5 @@
 /*
- * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 603 $ $Date: 2011-04-13 17:06:42 -0700 (Wed, 13 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -30,6 +30,7 @@ class Framebuffer;
 class CubeMapFramebuffer;
 class EclipseShadowVolumeSet;
 class TextureFont;
+class GlareOverlay;
 
 /** UniverseRenderer draws views of a VESTA Universe using a 3D rendering
   * library. Views are drawn as sets at a particular time. A typical usage
@@ -104,6 +105,7 @@ public:
     RenderStatus renderShadowCubeMap(const LightingEnvironment* lighting,
                                      const Eigen::Vector3d& cameraPosition,
                                      CubeMapFramebuffer* cubeMap);
+    RenderStatus renderLightGlare(GlareOverlay* glareOverlay);
 
     Spectrum ambientLight() const
     {
@@ -157,6 +159,19 @@ public:
     TextureFont* defaultFont() const;
     void setDefaultFont(TextureFont* font);
 
+    void setDefaultSunEnabled(bool enabled);
+
+    /** Return whether the default sun light source is enabled.
+      *
+      * \see setDefaultSunEnabled
+      */
+    bool defaultSunEnabled() const
+    {
+        return m_defaultSunEnabled;
+    }
+
+    GlareOverlay* createGlareOverlay();
+
 public:
     struct VisibleItem
     {
@@ -185,6 +200,8 @@ public:
         const LightSource* lightSource;
         Eigen::Vector3d position;
         Eigen::Vector3d cameraRelativePosition;
+        Eigen::Vector3f cameraSpacePosition;
+        float radius;
     };
 
     typedef std::vector<VisibleItem, Eigen::aligned_allocator<VisibleItem> > VisibleItemVector;
@@ -257,6 +274,7 @@ private:
     bool m_eclipseShadowsEnabled;
     bool m_visualizersEnabled;
     bool m_skyLayersEnabled;
+    bool m_defaultSunEnabled;
     float m_depthRangeFront;
     float m_depthRangeBack;
 
@@ -274,6 +292,7 @@ private:
     bool m_viewIndependentInitializationRequired;
 
     counted_ptr<TextureFont> m_defaultFont;
+    PlanarProjection m_lastProjection;
 };
 
 }

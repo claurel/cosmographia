@@ -19,15 +19,15 @@
 namespace vesta
 {
 
+class TextureMap;
+
 class LightSource : public Object
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     LightSource();
-    ~LightSource()
-    {
-    }
+    ~LightSource();
 
     enum LightType
     {
@@ -107,12 +107,23 @@ public:
         m_shadowCaster = castsShadows;
     }
 
+    /** Get the texture map used for displaying a glare effect when the light
+      * source is directly visible.
+      */
+    TextureMap* glareTexture() const
+    {
+        return m_glareTexture.ptr();
+    }
+
+    void setGlareTexture(TextureMap* texture);
+
 private:
     LightType m_type;
     float m_luminosity;
     Spectrum m_spectrum;
     float m_range;
     bool m_shadowCaster;
+    counted_ptr<TextureMap> m_glareTexture;
 };
 
 }

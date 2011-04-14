@@ -1,5 +1,5 @@
 /*
- * $Revision: 598 $ $Date: 2011-03-31 10:21:28 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 603 $ $Date: 2011-04-13 17:06:42 -0700 (Wed, 13 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -21,6 +21,7 @@
 #include "Framebuffer.h"
 #include "CubeMapFramebuffer.h"
 #include "TextureFont.h"
+#include "GlareOverlay.h"
 #include "glhelp/GLFramebuffer.h"
 #include "Units.h"
 #include "internal/EclipseShadowVolumeSet.h"
@@ -75,8 +76,10 @@ UniverseRenderer::UniverseRenderer() :
     m_eclipseShadowsEnabled(false),
     m_visualizersEnabled(true),
     m_skyLayersEnabled(true),
+    m_defaultSunEnabled(true),
     m_renderViewport(1, 1),
-    m_viewIndependentInitializationRequired(true)
+    m_viewIndependentInitializationRequired(true),
+    m_lastProjection(PlanarProjection::Perspective, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 10.0f)
 {
     m_sun = new LightSource();
     m_sun->setLightType(LightSource::Sun);
@@ -154,6 +157,18 @@ void
 UniverseRenderer::setSkyLayersEnabled(bool enable)
 {
     m_skyLayersEnabled = enable;
+}
+
+
+/** Set whether the default sun light source should be enabled. This
+  * is enabled when the UniverseRenderer is created and should be disabled
+  * by applications that want more control over lighting. The default
+  * sun light source is located at the origin.
+  */
+void
+UniverseRenderer::setDefaultSunEnabled(bool enable)
+{
+    m_defaultSunEnabled = enable;
 }
 
 
@@ -359,11 +374,14 @@ UniverseRenderer::beginViewSet(const Universe* universe, double tsec)
 
     // Add a light source for the Sun
     // TODO: Consider whether it might be good to *not* set this automatically
-    LightSourceItem sunItem;
-    sunItem.lightSource = m_sun.ptr();
-    sunItem.position = Vector3d::Zero();
-    sunItem.radius = SolarRadius;
-    m_lightSources.push_back(sunItem);
+    if (m_defaultSunEnabled)
+    {
+        LightSourceItem sunItem;
+        sunItem.lightSource = m_sun.ptr();
+        sunItem.position = Vector3d::Zero();
+        sunItem.radius = SolarRadius;
+        m_lightSources.push_back(sunItem);
+    }
 
     const vector<Entity*>& entities = m_universe->entities();
     for (vector<Entity*>::const_iterator iter = entities.begin(); iter != entities.end(); ++iter)
@@ -526,6 +544,9 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
     {
         return RenderNoViewSet;
     }
+
+    // Last used projection is required for glare rendering
+    m_lastProjection = projection;
 
     // Save the viewport and render surface so that they can be reset after
     // shadow and reflection rendering.
@@ -833,14 +854,14 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
         setDepthRange(spanIndex * spanRange, (spanIndex + 1) * spanRange);
         renderDepthBufferSpan(*iter, projection);
     }
-    setDepthRange(0.0f, 1.0f);
 
     m_renderContext->popModelView();
-
     m_renderContext->unbindShader();
 
     // Reset the front face
     glFrontFace(GL_CCW);
+
+    setDepthRange(0.0f, 1.0f);
 
 #if DEBUG_SHADOW_MAP
     if (m_shadowsEnabled && m_shadowMap.isValid())
@@ -909,6 +930,90 @@ UniverseRenderer::renderView(const Observer* observer,
 }
 
 
+/** Draw glare for light sources that are directly visible to the camera. This method
+  * should be called immediately after a call to renderView(). A typical calling sequence
+  * is the following:
+  *
+  * \code
+  * renderer->renderView();
+  * glareOverlay->adjustBrightness();
+  * renderer->renderLightGlare(glareOverlay);
+  * \endcode
+  *
+  * A separate GlareOverlay instance should be created for each camera used.
+  * \see createGlareOverlay
+  */
+UniverseRenderer::RenderStatus
+UniverseRenderer::renderLightGlare(GlareOverlay* glareOverlay)
+{
+    if (!m_universe)
+    {
+        return RenderNoViewSet;
+    }
+
+    if (!glareOverlay)
+    {
+        // Nothing to do
+        return RenderOk;
+    }
+
+    float spanRange = 1.0f;
+    if (!m_mergedDepthBufferSpans.empty())
+    {
+        spanRange /= (float) m_mergedDepthBufferSpans.size();
+    }
+
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glDepthMask(GL_FALSE);
+
+    // Track light sources
+    for (unsigned int i = 0; i < m_visibleLightSources.size(); ++i)
+    {
+        VisibleLightSourceItem& light = m_visibleLightSources[i];
+        if (light.lightSource->lightType() == LightSource::Sun)
+        {
+            // The glare occlusion test geometry drawn so that it appears just in front
+            // of the light source geometry.
+            Vector3f direction = light.cameraSpacePosition.normalized();
+            Vector3f glarePosition = light.cameraSpacePosition + (direction * light.radius / direction.z());
+
+            unsigned int spanIndex = m_mergedDepthBufferSpans.size() - 1;
+            for (vector<DepthBufferSpan>::const_iterator iter = m_mergedDepthBufferSpans.begin();
+                 iter != m_mergedDepthBufferSpans.end(); ++iter, --spanIndex)
+            {
+                if (-glarePosition.z() <= iter->farDistance && -glarePosition.z() >= iter->nearDistance)
+                {
+                    setDepthRange(spanIndex * spanRange, (spanIndex + 1) * spanRange);
+                    m_renderContext->setProjection(m_lastProjection.slice(iter->nearDistance, iter->farDistance));
+                    glareOverlay->trackGlare(*m_renderContext, light.lightSource, glarePosition, light.radius);
+                }
+            }
+        }
+    }
+
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glDepthMask(GL_FALSE);
+
+    glDepthRange(0.0f, 1.0f);
+
+    // Render glare geometry
+    for (unsigned int i = 0; i < m_visibleLightSources.size(); ++i)
+    {
+        VisibleLightSourceItem& light = m_visibleLightSources[i];
+        if (light.lightSource->lightType() == LightSource::Sun)
+        {
+            // The glare sprite is drawn
+            Vector3f direction = light.cameraSpacePosition.normalized();
+            Vector3f glarePosition = light.cameraSpacePosition + (direction * light.radius / direction.z());
+            glareOverlay->renderGlare(*m_renderContext, light.lightSource, glarePosition, light.radius);
+        }
+    }
+
+
+    return RenderOk;
+}
+
+
 // Predicate used for sorting light sources in the following priority:
 //   1. Sun light sources (only one supported now)
 //   2. Point lights with shadows
@@ -958,6 +1063,7 @@ UniverseRenderer::buildVisibleLightSourceList(const Vector3d& cameraPosition)
     {
         const LightSourceItem& lsi = *iter;
         Vector3d cameraRelativePosition = lsi.position - cameraPosition;
+        Vector3f cameraSpacePosition = toCameraSpace * cameraRelativePosition.cast<float>();
 
         bool cull = false;
         if (lsi.lightSource->lightType() != LightSource::Sun)
@@ -972,7 +1078,6 @@ UniverseRenderer::buildVisibleLightSourceList(const Vector3d& cameraPosition)
             else
             {
                 // Check whether the light lies outside the view frustum. We can disregard it if it does.
-                Vector3f cameraSpacePosition = toCameraSpace * cameraRelativePosition.cast<float>();
                 if (!m_viewFrustum.intersects(BoundingSphere<float>(cameraSpacePosition, lsi.lightSource->range())))
                 {
                     cull = true;
@@ -990,6 +1095,8 @@ UniverseRenderer::buildVisibleLightSourceList(const Vector3d& cameraPosition)
             visibleLight.lightSource = lsi.lightSource;
             visibleLight.position = lsi.position;
             visibleLight.cameraRelativePosition = cameraRelativePosition;
+            visibleLight.cameraSpacePosition = cameraSpacePosition;
+            visibleLight.radius = float(lsi.radius);
             m_visibleLightSources.push_back(visibleLight);
         }
     }
@@ -2027,3 +2134,32 @@ UniverseRenderer::setDefaultFont(TextureFont* font)
 }
 
 
+/** Create a glare overlay. An overlay may only be created after the
+  * renderer has been initialized. This method returns NULL if there was
+  * an error creating the overlay.
+  *
+  * A glare overlay object retains information about light source visibility
+  * between frames. Because of this, a separate overlay should be created
+  * for each camera used. If the same overlay is reused, the light glare will
+  * flicker whenever lights visible to one camera are not visible to the
+  * other camera.
+  */
+GlareOverlay*
+UniverseRenderer::createGlareOverlay()
+{
+    if (!m_renderContext)
+    {
+        VESTA_LOG("Cannot create a glare overlay before UniverseRenderer is initialized.");
+        return NULL;
+    }
+
+    GlareOverlay* overlay = new GlareOverlay();
+    if (!overlay->initialize())
+    {
+        VESTA_LOG("Error creating glare overlay.");
+        delete overlay;
+        return NULL;
+    }
+
+    return overlay;
+}

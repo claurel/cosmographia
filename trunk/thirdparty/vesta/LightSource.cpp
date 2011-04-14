@@ -9,6 +9,7 @@
  */
 
 #include "LightSource.h"
+#include "TextureMap.h"
 
 using namespace vesta;
 
@@ -22,3 +23,18 @@ LightSource::LightSource() :
 {
 }
 
+
+LightSource::~LightSource()
+{
+}
+
+
+/** Set the texture map used for displaying a glare effect when the light
+  * source is directly visible. Glare is disabled when the glare texture is
+  * set to NULL.
+  */
+void
+LightSource::setGlareTexture(TextureMap* texture)
+{
+    m_glareTexture = texture;
+}

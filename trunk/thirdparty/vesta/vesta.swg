@@ -1,5 +1,5 @@
 //
-// $Revision: 582 $ $Date: 2011-03-18 18:05:03 -0700 (Fri, 18 Mar 2011) $
+// $Revision: 603 $ $Date: 2011-04-13 17:06:42 -0700 (Wed, 13 Apr 2011) $
 //
 // Copyright by Astos Solutions GmbH, Germany
 //  
@@ -66,6 +66,7 @@
 #include "Observer.h"
 #include "StarCatalog.h"
 #include "UniverseRenderer.h"
+#include "GlareOverlay.h"
 #include "Atmosphere.h"
 
 // Utility classes
@@ -2038,6 +2039,21 @@ public:
 };
 
 
+%nodefaultctor GlareOverlay;
+
+class GlareOverlay
+{
+public:
+    ~GlareOverlay();
+
+    float adaptationRate() const;
+    void setAdaptationRate(float rate);
+    float glareSize();
+    void setGlareSize(float radiusInPixels);
+    void adjustBrightness();
+};
+
+
 class UniverseRenderer
 {
 public:
@@ -2079,6 +2095,10 @@ public:
     RenderStatus renderShadowCubeMap(const LightingEnvironment* lighting,
                                      const Eigen::Vector3d& cameraPosition,
                                      CubeMapFramebuffer* cubeMap);
+
+    RenderStatus renderLightGlare(GlareOverlay* glareOverlay);
+    GlareOverlay* createGlareOverlay();
+
 
     Spectrum ambientLight() const;
     void setAmbientLight(const Spectrum& spectrum);

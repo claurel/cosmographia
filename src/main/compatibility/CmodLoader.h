@@ -19,6 +19,7 @@
 #define _COMPATIBILITY_CMOD_LOADER_H_
 
 #include <vesta/MeshGeometry.h>
+#include <vesta/TextureMapLoader.h>
 #include <QIODevice>
 
 class QDataStream;
@@ -27,7 +28,7 @@ class QDataStream;
 class CmodLoader
 {
 public:
-    CmodLoader(QIODevice* in);
+    CmodLoader(QIODevice* in, vesta::TextureMapLoader* textureLoader);
     ~CmodLoader();
 
     bool error() const
@@ -92,6 +93,7 @@ private:
     QDataStream* m_inputStream;
     QString m_errorMessage;
     bool m_hasError;
+    vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
 };
 
 #endif // _COMPATIBILITY_CMOD_LOADER_H_

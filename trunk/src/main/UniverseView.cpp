@@ -55,7 +55,6 @@
 #include <vesta/BodyDirectionVisualizer.h>
 #include <vesta/SensorVisualizer.h>
 #include <vesta/LabelVisualizer.h>
-#include <vesta/BillboardGeometry.h>
 #include <vesta/TrajectoryGeometry.h>
 #include <vesta/TextureFont.h>
 #include <vesta/DataChunk.h>
@@ -63,7 +62,7 @@
 #include <vesta/SingleTextureTiledMap.h>
 #include <vesta/HierarchicalTiledMap.h>
 #include <vesta/PlanetGridLayer.h>
-#include <vesta/DDSLoader.h>
+#include <vesta/GlareOverlay.h>
 #include <vesta/GregorianDate.h>
 
 #include <vesta/interaction/ObserverController.h>
@@ -196,6 +195,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_framesPerSecond(0.0),
     m_reflectionsEnabled(false),
     m_anaglyphEnabled(false),
+    m_sunGlareEnabled(true),
     m_infoTextVisible(true),
     m_labelsVisible(true),
     m_videoEncoder(NULL)
@@ -205,6 +205,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_universe = universe;
     m_textureLoader = new NetworkTextureLoader(this);
     m_renderer = new UniverseRenderer();
+    m_renderer->setDefaultSunEnabled(false);
 
     m_labelFont = new TextureFont();
     m_textFont = new TextureFont();
@@ -295,6 +296,7 @@ static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFo
 
     planet->setVisualizer("label", vis);
     vis->setVisibility(visible);
+    vis->setDepthAdjustment(Visualizer::AdjustToFront);
 
     return vis;
 }
@@ -364,6 +366,8 @@ void UniverseView::initializeGL()
     {
         m_reflectionMap = CubeMapFramebuffer::CreateCubicReflectionMap(ReflectionMapSize, TextureMap::R8G8B8A8);
     }
+
+    m_glareOverlay = m_renderer->createGlareOverlay();
 }
 
 
@@ -531,6 +535,12 @@ void UniverseView::paintGL()
 
     updateTrajectoryPlots();
 
+    // Adjust the amount of glare based on the window size
+    if (m_glareOverlay.isValid())
+    {
+        m_glareOverlay->setGlareSize(max(width(), height()) / 20.0f);
+    }
+
     m_renderer->beginViewSet(m_universe.ptr(), m_simulationTime);
 
     if (m_reflectionsEnabled && !m_reflectionMap.isNull())
@@ -608,6 +618,11 @@ void UniverseView::paintGL()
     else
     {
         m_renderer->renderView(&lighting, m_observer.ptr(), m_fovY, mainViewport);
+        if (m_sunGlareEnabled && m_glareOverlay.isValid())
+        {
+            m_glareOverlay->adjustBrightness();
+            m_renderer->renderLightGlare(m_glareOverlay.ptr());
+        }
     }
 
 #define ZOOM_INSET 0
@@ -1763,14 +1778,15 @@ UniverseView::setCloudLayers(bool /* enable */)
 void
 UniverseView::setAmbientLight(bool enable)
 {
-    float light = enable ? 0.2f : 0.0f;
+    float light = enable ? 0.15f : 0.0f;
     m_renderer->setAmbientLight(Spectrum(light, light, light));
 }
 
 
 void
-UniverseView::setRealisticPlanets(bool /* enable */)
+UniverseView::setSunGlare(bool enable)
 {
+    m_sunGlareEnabled = enable;
 }
 
 
@@ -1835,6 +1851,17 @@ UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
         fadeSize = info->labelFadeSize;
     }
     labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, fadeSize, m_labelsVisible);
+
+    // Special handling for the Sun
+    if (entity->name() == "Sun")
+    {
+        LightSource* sunlight = new LightSource();
+        sunlight->setLightType(LightSource::Sun);
+        sunlight->setShadowCaster(true);
+        sunlight->setSpectrum(Spectrum::White());
+        sunlight->setGlareTexture(m_textureLoader->loadTexture("textures/flare.png", TextureProperties(TextureProperties::Clamp)));
+        entity->setLightSource(sunlight);
+    }
 }
 
 

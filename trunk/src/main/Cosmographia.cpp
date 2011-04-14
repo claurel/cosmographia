@@ -300,6 +300,10 @@ Cosmographia::Cosmographia() :
     QAction* ambientLightAction = new QAction("Extra &Light", graphicsMenu);
     ambientLightAction->setCheckable(true);
     graphicsMenu->addAction(ambientLightAction);
+    QAction* sunGlareAction = new QAction("Sun &Glare", graphicsMenu);
+    sunGlareAction->setCheckable(true);
+    sunGlareAction->setChecked(true);
+    graphicsMenu->addAction(sunGlareAction);
     QAction* reflectionsAction = new QAction("&Reflections", graphicsMenu);
     reflectionsAction->setCheckable(true);
     graphicsMenu->addAction(reflectionsAction);
@@ -326,6 +330,7 @@ Cosmographia::Cosmographia() :
     connect(atmospheresAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setAtmospheres(bool)));
     connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayers(bool)));
     connect(ambientLightAction,     SIGNAL(triggered(bool)), m_view3d, SLOT(setAmbientLight(bool)));
+    connect(sunGlareAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setSunGlare(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));
     connect(milkyWayAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setMilkyWayVisibility(bool)));
     connect(anaglyphAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setAnaglyphStereo(bool)));

@@ -85,6 +85,7 @@ private:
     vesta::Material* loadMaterial();
     vesta::Submesh* loadSubmesh();
     vesta::VertexSpec* loadVertexSpec();
+    vesta::PrimitiveBatch* loadPrimitiveBatch(unsigned int primitiveTypeToken, unsigned int vertexCount, unsigned int* materialIndex);
     vesta::VertexArray* loadVertexArray(const vesta::VertexSpec& spec);
 
 private:

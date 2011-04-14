@@ -43,6 +43,7 @@ APP_SOURCES = \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
+    $$MAIN_PATH/compatibility/CmodLoader.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp
 
@@ -77,6 +78,7 @@ APP_HEADERS = \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
+    $$MAIN_PATH/compatibility/CmodLoader.h \
     $$MAIN_PATH/compatibility/Scanner.h \
     $$MAIN_PATH/compatibility/TransformCatalog.h
 

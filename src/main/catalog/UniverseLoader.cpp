@@ -25,6 +25,7 @@
 #include "../MultiWMSTiledMap.h"
 #include "../MeshInstanceGeometry.h"
 #include "../compatibility/Scanner.h"
+#include "../compatibility/CmodLoader.h"
 #include "../astro/Rotation.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
@@ -1681,7 +1682,29 @@ UniverseLoader::loadMeshFile(const QString& fileName)
     }
     else
     {
-        MeshGeometry* meshGeometry = MeshGeometry::loadFromFile(fileName.toUtf8().data(), m_textureLoader.ptr());
+        MeshGeometry* meshGeometry = NULL;
+        if (fileName.toLower().endsWith(".cmod"))
+        {
+            QFile cmodFile(fileName);
+            if (!cmodFile.open(QIODevice::ReadOnly))
+            {
+                qDebug() << "Error opening cmod file " << fileName;
+            }
+            else
+            {
+                CmodLoader loader(&cmodFile);
+                meshGeometry = loader.loadMesh();
+                if (loader.error())
+                {
+                    qDebug() << "Error loading cmod file " << fileName << ": " << loader.errorMessage();
+                }
+            }
+        }
+        else
+        {
+            meshGeometry = MeshGeometry::loadFromFile(fileName.toUtf8().data(), m_textureLoader.ptr());
+        }
+
         if (meshGeometry)
         {
             // Optimize the mesh. The optimizations can be expensive for large meshes, but they can dramatically

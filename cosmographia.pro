@@ -113,6 +113,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/Framebuffer.cpp \
     $$VESTA_PATH/GeneralEllipse.cpp \
     $$VESTA_PATH/Geometry.cpp \
+    $$VESTA_PATH/GlareOverlay.cpp \
     $$VESTA_PATH/GregorianDate.cpp \
     $$VESTA_PATH/HierarchicalTiledMap.cpp \
     $$VESTA_PATH/InertialFrame.cpp \
@@ -195,6 +196,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/FixedRotationModel.h \
     $$VESTA_PATH/Geometry.h \
     $$VESTA_PATH/GeneralEllipse.h \
+    $$VESTA_PATH/GlareOverlay.h \
     $$VESTA_PATH/GregorianDate.h \
     $$VESTA_PATH/HierarchicalTiledMap.h \
     $$VESTA_PATH/InertialFrame.h \
@@ -488,14 +490,14 @@ macx {
     # Media files for the Mac bundle
     TEXTURES.path = Contents/Resources/data/textures
     TEXTURES.files = \
+        data/textures/flare.png \
         data/textures/milkyway.jpg \
         data/textures/moon.dds \
         data/textures/moon-normal.dds \
         data/textures/earth-normal.dds \
-        data/textures/mars4k.dds \
         data/textures/mercury.jpg \
         data/textures/venus.jpg \
-        data/textures/mars.jpg \
+        data/textures/mars.dds \
         data/textures/jupiter.dds \
         data/textures/saturn.jpg \
         data/textures/uranus.jpg \

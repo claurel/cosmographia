@@ -43,6 +43,7 @@ namespace vesta
     class ObserverController;
     class Trajectory;
     class TrajectoryPlotGenerator;
+    class GlareOverlay;
 }
 
 class UniverseView : public QGLWidget
@@ -125,9 +126,9 @@ public slots:
     void setCloudLayers(bool enable);
     void setAtmospheres(bool enable);
     void setAmbientLight(bool enable);
-    void setRealisticPlanets(bool enable);
     void setReflections(bool enable);
     void setAnaglyphStereo(bool enable);
+    void setSunGlare(bool enable);
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
     void plotTrajectoryObserver(const BodyInfo* info);
@@ -180,6 +181,7 @@ private:
     vesta::counted_ptr<vesta::Observer> m_observer;
     vesta::counted_ptr<vesta::ObserverController> m_controller;
     vesta::UniverseRenderer* m_renderer;
+    vesta::counted_ptr<vesta::GlareOverlay> m_glareOverlay;
     FrameType m_observerFrame;
     double m_fovY;
 
@@ -216,6 +218,7 @@ private:
 
     bool m_reflectionsEnabled;
     bool m_anaglyphEnabled;
+    bool m_sunGlareEnabled;
 
     struct TrajectoryPlotEntry
     {

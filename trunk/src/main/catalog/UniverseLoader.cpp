@@ -1692,7 +1692,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             }
             else
             {
-                CmodLoader loader(&cmodFile);
+                CmodLoader loader(&cmodFile, m_textureLoader.ptr());
                 meshGeometry = loader.loadMesh();
                 if (loader.error())
                 {

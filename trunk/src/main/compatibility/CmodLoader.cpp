@@ -22,9 +22,10 @@
 using namespace vesta;
 
 
-CmodLoader::CmodLoader(QIODevice *in) :
+CmodLoader::CmodLoader(QIODevice *in, TextureMapLoader* textureLoader) :
     m_inputStream(NULL),
-    m_hasError(false)
+    m_hasError(false),
+    m_textureLoader(textureLoader)
 {
     m_inputStream = new QDataStream(in);
     m_inputStream->setByteOrder(QDataStream::LittleEndian);
@@ -136,11 +137,43 @@ CmodLoader::loadMaterial()
         case CmodTexture:
         {
             quint16 textureType = 0;
-            QString textureSource;
             *m_inputStream >> textureType;
+
+            QString textureSource;
             if (!readStringProperty(&textureSource))
             {
                 setError("Error reading texture source");
+            }
+            else
+            {
+                if (m_textureLoader.isValid())
+                {
+                    TextureProperties texProps(TextureProperties::Wrap);
+                    if (textureSource.toLower().endsWith("dxt5nm"))
+                    {
+                        texProps.usage = TextureProperties::CompressedNormalMap;
+                    }
+
+                    counted_ptr<TextureMap> texture(m_textureLoader->loadTexture(textureSource.toUtf8().constData(), texProps));
+                    switch (textureType)
+                    {
+                    case 0:
+                        material->setBaseTexture(texture.ptr());
+                        break;
+                    case 1:
+                        material->setNormalTexture(texture.ptr());
+                        break;
+                    case 2:
+                        material->setSpecularTexture(texture.ptr());
+                        break;
+                    case 3:
+                        // Emissive texture not supported
+                        break;
+                    default:
+                        // Unsupported texture type
+                        break;
+                    }
+                }
             }
         }
         break;

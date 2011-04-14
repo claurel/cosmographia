@@ -48,7 +48,7 @@ LocalImageLoader::loadTexture(TextureMap* texture)
 
         qDebug() << "loadTexture: " << textureName;
 
-        if (info.suffix() == "dds")
+        if (info.suffix() == "dds" || info.suffix() == "dxt5nm")
         {
             // Handle DDS textures
             QFile ddsFile(textureName);

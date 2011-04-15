@@ -36,6 +36,11 @@ public:
     LocalImageLoader();
     ~LocalImageLoader();
 
+    QString searchPath() const
+    {
+        return m_searchPath;
+    }
+
 public slots:
     void loadTexture(vesta::TextureMap* texture);
     void setSearchPath(const QString& path);

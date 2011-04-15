@@ -525,7 +525,7 @@ Cosmographia::initialize()
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processReceivedResource(QNetworkReply*)));
 
     // Set up the texture loader
-    m_loader->setTextureLoader(m_view3d->textureLoader());
+    m_loader->setTextureLoader(dynamic_cast<NetworkTextureLoader*>(m_view3d->textureLoader()));
 
     loadCatalogFile("solarsys.json");
 }
@@ -901,13 +901,12 @@ Cosmographia::loadCatalogFile(const QString& fileName)
     }
 
     m_loader->setDataSearchPath(path);
-    m_loader->setTextureSearchPath(path);
     m_loader->setModelSearchPath(path);
 
     NetworkTextureLoader* textureLoader = dynamic_cast<NetworkTextureLoader*>(m_loader->textureLoader());
     if (textureLoader)
     {
-        textureLoader->setLocalSearchPatch(path);
+        textureLoader->setLocalSearchPath(path);
     }
 
     if (fileName.toLower().endsWith(".json"))
@@ -949,12 +948,12 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         //   mesh files - ./models
         // Where '.' is the directory containing the ssc file
         m_loader->setDataSearchPath(path + "/data");
-        m_loader->setTextureSearchPath(path + "/textures/medres");
         m_loader->setModelSearchPath(path + "/models");
         if (textureLoader)
         {
-            textureLoader->setLocalSearchPatch(path + "/textures/medres");
+            textureLoader->setLocalSearchPath(path + "/textures/medres");
         }
+        m_loader->setTexturesInModelDirectory(false);
 
         QVariantList items;
 
@@ -990,6 +989,9 @@ Cosmographia::loadCatalogFile(const QString& fileName)
                 m_view3d->replaceEntity(e, m_catalog->findInfo(name));
             }
         }
+
+        // Reset the textures in model directory bit
+        m_loader->setTexturesInModelDirectory(true);
     }
 
     QSet<QString> resourceRequests = m_loader->resourceRequests();

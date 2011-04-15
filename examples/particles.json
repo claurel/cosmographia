@@ -1,0 +1,42 @@
+{
+     "version": "1.0",
+     "name": "Particle Tests",
+
+     "items" :
+     [
+        {
+          "name" : "Particle test",
+          "center" : "Sun",
+
+          "trajectory" :
+          {
+              "type" : "FixedPoint",
+              "position" : [ 0.0, 0.0, 0.0 ]
+          },
+
+          "bodyFrame" : { "type" : "EclipticJ2000" },
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Point",
+                    "velocity" : [ 0, 0, 4.0e7 ]
+                },
+                "force" : [ 0, -5.0e7, 0.0 ],
+                "spawnRate" : 50,
+                "lifetime" : 2.0,
+                "startSize" : 0.0,
+                "endSize" : 1.0e7,
+                "colors" : [ "yellow", 1.0, "red", 0.0 ],
+                "endTime" : 3451545.0
+              } ]
+          }
+
+        }
+    ]
+}

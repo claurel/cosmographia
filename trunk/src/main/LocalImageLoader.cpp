@@ -39,12 +39,7 @@ LocalImageLoader::loadTexture(TextureMap* texture)
     if (texture)
     {
         QString textureName(texture->name().c_str());
-
         QFileInfo info(texture->name().c_str());
-        if (!info.exists())
-        {
-            textureName = m_searchPath + "/" + textureName;
-        }
 
         qDebug() << "loadTexture: " << textureName;
 

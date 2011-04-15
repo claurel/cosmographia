@@ -32,6 +32,7 @@ public:
     NetworkTextureLoader(QObject* parent, bool asynchronous = true);
     ~NetworkTextureLoader();
 
+    virtual std::string resolveResourceName(const std::string& resourceName);
     bool handleMakeResident(vesta::TextureMap* texture);
     void realizeLoadedTextures();
     void stop();
@@ -49,7 +50,8 @@ public:
 
     void setTextureMemoryLimit(unsigned int megs);
 
-    void setLocalSearchPatch(const QString& path);
+    QString localSearchPath() const;
+    void setLocalSearchPath(const QString& path);
 
 public slots:
     void queueTexture(vesta::TextureMap* texture, const QImage& image);

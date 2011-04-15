@@ -23,8 +23,8 @@
 #include <vesta/Frame.h>
 #include <vesta/Trajectory.h>
 #include <vesta/RotationModel.h>
-#include <vesta/TextureMapLoader.h>
 #include <vesta/Visualizer.h>
+#include <vesta/TextureMapLoader.h>
 #include <QVariant>
 #include <QStringList>
 #include <QTextStream>
@@ -39,6 +39,8 @@ namespace vesta
     class PlanetaryRings;
 }
 
+class NetworkTextureLoader;
+
 class UniverseLoader
 {
 public:
@@ -48,12 +50,9 @@ public:
     QStringList loadCatalogItems(const QVariantMap& contents,
                                  UniverseCatalog* catalog);
 
-    vesta::TextureMapLoader* textureLoader() const
-    {
-        return m_textureLoader.ptr();
-    }
+    vesta::TextureMapLoader* textureLoader() const;
 
-    void setTextureLoader(vesta::TextureMapLoader* textureLoader);
+    void setTextureLoader(NetworkTextureLoader* textureLoader);
     void addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory);
     void removeBuiltinOrbit(const QString& name);
     void addBuiltinRotationModel(const QString& name, vesta::RotationModel* trajectory);
@@ -69,6 +68,14 @@ public:
     void clearResourceRequests();
 
     void setCatalogLoaded(const QString& catalogFileName);
+
+    /** This property is normally true, but should be set to false
+      * in SSC compatibility mode.
+      */
+    void setTexturesInModelDirectory(bool enable)
+    {
+        m_texturesInModelDirectory = enable;
+    }
 
 public slots:
     void processUpdates();
@@ -112,7 +119,6 @@ private:
 
 private:
     QString dataFileName(const QString& fileName);
-    QString textureFileName(const QString& fileName);
     QString modelFileName(const QString& fileName);
 
     void cleanGeometryCache();
@@ -126,7 +132,7 @@ private:
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
     QMap<QString, vesta::counted_ptr<vesta::RotationModel> > m_builtinRotations;
-    vesta::counted_ptr<vesta::TextureMapLoader> m_textureLoader;
+    vesta::counted_ptr<NetworkTextureLoader> m_textureLoader;
     QMap<QString, vesta::counted_ptr<vesta::Geometry> > m_modelCache;
     QString m_dataSearchPath;
     QString m_textureSearchPath;
@@ -149,6 +155,8 @@ private:
     QHash<QString, vesta::counted_ptr<vesta::Geometry> > m_geometryCache;
 
     QSet<QString> m_loadedCatalogFiles;
+
+    bool m_texturesInModelDirectory;
 };
 
 #endif // _UNIVERSE_LOADER_H_

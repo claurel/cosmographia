@@ -123,6 +123,25 @@ NetworkTextureLoader::~NetworkTextureLoader()
 }
 
 
+std::string
+NetworkTextureLoader::resolveResourceName(const std::string& resourceName)
+{
+    if (resourceName.length() >= 4 && resourceName.substr(0, 4) == "wms:")
+    {
+        return resourceName;
+    }
+    else if (!resourceName.empty() && resourceName.at(0) == ':')
+    {
+        // Qt internal resource
+        return resourceName;
+    }
+    else
+    {
+        return std::string(m_localImageLoader->searchPath().toUtf8().constData()) + "/" + resourceName;
+    }
+}
+
+
 /** Implementation of TextureLoader::makeResident(). The method returns immediately,
   * but the texture will not actually be loaded until the worker thread has completed
   * loading and decompressing the image file.
@@ -286,8 +305,22 @@ NetworkTextureLoader::reportTextureLoadFailure(vesta::TextureMap* texture)
 }
 
 
+QString
+NetworkTextureLoader::localSearchPath() const
+{
+    if (m_localImageLoader)
+    {
+        return m_localImageLoader->searchPath();
+    }
+    else
+    {
+        return "";
+    }
+}
+
+
 void
-NetworkTextureLoader::setLocalSearchPatch(const QString& path)
+NetworkTextureLoader::setLocalSearchPath(const QString& path)
 {
     if (m_localImageLoader)
     {

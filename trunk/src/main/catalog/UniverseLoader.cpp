@@ -24,6 +24,7 @@
 #include "../WMSTiledMap.h"
 #include "../MultiWMSTiledMap.h"
 #include "../MeshInstanceGeometry.h"
+#include "../NetworkTextureLoader.h"
 #include "../compatibility/Scanner.h"
 #include "../compatibility/CmodLoader.h"
 #include "../astro/Rotation.h"
@@ -403,13 +404,21 @@ LoadInterpolatedRotation(const QString& fileName, RotationConvention mode)
 
 
 UniverseLoader::UniverseLoader() :
-    m_dataSearchPath(".")
+    m_dataSearchPath("."),
+    m_texturesInModelDirectory(true)
 {
 }
 
 
 UniverseLoader::~UniverseLoader()
 {
+}
+
+
+TextureMapLoader*
+UniverseLoader::textureLoader() const
+{
+    return m_textureLoader.ptr();
 }
 
 
@@ -1682,6 +1691,15 @@ UniverseLoader::loadMeshFile(const QString& fileName)
     }
     else
     {
+        // Set the texture loader path to search in the model file's directory for texture files
+        // except when loading SSC files, when the texturesInModelDirectory property will be false.
+        QFileInfo info(fileName);
+        QString savedPath = m_textureLoader->localSearchPath();
+        if (m_texturesInModelDirectory)
+        {
+            m_textureLoader->setLocalSearchPath(info.absolutePath());
+        }
+
         MeshGeometry* meshGeometry = NULL;
         if (fileName.toLower().endsWith(".cmod"))
         {
@@ -1715,6 +1733,8 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             m_geometryCache.insert(fileName, vesta::counted_ptr<Geometry>(meshGeometry));
             geometry = meshGeometry;
         }
+
+        m_textureLoader->setLocalSearchPath(savedPath);
     }
 
     return geometry;
@@ -1771,7 +1791,7 @@ UniverseLoader::loadRingSystemGeometry(const QVariantMap& map)
     if (m_textureLoader.isValid())
     {
         QString textureName = textureVar.toString();
-        TextureMap* ringTexture = m_textureLoader->loadTexture(textureFileName(textureName).toUtf8().data(), ringTextureProps);
+        TextureMap* ringTexture = m_textureLoader->loadTexture(textureName.toUtf8().data(), ringTextureProps);
         ringSystem->setTexture(ringTexture);
     }
 
@@ -1814,7 +1834,7 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         QString baseMapName = baseMapVar.toString();
         if (m_textureLoader.isValid())
         {
-            TextureMap* tex = m_textureLoader->loadTexture(textureFileName(baseMapName).toUtf8().data(), props);
+            TextureMap* tex = m_textureLoader->loadTexture(baseMapName.toUtf8().data(), props);
             world->setBaseMap(tex);
         }
     }
@@ -1837,7 +1857,7 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         QString normalMapBase = map.value("normalMap").toString();
         if (m_textureLoader.isValid())
         {
-            TextureMap* normalTex = m_textureLoader->loadTexture(textureFileName(normalMapBase).toUtf8().data(), normalMapProps);
+            TextureMap* normalTex = m_textureLoader->loadTexture(normalMapBase.toUtf8().data(), normalMapProps);
             world->setNormalMap(normalTex);
         }
     }
@@ -1858,7 +1878,7 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         QString cloudMapBase = cloudMapVar.toString();
         if (m_textureLoader.isValid())
         {
-            TextureMap* cloudTex = m_textureLoader->loadTexture(textureFileName(cloudMapBase).toUtf8().data(), cloudMapProps);
+            TextureMap* cloudTex = m_textureLoader->loadTexture(cloudMapBase.toUtf8().data(), cloudMapProps);
             world->setCloudMap(cloudTex);
             world->setCloudAltitude(6.0f);
         }
@@ -1867,7 +1887,7 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
     QVariant atmosphereVar = map.value("atmosphere");
     if (atmosphereVar.type() == QVariant::String)
     {
-        QString fileName = textureFileName(atmosphereVar.toString());
+        QString fileName = dataFileName(atmosphereVar.toString());
         QFile atmFile(fileName);
         if (atmFile.open(QIODevice::ReadOnly))
         {
@@ -2285,7 +2305,7 @@ UniverseLoader::loadParticleSystemGeometry(const QVariantMap& map)
             if (m_textureLoader.isValid())
             {
                 QString textureName = textureVar.toString();
-                texture = m_textureLoader->loadTexture(textureFileName(textureName).toUtf8().data(), particleTextureProps);
+                texture = m_textureLoader->loadTexture(textureName.toUtf8().data(), particleTextureProps);
             }
 
             ParticleEmitter* emitter = loadParticleEmitter(emitterMap);
@@ -2615,14 +2635,12 @@ UniverseLoader::loadCatalogFile(const QString& fileName,
     QString saveTextureSearchPath = m_textureSearchPath;
     QString saveModelSearchPath = m_modelSearchPath;
     setDataSearchPath(searchPath);
-    setTextureSearchPath(searchPath);
     setModelSearchPath(searchPath);
 
     bodyNames = loadCatalogItems(contents, catalog, requireDepth + 1);
 
     // Restore search paths
     setDataSearchPath(saveDataSearchPath);
-    setTextureSearchPath(saveTextureSearchPath);
     setModelSearchPath(saveModelSearchPath);
 
     return bodyNames;
@@ -2867,7 +2885,7 @@ UniverseLoader::removeBuiltinRotationModel(const QString& name)
 
 
 void
-UniverseLoader::setTextureLoader(vesta::TextureMapLoader *textureLoader)
+UniverseLoader::setTextureLoader(NetworkTextureLoader *textureLoader)
 {
     m_textureLoader = textureLoader;
 }
@@ -2898,13 +2916,6 @@ QString
 UniverseLoader::dataFileName(const QString& fileName)
 {
     return m_dataSearchPath + "/" + fileName;
-}
-
-
-QString
-UniverseLoader::textureFileName(const QString& fileName)
-{
-    return m_textureSearchPath + "/" + fileName;
 }
 
 

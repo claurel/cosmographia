@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 606 $ $Date: 2011-04-14 22:50:07 -0700 (Thu, 14 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -165,7 +165,7 @@ MeshGeometry::renderShadow(RenderContext& rc,
             // buffer.
             // TODO: Textures with transparent parts aren't handled here
             unsigned int materialIndex = materials[j];
-            if (m_materials[materialIndex]->opacity() > 0.5f)
+            if (materialIndex >= m_materials.size() || m_materials[materialIndex]->opacity() > 0.5f)
             {
                 rc.drawPrimitives(*batches[j]);
             }

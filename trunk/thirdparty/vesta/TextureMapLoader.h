@@ -1,5 +1,5 @@
 /*
- * $Revision: 339 $ $Date: 2010-07-08 16:03:01 -0700 (Thu, 08 Jul 2010) $
+ * $Revision: 606 $ $Date: 2011-04-14 22:50:07 -0700 (Thu, 14 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -53,6 +53,9 @@ public:
       * \return the new value of the frame counter
       */
     v_int64 incrementFrameCount();
+
+protected:
+    virtual std::string resolveResourceName(const std::string& resourceName);
 
 private:
     v_int64 m_frameCount;

@@ -454,9 +454,10 @@ void UniverseView::paintEvent(QPaintEvent* /* event */)
 {
     makeCurrent();
     paintGL();
+    swapBuffers();
 
-    QPainter painter(this);
 #if 0
+    QPainter painter(this);
     painter.fillRect(0, 0, 500, 500, QBrush(Qt::green));
 
     //painter.setRenderHint(QPainter::Antialiasing);
@@ -472,8 +473,9 @@ void UniverseView::paintEvent(QPaintEvent* /* event */)
     painter.drawText(200, 200, "This is a test");
     painter.drawLine(QPointF(100, 100), QPointF(200, 200));
     painter.drawEllipse(QPoint(200, 200), 150, 150);
-#endif
+
     painter.end();
+#endif
 }
 
 
@@ -693,18 +695,29 @@ void UniverseView::paintGL()
 
         if (m_textFont.isValid())
         {
+            const int titleFontHeight = 30;
+            const int textFontHeight = 20;
+
             // Show the current simulation time
             GregorianDate date = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
 
             m_textFont->bind();
 
-            m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(10.0f, 10.0f));
+            float dateY = float(viewportHeight - titleFontHeight);
+            m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(viewportWidth - 220.0f, dateY));
+            if (m_paused)
+            {
+                QString timeScaleString = QString("%1x time (paused)").arg(m_timeScale);
+                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 220.0f, dateY - textFontHeight));
+            }
+            else
+            {
+                QString timeScaleString = QString("%1x time").arg(m_timeScale);
+                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 220.0f, dateY - textFontHeight));
+            }
 
             QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
             m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
-
-            const int titleFontHeight = 30;
-            const int textFontHeight = 20;
 
             // Display information about the selection
             if (m_selectedBody.isValid())
@@ -757,19 +770,8 @@ void UniverseView::paintGL()
             }
 
             {
-                QString fovInfo = QString("FOV: %1\260").arg(toDegrees(m_fovY), 6, 'f', 1);
+                QString fovInfo = QString("%1\260 FOV").arg(toDegrees(m_fovY), 6, 'f', 1);
                 m_textFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
-            }
-
-            if (m_paused)
-            {
-                QString timeScaleString = QString("%1x (paused)").arg(m_timeScale, 0, 'f');
-                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
-            }
-            else
-            {
-                QString timeScaleString = QString("%1x").arg(m_timeScale, 0, 'f');
-                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 100.0f, 10.0f));
             }
         }
     }
@@ -1877,12 +1879,16 @@ UniverseView::gotoSelectedObject()
             distanceFromTarget = body->geometry()->boundingSphereRadius() * 3.0;
         }
 
-        m_observerAction = new GotoObserverAction(m_observer.ptr(),
-                                                  body,
-                                                  6.0,
-                                                  secondsFromBaseTime(),
-                                                  m_simulationTime,
-                                                  distanceFromTarget);
+        double currentDistance = (body->position(m_simulationTime) - m_observer->absolutePosition(m_simulationTime)).norm();
+        if (currentDistance > distanceFromTarget * 1.1)
+        {
+            m_observerAction = new GotoObserverAction(m_observer.ptr(),
+                                                      body,
+                                                      6.0,
+                                                      secondsFromBaseTime(),
+                                                      m_simulationTime,
+                                                      distanceFromTarget);
+        }
     }
 }
 

@@ -32,12 +32,10 @@ static double smoothstep(double x)
 
 // Version of smoothstep that is second order continuous at x = 0 and x = 1
 // From Ken Perlin
-/*
 static double smoothstep2(double x)
 {
     return x * x * x * (x* (x * 6 - 15) + 10);
 }
-*/
 
 
 Quaterniond lookRotation(const Eigen::Vector3d& from,
@@ -246,7 +244,7 @@ GotoObserverAction::updateObserver(Observer* observer, double realTime, double s
     double travelDistance = distanceFromStart - m_finalDistanceFromTarget;
 
     // Interpolation factor for rotation
-    double rt = smoothstep(min(1.0, t * 4.0));
+    double rt = smoothstep2(min(1.0, t * 4.0));
 
     // Interpolation factor for position
     double pt = smoothStepExp(t, 0.1 / travelDistance, 0.5);

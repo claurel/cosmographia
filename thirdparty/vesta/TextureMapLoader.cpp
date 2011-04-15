@@ -1,5 +1,5 @@
 /*
- * $Revision: 503 $ $Date: 2010-09-13 14:38:52 -0700 (Mon, 13 Sep 2010) $
+ * $Revision: 606 $ $Date: 2011-04-14 22:50:07 -0700 (Thu, 14 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -46,18 +46,35 @@ static string GenerateKey(const string& name, const TextureProperties& propertie
 }
 
 
+/** Converts a resource name into a unique identifier, possibly based on
+  * some state maintained by the TextureMapLoader, such as the current directory.
+  * The default implementation just returns the resource name unmodified.
+  */
+string
+TextureMapLoader::resolveResourceName(const std::string& resourceName)
+{
+    return resourceName;
+}
+
+
 /** Create a new texture object that will be managed by this loader. If a texture with
-  * the same resource name and properties already exists, this object is returned.
+  * the same resolved resource name and properties already exists, this object is returned.
   * Otherwise, a new texture is created in an unitialized state; the new texture cannot
   * be used for rendering until its makeResident() method is called.
   *
   * The interpretation of the resource name is left to the particular texture loader;
   * typically, it will either be a filename or a URL.
+  *
+  * Note that the resource name is first resolved by calling resolveResourceName. The
+  * default implementation of resolveResourceName returns the resource name unmodified,
+  * but a subclass may override the method to generate a string based on the resource
+  * name and some internal state of the loader.
   */
 TextureMap*
 TextureMapLoader::loadTexture(const string& resourceName, const TextureProperties& properties)
 {
-    string key = GenerateKey(resourceName, properties);
+    string resolvedName = resolveResourceName(resourceName);
+    string key = GenerateKey(resolvedName, properties);
 
     TextureTable::iterator iter = m_textures.find(key);
     if (iter != m_textures.end())
@@ -67,7 +84,7 @@ TextureMapLoader::loadTexture(const string& resourceName, const TexturePropertie
     else
     {
         counted_ptr<TextureMap> texture;
-        texture = new TextureMap(resourceName, this, properties);
+        texture = new TextureMap(resolvedName, this, properties);
         m_textures[key] = texture;
         return texture.ptr();
     }

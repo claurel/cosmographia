@@ -1903,32 +1903,119 @@ private:
 };
 
 
+class ParticleTraceRenderer : public ParticleRenderer
+{
+public:
+    ParticleTraceRenderer(RenderContext* rc, float* vertexStream, const Matrix3f& screenAlignTransform, float traceLength) :
+        m_rc(rc),
+        m_vertexStream(vertexStream),
+        m_screenAlignTransform(screenAlignTransform),
+        m_traceLength(traceLength)
+    {
+    }
+
+    virtual void renderParticles(const std::vector<ParticleEmitter::Particle>& particles)
+    {
+        // Render particles as screen-aligned quads. The quad surrounds a line that starts
+        // at the projected position and ends at the projected position plus the projected
+        // particle velocity. The length of the line is scaled by the trace length property.
+        // When trace length is zero, the line is undefined; in that case, a simple
+        // PointParticleRenderer should be used instead (it's also faster.)
+        Vector3f quadVertices[4];
+        Vector2f quadTexCoords[4] =
+        {
+            Vector2f(0.0f, 1.0f),
+            Vector2f(1.0f, 1.0f),
+            Vector2f(1.0f, 0.0f),
+            Vector2f(0.0f, 0.0f)
+        };
+
+        Vector3f screenX = m_screenAlignTransform.col(0);
+        Vector3f screenY = m_screenAlignTransform.col(1);
+        Vector3f screenZ = m_screenAlignTransform.col(2);
+
+        for (unsigned int i = 0; i < particles.size(); ++i)
+        {
+            const ParticleEmitter::Particle& particle = particles[i];
+            Vector3f v = particle.velocity * m_traceLength;
+            Vector3f u0(screenX.dot(v), screenY.dot(v), 0.0f);
+            Vector3f u1(-u0.y(), u0.x(), 0.0f);
+
+            float s = particle.size / u0.norm();
+
+            u1 *= s;
+            u0 = m_screenAlignTransform * u0;
+            u1 = m_screenAlignTransform * u1;
+            quadVertices[0] = -u1 - u0 * s;
+            quadVertices[1] = -u1 + u0 * (1.0f + s);
+            quadVertices[2] =  u1 + u0 * (1.0f + s);
+            quadVertices[3] =  u1 - u0 * s;
+
+            for (unsigned int j = 0; j < 4; ++j)
+            {
+                Vector3f vertex = particle.position + quadVertices[j];
+                unsigned int base = (i * 4 + j) * 10;
+                m_vertexStream[base + 0] = vertex.x();
+                m_vertexStream[base + 1] = vertex.y();
+                m_vertexStream[base + 2] = vertex.z();
+                m_vertexStream[base + 4] = quadTexCoords[j].x();
+                m_vertexStream[base + 5] = quadTexCoords[j].y();
+                m_vertexStream[base + 6] = particle.color.x();
+                m_vertexStream[base + 7] = particle.color.y();
+                m_vertexStream[base + 8] = particle.color.z();
+                m_vertexStream[base + 9] = particle.opacity;
+            }
+        }
+
+        m_rc->bindVertexArray(ParticleVertexSpec, m_vertexStream, ParticleVertexSpec.size());
+        glDrawArrays(GL_QUADS, 0, particles.size() * 4);
+    }
+
+private:
+    RenderContext* m_rc;
+    float* m_vertexStream;
+    Matrix3f m_screenAlignTransform;
+    float m_traceLength;
+};
+
+
 void
 RenderContext::drawParticles(ParticleEmitter* emitter, double clock)
 {
-    PointParticleRenderer particleRenderer(this,
-                                           m_vertexStream,
-                                           m_matrixStack[m_modelViewStackDepth].linear().transpose());
-
     glDisable(GL_LIGHTING);
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    // OpenGL point sprites limited by max point size, so we're using
-    // screen-aligned quads until a workaround is available.
-    // glEnable(GL_POINT_SPRITE_ARB);
-    // glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-
     setVertexInfo(ParticleVertexSpec);
     updateShaderState();
-    emitter->generateParticles(clock, m_particleBuffer->particles, &particleRenderer);
+
+    if (emitter->traceLength() != 0.0f)
+    {
+        ParticleTraceRenderer particleRenderer(this,
+                                               m_vertexStream,
+                                               m_matrixStack[m_modelViewStackDepth].linear().transpose(),
+                                               emitter->traceLength());
+        emitter->generateParticles(clock, m_particleBuffer->particles, &particleRenderer);
+    }
+    else
+    {
+        // OpenGL point sprites limited by max point size, so we're using
+        // screen-aligned quads until a workaround is available.
+        // glEnable(GL_POINT_SPRITE_ARB);
+        // glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+
+        PointParticleRenderer particleRenderer(this,
+                                               m_vertexStream,
+                                               m_matrixStack[m_modelViewStackDepth].linear().transpose());
+        emitter->generateParticles(clock, m_particleBuffer->particles, &particleRenderer);
+
+        //glDisable(GL_POINT_SPRITE_ARB);
+    }
 
     glEnable(GL_LIGHTING);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
-
-    //glDisable(GL_POINT_SPRITE_ARB);
 }
 
 

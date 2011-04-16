@@ -40,7 +40,8 @@ ParticleEmitter::ParticleEmitter() :
     m_force(Vector3f::Zero()),
     m_blockingPlaneEnabled(false),
     m_colorCount(1),
-    m_velocityVariation(0.0f)
+    m_velocityVariation(0.0f),
+    m_traceLength(0.0f)
 {
     m_colorKeys[0] = Vector4f::Ones();
     m_generator = new PointGenerator();
@@ -168,6 +169,7 @@ ParticleEmitter::generateParticles(double simulationTime,
         }
 
         // Calculate particle position as p0 + v0*t + (1/2)at^2
+        particle.velocity = v0 + age * m_force;
         particle.position = p0 + age * (v0 + (age * 0.5f) * m_force);
 
         // Rotation (if enabled)

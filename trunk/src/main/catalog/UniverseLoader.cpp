@@ -144,6 +144,56 @@ private:
 };
 
 
+class StripParticleGenerator : public vesta::InitialStateGenerator
+{
+public:
+    StripParticleGenerator(const std::vector<Vector3f>& states) :
+        m_states(states),
+        m_lineCount(states.size() / 2 - 1)
+    {
+        m_boundingRadius = 0.0f;
+        m_maxSpeed = 0.0f;
+        for (unsigned int i = 0; i <= m_lineCount; ++i)
+        {
+            m_boundingRadius = std::max(m_boundingRadius, m_states[i * 2].norm());
+            m_maxSpeed = std::max(m_maxSpeed, states[i * 2 + 1].norm());
+        }
+    }
+
+    virtual void generateParticle(PseudorandomGenerator& gen,
+                                  Eigen::Vector3f& position, Eigen::Vector3f& velocity) const
+    {
+        if (m_lineCount > 0)
+        {
+            unsigned int lineIndex = gen.randUint() % m_lineCount;
+            float alpha = gen.randFloat();
+            position = (1.0f - alpha) * m_states[lineIndex * 2] + alpha * m_states[lineIndex * 2 + 2];
+            velocity = (1.0f - alpha) * m_states[lineIndex * 2 + 1] + alpha * m_states[lineIndex * 2 + 3];
+        }
+        else
+        {
+            position = velocity = Vector3f::Zero();
+        }
+    }
+
+    virtual float maxDistanceFromOrigin() const
+    {
+        return m_boundingRadius;
+    }
+
+    virtual float maxSpeed() const
+    {
+        return m_maxSpeed;
+    }
+
+private:
+    std::vector<Vector3f> m_states;
+    unsigned int m_lineCount;
+    float m_boundingRadius;
+    float m_maxSpeed;
+};
+
+
 static bool readNextDouble(Scanner* scanner, double* value)
 {
     if (scanner->readNext() == Scanner::Double || scanner->currentToken() == Scanner::Integer)
@@ -2089,6 +2139,47 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
 
 
 static InitialStateGenerator*
+loadStripParticleGenerator(const QVariantMap& map)
+{
+    QVariant statesVar = map.value("states");
+    if (!statesVar.isValid())
+    {
+        qDebug() << "Missing states for strip particle generator";
+        return NULL;
+    }
+
+    if (statesVar.type() != QVariant::List)
+    {
+        qDebug() << "Strip particles states must be a list of numbers";
+        return NULL;
+    }
+
+    QVariantList statesList = statesVar.toList();
+    if (statesList.size() < 12 || statesList.size() % 6 != 0)
+    {
+        qDebug() << "Bad number of values in states list for strip particle generator";
+        return NULL;
+    }
+
+    unsigned int stateCount = statesList.size() / 6;
+    std::vector<Vector3f> states;
+    for (unsigned int i = 0; i < stateCount; ++i)
+    {
+        Vector3f position(statesList.at(i * 6 + 0).toFloat(),
+                          statesList.at(i * 6 + 1).toFloat(),
+                          statesList.at(i * 6 + 2).toFloat());
+        Vector3f velocity(statesList.at(i * 6 + 3).toFloat(),
+                          statesList.at(i * 6 + 4).toFloat(),
+                          statesList.at(i * 6 + 5).toFloat());
+        states.push_back(position);
+        states.push_back(velocity);
+    }
+
+    return new StripParticleGenerator(states);
+}
+
+
+static InitialStateGenerator*
 loadParticleStateGenerator(const QVariantMap& map)
 {
     QVariant typeVar = map.value("type");
@@ -2130,6 +2221,10 @@ loadParticleStateGenerator(const QVariantMap& map)
 
         return generator;
     }
+    else if (type == "Strip")
+    {
+        return loadStripParticleGenerator(map);
+    }
     else
     {
         qDebug() << "Unknown particle generator type " << type;
@@ -2151,6 +2246,7 @@ loadParticleEmitter(const QVariantMap& map)
     QVariant generatorVar = map.value("generator");
     QVariant velocityVariationVar = map.value("velocityVariation");
     QVariant forceVar = map.value("force");
+    QVariant traceVar = map.value("trace");
 
     // Get the required parameters: lifetime and spawn rate
     double lifetime = 0.0;
@@ -2229,6 +2325,11 @@ loadParticleEmitter(const QVariantMap& map)
     if (velocityVariationVar.isValid())
     {
         emitter->setVelocityVariation(velocityVariationVar.toFloat());
+    }
+
+    if (traceVar.isValid())
+    {
+        emitter->setTraceLength(traceVar.toFloat());
     }
 
     if (forceVar.isValid())

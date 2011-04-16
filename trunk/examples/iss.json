@@ -20,7 +20,7 @@
           "bodyFrame" :
           {
               "type" : "TwoVector",
-              "primaryAxis" : "x",
+              "primaryAxis" : "-x",
               "primary" :
               {
                   "type" : "RelativePosition",
@@ -39,7 +39,7 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "size" : 1.0,
+              "size" : 0.1,
               "source" : "models/jason.obj"
           }
         }

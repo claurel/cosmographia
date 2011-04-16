@@ -100,6 +100,7 @@ public:
     struct Particle
     {
         Eigen::Vector3f position;
+        Eigen::Vector3f velocity;
         Eigen::Vector3f color;
         float opacity;
         float size;
@@ -285,6 +286,25 @@ public:
         m_velocityVariation = variation;
     }
 
+    /** Get the trace length for particles. A non-zero trace length will
+      * cause the particle appear stretched along the direction of its
+      * velocity.
+      */
+    float traceLength() const
+    {
+        return m_traceLength;
+    }
+
+    /** Set the trace length for particles. A non-zero trace length will
+      * cause the particle appear stretched along the direction of its
+      * velocity. The length of the particle is the trace length multiplied
+      * the by the current particle speed.
+      */
+    void setTraceLength(float traceLength)
+    {
+        m_traceLength = traceLength;
+    }
+
     float boundingRadius() const;
 
 private:
@@ -309,6 +329,7 @@ private:
     unsigned int m_colorCount;
 
     float m_velocityVariation;
+    float m_traceLength;
 };
 
 }

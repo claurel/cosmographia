@@ -368,7 +368,10 @@ CmodLoader::loadPrimitiveBatch(unsigned int primitiveTypeToken, unsigned int ver
     quint32 indexCount = 0;
     *m_inputStream >> materialIndex32 >> indexCount;
 
-    *materialIndex = materialIndex32;
+    // In a CMOD file, the material index -1 (0xffffffff unsigned) indicates that the default
+    // material should be used. The loader always places the default material at index 0. All
+    // material indices therefore need to be incremented by one.
+    *materialIndex = materialIndex32 + 1;
 
     if (indexCount < minIndexCount ||
         (primType == PrimitiveBatch::Triangles && indexCount % 3 != 0) ||
@@ -570,6 +573,12 @@ CmodLoader::loadMesh()
     }
 
     MeshGeometry* mesh = new MeshGeometry();
+
+    // Add the default material
+    Material* defaultMaterial = new Material();
+    defaultMaterial->setDiffuse(Spectrum::Flat(0.8f));
+    defaultMaterial->setBrdf(Material::Lambert);
+    mesh->addMaterial(defaultMaterial);
 
     bool done = false;
     unsigned int meshCount = 0;

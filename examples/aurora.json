@@ -1,0 +1,51 @@
+{
+     "version": "1.0",
+     "name": "Aurora",
+
+     "items" :
+     [
+        {
+          "name" : "Aurora",
+          "center" : "Earth",
+
+          "trajectory" :
+          {
+              "type" : "FixedPoint",
+              "position" : [ 0.0, 0.0, 0.0 ]
+          },
+
+          "bodyFrame" : { "type" : "BodyFixed", "body" : "Earth" },
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Strip",
+                    "states" :
+                    [
+                      2594.2069832,            0.0, 5826.68428339,
+                      2.5942069832,            0.0, 5.82668428339,
+                      2041.42700345, 1429.42257652, 5871.07200581,
+                      2.04142700345, 1.42942257652, 5.87107200581,
+                      781.757705429, 2147.86164315, 5954.46931824,
+                      0.78175770542, 2.14786164315, 5.95446931824
+                    ]
+                },
+                "velocityVariation" : 2,
+                "trace" : 60,
+                "spawnRate" : 25,
+                "lifetime" : 40.0,
+                "startSize" : 60,
+                "endSize" : 30,
+                "colors" : [ "#000000", 0.0, "#11ff44", 0.00, "#11dd55", 0.025, "#22ff33", 0.0 ],
+                "endTime" : 3451545.0
+              } ]
+          }
+
+        }
+    ]
+}

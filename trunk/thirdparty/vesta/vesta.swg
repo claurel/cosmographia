@@ -1,5 +1,5 @@
 //
-// $Revision: 603 $ $Date: 2011-04-13 17:06:42 -0700 (Wed, 13 Apr 2011) $
+// $Revision: 607 $ $Date: 2011-04-16 13:45:21 -0700 (Sat, 16 Apr 2011) $
 //
 // Copyright by Astos Solutions GmbH, Germany
 //  
@@ -2148,6 +2148,8 @@ public:
     void setGenerator(InitialStateGenerator* generator);
     float velocityVariation() const;
     void setVelocityVariation(float variation);
+    float traceLength() const;
+    void setTraceLength(float traceLength);
 
     float boundingRadius() const;
 };

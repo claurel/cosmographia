@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 607 $ $Date: 2011-04-16 13:45:21 -0700 (Sat, 16 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -30,18 +30,21 @@ ParticleSystemGeometry::~ParticleSystemGeometry()
 void
 ParticleSystemGeometry::render(RenderContext& rc, double clock) const
 {
-    Material material;
-    material.setEmission(Spectrum(1.0f, 1.0f, 0.0f));
-    material.setDiffuse(Spectrum(1.0f, 1.0f, 1.0f));
-    material.setBlendMode(Material::AdditiveBlend);
-
-    for (unsigned int i = 0; i < m_emitters.size(); ++i)
+    if (rc.pass() == RenderContext::TranslucentPass)
     {
-        material.setBaseTexture(m_particleTextures[i].ptr());
-        rc.bindMaterial(&material);
+        Material material;
+        material.setEmission(Spectrum(1.0f, 1.0f, 0.0f));
+        material.setDiffuse(Spectrum(1.0f, 1.0f, 1.0f));
+        material.setBlendMode(Material::AdditiveBlend);
 
-        ParticleEmitter* emitter = m_emitters[i].ptr();
-        rc.drawParticles(emitter, clock);
+        for (unsigned int i = 0; i < m_emitters.size(); ++i)
+        {
+            material.setBaseTexture(m_particleTextures[i].ptr());
+            rc.bindMaterial(&material);
+
+            ParticleEmitter* emitter = m_emitters[i].ptr();
+            rc.drawParticles(emitter, clock);
+        }
     }
 }
 

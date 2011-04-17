@@ -545,7 +545,7 @@ qtDateToVestaDate(const QDateTime& d)
 {
     return GregorianDate(d.date().year(), d.date().month(), d.date().day(),
                          d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
-                         TimeScale_TDB);
+                         TimeScale_UTC);
 }
 
 
@@ -615,6 +615,8 @@ Cosmographia::setTime()
     QDialog timeDialog;
     timeDialog.setWindowTitle(tr("Set Time and Date"));
     QDateTimeEdit* timeEdit = new QDateTimeEdit(&timeDialog);
+    timeEdit->setDateTimeRange(QDateTime(QDate(1800, 1, 1)), QDateTime(QDate(2100, 1, 1)));
+    timeEdit->setDisplayFormat("yyyy MMM dd hh:mm:ss");
 
     QVBoxLayout* vbox = new QVBoxLayout(&timeDialog);
     timeDialog.setLayout(vbox);
@@ -631,7 +633,7 @@ Cosmographia::setTime()
     connect(buttons, SIGNAL(rejected()), &timeDialog, SLOT(reject()));
 
     double tsec = m_view3d->simulationTime();
-    GregorianDate simDate = GregorianDate::TDBDateFromTDBSec(tsec);
+    GregorianDate simDate = GregorianDate::UTCDateFromTDBSec(tsec);
     timeEdit->setDateTime(vestaDateToQtDate(simDate));
 
     if (timeDialog.exec() == QDialog::Accepted)

@@ -23,7 +23,8 @@
 using namespace vesta;
 
 
-LocalImageLoader::LocalImageLoader()
+LocalImageLoader::LocalImageLoader() :
+    m_searchPath(".")
 {
 }
 

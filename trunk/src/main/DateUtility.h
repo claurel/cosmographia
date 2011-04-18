@@ -15,31 +15,13 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _VEXT_SIMPLE_ROTATION_MODEL_H_
-#define _VEXT_SIMPLE_ROTATION_MODEL_H_
+#ifndef _DATE_UTILITY_H_
+#define _DATE_UTILITY_H_
 
-#include <vesta/RotationModel.h>
+#include <vesta/GregorianDate.h>
+#include <QDateTime>
 
+QDateTime VestaDateToQtDate(const vesta::GregorianDate& date);
+vesta::GregorianDate QtDateToVestaDate(const QDateTime& d);
 
-class SimpleRotationModel : public vesta::RotationModel
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    SimpleRotationModel(double inclination,
-                        double ascendingNode,
-                        double rotationRate,
-                        double meridianAngleAtEpoch,
-                        double epoch);
-    Eigen::Quaterniond orientation(double t) const;
-    Eigen::Vector3d angularVelocity(double t) const;
-
-private:
-    double m_rotationRate;
-    double m_meridianAngleAtEpoch;
-    double m_epoch;
-    Eigen::Quaterniond m_rotation;
-};
-
-#endif // _VEXT_SIMPLE_ROTATION_MODEL_H_
-
+#endif // _DATE_UTILITY_H_

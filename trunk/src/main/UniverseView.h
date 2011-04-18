@@ -101,6 +101,13 @@ public:
         return m_selectedBody.ptr();
     }
 
+    enum TimeDisplayMode
+    {
+        UTC,
+        LocalTime,
+        MultiTime,
+    };
+
     void setSelectedBody(vesta::Entity* body);
 
     void replaceEntity(vesta::Entity* entity, const BodyInfo* info);

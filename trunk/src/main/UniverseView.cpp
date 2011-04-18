@@ -31,15 +31,9 @@
 #include <vesta/Arc.h>
 #include <vesta/Body.h>
 #include <vesta/Units.h>
-#include <vesta/FixedPointTrajectory.h>
-#include <vesta/FixedRotationModel.h>
-#include <vesta/KeplerianTrajectory.h>
-#include <vesta/MeshGeometry.h>
-#include <vesta/UniformRotationModel.h>
 #include <vesta/Universe.h>
 #include <vesta/UniverseRenderer.h>
 #include <vesta/WorldGeometry.h>
-#include <vesta/PlanetaryRings.h>
 #include <vesta/TextureMapLoader.h>
 #include <vesta/InertialFrame.h>
 #include <vesta/BodyFixedFrame.h>
@@ -48,17 +42,15 @@
 #include <vesta/StarsLayer.h>
 #include <vesta/SkyImageLayer.h>
 #include <vesta/ConstellationsLayer.h>
-#include <vesta/AxesVisualizer.h>
 #include <vesta/PlaneVisualizer.h>
+#include <vesta/AxesVisualizer.h>
 #include <vesta/VelocityVisualizer.h>
 #include <vesta/NadirVisualizer.h>
 #include <vesta/BodyDirectionVisualizer.h>
-#include <vesta/SensorVisualizer.h>
 #include <vesta/LabelVisualizer.h>
 #include <vesta/TrajectoryGeometry.h>
 #include <vesta/TextureFont.h>
 #include <vesta/DataChunk.h>
-#include <vesta/Atmosphere.h>
 #include <vesta/SingleTextureTiledMap.h>
 #include <vesta/HierarchicalTiledMap.h>
 #include <vesta/PlanetGridLayer.h>
@@ -108,56 +100,6 @@ static TextureProperties SkyLayerTextureProperties()
     return props;
 }
 
-
-// LocalTiledMap loads texture tiles from a directory structure on
-// a file system.
-class LocalTiledMap : public HierarchicalTiledMap
-{
-public:
-    // The pattern is a string that will be used to construct a tile name given
-    // the level, column, and row. %1, %2, and %3 in the string will be replaced
-    // with the values of the level, column, and row, respectively.
-    //
-    // Example pattern: "earthmap/level%1/tile_%2_%3.png"
-    LocalTiledMap(TextureMapLoader* loader, const QString& tileNamePattern, bool flipped, unsigned int tileSize, unsigned int levelCount) :
-        HierarchicalTiledMap(loader, tileSize),
-        m_tileNamePattern(tileNamePattern),
-        m_flipped(flipped),
-        m_levelCount(levelCount)
-    {
-    }
-
-    virtual string tileResourceIdentifier(unsigned int level, unsigned int column, unsigned int row)
-    {
-        // Row may be inverted here if the tiles are arranged so that the northernmost
-        // tile in a level is at row 0.
-        unsigned int y = m_flipped ? (1 << level) - 1 - row : row;
-        QString s = m_tileNamePattern.arg(level).arg(column).arg(y);
-        return string(s.toUtf8().data());
-    }
-
-    virtual bool isValidTileAddress(unsigned int level, unsigned int column, unsigned int row)
-    {
-        return level < m_levelCount && column < (1u << (level + 1)) && row < (1u << level);
-    }
-
-    virtual bool tileResourceExists(const std::string& resourceId)
-    {
-        if (QString(resourceId.c_str()).startsWith("wms:"))
-        {
-            return true;//level < levelCount;
-        }
-        else
-        {
-            return QFileInfo(resourceId.c_str()).exists();
-        }
-    }
-
-private:
-    QString m_tileNamePattern;
-    bool m_flipped;
-    unsigned int m_levelCount;
-};
 
 
 static string TrajectoryVisualizerName(Entity* entity)

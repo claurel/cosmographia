@@ -34,6 +34,7 @@
 #include "astro/L1.h"
 #include "astro/TASS17.h"
 #include "astro/Gust86.h"
+#include "DateUtility.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -531,24 +532,6 @@ Cosmographia::initialize()
 }
 
 
-static QDateTime
-vestaDateToQtDate(const GregorianDate& date)
-{
-    return QDateTime(QDate(date.year(), date.month(), date.day()),
-                     QTime(date.hour(), date.minute(), date.second(), date.usec() / 1000),
-                     Qt::UTC);
-}
-
-
-static GregorianDate
-qtDateToVestaDate(const QDateTime& d)
-{
-    return GregorianDate(d.date().year(), d.date().month(), d.date().day(),
-                         d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
-                         TimeScale_UTC);
-}
-
-
 void
 Cosmographia::findObject()
 {
@@ -616,7 +599,7 @@ Cosmographia::setTime()
     timeDialog.setWindowTitle(tr("Set Time and Date"));
     QDateTimeEdit* timeEdit = new QDateTimeEdit(&timeDialog);
     timeEdit->setDateTimeRange(QDateTime(QDate(1800, 1, 1)), QDateTime(QDate(2100, 1, 1)));
-    timeEdit->setDisplayFormat("yyyy MMM dd hh:mm:ss");
+    timeEdit->setDisplayFormat("yyyy-MMM-dd hh:mm:ss");
 
     QVBoxLayout* vbox = new QVBoxLayout(&timeDialog);
     timeDialog.setLayout(vbox);
@@ -634,12 +617,12 @@ Cosmographia::setTime()
 
     double tsec = m_view3d->simulationTime();
     GregorianDate simDate = GregorianDate::UTCDateFromTDBSec(tsec);
-    timeEdit->setDateTime(vestaDateToQtDate(simDate));
+    timeEdit->setDateTime(VestaDateToQtDate(simDate));
 
     if (timeDialog.exec() == QDialog::Accepted)
     {
         QDateTime newDate = timeEdit->dateTime();
-        m_view3d->setSimulationTime(qtDateToVestaDate(newDate).toTDBSec());
+        m_view3d->setSimulationTime(QtDateToVestaDate(newDate).toTDBSec());
     }
 }
 

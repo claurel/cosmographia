@@ -27,6 +27,9 @@
 #include "../NetworkTextureLoader.h"
 #include "../compatibility/Scanner.h"
 #include "../compatibility/CmodLoader.h"
+#include "../vext/SimpleRotationModel.h"
+#include "../vext/StripParticleGenerator.h"
+#include "../vext/ArcStripParticleGenerator.h"
 #include "../astro/Rotation.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
@@ -106,92 +109,6 @@ QString TleKey(const QString& source, const QString& name)
 }
 
 
-class SimpleRotationModel : public RotationModel
-{
-public:
-    SimpleRotationModel(double inclination,
-                        double ascendingNode,
-                        double rotationRate,
-                        double meridianAngleAtEpoch,
-                        double epoch) :
-        m_rotationRate(rotationRate),
-        m_meridianAngleAtEpoch(meridianAngleAtEpoch),
-        m_epoch(epoch),
-        m_rotation(AngleAxisd(ascendingNode, Vector3d::UnitZ()) * AngleAxisd(inclination, Vector3d::UnitX()))
-    {
-    }
-
-
-    Quaterniond
-    orientation(double t) const
-    {
-        double meridianAngle = m_meridianAngleAtEpoch + (t - m_epoch) * m_rotationRate;
-        return m_rotation * Quaterniond(AngleAxisd(meridianAngle, Vector3d::UnitZ()));
-    }
-
-
-    Vector3d
-    angularVelocity(double /* t */) const
-    {
-        return m_rotation * (Vector3d::UnitZ() * m_rotationRate);
-    }
-
-private:
-    double m_rotationRate;
-    double m_meridianAngleAtEpoch;
-    double m_epoch;
-    Quaterniond m_rotation;
-};
-
-
-class StripParticleGenerator : public vesta::InitialStateGenerator
-{
-public:
-    StripParticleGenerator(const std::vector<Vector3f>& states) :
-        m_states(states),
-        m_lineCount(states.size() / 2 - 1)
-    {
-        m_boundingRadius = 0.0f;
-        m_maxSpeed = 0.0f;
-        for (unsigned int i = 0; i <= m_lineCount; ++i)
-        {
-            m_boundingRadius = std::max(m_boundingRadius, m_states[i * 2].norm());
-            m_maxSpeed = std::max(m_maxSpeed, states[i * 2 + 1].norm());
-        }
-    }
-
-    virtual void generateParticle(PseudorandomGenerator& gen,
-                                  Eigen::Vector3f& position, Eigen::Vector3f& velocity) const
-    {
-        if (m_lineCount > 0)
-        {
-            unsigned int lineIndex = gen.randUint() % m_lineCount;
-            float alpha = gen.randFloat();
-            position = (1.0f - alpha) * m_states[lineIndex * 2] + alpha * m_states[lineIndex * 2 + 2];
-            velocity = (1.0f - alpha) * m_states[lineIndex * 2 + 1] + alpha * m_states[lineIndex * 2 + 3];
-        }
-        else
-        {
-            position = velocity = Vector3f::Zero();
-        }
-    }
-
-    virtual float maxDistanceFromOrigin() const
-    {
-        return m_boundingRadius;
-    }
-
-    virtual float maxSpeed() const
-    {
-        return m_maxSpeed;
-    }
-
-private:
-    std::vector<Vector3f> m_states;
-    unsigned int m_lineCount;
-    float m_boundingRadius;
-    float m_maxSpeed;
-};
 
 
 static bool readNextDouble(Scanner* scanner, double* value)
@@ -2141,6 +2058,17 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
 static InitialStateGenerator*
 loadStripParticleGenerator(const QVariantMap& map)
 {
+    // States is a list of floating point values giving the initial particle
+    // states at line endpoints. The state values are arranged as follows:
+    //
+    // [ x[0], y[0], z[0], vx[0], vy[0], vz[0],
+    //   x[1], y[1], z[1], vx[1], vy[1], vz[1],
+    //   ...
+    //   x[n], y[n], z[n], vx[n], vy[n], vz[n]
+    // ]
+    //
+    // vx, vy, and vz are the components of the initial velocity
+
     QVariant statesVar = map.value("states");
     if (!statesVar.isValid())
     {
@@ -2176,6 +2104,55 @@ loadStripParticleGenerator(const QVariantMap& map)
     }
 
     return new StripParticleGenerator(states);
+}
+
+
+static InitialStateGenerator*
+loadArcStripParticleGenerator(const QVariantMap& map)
+{
+    // Arcs is a list of floating point values, arranged as follows:
+    //
+    // [ latitude0, longitude0, radius0, speed0,
+    //   latitude1, longitude1, radius1, speed1,
+    //   ...
+    //   latitudeN, longitudeN, radiusN, speedN
+    // ]
+    QVariant arcsVar = map.value("arcs");
+    if (!arcsVar.isValid())
+    {
+        qDebug() << "Missing arcs for arc strip particle generator";
+        return NULL;
+    }
+
+    if (arcsVar.type() != QVariant::List)
+    {
+        qDebug() << "Arc strip particles arcs must be a list of numbers";
+        return NULL;
+    }
+
+    QVariantList arcsList = arcsVar.toList();
+    if (arcsList.size() < 8 || arcsList.size() % 4 != 0)
+    {
+        qDebug() << "Bad number of values in arcs list for arc strip particle generator";
+        return NULL;
+    }
+
+    unsigned int arcCount = arcsList.size() / 4;
+    std::vector<Vector3f> positions;
+    std::vector<float> speeds;
+    for (unsigned int i = 0; i < arcCount; ++i)
+    {
+        float latitude = float(toRadians(arcsList.at(i * 4).toDouble()));
+        float longitude = float(toRadians(arcsList.at(i * 4 + 1).toDouble()));
+        float radius = arcsList.at(i * 4 + 2).toFloat();
+        float speed = arcsList.at(i * 4 + 3).toFloat();
+
+        Vector3f r = Vector3f(cos(latitude) * cos(longitude), cos(latitude) * sin(longitude), sin(latitude)) * radius;
+        positions.push_back(r);
+        speeds.push_back(speed);
+    }
+
+    return new ArcStripParticleGenerator(positions, speeds);
 }
 
 
@@ -2224,6 +2201,10 @@ loadParticleStateGenerator(const QVariantMap& map)
     else if (type == "Strip")
     {
         return loadStripParticleGenerator(map);
+    }
+    else if (type == "ArcStrip")
+    {
+        return loadArcStripParticleGenerator(map);
     }
     else
     {

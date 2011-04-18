@@ -42,6 +42,7 @@ APP_SOURCES = \
     $$MAIN_PATH/catalog/AstorbLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
+    $$MAIN_PATH/vext/SimpleRotationModel.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/CmodLoader.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
@@ -77,6 +78,9 @@ APP_HEADERS = \
     $$MAIN_PATH/catalog/AstorbLoader.h \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
+    $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
+    $$MAIN_PATH/vext/SimpleRotationModel.h \
+    $$MAIN_PATH/vext/StripParticleGenerator.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
     $$MAIN_PATH/compatibility/CmodLoader.h \
     $$MAIN_PATH/compatibility/Scanner.h \
@@ -414,7 +418,7 @@ RESOURCES = resources/icons.qrc
 
 INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 
-#CONFIG += ffmpeg
+CONFIG += ffmpeg
 
 ffmpeg {
     message("Using FFMPEG")

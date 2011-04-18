@@ -15,31 +15,27 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _VEXT_SIMPLE_ROTATION_MODEL_H_
-#define _VEXT_SIMPLE_ROTATION_MODEL_H_
+#include "DateUtility.h"
 
-#include <vesta/RotationModel.h>
+using namespace vesta;
 
 
-class SimpleRotationModel : public vesta::RotationModel
+QDateTime
+VestaDateToQtDate(const GregorianDate& date)
 {
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    // Qt's DateTime class doesn't handle leap seconds
+    int clampSec = std::min(int(date.second()), 59);
 
-    SimpleRotationModel(double inclination,
-                        double ascendingNode,
-                        double rotationRate,
-                        double meridianAngleAtEpoch,
-                        double epoch);
-    Eigen::Quaterniond orientation(double t) const;
-    Eigen::Vector3d angularVelocity(double t) const;
+    return QDateTime(QDate(date.year(), date.month(), date.day()),
+                     QTime(date.hour(), date.minute(), clampSec, date.usec() / 1000),
+                     Qt::UTC);
+}
 
-private:
-    double m_rotationRate;
-    double m_meridianAngleAtEpoch;
-    double m_epoch;
-    Eigen::Quaterniond m_rotation;
-};
 
-#endif // _VEXT_SIMPLE_ROTATION_MODEL_H_
-
+GregorianDate
+QtDateToVestaDate(const QDateTime& d)
+{
+    return GregorianDate(d.date().year(), d.date().month(), d.date().day(),
+                         d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
+                         TimeScale_UTC);
+}

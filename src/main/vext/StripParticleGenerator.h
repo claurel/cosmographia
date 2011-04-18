@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef _VEXT_STRIP_PARTICLE_GENERATOR_H_
+#define _VEXT_STRIP_PARTICLE_GENERATOR_H_
+
 #include <vesta/particlesys/InitialStateGenerator.h>
 #include <vector>
 
@@ -68,3 +71,4 @@ private:
     float m_maxSpeed;
 };
 
+#endif // _VEXT_STRIP_PARTICLE_GENERATOR_H_

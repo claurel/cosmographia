@@ -18,6 +18,7 @@ APP_SOURCES = \
     $$MAIN_PATH/UniverseView.cpp \
     $$MAIN_PATH/NetworkTextureLoader.cpp \
     $$MAIN_PATH/LocalImageLoader.cpp \
+    $$MAIN_PATH/DateUtility.cpp \
     $$MAIN_PATH/ChebyshevPolyTrajectory.cpp \
     $$MAIN_PATH/InterpolatedRotation.cpp \
     $$MAIN_PATH/InterpolatedStateTrajectory.cpp \
@@ -42,6 +43,7 @@ APP_SOURCES = \
     $$MAIN_PATH/catalog/AstorbLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
+    $$MAIN_PATH/vext/LocalTiledMap.cpp \
     $$MAIN_PATH/vext/SimpleRotationModel.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/CmodLoader.cpp \
@@ -53,6 +55,7 @@ APP_HEADERS = \
     $$MAIN_PATH/UniverseView.h \
     $$MAIN_PATH/NetworkTextureLoader.h \
     $$MAIN_PATH/LocalImageLoader.h \
+    $$MAIN_PATH/DateUtility.h \
     $$MAIN_PATH/ChebyshevPolyTrajectory.h \
     $$MAIN_PATH/InterpolatedRotation.h \
     $$MAIN_PATH/InterpolatedStateTrajectory.h \
@@ -79,6 +82,7 @@ APP_HEADERS = \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
+    $$MAIN_PATH/vext/LocalTiledMap.h \
     $$MAIN_PATH/vext/SimpleRotationModel.h \
     $$MAIN_PATH/vext/StripParticleGenerator.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \

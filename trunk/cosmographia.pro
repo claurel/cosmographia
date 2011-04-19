@@ -422,7 +422,7 @@ RESOURCES = resources/icons.qrc
 
 INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 
-CONFIG += ffmpeg
+#CONFIG += ffmpeg
 
 ffmpeg {
     message("Using FFMPEG")

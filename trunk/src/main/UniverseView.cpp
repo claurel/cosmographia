@@ -142,7 +142,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_infoTextVisible(true),
     m_labelsVisible(true),
     m_videoEncoder(NULL),
-    m_timeDisplay(TimeDisplay_Multiple)
+    m_timeDisplay(TimeDisplay_UTC)
 {
     setAutoFillBackground(false);
 

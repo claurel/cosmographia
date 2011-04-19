@@ -531,6 +531,7 @@ macx {
         data/textures/umbriel.dds \
         data/textures/titania.dds \
         data/textures/oberon.dds \
+        data/textures/triton.dds \
         data/textures/pluto.png \
         data/textures/earth-clouds.dds
 

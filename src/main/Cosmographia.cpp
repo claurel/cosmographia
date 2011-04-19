@@ -136,6 +136,28 @@ Cosmographia::Cosmographia() :
     QAction* setTimeAction = new QAction("Set &Time...", timeMenu);
     setTimeAction->setShortcut(QKeySequence("Ctrl+T"));
     timeMenu->addAction(setTimeAction);
+    QAction* nowAction = new QAction("&Current time", timeMenu);
+    timeMenu->addAction(nowAction);
+    this->menuBar()->addMenu(timeMenu);
+
+    QMenu* timeDisplayMenu = new QMenu("&Time Display", timeMenu);
+    QActionGroup* timeDisplayGroup = new QActionGroup(timeDisplayMenu);
+    QAction* utcAction = new QAction("UTC", timeDisplayGroup);
+    utcAction->setCheckable(true);
+    utcAction->setChecked(true);
+    utcAction->setData(int(UniverseView::TimeDisplay_UTC));
+    timeDisplayMenu->addAction(utcAction);
+    QAction* localAction = new QAction("Local", timeDisplayGroup);
+    localAction->setCheckable(true);
+    localAction->setData(int(UniverseView::TimeDisplay_Local));
+    timeDisplayMenu->addAction(localAction);
+    QAction* multipleTimeAction = new QAction("Multiple", timeDisplayGroup);
+    multipleTimeAction->setCheckable(true);
+    multipleTimeAction->setData(int(UniverseView::TimeDisplay_Multiple));
+    timeDisplayMenu->addAction(multipleTimeAction);
+    timeMenu->addMenu(timeDisplayMenu);
+    connect(timeDisplayGroup, SIGNAL(selected(QAction*)), this, SLOT(setTimeDisplay(QAction*)));
+
     timeMenu->addSeparator();
     QAction* pauseAction = new QAction("&Pause", timeMenu);
     pauseAction->setCheckable(true);
@@ -168,9 +190,6 @@ Cosmographia::Cosmographia() :
     QAction* reverseAction = new QAction("&Reverse", timeMenu);
     reverseAction->setShortcut(QKeySequence("Ctrl+J"));
     timeMenu->addAction(reverseAction);
-    QAction* nowAction = new QAction("&Current time", timeMenu);
-    timeMenu->addAction(nowAction);
-    this->menuBar()->addMenu(timeMenu);
 
     connect(setTimeAction, SIGNAL(triggered()),     this,     SLOT(setTime()));
     connect(pauseAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setPaused(bool)));
@@ -1038,3 +1057,10 @@ Cosmographia::setStarStyle(QAction *action)
     }
 }
 
+
+void
+Cosmographia::setTimeDisplay(QAction *action)
+{
+    UniverseView::TimeDisplayMode mode = (UniverseView::TimeDisplayMode) action->data().toInt();
+    m_view3d->setTimeDisplay(mode);
+}

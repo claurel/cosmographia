@@ -103,10 +103,15 @@ public:
 
     enum TimeDisplayMode
     {
-        UTC,
-        LocalTime,
-        MultiTime,
+        TimeDisplay_UTC       = 0,
+        TimeDisplay_Local     = 1,
+        TimeDisplay_Multiple  = 2,
     };
+
+    TimeDisplayMode timeDisplay() const
+    {
+        return m_timeDisplay;
+    }
 
     void setSelectedBody(vesta::Entity* body);
 
@@ -141,6 +146,7 @@ public slots:
     void plotTrajectoryObserver(const BodyInfo* info);
     void clearTrajectory(vesta::Entity* body);
     void gotoSelectedObject();
+    void setTimeDisplay(TimeDisplayMode mode);
 
 protected:
     void initializeGL();
@@ -244,6 +250,7 @@ private:
     vesta::counted_ptr<ObserverAction> m_observerAction;
 
     QVideoEncoder* m_videoEncoder;
+    TimeDisplayMode m_timeDisplay;
 };
 
 #endif // _UNIVERSE_VIEW_H_

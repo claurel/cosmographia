@@ -80,6 +80,7 @@
 #include <QNetworkDiskCache>
 #include <QDesktopServices>
 #include <QLocale>
+#include <QPinchGesture>
 
 using namespace vesta;
 using namespace Eigen;
@@ -92,6 +93,10 @@ static const unsigned int ShadowMapSize = 2048;
 static const unsigned int ReflectionMapSize = 512;
 
 static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
+
+static const double MinimumFOV = toRadians(1.0);
+static const double MaximumFOV = toRadians(90.0);
+
 
 static TextureProperties SkyLayerTextureProperties()
 {
@@ -183,6 +188,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     setFocusPolicy(Qt::StrongFocus);
 
     initNetwork();
+
+    grabGesture(Qt::PinchGesture);
 }
 
 
@@ -249,6 +256,7 @@ static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFo
 void UniverseView::initializeGL()
 {
     qDebug() << "InitializeGL";
+
     // Initialize the renderer. This must be done *after* an OpenGL context
     // has been created, otherwise information about OpenGL capabilities is
     // not available.
@@ -589,20 +597,6 @@ void UniverseView::paintGL()
         }
     }
 
-#define ZOOM_INSET 0
-#if ZOOM_INSET
-    // Multiview example: small zoomed view in lower right corner
-    int insetWidth = size().width() / 3;
-    int insetHeight = size().height() / 3;
-    Viewport insetViewport(size().width() - insetWidth, 0, insetWidth, insetHeight);
-    glScissor(insetViewport.x(), insetViewport.y(), insetViewport.width(), insetViewport.height());
-    glEnable(GL_SCISSOR_TEST);
-    glDepthMask(GL_TRUE);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_SCISSOR_TEST);
-    m_renderer->renderView(m_spacecraftObserver, toRadians(5.0f), insetViewport);
-#endif
-
     m_renderer->endViewSet();
 
 #if FFMPEG_SUPPORT
@@ -868,7 +862,7 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
     {
         double zoomFactor = exp(dy / 1000.0);
         m_fovY *= zoomFactor;
-        m_fovY = max(toRadians(1.0), min(toRadians(90.0), m_fovY));
+        m_fovY = max(MinimumFOV, min(MaximumFOV, m_fovY));
     }
     else if (rightButton || (leftButton && alt))
     {
@@ -989,6 +983,41 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
         {
             stars->setLimitingMagnitude(min(13.0f, stars->limitingMagnitude() + 0.2f));
         }
+    }
+}
+
+
+bool
+UniverseView::event(QEvent* e)
+{
+    if (e->type() == QEvent::Gesture)
+    {
+        return gestureEvent(static_cast<QGestureEvent*>(e));
+    }
+    else
+    {
+        return QGLWidget::event(e);
+    }
+}
+
+
+bool
+UniverseView::gestureEvent(QGestureEvent* event)
+{
+    QPinchGesture* pinch = static_cast<QPinchGesture*>(event->gesture(Qt::PinchGesture));
+    if (pinch)
+    {
+        float fovScale = pinch->lastScaleFactor() / pinch->scaleFactor();
+        m_fovY = max(MinimumFOV, min(MaximumFOV, m_fovY * fovScale));
+
+        float rotationAngle = float(toRadians(pinch->rotationAngle() - pinch->lastRotationAngle()));
+        m_controller->roll(rotationAngle * 5);
+
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

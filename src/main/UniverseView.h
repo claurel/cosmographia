@@ -23,6 +23,7 @@
 #include <QGLWidget>
 #include <QTimer>
 #include <QDateTime>
+#include <QGestureEvent>
 #include <vesta/Universe.h>
 #include <vesta/Observer.h>
 #include <vesta/TextureMapLoader.h>
@@ -161,6 +162,7 @@ protected:
     void keyReleaseEvent(QKeyEvent* event);
     void contextMenuEvent(QContextMenuEvent* event);
     void paintEvent(QPaintEvent* event);
+    bool event(QEvent* event);
 
 private:
     enum FrameType
@@ -172,7 +174,6 @@ private:
 
     void setCenterAndFrame(vesta::Entity* center, FrameType f);
     void initializeSkyLayers();
-    //void initializeUniverse();
     void initializeObserver();
     double secondsFromBaseTime() const;
     vesta::TextureMap* loadTexture(const QString& location, const vesta::TextureProperties& texProps);
@@ -181,6 +182,7 @@ private:
     bool initPlanetEphemeris();
 
     void updateTrajectoryPlots();
+    bool gestureEvent(QGestureEvent* event);
 
     vesta::Entity* pickObject(const QPoint& point);
 

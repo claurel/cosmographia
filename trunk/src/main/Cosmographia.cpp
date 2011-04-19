@@ -244,7 +244,7 @@ Cosmographia::Cosmographia() :
     /*** Visual aids menu ***/
     QMenu* visualAidsMenu = new QMenu("&Visualization", this);
 
-    QAction* eqGridAction = new QAction("E&quatorial grid", visualAidsMenu);
+    QAction* eqGridAction = new QAction("E&quatorial Grid", visualAidsMenu);
     eqGridAction->setCheckable(true);
     visualAidsMenu->addAction(eqGridAction);
     QAction* eclipticAction = new QAction("&Ecliptic", visualAidsMenu);
@@ -255,16 +255,19 @@ Cosmographia::Cosmographia() :
     labelsAction->setCheckable(true);
     labelsAction->setChecked(true);
     visualAidsMenu->addAction(labelsAction);
+    QAction* figuresAction = new QAction("Constellation &Figures", visualAidsMenu);
+    figuresAction->setCheckable(true);
+    visualAidsMenu->addAction(figuresAction);
     visualAidsMenu->addSeparator();
 
-    QAction* planetOrbitsAction = new QAction("Planet &orbits", visualAidsMenu);
+    QAction* planetOrbitsAction = new QAction("Planet &Orbits", visualAidsMenu);
     planetOrbitsAction->setShortcut(QKeySequence("Ctrl+O"));
     planetOrbitsAction->setCheckable(true);
     visualAidsMenu->addAction(planetOrbitsAction);
-    QAction* plotTrajectoryAction = new QAction("&Plot trajectory", visualAidsMenu);
+    QAction* plotTrajectoryAction = new QAction("&Plot Trajectory", visualAidsMenu);
     plotTrajectoryAction->setShortcut(QKeySequence("Ctrl+P"));
     visualAidsMenu->addAction(plotTrajectoryAction);
-    QAction* plotTrajectoryObserverAction = new QAction("&Plot trajectory in observer frame", visualAidsMenu);
+    QAction* plotTrajectoryObserverAction = new QAction("&Plot Trajectory in Observer Frame", visualAidsMenu);
     plotTrajectoryObserverAction->setShortcut(QKeySequence("Shift+Ctrl+P"));
     visualAidsMenu->addAction(plotTrajectoryObserverAction);
 
@@ -279,6 +282,7 @@ Cosmographia::Cosmographia() :
     connect(eqGridAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
     connect(labelsAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setLabelVisibility(bool)));
+    connect(figuresAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(setConstellationFigureVisibility(bool)));
 
     connect(planetOrbitsAction, SIGNAL(triggered(bool)), this, SLOT(setPlanetOrbitsVisibility(bool)));
     connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));

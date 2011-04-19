@@ -294,14 +294,6 @@ void UniverseView::initializeGL()
         m_labelFont->loadTxf(&chunk);
     }
 
-#if ENABLE_CONSTELLATIONS
-    ConstellationsLayer* constellations = new ConstellationsLayer(m_universe->starCatalog());
-    constellations->setDiagramColor(Spectrum(0.0f, 0.2f, 0.5f));
-    constellations->setDefaultConstellations();
-    constellations->setVisibility(true);
-    m_renderer->addSkyLayer(constellations);
-#endif
-
     if (m_renderer->shadowsSupported())
     {
         m_renderer->initializeShadowMaps(ShadowMapSize, 1);
@@ -1301,13 +1293,18 @@ UniverseView::initializeSkyLayers()
     m_universe->setLayer("stars", starsLayer);
 
     SkyImageLayer* milkyWayLayer = new SkyImageLayer();
-    milkyWayLayer->setVisibility(true);
     milkyWayLayer->setOpacity(0.3f);
     milkyWayLayer->setDrawOrder(-1);
     milkyWayLayer->setTexture(m_textureLoader->loadTexture("textures/milkyway.jpg", SkyLayerTextureProperties()));
     milkyWayLayer->setOrientation(InertialFrame::galactic()->orientation());
     m_universe->setLayer("milky way", milkyWayLayer);
     milkyWayLayer->setVisibility(false);
+
+    ConstellationsLayer* constellations = new ConstellationsLayer(m_universe->starCatalog());
+    constellations->setDiagramColor(Spectrum(0.0f, 0.2f, 0.5f));
+    constellations->setDefaultConstellations();
+    constellations->setVisibility(false);
+    m_universe->setLayer("constellation figures", constellations);
 }
 
 
@@ -1576,6 +1573,17 @@ UniverseView::setLabelVisibility(bool enable)
                 vis->setVisibility(enable);
             }
         }
+    }
+}
+
+
+void
+UniverseView::setConstellationFigureVisibility(bool checked)
+{
+    SkyLayer* layer = m_universe->layer("constellation figures");
+    if (layer)
+    {
+        layer->setVisibility(checked);
     }
 }
 

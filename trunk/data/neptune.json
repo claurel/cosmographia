@@ -31,6 +31,46 @@
               "radii" : [ 24764, 24764, 24341 ],
               "baseMap" : "textures/neptune.jpg"
           }
+        },
+
+        {
+          "name" : "Triton",
+          "label" : { "color" : [ 0.4, 0.4, 0.7 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Neptune",
+
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 354765.286,
+              "eccentricity" : 0.0000110534857,
+              "period" : "5.876854078286229d",
+              "inclination" : 130.9092040930803,
+              "ascendingNode" :  213.1742023027628,
+              "argumentOfPeriapsis" : 279.1380491242861,
+              "meanAnomaly" : 348.9715288637743,
+              "epoch" : "1989-08-25 00:00:00"
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "5.876854078286229d",
+              "inclination" : 131.17,
+              "ascendingNode" : 209.36,
+              "meridianAngle" : 243.47
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radius" : 1352.6,
+              "baseMap" : "textures/triton.dds"
+          }
         }
+
     ]
 }

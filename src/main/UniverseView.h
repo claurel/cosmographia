@@ -133,6 +133,7 @@ public slots:
     void setEclipticVisibility(bool checked);
     void setEquatorialPlaneVisibility(bool checked);
     void setPlanetographicGridVisibility(bool checked);
+    void setConstellationFigureVisibility(bool checked);
     void setLabelVisibility(bool enable);
     void setShadows(bool enable);
     void setEclipseShadows(bool enable);

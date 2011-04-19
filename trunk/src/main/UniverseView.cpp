@@ -22,6 +22,7 @@
 
 #include "ObserverAction.h"
 #include "InterpolatedStateTrajectory.h"
+#include "DateUtility.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -140,7 +141,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_sunGlareEnabled(true),
     m_infoTextVisible(true),
     m_labelsVisible(true),
-    m_videoEncoder(NULL)
+    m_videoEncoder(NULL),
+    m_timeDisplay(TimeDisplay_Multiple)
 {
     setAutoFillBackground(false);
 
@@ -446,13 +448,31 @@ QString readableNumber(double value, int significantDigits)
 static
 QString formatDate(const GregorianDate& date)
 {
-    return QString("%1-%2-%3 %4:%5:%6 UTC")
+    const char* timeSystem = "";
+    switch (date.timeScale())
+    {
+    case TimeScale_TDB:
+        timeSystem = "TDB";
+        break;
+    case TimeScale_TT:
+        timeSystem = "TT";
+        break;
+    case TimeScale_TAI:
+        timeSystem = "TAI";
+        break;
+    case TimeScale_UTC:
+        timeSystem = "UTC";
+        break;
+    }
+
+    return QString("%1-%2-%3 %4:%5:%6 %7")
             .arg(date.year())
             .arg(QLocale::system().monthName(date.month(), QLocale::ShortFormat))
             .arg(date.day(), 2, 10, QChar('0'))
             .arg(date.hour(), 2, 10, QChar('0'))
             .arg(date.minute(), 2, 10, QChar('0'))
-            .arg(date.second(), 2, 10, QChar('0'));
+            .arg(date.second(), 2, 10, QChar('0'))
+            .arg(timeSystem);
 }
 
 
@@ -646,16 +666,41 @@ void UniverseView::paintGL()
             m_textFont->bind();
 
             float dateY = float(viewportHeight - titleFontHeight);
-            m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(viewportWidth - 220.0f, dateY));
+            float dateX = viewportWidth - 250.0f;
+
+            if (m_timeDisplay == TimeDisplay_UTC)
+            {
+                m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(dateX, dateY));
+                dateY -= textFontHeight;
+            }
+            else if (m_timeDisplay == TimeDisplay_Local)
+            {
+                QDateTime localTime = VestaDateToQtDate(date).toLocalTime();
+                m_textFont->render(localTime.toString("yyyy-MMM-dd hh:mm:ss 'Local'").toLatin1().constData(), Vector2f(dateX, dateY));
+                dateY -= textFontHeight;
+            }
+            else if (m_timeDisplay == TimeDisplay_Multiple)
+            {
+                m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(dateX, dateY));
+                dateY -= textFontHeight;
+                GregorianDate ttDate = GregorianDate::TDBDateFromTDBSec(m_simulationTime);
+                ttDate.setTimeScale(TimeScale_TT);
+                m_textFont->render(formatDate(ttDate).toUtf8().data(), Vector2f(dateX, dateY));
+                dateY -= textFontHeight;
+                m_textFont->render(QString("JD %1 TT").arg(ttDate.toTTJD(), 0, 'f', 6).toLatin1().constData(), Vector2f(dateX, dateY));
+                dateY -= textFontHeight;
+            }
+
+            // Show the time rate below the time/date
             if (m_paused)
             {
                 QString timeScaleString = QString("%1x time (paused)").arg(m_timeScale);
-                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 220.0f, dateY - textFontHeight));
+                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
             }
             else
             {
                 QString timeScaleString = QString("%1x time").arg(m_timeScale);
-                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(viewportWidth - 220.0f, dateY - textFontHeight));
+                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
             }
 
             QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
@@ -1768,6 +1813,12 @@ UniverseView::setSelectedBody(Entity* body)
     m_selectedBody = body;
 }
 
+
+void
+UniverseView::setTimeDisplay(TimeDisplayMode mode)
+{
+    m_timeDisplay = mode;
+}
 
 void
 UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)

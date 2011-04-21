@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "ObserverAction.h"
+#include "RotationUtility.h"
 #include <algorithm>
 #include <cmath>
 
@@ -38,38 +39,6 @@ static double smoothstep2(double x)
 }
 
 
-Quaterniond lookRotation(const Eigen::Vector3d& from,
-                         const Eigen::Vector3d& to,
-                         const Eigen::Vector3d& up)
-{
-    Vector3d lookDir = to - from;
-    if (lookDir.isZero())
-    {
-        return Quaterniond::Identity();
-    }
-
-    Vector3d zAxis = -lookDir.normalized();
-
-    // x-axis normal to both the z-axis and the up vector
-    Vector3d xAxis = up.cross(zAxis);
-    if (xAxis.isZero())
-    {
-        // Up vector is parallel to the look direction; choose instead an
-        // arbitrary vector orthogonal to the look direction.
-        xAxis = zAxis.cross(zAxis.unitOrthogonal());
-    }
-
-    xAxis.normalize();
-    Vector3d yAxis = zAxis.cross(xAxis);
-
-    Matrix3d m;
-    m << xAxis, yAxis, zAxis;
-
-    return Quaterniond(m);
-
-}
-
-
 CenterObserverAction::CenterObserverAction(Observer* observer,
                                            Entity* target,
                                            double duration,
@@ -81,7 +50,7 @@ CenterObserverAction::CenterObserverAction(Observer* observer,
     m_startOrientation = observer->absoluteOrientation(simulationTime);
 
     Vector3d up = observer->absoluteOrientation(simulationTime) * Vector3d::UnitY();
-    m_finalOrientation = lookRotation(observer->absolutePosition(simulationTime),
+    m_finalOrientation = LookRotation(observer->absolutePosition(simulationTime),
                                       target->position(simulationTime),
                                       up);
 }
@@ -219,7 +188,7 @@ GotoObserverAction::GotoObserverAction(Observer* observer,
     m_startPosition = observer->absolutePosition(simulationTime);
 
     Vector3d up = observer->absoluteOrientation(simulationTime) * Vector3d::UnitY();
-    m_finalOrientation = lookRotation(observer->absolutePosition(simulationTime),
+    m_finalOrientation = LookRotation(observer->absolutePosition(simulationTime),
                                       target->position(simulationTime),
                                       up);
 }

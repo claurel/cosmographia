@@ -1,0 +1,13 @@
+{
+    "version": "1.0",
+    "name": "Starting Viewpoints",
+    "items" : [
+        {
+          "type" : "Viewpoint",
+          "name" : "Full Earth",
+          "center" : "Earth",
+          "altitude" : 600,
+          "reference" : "Sun"
+        }
+    ]
+}

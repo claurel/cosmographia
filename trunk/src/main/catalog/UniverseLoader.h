@@ -40,6 +40,7 @@ namespace vesta
 }
 
 class NetworkTextureLoader;
+class Viewpoint;
 
 class UniverseLoader
 {
@@ -112,6 +113,8 @@ private:
 
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
                                       const UniverseCatalog* catalog);
+    Viewpoint* loadViewpoint(const QVariantMap& info,
+                             UniverseCatalog* catalog);
 
     QStringList loadCatalogItems(const QVariantMap& contents,
                                  UniverseCatalog* catalog,

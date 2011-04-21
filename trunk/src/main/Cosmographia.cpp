@@ -552,6 +552,8 @@ Cosmographia::initialize()
     m_loader->setTextureLoader(dynamic_cast<NetworkTextureLoader*>(m_view3d->textureLoader()));
 
     loadCatalogFile("solarsys.json");
+    loadCatalogFile("start-viewpoints.json");
+    qDebug() << m_catalog->viewpointNames();
 }
 
 

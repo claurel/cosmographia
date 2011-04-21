@@ -31,6 +31,7 @@
 #include "../vext/StripParticleGenerator.h"
 #include "../vext/ArcStripParticleGenerator.h"
 #include "../astro/Rotation.h"
+#include "../Viewpoint.h"
 #include <vesta/Units.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -2569,6 +2570,69 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
 }
 
 
+Viewpoint*
+UniverseLoader::loadViewpoint(const QVariantMap& map,
+                              UniverseCatalog* catalog)
+{
+    QVariant nameVar = map.value("name");
+    QVariant centerVar = map.value("center");
+    QVariant referenceVar = map.value("reference");
+    QVariant altitudeVar = map.value("altitude");
+
+    if (!nameVar.isValid())
+    {
+        qDebug() << "Viewpoint is missing name";
+        return NULL;
+    }
+
+    if (!centerVar.isValid())
+    {
+        qDebug() << "Viewpoint is missing center body";
+        return NULL;
+    }
+
+    if (!referenceVar.isValid())
+    {
+        qDebug() << "Viewpoint is missing reference body";
+        return NULL;
+    }
+
+    if (!altitudeVar.isValid() || !altitudeVar.canConvert(QVariant::Double))
+    {
+        qDebug() << "Bad or missing altitude for viewpoint.";
+        return NULL;
+    }
+
+    Entity* center = catalog->find(centerVar.toString());
+    Entity* referenceBody = catalog->find(referenceVar.toString());
+
+    if (!center)
+    {
+        qDebug() << "Unknown center body " << centerVar.toString() << " for viewpoint";
+        return NULL;
+    }
+
+    if (!referenceBody)
+    {
+        qDebug() << "Unknown reference body " << referenceVar.toString() << " for viewpoint";
+        return NULL;
+    }
+
+    // Convert altitude to distance when the center object is an ellipsoid
+    double distance = altitudeVar.toDouble();
+    if (center->geometry() && center->geometry()->isEllipsoidal())
+    {
+        distance += center->geometry()->ellipsoid().semiMajorAxisLength();
+    }
+
+    Viewpoint* viewpoint = new Viewpoint(center, distance);
+    viewpoint->setReferenceBody(referenceBody);
+    viewpoint->setName(nameVar.toString().toUtf8().constData());
+
+    return viewpoint;
+}
+
+
 void
 loadTrajectoryPlotInfo(BodyInfo* info,
                        const QVariantMap& plot)
@@ -2929,6 +2993,14 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                             body->setVisualizer(tag.toUtf8().data(), visualizer);
                         }
                     }
+                }
+            }
+            else if (type == "Viewpoint")
+            {
+                Viewpoint* viewpoint = loadViewpoint(item, catalog);
+                if (viewpoint)
+                {
+                    catalog->addViewpoint(QString::fromUtf8(viewpoint->name().c_str()), viewpoint);
                 }
             }
         }

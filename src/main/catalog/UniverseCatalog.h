@@ -24,6 +24,7 @@
 #include <QStringList>
 #include <QMap>
 
+class Viewpoint;
 
 class BodyInfo : public vesta::Object
 {
@@ -66,9 +67,15 @@ public:
 
     QStringList names() const;
 
+    Viewpoint* findViewpoint(const QString& name);
+    void addViewpoint(const QString& name, Viewpoint* viewpoint);
+    void removeViewpoint(const QString& name);
+    QStringList viewpointNames() const;
+
 private:
     QMap<QString, vesta::counted_ptr<vesta::Entity> > m_bodies;
     QMap<QString, vesta::counted_ptr<BodyInfo> > m_info;
+    QMap<QString, vesta::counted_ptr<Viewpoint> > m_viewpoints;
 };
 
 #endif // _UNIVERSE_CATALOG_H_

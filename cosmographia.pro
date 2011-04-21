@@ -16,9 +16,11 @@ APP_SOURCES = \
     $$MAIN_PATH/main.cpp \
     $$MAIN_PATH/Cosmographia.cpp \
     $$MAIN_PATH/UniverseView.cpp \
+    $$MAIN_PATH/Viewpoint.cpp \
     $$MAIN_PATH/NetworkTextureLoader.cpp \
     $$MAIN_PATH/LocalImageLoader.cpp \
     $$MAIN_PATH/DateUtility.cpp \
+    $$MAIN_PATH/RotationUtility.cpp \
     $$MAIN_PATH/ChebyshevPolyTrajectory.cpp \
     $$MAIN_PATH/InterpolatedRotation.cpp \
     $$MAIN_PATH/InterpolatedStateTrajectory.cpp \
@@ -53,9 +55,11 @@ APP_SOURCES = \
 APP_HEADERS = \
     $$MAIN_PATH/Cosmographia.h \
     $$MAIN_PATH/UniverseView.h \
+    $$MAIN_PATH/Viewpoint.h \
     $$MAIN_PATH/NetworkTextureLoader.h \
     $$MAIN_PATH/LocalImageLoader.h \
     $$MAIN_PATH/DateUtility.h \
+    $$MAIN_PATH/RotationUtility.h \
     $$MAIN_PATH/ChebyshevPolyTrajectory.h \
     $$MAIN_PATH/InterpolatedRotation.h \
     $$MAIN_PATH/InterpolatedStateTrajectory.h \
@@ -563,6 +567,7 @@ macx {
         data/uranus.json \
         data/neptune.json \
         data/pluto.json \
+        data/start-viewpoints.json \
         data/sans-12.txf \
         data/sans-24.txf \
         data/csans-14.txf \

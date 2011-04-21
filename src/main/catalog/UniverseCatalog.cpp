@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "UniverseCatalog.h"
+#include "../Viewpoint.h"
 
 using namespace vesta;
 
@@ -86,4 +87,36 @@ void UniverseCatalog::setBodyInfo(const QString& name, BodyInfo* info)
 QStringList UniverseCatalog::names() const
 {
     return m_bodies.keys();
+}
+
+
+/** Look up the viewpoint with the specified name.
+  */
+Viewpoint*
+UniverseCatalog::findViewpoint(const QString& name)
+{
+    return m_viewpoints.value(name).ptr();
+}
+
+
+void
+UniverseCatalog::addViewpoint(const QString& name, Viewpoint* viewpoint)
+{
+    m_viewpoints.insert(name, counted_ptr<Viewpoint>(viewpoint));
+}
+
+
+void
+UniverseCatalog::removeViewpoint(const QString& name)
+{
+    m_viewpoints.remove(name);
+}
+
+
+/** Return the names of all viewpoints in the catalog.
+  */
+QStringList
+UniverseCatalog::viewpointNames() const
+{
+    return m_viewpoints.keys();
 }

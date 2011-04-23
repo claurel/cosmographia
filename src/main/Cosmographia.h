@@ -61,6 +61,9 @@ public slots:
 
     void processReceivedResource(QNetworkReply* reply);
 
+protected:
+    bool event(QEvent* event);
+
 private slots:
     void setFullScreen(bool enabled);
     void loadCatalog();

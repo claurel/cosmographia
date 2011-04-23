@@ -1070,3 +1070,24 @@ Cosmographia::setTimeDisplay(QAction *action)
     UniverseView::TimeDisplayMode mode = (UniverseView::TimeDisplayMode) action->data().toInt();
     m_view3d->setTimeDisplay(mode);
 }
+
+
+bool
+Cosmographia::event(QEvent* event)
+{
+    if (event->type() == QEvent::Hide)
+    {
+        // Reduce CPU usage when the app is minimized or otherwise hidden
+        m_view3d->setUpdateInterval(500);
+        return QMainWindow::event(event);
+    }
+    else if (event->type() == QEvent::Show)
+    {
+        m_view3d->setUpdateInterval(10);
+        return QMainWindow::event(event);
+    }
+    else
+    {
+        return QMainWindow::event(event);
+    }
+}

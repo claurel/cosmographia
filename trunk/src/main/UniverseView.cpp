@@ -1923,6 +1923,13 @@ UniverseView::gotoSelectedObject()
 }
 
 
+void
+UniverseView::setUpdateInterval(unsigned int msec)
+{
+    m_timer->setInterval(msec);
+}
+
+
 UniverseView::TrajectoryPlotEntry::TrajectoryPlotEntry() :
     generator(NULL),
     sampleCount(100),

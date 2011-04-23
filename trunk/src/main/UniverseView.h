@@ -150,6 +150,8 @@ public slots:
     void gotoSelectedObject();
     void setTimeDisplay(TimeDisplayMode mode);
 
+    void setUpdateInterval(unsigned int msec);
+
 protected:
     void initializeGL();
     void paintGL();

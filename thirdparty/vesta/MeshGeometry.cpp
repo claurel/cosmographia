@@ -1,5 +1,5 @@
 /*
- * $Revision: 606 $ $Date: 2011-04-14 22:50:07 -0700 (Thu, 14 Apr 2011) $
+ * $Revision: 608 $ $Date: 2011-04-23 18:14:37 -0700 (Sat, 23 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -484,51 +484,54 @@ Convert3DSMesh(Lib3dsFile* meshfile, TextureMapLoader* textureLoader)
     for (int meshIndex = 0; meshIndex < meshfile->nmeshes; ++meshIndex)
     {
         Lib3dsMesh* mesh = meshfile->meshes[meshIndex];
-        bool hasTextureCoords = mesh->texcos != 0;
-
-        // Generate normals for the mesh
-        float* normals = new float[mesh->nfaces * 9];
-        lib3ds_mesh_calculate_vertex_normals(mesh, (float(*)[3]) normals);
-
-        VertexPool vertexPool;
-
-        for (int faceIndex = 0; faceIndex < mesh->nfaces; ++faceIndex)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                int vertexIndex = mesh->faces[faceIndex].index[i];
-                vertexPool.addVec3(mesh->vertices[vertexIndex]);
-                vertexPool.addVec3(&normals[(faceIndex * 3 + i) * 3]);
-
-                if (hasTextureCoords)
-                {
-                    // Invert the v texture coordinate, since 3ds uses a texture
-                    // coordinate system that is flipped with respect to OpenGL's
-                    vertexPool.addVec2(mesh->texcos[vertexIndex][0], 1.0f - mesh->texcos[vertexIndex][1]);
-                }
-            }
-        }
-
-        delete[] normals;
-
-        const VertexSpec* vertexSpec = hasTextureCoords ? &VertexSpec::PositionNormalTex : &VertexSpec::PositionNormal;
-        VertexArray* vertexArray = vertexPool.createVertexArray(mesh->nfaces * 3, *vertexSpec);
-        PrimitiveBatch* batch = new PrimitiveBatch(PrimitiveBatch::Triangles, mesh->nfaces);
-
-        // Get the material for the primitive batch
-        // TODO: This assumes that a single material is applied to the whole mesh; however,
-        // materials can be assigned per-face (but rarely are in most 3ds files.)
-        unsigned int materialIndex = Submesh::DefaultMaterialIndex;
         if (mesh->nfaces > 0)
         {
-            // Use the material of the first face
-            materialIndex = mesh->faces[0].material;
+            bool hasTextureCoords = mesh->texcos != 0;
+
+            // Generate normals for the mesh
+            float* normals = new float[mesh->nfaces * 9];
+            lib3ds_mesh_calculate_vertex_normals(mesh, (float(*)[3]) normals);
+
+            VertexPool vertexPool;
+
+            for (int faceIndex = 0; faceIndex < mesh->nfaces; ++faceIndex)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    int vertexIndex = mesh->faces[faceIndex].index[i];
+                    vertexPool.addVec3(mesh->vertices[vertexIndex]);
+                    vertexPool.addVec3(&normals[(faceIndex * 3 + i) * 3]);
+
+                    if (hasTextureCoords)
+                    {
+                        // Invert the v texture coordinate, since 3ds uses a texture
+                        // coordinate system that is flipped with respect to OpenGL's
+                        vertexPool.addVec2(mesh->texcos[vertexIndex][0], 1.0f - mesh->texcos[vertexIndex][1]);
+                    }
+                }
+            }
+
+            delete[] normals;
+
+            const VertexSpec* vertexSpec = hasTextureCoords ? &VertexSpec::PositionNormalTex : &VertexSpec::PositionNormal;
+            VertexArray* vertexArray = vertexPool.createVertexArray(mesh->nfaces * 3, *vertexSpec);
+            PrimitiveBatch* batch = new PrimitiveBatch(PrimitiveBatch::Triangles, mesh->nfaces);
+
+            // Get the material for the primitive batch
+            // TODO: This assumes that a single material is applied to the whole mesh; however,
+            // materials can be assigned per-face (but rarely are in most 3ds files.)
+            unsigned int materialIndex = Submesh::DefaultMaterialIndex;
+            if (mesh->nfaces > 0)
+            {
+                // Use the material of the first face
+                materialIndex = mesh->faces[0].material;
+            }
+
+            Submesh* submesh = new Submesh(vertexArray);
+            submesh->addPrimitiveBatch(batch, materialIndex);
+
+            meshGeometry->addSubmesh(submesh);
         }
-
-        Submesh* submesh = new Submesh(vertexArray);
-        submesh->addPrimitiveBatch(batch, materialIndex);
-
-        meshGeometry->addSubmesh(submesh);
     }
 
     return meshGeometry;

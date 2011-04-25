@@ -70,12 +70,34 @@ public:
         m_name = name;
     }
 
+    double azimuth() const
+    {
+        return m_azimuth;
+    }
+
+    void setAzimuth(double azimuth)
+    {
+        m_azimuth = azimuth;
+    }
+
+    double elevation() const
+    {
+        return m_elevation;
+    }
+
+    void setElevation(double elevation)
+    {
+        m_elevation = elevation;
+    }
+
     void positionObserver(vesta::Observer* observer, double tdbSec);
 
 private:
     vesta::counted_ptr<vesta::Entity> m_centerBody;
     vesta::counted_ptr<vesta::Entity> m_referenceBody;
     double m_centerDistance;
+    double m_azimuth;
+    double m_elevation;
     std::string m_name;
 };
 

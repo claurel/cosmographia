@@ -6,8 +6,73 @@
           "type" : "Viewpoint",
           "name" : "Full Earth",
           "center" : "Earth",
-          "altitude" : 600,
-          "reference" : "Sun"
+          "altitude" : 13000,
+          "reference" : "Sun",
+          "azimuth" : 0.0
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Crescent Moon",
+          "center" : "Moon",
+          "altitude" : 6000,
+          "reference" : "Sun",
+          "azimuth" : 120.0
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Jupiter",
+          "center" : "Jupiter",
+          "altitude" : 200000,
+          "reference" : "Sun",
+          "azimuth" : 45.0
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Saturn",
+          "center" : "Saturn",
+          "altitude" : 200000,
+          "reference" : "Sun",
+          "azimuth" : 45.0
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Neptune",
+          "center" : "Neptune",
+          "altitude" : 70000,
+          "reference" : "Sun",
+          "azimuth" : 45.0
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Io",
+          "center" : "Io",
+          "altitude" : 6000,
+          "reference" : "Sun",
+          "azimuth" : 45.0
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Europa",
+          "center" : "Europa",
+          "altitude" : 25000,
+          "reference" : "Jupiter",
+          "azimuth" : 175
+        },
+
+        {
+          "type" : "Viewpoint",
+          "name" : "Mars Distant",
+          "center" : "Mars",
+          "altitude" : 20000,
+          "reference" : "Sun",
+          "azimuth" : 45.0
         }
+
     ]
 }

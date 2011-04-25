@@ -33,6 +33,7 @@
 
 class QVideoEncoder;
 class ObserverAction;
+class Viewpoint;
 
 namespace vesta
 {
@@ -148,6 +149,7 @@ public slots:
     void plotTrajectoryObserver(const BodyInfo* info);
     void clearTrajectory(vesta::Entity* body);
     void gotoSelectedObject();
+    void setViewpoint(Viewpoint* viewpoint);
     void setTimeDisplay(TimeDisplayMode mode);
 
     void setUpdateInterval(unsigned int msec);
@@ -256,6 +258,7 @@ private:
 
     QVideoEncoder* m_videoEncoder;
     TimeDisplayMode m_timeDisplay;
+    bool m_wireframe;
 };
 
 #endif // _UNIVERSE_VIEW_H_

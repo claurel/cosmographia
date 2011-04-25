@@ -21,6 +21,7 @@
 #include "UniverseView.h"
 
 #include "ObserverAction.h"
+#include "Viewpoint.h"
 #include "InterpolatedStateTrajectory.h"
 #include "DateUtility.h"
 
@@ -147,7 +148,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_infoTextVisible(true),
     m_labelsVisible(true),
     m_videoEncoder(NULL),
-    m_timeDisplay(TimeDisplay_UTC)
+    m_timeDisplay(TimeDisplay_UTC),
+    m_wireframe(false)
 {
     setAutoFillBackground(false);
 
@@ -255,8 +257,6 @@ static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFo
 
 void UniverseView::initializeGL()
 {
-    qDebug() << "InitializeGL";
-
     // Initialize the renderer. This must be done *after* an OpenGL context
     // has been created, otherwise information about OpenGL capabilities is
     // not available.
@@ -550,6 +550,11 @@ void UniverseView::paintGL()
         lighting.reflectionRegions().push_back(cameraRegion);
     }
 
+    if (m_wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
     if (m_anaglyphEnabled)
     {
         Quaterniond cameraOrientation = m_observer->absoluteOrientation(m_simulationTime);
@@ -587,6 +592,11 @@ void UniverseView::paintGL()
             m_glareOverlay->adjustBrightness();
             m_renderer->renderLightGlare(m_glareOverlay.ptr());
         }
+    }
+
+    if (m_wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     m_renderer->endViewSet();
@@ -975,6 +985,13 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
         {
             stars->setLimitingMagnitude(min(13.0f, stars->limitingMagnitude() + 0.2f));
         }
+    }
+
+    // Alt+Shift+W enables wireframe mode
+    // TODO: This should only be available in debug builds
+    if (event->key() == Qt::Key_W && (event->modifiers() & Qt::AltModifier) && (event->modifiers() & Qt::ShiftModifier))
+    {
+        m_wireframe = !m_wireframe;
     }
 }
 
@@ -1920,6 +1937,14 @@ UniverseView::gotoSelectedObject()
                                                       distanceFromTarget);
         }
     }
+}
+
+
+void
+UniverseView::setViewpoint(Viewpoint *viewpoint)
+{
+    viewpoint->positionObserver(m_observer.ptr(), m_simulationTime);
+    m_selectedBody = viewpoint->centerBody();
 }
 
 

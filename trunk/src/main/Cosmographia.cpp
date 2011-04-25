@@ -553,7 +553,13 @@ Cosmographia::initialize()
 
     loadCatalogFile("solarsys.json");
     loadCatalogFile("start-viewpoints.json");
-    qDebug() << m_catalog->viewpointNames();
+
+    QStringList viewpointNames = m_catalog->viewpointNames();
+    if (!viewpointNames.isEmpty())
+    {
+        qsrand((uint) QTime::currentTime().msecsTo(QTime(0, 0, 0)));
+        m_view3d->setViewpoint(m_catalog->findViewpoint(viewpointNames.at(abs(qrand()) % viewpointNames.size())));
+    }
 }
 
 

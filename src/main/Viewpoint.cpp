@@ -16,6 +16,8 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "Viewpoint.h"
+#include "RotationUtility.h"
+#include <vesta/Units.h>
 #include <vesta/InertialFrame.h>
 
 using namespace vesta;
@@ -25,7 +27,9 @@ using namespace Eigen;
 Viewpoint::Viewpoint(vesta::Entity* centerBody, double distance) :
     m_centerBody(centerBody),
     m_referenceBody(NULL),
-    m_centerDistance(distance)
+    m_centerDistance(distance),
+    m_azimuth(0.0),
+    m_elevation(0.0)
 {
 }
 
@@ -48,7 +52,15 @@ Viewpoint::positionObserver(vesta::Observer* observer, double tdbSec)
 
     Vector3d up = m_centerBody->orientation(tdbSec) * Vector3d::UnitZ();
 
+    // Compute the vector w, which points in the direction of up and is perpendicular to the
+    // center to reference direction.
+    Vector3d v = toRefDir.cross(up);
+    Vector3d w = v.cross(toRefDir);
+    Vector3d position = AngleAxisd(toRadians(m_azimuth), w).toRotationMatrix() * (toRefDir * m_centerDistance);
+
+    observer->setCenter(m_centerBody.ptr());
     observer->setPositionFrame(InertialFrame::icrf());
     observer->setPointingFrame(InertialFrame::icrf());
-    observer->setPosition(toRefDir * m_centerDistance);
+    observer->setPosition(position);
+    observer->setOrientation(LookRotation(position, Vector3d::Zero(), up));
 }

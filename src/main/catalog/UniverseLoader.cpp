@@ -2578,6 +2578,8 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     QVariant centerVar = map.value("center");
     QVariant referenceVar = map.value("reference");
     QVariant altitudeVar = map.value("altitude");
+    QVariant azimuthVar = map.value("azimuth");
+    QVariant elevationVar = map.value("azimuth");
 
     if (!nameVar.isValid())
     {
@@ -2601,6 +2603,34 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     {
         qDebug() << "Bad or missing altitude for viewpoint.";
         return NULL;
+    }
+
+    double azimuth = 0.0;
+    if (azimuthVar.isValid())
+    {
+        if (!altitudeVar.canConvert(QVariant::Double))
+        {
+           qDebug() << "Bad azimuth given for viewpoint.";
+           return NULL;
+        }
+        else
+        {
+            azimuth = azimuthVar.toDouble();
+        }
+    }
+
+    double elevation = 0.0;
+    if (elevationVar.isValid())
+    {
+        if (!elevationVar.canConvert(QVariant::Double))
+        {
+           qDebug() << "Bad azimuth given for viewpoint.";
+           return NULL;
+        }
+        else
+        {
+            elevation = elevationVar.toDouble();
+        }
     }
 
     Entity* center = catalog->find(centerVar.toString());
@@ -2627,6 +2657,8 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
 
     Viewpoint* viewpoint = new Viewpoint(center, distance);
     viewpoint->setReferenceBody(referenceBody);
+    viewpoint->setAzimuth(azimuth);
+    viewpoint->setElevation(elevation);
     viewpoint->setName(nameVar.toString().toUtf8().constData());
 
     return viewpoint;

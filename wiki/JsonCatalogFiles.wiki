@@ -60,7 +60,22 @@ Dates are always interpreted in the TDB time system; as of 2011, this is 66 seco
 
  * version - version number of the catalog file (always 1.0 for now)
  * name - name of the catalog
+ * require - a list of other catalog files that must be loaded first
  * items - an array of catalog file objects (for now, bodies and visualizers)
+
+== require ==
+
+{{{
+   "require" :
+    [
+        "sun.json",
+        "mercury.json",
+        "venus.json",
+        "earth.json"
+    ]
+}}}
+
+The catalog files in the require list will be loaded in the specified order. Files that have already been loaded will not be loaded again. The files in the require list will be loaded from the same directory as the current catalog file.
 
 = Body properties =
 

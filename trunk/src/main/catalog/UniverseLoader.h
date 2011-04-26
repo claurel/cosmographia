@@ -37,6 +37,7 @@ class TleTrajectory;
 namespace vesta
 {
     class PlanetaryRings;
+    class InertialFrame;
 }
 
 class NetworkTextureLoader;
@@ -78,6 +79,11 @@ public:
         m_texturesInModelDirectory = enable;
     }
 
+    QStringList loadCatalogFile(const QString& fileName,
+                                UniverseCatalog* catalog);
+    void clearMessageLog();
+    QString messageLog();
+
 public slots:
     void processUpdates();
     void processTleSet(const QString& source, QTextStream& stream);
@@ -102,6 +108,9 @@ private:
                         double startTime);
     vesta::Frame* loadFrame(const QVariantMap& map,
                             const UniverseCatalog* catalog);
+    vesta::InertialFrame* loadInertialFrame(const QString& name);
+    vesta::Frame* loadBodyFixedFrame(const QVariantMap& map, const UniverseCatalog* catalog);
+
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);
     vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadInterpolatedStatesTrajectory(const QVariantMap& info);
@@ -110,6 +119,7 @@ private:
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadBuiltinRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);
+    vesta::RotationModel* loadFixedRotationModel(const QVariantMap& map);
 
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
                                       const UniverseCatalog* catalog);
@@ -130,7 +140,8 @@ private:
     QStringList loadCatalogFile(const QString& fileName,
                                 UniverseCatalog* catalog,
                                 unsigned int requireDepth);
-
+    void errorMessage(const QString& message);
+    void warningMessage(const QString& message);
 
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
@@ -158,6 +169,7 @@ private:
     QHash<QString, vesta::counted_ptr<vesta::Geometry> > m_geometryCache;
 
     QSet<QString> m_loadedCatalogFiles;
+    QString m_messageLog;
 
     bool m_texturesInModelDirectory;
 };

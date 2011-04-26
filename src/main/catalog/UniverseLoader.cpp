@@ -69,6 +69,7 @@
 #include <QFileInfo>
 #include <QColor>
 #include <QRegExp>
+#include <QBuffer>
 #include <QDebug>
 
 using namespace vesta;
@@ -483,6 +484,8 @@ static Quaterniond quaternionValue(QVariant v, bool* ok)
         *ok = loadOk;
     }
 
+    result.normalize();
+
     return result;
 }
 
@@ -834,7 +837,7 @@ UniverseLoader::loadBuiltinTrajectory(const QVariantMap& info)
     }
     else
     {
-        qDebug() << "Builtin trajectory is missing name.";
+        errorMessage("Builtin trajectory is missing name.");
         return NULL;
     }
 }
@@ -858,13 +861,13 @@ UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
         }
         else
         {
-            qDebug() << "Unknown sampled trajectory format.";
+            errorMessage("Unknown sampled trajectory format.");
             return NULL;
         }
     }
     else
     {
-        qDebug() << "No source file specified for sampled trajectory.";
+        errorMessage("No source file specified for sampled trajectory.");
         return NULL;
     }
 }
@@ -880,19 +883,19 @@ UniverseLoader::loadTleTrajectory(const QVariantMap& info)
 
     if (nameVar.type() != QVariant::String)
     {
-        qDebug() << "Bad or missing name for TLE trajectory";
+        errorMessage("Bad or missing name for TLE trajectory");
         return NULL;
     }
 
     if (line1Var.type() != QVariant::String)
     {
-        qDebug() << "Bad or missing first line (line1) for TLE trajectory";
+        errorMessage("Bad or missing first line (line1) for TLE trajectory");
         return NULL;
     }
 
     if (line2Var.type() != QVariant::String)
     {
-        qDebug() << "Bad or missing second line (line2) for TLE trajectory";
+        errorMessage("Bad or missing second line (line2) for TLE trajectory");
         return NULL;
     }
 
@@ -924,7 +927,7 @@ UniverseLoader::loadTleTrajectory(const QVariantMap& info)
                                                                    line2.toAscii().data()));
     if (tleTrajectory.isNull())
     {
-        qDebug() << "Invalid TLE data for " << name;
+        errorMessage(QString("Invalid TLE data for '%1'").arg(name));
         return NULL;
     }
 
@@ -945,7 +948,7 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     QVariant typeData = map.value("type");
     if (typeData.type() != QVariant::String)
     {
-        qDebug() << "Trajectory definition is missing type.";
+        errorMessage("Trajectory definition is missing type.");
     }
 
     QString type = typeData.toString();
@@ -971,7 +974,7 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     }
     else
     {
-        qDebug() << "Unknown trajectory type " << type;
+        errorMessage(QString("Unknown trajectory type '%1'").arg(type));
     }
 
     return NULL;
@@ -979,7 +982,7 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
 
 
 vesta::RotationModel*
-loadFixedRotationModel(const QVariantMap& map)
+UniverseLoader::loadFixedRotationModel(const QVariantMap& map)
 {
     QVariant quatVar = map.value("quaternion");
     if (quatVar.isValid())
@@ -988,7 +991,7 @@ loadFixedRotationModel(const QVariantMap& map)
         Quaterniond q = quaternionValue(quatVar, &ok);
         if (!ok)
         {
-            qDebug() << "Invalid quaternion given for FixedRotation";
+            errorMessage("Invalid quaternion given for FixedRotation");
             return NULL;
         }
         else
@@ -1042,7 +1045,7 @@ UniverseLoader::loadBuiltinRotationModel(const QVariantMap& info)
     }
     else
     {
-        qDebug() << "Builtin rotation model is missing name.";
+        errorMessage("Builtin rotation model is missing name.");
         return NULL;
     }
 }
@@ -1070,13 +1073,13 @@ UniverseLoader::loadInterpolatedRotationModel(const QVariantMap& info)
         }
         else
         {
-            qDebug() << "Unknown interpolated rotation format.";
+            errorMessage("Unknown interpolated rotation format.");
             return NULL;
         }
     }
     else
     {
-        qDebug() << "No source file specified for interpolated rotation.";
+        errorMessage("No source file specified for interpolated rotation.");
         return NULL;
     }
 }
@@ -1088,7 +1091,7 @@ UniverseLoader::loadRotationModel(const QVariantMap& map)
     QVariant typeVar = map.value("type");
     if (typeVar.type() != QVariant::String)
     {
-        qDebug() << "RotationModel definition is missing type.";
+        errorMessage("RotationModel definition is missing type.");
     }
 
     QString type = typeVar.toString();
@@ -1110,14 +1113,15 @@ UniverseLoader::loadRotationModel(const QVariantMap& map)
     }
     else
     {
-        qDebug() << "Unknown rotation model type " << type;
+        errorMessage(QString("Unknown rotation model type '%1'").arg(type));
     }
 
     return NULL;
 }
 
 
-vesta::InertialFrame* loadInertialFrame(const QString& name)
+vesta::InertialFrame*
+UniverseLoader::loadInertialFrame(const QString& name)
 {
     if (name == "EclipticJ2000")
     {
@@ -1137,19 +1141,20 @@ vesta::InertialFrame* loadInertialFrame(const QString& name)
     }
     else
     {
-        qDebug() << "Unknown inertial frame: " << name;
+        errorMessage(QString("Unknown inertial frame: '%1'").arg(name));
         return NULL;
     }
 }
 
 
-vesta::Frame* loadBodyFixedFrame(const QVariantMap& map,
-                                 const UniverseCatalog* catalog)
+vesta::Frame*
+UniverseLoader::loadBodyFixedFrame(const QVariantMap& map,
+                                   const UniverseCatalog* catalog)
 {
     QVariant bodyVar = map.value("body");
     if (bodyVar.type() != QVariant::String)
     {
-        qDebug() << "BodyFixed frame is missing body name.";
+        errorMessage("BodyFixed frame is missing body name.");
         return NULL;
     }
 
@@ -1162,7 +1167,7 @@ vesta::Frame* loadBodyFixedFrame(const QVariantMap& map,
     }
     else
     {
-        qDebug() << "BodyFixed frame refers to unknown body " << bodyName;
+        errorMessage(QString("BodyFixed frame refers to unknown body '%1'").arg(bodyName));
         return NULL;
     }
 }
@@ -1308,8 +1313,9 @@ loadFrameVector(const QVariantMap& map,
 }
 
 
-vesta::Frame* loadTwoVectorFrame(const QVariantMap& map,
-                                 const UniverseCatalog* catalog)
+vesta::Frame*
+loadTwoVectorFrame(const QVariantMap& map,
+                   const UniverseCatalog* catalog)
 {
     QVariant primaryVar = map.value("primary");
     QVariant primaryAxisVar = map.value("primaryAxis");
@@ -1381,7 +1387,7 @@ UniverseLoader::loadFrame(const QVariantMap& map,
     QVariant typeVar = map.value("type");
     if (typeVar.type() != QVariant::String)
     {
-        qDebug() << "Frame definition is missing type.";
+        errorMessage("Frame definition is missing type.");
     }
 
     QString type = typeVar.toString();
@@ -1398,7 +1404,7 @@ UniverseLoader::loadFrame(const QVariantMap& map,
         Frame* frame = loadInertialFrame(type);
         if (!frame)
         {
-            qDebug() << "Unknown frame type " << type;
+            errorMessage(QString("Unknown frame type '%1'").arg(type));
         }
         else
         {
@@ -1430,7 +1436,7 @@ UniverseLoader::loadArc(const QVariantMap& map,
     }
     else
     {
-        qDebug() << "Missing center for object.";
+        errorMessage("Missing center for object.");
         delete arc;
         return NULL;
     }
@@ -1497,7 +1503,7 @@ UniverseLoader::loadArc(const QVariantMap& map,
         endTime = dateValue(endTimeVar, &ok);
         if (!ok)
         {
-            qDebug() << "Invalid endTime specified.";
+            errorMessage("Invalid endTime specified.");
             delete arc;
             return NULL;
         }
@@ -1505,7 +1511,7 @@ UniverseLoader::loadArc(const QVariantMap& map,
 
     if (endTime <= startTime)
     {
-        qDebug() << "End time must be after the start time";
+        errorMessage("End time must be after the start time");
         delete arc;
         return NULL;
     }
@@ -1528,7 +1534,7 @@ UniverseLoader::loadChronology(const QVariantList& list,
     {
         if (v.type() != QVariant::Map)
         {
-            qDebug() << "Invalid arc in arcs list.";
+            errorMessage("Invalid arc in arcs list.");
             arcs.clear();
             break;
         }
@@ -1674,7 +1680,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             QFile cmodFile(fileName);
             if (!cmodFile.open(QIODevice::ReadOnly))
             {
-                qDebug() << "Error opening cmod file " << fileName;
+                errorMessage(QString("Error opening cmod file '%1'").arg(fileName));
             }
             else
             {
@@ -1682,7 +1688,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
                 meshGeometry = loader.loadMesh();
                 if (loader.error())
                 {
-                    qDebug() << "Error loading cmod file " << fileName << ": " << loader.errorMessage();
+                    errorMessage(QString("Error loading cmod file %1: %2").arg(fileName, loader.errorMessage()));
                 }
             }
         }
@@ -1718,19 +1724,19 @@ UniverseLoader::loadRingSystemGeometry(const QVariantMap& map)
 
     if (!innerRadiusVar.isValid())
     {
-        qDebug() << "innerRadius missing for ring system";
+        errorMessage("innerRadius missing for ring system");
         return NULL;
     }
 
     if (!outerRadiusVar.isValid())
     {
-        qDebug() << "outerRadius missing for ring system";
+        errorMessage("outerRadius missing for ring system");
         return NULL;
     }
 
     if (!textureVar.isValid())
     {
-        qDebug() << "texture missing for ring system";
+        errorMessage("texture missing for ring system");
         return NULL;
     }
 
@@ -1738,14 +1744,14 @@ UniverseLoader::loadRingSystemGeometry(const QVariantMap& map)
     double innerRadius = distanceValue(innerRadiusVar, Unit_Kilometer, 1.0, &ok);
     if (!ok)
     {
-        qDebug() << "Bad value for inner radius of ring system";
+        errorMessage("Bad value for inner radius of ring system");
         return NULL;
     }
 
     double outerRadius = distanceValue(outerRadiusVar, Unit_Kilometer, 1.0, &ok);
     if (!ok)
     {
-        qDebug() << "Bad value for outer radius of ring system";
+        errorMessage("Bad value for outer radius of ring system");
         return NULL;
     }
 
@@ -1784,7 +1790,7 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         radii = vec3Value(map.value("radii"), &ok);
         if (!ok)
         {
-            qDebug() << "Invalid radii given for globe geometry.";
+            errorMessage("Invalid radii given for globe geometry.");
             return NULL;
         }
     }
@@ -1881,7 +1887,7 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         }
         else
         {
-            qDebug() << "Error in definition of ringSystem";
+            errorMessage("Error in definition of ringSystem");
         }
     }
 
@@ -1940,13 +1946,13 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
 
     if (targetVar.type() != QVariant::String)
     {
-        qDebug() << "Bad or missing target for sensor geometry";
+        errorMessage("Bad or missing target for sensor geometry");
         return NULL;
     }
 
     if (!rangeVar.canConvert(QVariant::Double))
     {
-        qDebug() << "Bad or missing range for sensor geometry";
+        errorMessage("Bad or missing range for sensor geometry");
         return NULL;
     }
 
@@ -1962,7 +1968,7 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
     Entity* target = catalog->find(targetVar.toString());
     if (!target)
     {
-        qDebug() << "Target for sensor geometry not found";
+        errorMessage("Target for sensor geometry not found");
         return NULL;
     }
 
@@ -2009,13 +2015,13 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
 
     if (!sourceVar.isValid())
     {
-       qDebug() << "Missing source for swarm geometry";
+       errorMessage("Missing source for swarm geometry");
        return NULL;
     }
 
     if (!formatVar.isValid())
     {
-        qDebug() << "Missing format for swarm geometry";
+        errorMessage("Missing format for swarm geometry");
         return NULL;
     }
 
@@ -2041,7 +2047,7 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
     }
     else
     {
-        qDebug() << "Unknown format for Keplerian swarm geometry.";
+        errorMessage("Unknown format for Keplerian swarm geometry.");
         return NULL;
     }
 
@@ -2361,13 +2367,13 @@ UniverseLoader::loadParticleSystemGeometry(const QVariantMap& map)
     QVariant emittersVar = map.value("emitters");
     if (!emittersVar.isValid())
     {
-        qDebug() << "Emitters are missing from particle system";
+        errorMessage("Emitters are missing from particle system");
         return NULL;
     }
 
     if (emittersVar.type() != QVariant::List)
     {
-        qDebug() << "Emitters in particle system must be an array";
+        errorMessage("Emitters in particle system must be an array");
         return NULL;
     }
 
@@ -2399,7 +2405,7 @@ UniverseLoader::loadParticleSystemGeometry(const QVariantMap& map)
         }
         else
         {
-            qDebug() << "Bad emitter in particle system";
+            errorMessage("Bad emitter in particle system");
         }
     }
 
@@ -2451,7 +2457,7 @@ UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* cata
     }
     else
     {
-        qDebug() << "Unknown type " << type << " for geometry.";
+        errorMessage(QString("Unknown type '%1' for geometry.").arg(type));
     }
 
     return geometry;
@@ -2537,7 +2543,7 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
     QVariant styleVar = map.value("style");
     if (styleVar.type() != QVariant::Map)
     {
-        qDebug() << "Missing visualizer style.";
+        errorMessage("Missing visualizer style.");
         return NULL;
     }
 
@@ -2545,7 +2551,7 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
     QVariant typeVar = style.value("type");
     if (typeVar.type() != QVariant::String)
     {
-        qDebug() << "Bad or missing type for visualizer style.";
+        errorMessage("Bad or missing type for visualizer style.");
         return NULL;
     }
 
@@ -2564,7 +2570,7 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
     }
     else
     {
-        qDebug() << "Unknown visualizer type " << type;
+        errorMessage(QString("Unknown visualizer type '%1'").arg(type));
         return NULL;
     }
 }
@@ -2583,25 +2589,25 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
 
     if (!nameVar.isValid())
     {
-        qDebug() << "Viewpoint is missing name";
+        errorMessage("Viewpoint is missing name");
         return NULL;
     }
 
     if (!centerVar.isValid())
     {
-        qDebug() << "Viewpoint is missing center body";
+        errorMessage("Viewpoint is missing center body");
         return NULL;
     }
 
     if (!referenceVar.isValid())
     {
-        qDebug() << "Viewpoint is missing reference body";
+        errorMessage("Viewpoint is missing reference body");
         return NULL;
     }
 
     if (!altitudeVar.isValid() || !altitudeVar.canConvert(QVariant::Double))
     {
-        qDebug() << "Bad or missing altitude for viewpoint.";
+        errorMessage("Bad or missing altitude for viewpoint.");
         return NULL;
     }
 
@@ -2610,7 +2616,7 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     {
         if (!altitudeVar.canConvert(QVariant::Double))
         {
-           qDebug() << "Bad azimuth given for viewpoint.";
+           errorMessage("Bad azimuth given for viewpoint");
            return NULL;
         }
         else
@@ -2624,7 +2630,7 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     {
         if (!elevationVar.canConvert(QVariant::Double))
         {
-           qDebug() << "Bad azimuth given for viewpoint.";
+           errorMessage("Bad elevation given for viewpoint.");
            return NULL;
         }
         else
@@ -2638,13 +2644,13 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
 
     if (!center)
     {
-        qDebug() << "Unknown center body " << centerVar.toString() << " for viewpoint";
+        errorMessage(QString("Unknown center body '%1' for viewpoint").arg(centerVar.toString()));
         return NULL;
     }
 
     if (!referenceBody)
     {
-        qDebug() << "Unknown reference body " << referenceVar.toString() << " for viewpoint";
+        errorMessage(QString("Unknown reference body '%1' for viewpoint").arg(referenceVar.toString()));
         return NULL;
     }
 
@@ -2761,6 +2767,14 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
 
 QStringList
 UniverseLoader::loadCatalogFile(const QString& fileName,
+                                UniverseCatalog* catalog)
+{
+    return loadCatalogFile(fileName, catalog, 0);
+}
+
+
+QStringList
+UniverseLoader::loadCatalogFile(const QString& fileName,
                                 UniverseCatalog* catalog,
                                 unsigned int requireDepth)
 {
@@ -2779,31 +2793,40 @@ UniverseLoader::loadCatalogFile(const QString& fileName,
 
     if (requireDepth > 10)
     {
-        qDebug() << "'require' is nested too deeply (recursive requires?)";
+        errorMessage("'require' is nested too deeply (recursive requires?)");
         return bodyNames;
     }
 
     QFile catalogFile(path);
     if (!catalogFile.open(QIODevice::ReadOnly))
     {
-        qDebug() << QString("Cannot open required file %1").arg(path);
+        errorMessage(QString("Cannot open required file %1").arg(path));
         return bodyNames;
     }
+
+    // Strip single-line C++ style comments from the JSON text. This is a
+    // temporary solution, as the regex used here doesn't properly distinguish
+    // and ignore comment characters in the middle of a string.
+    QString catalogText(catalogFile.readAll());
+    QRegExp stripComments("//.*[\n\r]");
+    stripComments.setMinimal(true);
+    QByteArray catalogBytes = catalogText.replace(stripComments, " ").toUtf8();
+    QBuffer buffer(&catalogBytes);
 
     QJson::Parser parser;
 
     bool parseOk = false;
-    QVariant result = parser.parse(&catalogFile, &parseOk);
+    QVariant result = parser.parse(&buffer, &parseOk);
     if (!parseOk)
     {
-        qDebug() << QString("Error in %1, line %2: %3").arg(path).arg(parser.errorLine()).arg(parser.errorString());
+        errorMessage(QString("Error in %1, line %2: %3").arg(path).arg(parser.errorLine()).arg(parser.errorString()));
         return bodyNames;
     }
 
     QVariantMap contents = result.toMap();
     if (contents.empty())
     {
-        qDebug() << "Solar system file is empty.";
+        errorMessage("Solar system file is empty.");
         return bodyNames;
     }
 
@@ -2849,7 +2872,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
         }
         else
         {
-            qDebug() << "Require property must be a list of filenames";
+            errorMessage("Require property must be a list of filenames");
         }
     }
 
@@ -2860,7 +2883,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
 
     if (contents["items"].type() != QVariant::List)
     {
-        qDebug() << "items is not a list.";
+        errorMessage("items is not a list.");
         return bodyNames;
     }
     QVariantList items = contents["items"].toList();
@@ -2869,7 +2892,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
     {
         if (itemVar.type() != QVariant::Map)
         {
-            qDebug() << "Invalid item in bodies list.";
+            errorMessage("Invalid item in bodies list.");
         }
         else
         {
@@ -2913,7 +2936,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                     }
                     else
                     {
-                        qDebug() << "Invalid geometry for body.";
+                        errorMessage("Invalid geometry for body.");
                         valid = false;
                     }
                 }
@@ -2925,7 +2948,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                     startTime = dateValue(startTimeVar, &ok);
                     if (!ok)
                     {
-                        qDebug() << "Invalid startTime specified";
+                        errorMessage("Invalid startTime specified");
                         valid = false;
                     }
                 }
@@ -2936,7 +2959,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                 {
                     if (arcsVar.type() != QVariant::List)
                     {
-                        qDebug() << "Arcs must be an array";
+                        errorMessage("Arcs must be an array");
                     }
                     else
                     {
@@ -2987,7 +3010,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                 }
                 else
                 {
-                    qDebug() << "Skipping body " << bodyName << " because of errors.";
+                    errorMessage(QString("Skipping body '%1' because of errors.").arg(bodyName));
                     if (newBody)
                     {
                         catalog->removeBody(bodyName);
@@ -3001,11 +3024,11 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
 
                 if (tagVar.type() != QVariant::String)
                 {
-                    qDebug() << "Bad or missing tag for visualizer";
+                    errorMessage("Bad or missing tag for visualizer");
                 }
                 else if (bodyVar.type() != QVariant::String)
                 {
-                    qDebug() << "Bad or missing body name for visualizer";
+                    errorMessage("Bad or missing body name for visualizer");
                 }
                 else
                 {
@@ -3015,7 +3038,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                     Entity* body = catalog->find(bodyName);
                     if (body == NULL)
                     {
-                        qDebug() << "Can't find body " << bodyName << " for visualizer.";
+                        errorMessage(QString("Can't find body '%1' for visualizer.").arg(bodyName));
                     }
                     else
                     {
@@ -3220,4 +3243,34 @@ void
 UniverseLoader::clearResourceRequests()
 {
     m_resourceRequests.clear();
+}
+
+
+void
+UniverseLoader::clearMessageLog()
+{
+    m_messageLog.clear();
+}
+
+
+QString
+UniverseLoader::messageLog()
+{
+    return m_messageLog;
+}
+
+
+void
+UniverseLoader::errorMessage(const QString& message)
+{
+    m_messageLog += message;
+    m_messageLog += '\n';
+}
+
+
+void
+UniverseLoader::warningMessage(const QString& message)
+{
+    m_messageLog += message;
+    m_messageLog += '\n';
 }

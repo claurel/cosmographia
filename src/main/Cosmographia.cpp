@@ -905,12 +905,13 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         return;
     }
 
-    QFile solarSystemFile(fileName);
-    QString path = QFileInfo(solarSystemFile).absolutePath();
+    QFile catalogFile(fileName);
+    QFileInfo info = QFileInfo(catalogFile);
+    QString path = info.absolutePath();
 
     m_loader->clearResourceRequests();
 
-    if (!solarSystemFile.open(QIODevice::ReadOnly))
+    if (!catalogFile.open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(this, tr("Solar System File Error"), tr("Could not open file '%1'.").arg(fileName));
         return;
@@ -927,26 +928,17 @@ Cosmographia::loadCatalogFile(const QString& fileName)
 
     if (fileName.toLower().endsWith(".json"))
     {
-        QJson::Parser parser;
-
-        bool parseOk = false;
-        QVariant result = parser.parse(&solarSystemFile, &parseOk);
-        if (!parseOk)
+        m_loader->clearMessageLog();
+        QStringList bodyNames = m_loader->loadCatalogFile(info.fileName(), m_catalog);
+        QString errorMessages = m_loader->messageLog();
+        qDebug() << errorMessages;
+        if (!errorMessages.isEmpty())
         {
             QMessageBox::warning(this,
-                                 tr("Solar System File Error"),
-                                 QString("Line %1: %2").arg(parser.errorLine()).arg(parser.errorString()));
-            return;
+                                 tr("Errors in catalog file"),
+                                 errorMessages);
         }
 
-        QVariantMap contents = result.toMap();
-        if (contents.empty())
-        {
-            qDebug() << "Solar system file is empty.";
-            return;
-        }
-
-        QStringList bodyNames = m_loader->loadCatalogItems(contents, m_catalog);
         foreach (QString name, bodyNames)
         {
             Entity* e = m_catalog->find(name);
@@ -973,7 +965,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
 
         QVariantList items;
 
-        CatalogParser parser(&solarSystemFile);
+        CatalogParser parser(&catalogFile);
         QVariant obj = parser.nextSscObject();
         while (obj.type() == QVariant::Map)
         {

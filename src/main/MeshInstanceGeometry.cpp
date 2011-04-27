@@ -74,5 +74,11 @@ MeshInstanceGeometry::handleRayPick(const Vector3d& pickOrigin,
     Vector3d origin = invScale * pickOrigin;
     Vector3d direction = (invScale * pickDirection).normalized();
 
-    return m_mesh->rayPick(origin, direction, clock, distance);
+    bool hit = m_mesh->rayPick(origin, direction, clock, distance);
+    if (distance)
+    {
+        *distance *= m_scale;
+    }
+
+    return hit;
 }

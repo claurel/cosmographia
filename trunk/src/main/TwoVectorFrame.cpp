@@ -207,3 +207,33 @@ RelativeVelocityVector::direction(double tdbSec) const
     }
 }
 
+
+/** Create a new constant frame direction.
+  *
+  * \param frame the frame in which the vector is fixed
+  * \param a direction vector (must be normalized)
+  */
+ConstantFrameDirection::ConstantFrameDirection(vesta::Frame *frame, const Eigen::Vector3d &vector) :
+    m_frame(frame),
+    m_vector(vector)
+{
+}
+
+
+ConstantFrameDirection::~ConstantFrameDirection()
+{
+}
+
+
+Vector3d
+ConstantFrameDirection::direction(double tdbSec) const
+{
+    if (m_frame.isValid())
+    {
+        return m_frame->orientation(tdbSec) * m_vector;
+    }
+    else
+    {
+        return Vector3d::Zero();
+    }
+}

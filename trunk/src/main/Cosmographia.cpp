@@ -931,7 +931,6 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         m_loader->clearMessageLog();
         QStringList bodyNames = m_loader->loadCatalogFile(info.fileName(), m_catalog);
         QString errorMessages = m_loader->messageLog();
-        qDebug() << errorMessages;
         if (!errorMessages.isEmpty())
         {
             QMessageBox::warning(this,

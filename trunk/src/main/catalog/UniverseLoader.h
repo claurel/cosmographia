@@ -42,6 +42,7 @@ namespace vesta
 
 class NetworkTextureLoader;
 class Viewpoint;
+class TwoVectorFrameDirection;
 
 class UniverseLoader
 {
@@ -110,6 +111,9 @@ private:
                             const UniverseCatalog* catalog);
     vesta::InertialFrame* loadInertialFrame(const QString& name);
     vesta::Frame* loadBodyFixedFrame(const QVariantMap& map, const UniverseCatalog* catalog);
+    vesta::Frame* loadTwoVectorFrame(const QVariantMap& map, const UniverseCatalog* catalog);
+    TwoVectorFrameDirection* loadFrameVector(const QVariantMap& map, const UniverseCatalog* catalog);
+    TwoVectorFrameDirection* loadConstantFrameVector(const QVariantMap& map, const UniverseCatalog* catalog);
 
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);
     vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);

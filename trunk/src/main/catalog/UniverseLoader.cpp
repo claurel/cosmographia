@@ -1317,7 +1317,21 @@ UniverseLoader::loadConstantFrameVector(const QVariantMap& map,
     vesta::Frame* frame = InertialFrame::equatorJ2000();
     if (frameVar.isValid())
     {
-        frame = loadFrame(map, catalog);
+        if (frameVar.type() == QVariant::String)
+        {
+            // Inertial frame name
+            frame = loadInertialFrame(frameVar.toString());
+        }
+        else if (frameVar.type() == QVariant::Map)
+        {
+            frame = loadFrame(frameVar.toMap(), catalog);
+        }
+        else
+        {
+            frame = NULL;
+            errorMessage("Invalid frame given for ConstantVector");
+        }
+
         if (!frame)
         {
             return NULL;
@@ -1349,7 +1363,7 @@ UniverseLoader::loadFrameVector(const QVariantMap& map,
         return loadRelativeVelocity(map, catalog);
     }
     else if (type == "ConstantVector")
-    {
+    {        
         return loadConstantFrameVector(map, catalog);
     }
     else

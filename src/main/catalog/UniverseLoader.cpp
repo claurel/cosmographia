@@ -1286,17 +1286,60 @@ loadRelativeVelocity(const QVariantMap& map,
 
 
 TwoVectorFrameDirection*
-loadFrameVector(const QVariantMap& map,
-                const UniverseCatalog* catalog)
+UniverseLoader::loadConstantFrameVector(const QVariantMap& map,
+                                        const UniverseCatalog* catalog)
+{
+    QVariant directionVar = map.value("direction");
+    QVariant frameVar = map.value("frame");
+
+    if (!directionVar.isValid())
+    {
+        errorMessage("Direction missing for ConstantVector");
+        return NULL;
+    }
+
+    bool ok = false;
+    Vector3d direction = vec3Value(directionVar, &ok);
+    if (!ok)
+    {
+        errorMessage("Invalid vector given for ConstantVector direction");
+        return NULL;
+    }
+
+    if (direction.isZero())
+    {
+        errorMessage("Zero vector is not permitted for ConstantVector direction");
+        return NULL;
+    }
+
+    direction.normalize();
+
+    vesta::Frame* frame = InertialFrame::equatorJ2000();
+    if (frameVar.isValid())
+    {
+        frame = loadFrame(map, catalog);
+        if (!frame)
+        {
+            return NULL;
+        }
+    }
+
+    return new ConstantFrameDirection(frame, direction);
+}
+
+
+TwoVectorFrameDirection*
+UniverseLoader::loadFrameVector(const QVariantMap& map,
+                                const UniverseCatalog* catalog)
 {
     QVariant typeVar = map.value("type");
     if (typeVar.type() != QVariant::String)
     {
-        qDebug() << "Bad or missing type for TwoVector frame direction.";
+        errorMessage("Bad or missing type for TwoVector frame direction.");
         return NULL;
     }
 
-    QVariant type = typeVar.toString();
+    QString type = typeVar.toString();
     if (type == "RelativePosition")
     {
         return loadRelativePosition(map, catalog);
@@ -1305,17 +1348,21 @@ loadFrameVector(const QVariantMap& map,
     {
         return loadRelativeVelocity(map, catalog);
     }
+    else if (type == "ConstantVector")
+    {
+        return loadConstantFrameVector(map, catalog);
+    }
     else
     {
-        qDebug() << "Unknoown TwoVector frame direction type " << type;
+        errorMessage(QString("Unknoown TwoVector frame direction type '%1'").arg(type));
         return NULL;
     }
 }
 
 
 vesta::Frame*
-loadTwoVectorFrame(const QVariantMap& map,
-                   const UniverseCatalog* catalog)
+UniverseLoader::loadTwoVectorFrame(const QVariantMap& map,
+                                   const UniverseCatalog* catalog)
 {
     QVariant primaryVar = map.value("primary");
     QVariant primaryAxisVar = map.value("primaryAxis");
@@ -1324,25 +1371,25 @@ loadTwoVectorFrame(const QVariantMap& map,
 
     if (primaryVar.type() != QVariant::Map)
     {
-        qDebug() << "Invalid or missing primary direction in TwoVector frame";
+        errorMessage("Invalid or missing primary direction in TwoVector frame");
         return NULL;
     }
 
     if (secondaryVar.type() != QVariant::Map)
     {
-        qDebug() << "Invalid or missing secondary direction in TwoVector frame";
+        errorMessage("Invalid or missing secondary direction in TwoVector frame");
         return NULL;
     }
 
     if (primaryAxisVar.type() != QVariant::String)
     {
-        qDebug() << "Invalid or missing primary axis in TwoVector frame";
+        errorMessage("Invalid or missing primary axis in TwoVector frame");
         return NULL;
     }
 
     if (secondaryAxisVar.type() != QVariant::String)
     {
-        qDebug() << "Invalid or missing secondary axis in TwoVector frame";
+        errorMessage("Invalid or missing secondary axis in TwoVector frame");
         return NULL;
     }
 
@@ -1350,19 +1397,19 @@ loadTwoVectorFrame(const QVariantMap& map,
     TwoVectorFrame::Axis secondaryAxis = TwoVectorFrame::PositiveX;
     if (!parseAxisLabel(primaryAxisVar.toString(), &primaryAxis))
     {
-        qDebug() << "Invalid label " << primaryAxisVar.toString() << " for primary axis in TwoVector frame";
+        errorMessage(QString("Invalid label '%1' for primary axis in TwoVector frame").arg(primaryAxisVar.toString()));
         return NULL;
     }
 
     if (!parseAxisLabel(secondaryAxisVar.toString(), &secondaryAxis))
     {
-        qDebug() << "Invalid label " << secondaryAxisVar.toString() << " for secondary axis in TwoVector frame";
+        errorMessage(QString("Invalid label '%1' for secondary axis in TwoVector frame").arg(secondaryAxisVar.toString()));
         return NULL;
     }
 
     if (!TwoVectorFrame::orthogonalAxes(primaryAxis, secondaryAxis))
     {
-        qDebug() << "Bad two vector frame. Primary and secondary axes must be orthogonal";
+        errorMessage("Bad two vector frame. Primary and secondary axes must be orthogonal");
         return NULL;
     }
 
@@ -1704,6 +1751,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             // the average model loaded off the web benefits from some preprocessing at load time.
             meshGeometry->mergeSubmeshes();
             meshGeometry->uniquifyVertices();
+            //meshGeometry->mergeMaterials();
             m_geometryCache.insert(fileName, vesta::counted_ptr<Geometry>(meshGeometry));
             geometry = meshGeometry;
         }

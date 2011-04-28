@@ -80,6 +80,29 @@ private:
 };
 
 
+class ConstantFrameDirection : public TwoVectorFrameDirection
+{
+public:
+    ConstantFrameDirection(vesta::Frame* frame, const Eigen::Vector3d& vector);
+    ~ConstantFrameDirection();
+    virtual Eigen::Vector3d direction(double tdbSec) const;
+
+    Eigen::Vector3d vector() const
+    {
+        return m_vector;
+    }
+
+    vesta::Frame* frame() const
+    {
+        return m_frame.ptr();
+    }
+
+private:
+    vesta::counted_ptr<vesta::Frame> m_frame;
+    Eigen::Vector3d m_vector;
+};
+
+
 class TwoVectorFrame : public vesta::Frame
 {
 public:

@@ -2870,7 +2870,7 @@ UniverseLoader::loadCatalogFile(const QString& fileName,
     // temporary solution, as the regex used here doesn't properly distinguish
     // and ignore comment characters in the middle of a string.
     QString catalogText(catalogFile.readAll());
-    QRegExp stripComments("//.*[\n\r]");
+    QRegExp stripComments("//[^\"]*[\n\r]");
     stripComments.setMinimal(true);
     QByteArray catalogBytes = catalogText.replace(stripComments, " ").toUtf8();
     QBuffer buffer(&catalogBytes);

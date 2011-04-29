@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 611 $ $Date: 2011-04-29 14:56:33 -0700 (Fri, 29 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -26,6 +26,26 @@ class GLVertexBuffer;
 
 /** MeshGeometry is a Geometry object for triangle meshes, typically
   * loaded from a 3D model file.
+  *
+  * Optimization of meshes:
+  * Often, 3D mesh files are not well-conditioned for rendering on
+  * graphics hardware. They may contain redundant vertexes and materials.
+  * Or, the geometry may be split into many small chunks that result
+  * in extra overhead for the hardware or driver. MeshGeometry has three
+  * methods to preprocess meshes for better hardware performance:
+  *
+  * - mergeSubmeshes
+  * - unquifyVertices
+  * - mergeMaterials
+  *
+  * For the best possible results, all three methods should be called
+  * after a model is loaded. The sequence is important: the methods should
+  * be called in the order given above.
+  *
+  * If mesh files are saved in optimized form, then preprocessing at load
+  * time can be skipped. This is ideal, as the optimization functions can
+  * require significant amounts of computation for complex models with many
+  * triangles.
   */
 class MeshGeometry : public Geometry
 {
@@ -93,6 +113,7 @@ public:
 
     bool mergeSubmeshes();
     bool uniquifyVertices(float positionTolerance = 0.0f, float normalTolerance = 0.0f, float texCoordTolerance = 0.0f);
+    bool mergeMaterials();
 
     static MeshGeometry* loadFromFile(const std::string& filename, TextureMapLoader* textureLoader);
 

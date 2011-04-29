@@ -1,5 +1,5 @@
 /*
- * $Revision: 404 $ $Date: 2010-08-03 13:04:00 -0700 (Tue, 03 Aug 2010) $
+ * $Revision: 610 $ $Date: 2011-04-29 14:45:37 -0700 (Fri, 29 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -89,6 +89,19 @@ Submesh::addPrimitiveBatch(PrimitiveBatch* batch, unsigned int materialIndex)
 
     m_boundingSphereRadius = std::max(m_boundingSphereRadius, std::sqrt(maxDistSquared));
 #endif
+}
+
+
+/** Set the material index for the primitive batch at the specified index.
+  * This method has no effect if batchIndex is out of range.
+  */
+void
+Submesh::setMaterial(unsigned int batchIndex, unsigned int materialIndex)
+{
+    if (batchIndex < m_materials.size())
+    {
+        m_materials[batchIndex] = materialIndex;
+    }
 }
 
 
@@ -476,10 +489,24 @@ Submesh::uniquifyVertices(float positionTolerance, float normalTolerance, float 
     VertexArray* newVertexArray = new VertexArray(newVertexData, uniqueVertexCount, m_vertices->vertexSpec(), m_vertices->stride());
 
     // Remap all vertex indices
-    for (vector<PrimitiveBatch*>::const_iterator iter = m_primitiveBatches.begin(); iter != m_primitiveBatches.end(); ++iter)
+    for (vector<PrimitiveBatch*>::iterator iter = m_primitiveBatches.begin(); iter != m_primitiveBatches.end(); ++iter)
     {
+        // Vertex remapping might require us to promote a 16-bit indices to 32-bit,
+        // even though the total number of vertices has been reduced.
+        if (uniqueVertexCount > PrimitiveBatch::MaxIndex16 && (*iter)->indexSize() == PrimitiveBatch::Index16)
+        {
+            if (!(*iter)->promoteTo32Bit())
+            {
+                VESTA_WARNING("Problem remapping vertex indices. Unable to promote 16-bit indices to 32-bit.");
+                delete newVertexArray;
+                return false;
+            }
+        }
+
         if (!(*iter)->remapIndices(vertexMap))
         {
+            // This should never occur; the only problem case has been dealt with by promoting
+            // 16-bit indices to 32-bit.
             VESTA_WARNING("Problem remapping vertex indices.");
             delete newVertexArray;
             return false;
@@ -697,3 +724,192 @@ Submesh::rayPick(const Vector3d& pickOrigin,
         return false;
     }
 }
+
+
+
+class MaterialOrderPredicate
+{
+public:
+    MaterialOrderPredicate(const Submesh* submesh) :
+        m_submesh(submesh)
+    {
+    }
+
+    // Compare the material index of two primitive batch indices
+    bool operator()(unsigned int index0, unsigned int index1) const
+    {
+        return m_submesh->materials().at(index0) < m_submesh->materials().at(index1);
+    }
+
+private:
+    const Submesh* m_submesh;
+};
+
+
+static PrimitiveBatch*
+mergeTriangleLists(const vector<PrimitiveBatch*>& batches, unsigned int firstBatch, unsigned int count)
+{
+    assert(count > 0);
+
+    unsigned int totalIndexCount = 0;
+    PrimitiveBatch::IndexSize indexSize = PrimitiveBatch::Index16;
+    for (unsigned int i = firstBatch; i < firstBatch + count; ++i)
+    {
+        // Only triangles for now
+        assert(batches[i]->primitiveType() == PrimitiveBatch::Triangles);
+
+        totalIndexCount += batches[i]->indexCount();
+        if (batches[i]->indexSize() == PrimitiveBatch::Index32)
+        {
+            indexSize = PrimitiveBatch::Index32;
+        }
+    }
+
+    // Total index count must be a multiple of three because there are 3 vertices / triangle
+    assert(totalIndexCount % 3 == 0);
+
+    PrimitiveBatch* mergedBatch = NULL;
+    if (indexSize == PrimitiveBatch::Index16)
+    {
+        // All indices are 16-bit
+        v_uint16* indices = new v_uint16[totalIndexCount];
+        unsigned int baseIndex = 0;
+        for (unsigned int i = firstBatch; i < firstBatch + count; ++i)
+        {
+            unsigned int batchIndexCount = batches[i]->indexCount();
+            const v_uint16* batchIndices = reinterpret_cast<v_uint16*>(batches[i]->indexData());
+            copy(batchIndices, batchIndices + batchIndexCount, indices + baseIndex);
+            baseIndex += batchIndexCount;
+        }
+        assert(baseIndex == totalIndexCount);
+
+        mergedBatch = new PrimitiveBatch(PrimitiveBatch::Triangles, indices, totalIndexCount / 3);
+        delete[] indices;
+    }
+    else
+    {
+        // At least some indices are 32-bit
+        v_uint32* indices = new v_uint32[totalIndexCount];
+        unsigned int baseIndex = 0;
+        for (unsigned int i = firstBatch; i < firstBatch + count; ++i)
+        {
+            unsigned int batchIndexCount = batches[i]->indexCount();
+            if (batches[i]->indexSize() == PrimitiveBatch::Index16)
+            {
+                // Convert 16-bit indices to 32-bit during copy
+                const v_uint16* batchIndices = reinterpret_cast<v_uint16*>(batches[i]->indexData());
+                for (unsigned int j = 0; j < batchIndexCount; ++j)
+                {
+                    indices[count + j] = batchIndices[j];
+                }
+            }
+            else
+            {
+                const v_uint32* batchIndices = reinterpret_cast<v_uint32*>(batches[i]->indexData());
+                copy(batchIndices, batchIndices + batchIndexCount, indices + baseIndex);
+            }
+            baseIndex += batchIndexCount;
+        }
+        assert(baseIndex == totalIndexCount);
+
+        mergedBatch = new PrimitiveBatch(PrimitiveBatch::Triangles, indices, totalIndexCount / 3);
+        delete[] indices;
+    }
+
+    return mergedBatch;
+}
+
+
+/** Optimize the submesh by merging batches with identical materials. This reduces the
+  * number of draw calls issued to the GPU, which can greatly improve performance for
+  * complex models with many parts. If a mesh is known to already be optimized, this
+  * step can be skipped.
+  */
+bool
+Submesh::mergeMaterials()
+{
+    assert(m_materials.size() == m_primitiveBatches.size());
+
+    // Bail out early if there's nothing to do. We need to avoid bad allocations of zero-length
+    // arrays, and it's easiest just to check once here.
+    if (m_materials.size() == 0)
+    {
+        return false;
+    }
+
+    // Sort primitive batches by the materials assignmed to them
+    vector<unsigned int> batchIndices;
+    for (unsigned int i = 0; i < m_primitiveBatches.size(); ++i)
+    {
+        batchIndices.push_back(i);
+    }
+    sort(batchIndices.begin(), batchIndices.end(), MaterialOrderPredicate(this));
+
+    // Create the ordered lists of materials and primitive batches
+    std::vector<PrimitiveBatch*> orderedBatches;
+    std::vector<unsigned int> orderedMaterials;
+    for (unsigned int i = 0; i < m_primitiveBatches.size(); ++i)
+    {
+        unsigned int index = batchIndices[i];
+        orderedBatches.push_back(m_primitiveBatches[index]);
+        orderedMaterials.push_back(m_materials[index]);
+    }
+
+    // Finally, merge primitive batches with identical materials. Currently, we only
+    // handle merging indexed triangle lists (by far the most common type.) Other
+    // batches are left unmodified.
+
+    std::vector<PrimitiveBatch*> mergedBatches;
+    std::vector<PrimitiveBatch*> unusedBatches;
+    std::vector<unsigned int> mergedMaterials;
+    unsigned int firstMergeIndex = 0;
+    for (unsigned int i = 0; i <= orderedMaterials.size(); ++i)
+    {
+        bool isFinalBatch = i == orderedMaterials.size();
+        bool materialChanged = false;
+        bool isIndexedTriangleList = false;
+        if (!isFinalBatch)
+        {
+            materialChanged = orderedMaterials[i] != orderedMaterials[firstMergeIndex];
+            isIndexedTriangleList = orderedBatches[i]->primitiveType() == PrimitiveBatch::Triangles && orderedBatches[i]->isIndexed();
+        }
+
+        if (isFinalBatch || materialChanged || !isIndexedTriangleList)
+        {
+            // Merge primitive batches from firstMergeBatch through i - 1
+            unsigned count = i - firstMergeIndex;
+            if (count == 1)
+            {
+                // The batch doesn't need to be merged; just copy it
+                mergedBatches.push_back(orderedBatches[firstMergeIndex]);
+            }
+            else
+            {
+                PrimitiveBatch* merged = mergeTriangleLists(orderedBatches, firstMergeIndex, count);
+                mergedBatches.push_back(merged);
+                for (unsigned int j = firstMergeIndex; j < i; ++j)
+                {
+                    unusedBatches.push_back(orderedBatches[j]);
+                }
+            }
+
+            mergedMaterials.push_back(orderedMaterials[firstMergeIndex]);
+            firstMergeIndex = i;
+        }
+    }
+
+    VESTA_LOG("mergeMaterials: reduced batch count from %d to %d", m_primitiveBatches.size(), mergedBatches.size());
+
+    m_primitiveBatches = mergedBatches;
+    m_materials = mergedMaterials;
+
+    // Clean up the unused batches
+    for (unsigned int i = 0; i < unusedBatches.size(); ++i)
+    {
+        delete unusedBatches[i];
+    }
+
+    return true;
+}
+
+

@@ -95,7 +95,7 @@ static const unsigned int ReflectionMapSize = 512;
 
 static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
 
-static const double MinimumFOV = toRadians(1.0);
+static const double MinimumFOV = toRadians(0.1);
 static const double MaximumFOV = toRadians(90.0);
 
 

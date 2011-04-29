@@ -1765,7 +1765,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             // the average model loaded off the web benefits from some preprocessing at load time.
             meshGeometry->mergeSubmeshes();
             meshGeometry->uniquifyVertices();
-            //meshGeometry->mergeMaterials();
+            meshGeometry->mergeMaterials();
             m_geometryCache.insert(fileName, vesta::counted_ptr<Geometry>(meshGeometry));
             geometry = meshGeometry;
         }

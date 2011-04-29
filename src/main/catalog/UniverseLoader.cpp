@@ -2916,6 +2916,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                                  unsigned int requireDepth)
 {
     qDebug() << "Loading catalog " << contents["name"].toString();
+    m_currentBodyName = "";
 
     QStringList bodyNames;
     if (contents.contains("require"))
@@ -2952,6 +2953,8 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
 
     foreach (QVariant itemVar, items)
     {
+        m_currentBodyName = "";
+
         if (itemVar.type() != QVariant::Map)
         {
             errorMessage("Invalid item in bodies list.");
@@ -3325,6 +3328,10 @@ UniverseLoader::messageLog()
 void
 UniverseLoader::errorMessage(const QString& message)
 {
+    if (!m_currentBodyName.isEmpty())
+    {
+        m_messageLog += QString("Item '%1': ").arg(m_currentBodyName);
+    }
     m_messageLog += message;
     m_messageLog += '\n';
 }
@@ -3333,6 +3340,10 @@ UniverseLoader::errorMessage(const QString& message)
 void
 UniverseLoader::warningMessage(const QString& message)
 {
+    if (!m_currentBodyName.isEmpty())
+    {
+        m_messageLog += QString("Item '%1': ").arg(m_currentBodyName);
+    }
     m_messageLog += message;
     m_messageLog += '\n';
 }

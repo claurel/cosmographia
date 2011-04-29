@@ -76,6 +76,8 @@ private:
 
     void loadCatalogFile(const QString& fileName);
 
+    void showCatalogErrorDialog(const QString& errorMessages);
+
 private:
     vesta::counted_ptr<vesta::Universe> m_universe;
 

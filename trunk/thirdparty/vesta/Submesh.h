@@ -1,5 +1,5 @@
 /*
- * $Revision: 404 $ $Date: 2010-08-03 13:04:00 -0700 (Tue, 03 Aug 2010) $
+ * $Revision: 610 $ $Date: 2011-04-29 14:45:37 -0700 (Fri, 29 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -48,6 +48,8 @@ public:
         return m_materials;
     }
 
+    void setMaterial(unsigned int batchIndex, unsigned int materialIndex);
+
     BoundingBox boundingBox() const
     {
         return m_boundingBox;
@@ -68,6 +70,9 @@ public:
 
     static Submesh* mergeSubmeshes(const std::vector<Submesh*>& submeshes);
     bool uniquifyVertices(float positionTolerance = 0.0f, float normalTolerance = 0.0f, float texCoordTolerance = 0.0f);
+
+
+    bool mergeMaterials();
 
     static const unsigned int DefaultMaterialIndex = 0xffffffff;
 

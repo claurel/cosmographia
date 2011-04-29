@@ -1,5 +1,5 @@
 /*
- * $Revision: 370 $ $Date: 2010-07-19 19:24:43 -0700 (Mon, 19 Jul 2010) $
+ * $Revision: 610 $ $Date: 2011-04-29 14:45:37 -0700 (Fri, 29 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -270,6 +270,10 @@ PrimitiveBatch::promoteTo32Bit()
             return false;
         }
     }
+    else
+    {
+        m_indexSize = Index32;
+    }
 
     return true;
 }
@@ -336,7 +340,7 @@ PrimitiveBatch::convertToIndexed()
 
     try
     {
-        if (m_firstVertex + nIndices > MaxIndex16)
+        if (m_indexSize == Index32)
         {
             v_uint32* indexData = new v_uint32[nIndices];
             for (unsigned int i = 0; i < nIndices; ++i)
@@ -344,7 +348,6 @@ PrimitiveBatch::convertToIndexed()
                 indexData[i] = m_firstVertex + i;
             }
             m_indexData = indexData;
-            m_indexSize = Index32;
         }
         else
         {
@@ -354,7 +357,6 @@ PrimitiveBatch::convertToIndexed()
                 indexData[i] = v_uint16(m_firstVertex + i);
             }
             m_indexData = indexData;
-            m_indexSize = Index16;
         }
     }
     catch (std::bad_alloc&)

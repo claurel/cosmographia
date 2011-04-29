@@ -898,6 +898,26 @@ Cosmographia::loadCatalog()
 
 
 void
+Cosmographia::showCatalogErrorDialog(const QString& errorMessages)
+{
+    QDialog errorDialog;
+    errorDialog.setMinimumSize(600, 300);
+    QVBoxLayout* layout = new QVBoxLayout(&errorDialog);
+    layout->addWidget(new QLabel("Error and warning log:", &errorDialog));
+    QTextEdit* text = new QTextEdit(&errorDialog);
+    layout->addWidget(text);
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal, &errorDialog);
+    layout->addWidget(buttonBox);
+    errorDialog.setWindowTitle("Error loading catalog file");
+    text->setText(errorMessages);
+    text->setReadOnly(true);
+    connect(buttonBox, SIGNAL(accepted()), &errorDialog, SLOT(accept()));
+
+    errorDialog.exec();
+}
+
+
+void
 Cosmographia::loadCatalogFile(const QString& fileName)
 {
     if (fileName.isEmpty())
@@ -933,9 +953,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         QString errorMessages = m_loader->messageLog();
         if (!errorMessages.isEmpty())
         {
-            QMessageBox::warning(this,
-                                 tr("Errors in catalog file"),
-                                 errorMessages);
+            showCatalogErrorDialog(errorMessages);
         }
 
         foreach (QString name, bodyNames)
@@ -987,6 +1005,12 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         contents.insert("items", items);
 
         QStringList bodyNames = m_loader->loadCatalogItems(contents, m_catalog);
+        QString errorMessages = m_loader->messageLog();
+        if (!errorMessages.isEmpty())
+        {
+            showCatalogErrorDialog(errorMessages);
+        }
+
         foreach (QString name, bodyNames)
         {
             Entity* e = m_catalog->find(name);

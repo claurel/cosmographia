@@ -1,5 +1,5 @@
 /*
- * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 609 $ $Date: 2011-04-29 12:30:42 -0700 (Fri, 29 Apr 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -1166,6 +1166,20 @@ RenderContext::setShaderMaterial(const Material* material)
     if (isViewDependent)
     {
         Vector3f eyePosition = (inverseModelView * Vector4f::UnitW()).start<3>();
+
+        // Clamp the eyePosition to a distance of 100 times the scale factor. This prevents
+        // precision related rendering errors at small fields of view. The visual result of
+        // this clamping is imperceptible.
+        float eyeDistance = eyePosition.norm();
+        if (eyeDistance > 100.0f)
+        {
+            // Currently, we only apply this correction for planets; for other objects, we
+            // can't make any assumptions about the range of vertex positions.
+            if (shaderInfo.isSpherical())
+            {
+                eyePosition *= 100.0f / eyeDistance;
+            }
+        }
         shader->setConstant("eyePosition", eyePosition);
     }
 

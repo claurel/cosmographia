@@ -193,9 +193,24 @@ An example is given below, but check the separate [ParticleSystem Particle Syste
 "trajectory" :
 {
     "type" : "FixedPoint",
-    "position" : [ 0.1 0.2 0.3 ]
+    "position" : [ 0.1, 0.2, 0.3 ]
 }
 }}}
+
+A FixedPoint trajectory specifies a fixed position within the trajectory frame. The components of position are in kilometers.
+
+== Fixed Spherical ==
+
+{{{
+    "type" : "FixedSpherical",
+    "latitude" :  47.5,
+    "longitude" : -122.5,
+    "radius" : 6378.3
+}}}
+
+Similar to FixedPoint, a FixedSpherical trajectory specifies a constant position within the body's reference frame. Latitude and longitude are given in degrees, and radius has default units of kilometers. All three values must be provided.
+
+Note that FixedSpherical has no notion of the IAU defined planetographic coordinate systems. It works as expected for placing objects on the surfaces of planets except for retrograde rotators, where north and south are reversed.
 
 == Keplerian ==
 

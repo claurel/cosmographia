@@ -491,11 +491,16 @@ static Quaterniond quaternionValue(QVariant v, bool* ok)
 
 
 // Load an angle from a variant and convert it to radians
-static double angleValue(QVariant v, double defaultValue = 0.0)
+static double angleValue(QVariant v, double defaultValue = 0.0, bool* ok = NULL)
 {
-    bool ok = false;
-    double value = v.toDouble(&ok);
+    bool _ok = false;
+    double value = v.toDouble(&_ok);
     if (ok)
+    {
+        *ok = _ok;
+    }
+
+    if (_ok)
     {
         return toRadians(value);
     }
@@ -767,17 +772,54 @@ static double dateValue(QVariant v, bool* ok)
 }
 
 
-vesta::Trajectory* loadFixedTrajectory(const QVariantMap& info)
+vesta::Trajectory*
+UniverseLoader::loadFixedPointTrajectory(const QVariantMap& info)
 {
     bool ok = false;
+
     Vector3d position = vec3Value(info.value("position"), &ok);
     if (!ok)
     {
-        qDebug() << "Invalid or missing position given for FixedPoint trajectory.";
+        errorMessage("Invalid or missing position given for FixedPoint trajectory.");
         return NULL;
     }
 
     return new FixedPointTrajectory(position);
+}
+
+
+vesta::Trajectory*
+UniverseLoader::loadFixedSphericalTrajectory(const QVariantMap& map)
+{
+    bool ok = false;
+
+    QVariant latitudeVar = map.value("latitude");
+    QVariant longitudeVar = map.value("longitude");
+    QVariant radiusVar = map.value("radius");
+
+    double latitude = angleValue(latitudeVar, 0.0, &ok);
+    if (!ok)
+    {
+        errorMessage("Bad or missing latitude for FixedSpherical trajectory");
+        return NULL;
+    }
+
+    double longitude = angleValue(longitudeVar, 0.0, &ok);
+    if (!ok)
+    {
+        errorMessage("Bad or missing longitude for FixedSpherical trajectory");
+        return NULL;
+    }
+
+    double radius = distanceValue(radiusVar, Unit_Kilometer, 0.0, &ok);
+    if (!ok)
+    {
+        errorMessage("Bad or missing radius for FixedSpherical trajectory");
+        return NULL;
+    }
+
+    Vector3d position(cos(latitude) * cos(longitude), cos(latitude) * sin(longitude), sin(latitude));
+    return new FixedPointTrajectory(position * radius);
 }
 
 
@@ -954,7 +996,11 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     QString type = typeData.toString();
     if (type == "FixedPoint")
     {
-        return loadFixedTrajectory(map);
+        return loadFixedPointTrajectory(map);
+    }
+    else if (type == "FixedSpherical")
+    {
+        return loadFixedSphericalTrajectory(map);
     }
     else if (type == "Keplerian")
     {

@@ -1,0 +1,69 @@
+{
+     "version": "1.0",
+     "name": "Tvashtar Volcano",
+
+     "items" :
+     [
+        {
+          "name" : "Tvashtar",
+          "center" : "Io",
+
+          "trajectoryFrame" : { "type" : "BodyFixed", "body" : "Io" },
+          "trajectory" :
+          {
+              "type" : "FixedSpherical",
+              "latitude" : 62.76,
+              "longitude" : 123.53,
+              "radius" : 1820
+          },
+
+          "bodyFrame" : {
+              "type" : "TwoVector",
+              "primaryAxis" : "-z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Tvashtar",
+                  "target" : "Io"
+              },
+              "secondaryAxis" : "y",
+              "secondary" :
+              {
+                  "type" : "ConstantVector",
+                  "direction" : [ 0, 0, 1 ],
+                  "frame" : { "type" : "BodyFixed", "body" : "Io" }
+              }
+          },
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Box",
+                    "center" : [ 0, 0, 0 ],
+                    "sides" : [ 3, 3, 3 ],
+                    "velocity" : [ 0, 0, 0.5 ]
+                },
+                "force" : [ 0, 0, -0.005 ],
+                "velocityVariation" : 1,
+                "trace" : 50,
+                "spawnRate" : 2.5,
+                "lifetime" : 400,
+                "startSize" : 1,
+                "endSize" : 7,
+                "colors" : [
+                   "#5566ff", 0.2,
+                   "#5566ff", 0.4,
+                   "#5566ff", 0.0
+                ],
+                "endTime" : 3451545.0
+              } ]
+          }
+
+        }
+    ]
+}

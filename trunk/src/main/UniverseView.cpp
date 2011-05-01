@@ -1131,6 +1131,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
             if (bodyAxesAction->isChecked())
             {
                 AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::BodyAxes, visualizerSize);
+                axes->setLabelEnabled(true, ArrowGeometry::AllAxes);
                 axes->setVisibility(true);
                 body->setVisualizer("body axes", axes);
             }
@@ -1144,6 +1145,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
             if (frameAxesAction->isChecked())
             {
                 AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::FrameAxes, visualizerSize);
+                axes->setLabelEnabled(true, ArrowGeometry::AllAxes);
                 axes->setVisibility(true);
                 axes->arrows()->setOpacity(0.3f);
                 body->setVisualizer("frame axes", axes);
@@ -1160,6 +1162,8 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
                 VelocityVisualizer* arrow = new VelocityVisualizer(visualizerSize);
                 arrow->setVisibility(true);
                 arrow->setColor(Spectrum(0.25f, 1.0f, 1.0f));
+                arrow->setLabelEnabled(true);
+                arrow->setLabelText("Velocity");
                 body->setVisualizer("velocity direction", arrow);
             }
             else
@@ -1174,6 +1178,8 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
                 ArrowVisualizer* arrow = new BodyDirectionVisualizer(visualizerSize, m_universe->findFirst("Sun"));
                 arrow->setVisibility(true);
                 arrow->setColor(Spectrum(1.0f, 1.0f, 0.7f));
+                arrow->setLabelEnabled(true);
+                arrow->setLabelText("Sun");
                 body->setVisualizer("sun direction", arrow);
             }
             else
@@ -1188,6 +1194,8 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
                 ArrowVisualizer* arrow = new BodyDirectionVisualizer(visualizerSize, m_universe->findFirst("Earth"));
                 arrow->setVisibility(true);
                 arrow->setColor(Spectrum(0.7f, 0.7f, 1.0f));
+                arrow->setLabelEnabled(true);
+                arrow->setLabelText("Earth");
                 body->setVisualizer("earth direction", arrow);
             }
             else

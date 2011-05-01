@@ -2965,6 +2965,21 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
     m_currentBodyName = "";
 
     QStringList bodyNames;
+
+    // Validate the file version (must be 1.0 right now)
+    QVariant versionVar = contents.value("version");
+    if (!versionVar.isValid())
+    {
+        errorMessage("Version missing from catalog file");
+        return bodyNames;
+    }
+    else if (versionVar.toString() != "1.0")
+    {
+        qDebug() << versionVar;
+        errorMessage(QString("Unsupported catalog file version %1 (only version 1.0 allowed)").arg(versionVar.toString()));
+        return bodyNames;
+    }
+
     if (contents.contains("require"))
     {
         QVariant requireVar = contents.value("require");

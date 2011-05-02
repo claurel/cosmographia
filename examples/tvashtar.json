@@ -13,7 +13,7 @@
           {
               "type" : "FixedSpherical",
               "latitude" : 62.76,
-              "longitude" : 123.53,
+              "longitude" : -123.53,
               "radius" : 1820
           },
 
@@ -51,7 +51,7 @@
                 "force" : [ 0, 0, -0.005 ],
                 "velocityVariation" : 1,
                 "trace" : 50,
-                "spawnRate" : 2.5,
+                "spawnRate" : 5,
                 "lifetime" : 400,
                 "startSize" : 1,
                 "endSize" : 7,

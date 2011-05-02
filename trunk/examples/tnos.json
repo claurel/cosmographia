@@ -1,0 +1,38 @@
+{
+     "version": "1.0",
+     "name": "Trans-Neptunian Objects",
+
+     "items" :
+     [
+        {
+          "name" : "Classical KBOs",
+          "center" : "Sun",
+          "bodyFrame" : "EclipticJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "astorb",
+              "source" : "kbos.txt",
+              "particleSize" : 3.0,
+              "color" : "#77cc99",
+              "opacity" : 1.0
+          }
+        },
+
+        {
+          "name" : "Plutinos",
+          "center" : "Sun",
+          "bodyFrame" : "EclipticJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "astorb",
+              "source" : "plutinos.txt",
+              "particleSize" : 3.0,
+              "color" : "#7788cc",
+              "opacity" : 1.0
+          }
+        }
+
+    ]
+}

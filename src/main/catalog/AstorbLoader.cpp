@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QRegExp>
+#include <QDataStream>
 
 using namespace vesta;
 
@@ -115,6 +116,96 @@ LoadAstorbFile(const QString& fileName)
         qDebug() << "astorb file " << fileName << " contains no records";
         delete swarm;
         swarm = NULL;
+    }
+
+    return swarm;
+}
+
+
+/** Load a binary file containing minor planet data. Each record contains the following:
+  *
+  * semi-major axis      (32-bit float, AU)
+  * eccentricity         (32-bit float)
+  * inclination          (32-bit float, degrees)
+  * ascending node       (32-bit float, degrees)
+  * arg. of periapsis    (32-bit float, degrees)
+  * mean anomaly         (32-bit float, degrees)
+  * epoch                (64-bit double, Julian date TT)
+  * discovery date       (32-bit float, Julian date TT)
+  */
+KeplerianSwarm*
+LoadBinaryAstorbFile(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Unable to open astorb data file " << fileName;
+        return NULL;
+    }
+
+    KeplerianSwarm* swarm = new KeplerianSwarm();
+
+    unsigned int objectCount = 0;
+
+    QDataStream in(&file);
+
+    // Set the stream version to 4.5; more recent versions can read single or double precision
+    // floating point values, but not both from the same stream.
+    in.setVersion(QDataStream::Qt_4_5);
+
+    while (!in.atEnd() && in.status() == QTextStream::Ok)
+    {
+        float smaAU = 0.0f;
+        float eccentricity = 0.0f;
+        float inclination = 0.0f;
+        float ascendingNode = 0.0f;
+        float argOfPeriapsis = 0.0f;
+        float meanAnomaly = 0.0f;
+        double epoch = 0.0;
+        float discoveryDate = 0.0f;
+
+        // Read orbital elements
+        in >> smaAU >> eccentricity >> inclination >> ascendingNode >> argOfPeriapsis >> meanAnomaly;
+
+        // Read dates
+        in >> epoch >> discoveryDate;
+
+        double periodYears = pow(smaAU, 1.5);
+
+        if (in.status() == QDataStream::Ok)
+        {
+            OrbitalElements el;
+            el.eccentricity = eccentricity;
+            el.periapsisDistance = (1.0 - eccentricity) * smaAU * astro::AU;
+            el.inclination = toRadians(inclination);
+            el.longitudeOfAscendingNode = toRadians(ascendingNode);
+            el.argumentOfPeriapsis = toRadians(argOfPeriapsis);
+            el.meanAnomalyAtEpoch = toRadians(meanAnomaly);
+            el.meanMotion = 2.0 * PI / daysToSeconds(365.25 * periodYears);
+            el.epoch = daysToSeconds(epoch - J2000);
+
+            float discoveryTime = (float) daysToSeconds(discoveryDate - J2000);
+
+            // Automatically set epoch for the swarm geometry to that of the first record in the file
+            if (objectCount == 0)
+            {
+                swarm->setEpoch(el.epoch);
+            }
+
+            swarm->addObject(el, discoveryTime);
+            objectCount++;
+        }
+    }
+
+    if (objectCount == 0)
+    {
+        qDebug() << "Binary astorb file " << fileName << " contains no records";
+        delete swarm;
+        swarm = NULL;
+    }
+    else
+    {
+        qDebug() << "Binary astorb file contains " << objectCount << " objects";
     }
 
     return swarm;

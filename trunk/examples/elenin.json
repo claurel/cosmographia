@@ -1,0 +1,79 @@
+{
+     "version": "1.0",
+     "name": "Comet Elenin",
+
+     "items" :
+     [
+        {
+          "name" : "C/2010 X1 (Elenin)",
+          "label" : { "color" : "cyan" },
+	  "trajectoryPlot": {
+              "fade" : 0.5,
+	      "duration" : "10y"
+	  }, 
+
+	  "startTime" : "2006-01-01",
+	  "endTime" : "2016-01-01",
+	  "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "elenin.xyzv"
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 1.5,
+              "source" : "smallbodies/churyumov.obj"
+          }
+        },
+
+	{
+	  "name" : "Elenin Tail",
+	  "center" : "C/2010 X1 (Elenin)",
+
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "C/2010 X1 (Elenin)",
+                  "target" : "Sun"
+              },
+              "secondaryAxis" : "x",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "C/2010 X1 (Elenin)",
+                  "target" : "Sun"
+              }
+          },
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Point",
+                    "velocity" : [ 0, 0, -1.0e6 ]
+                },
+		"force" : [ 2.0e4, 0, 0 ],
+                "spawnRate" : 6,
+                "lifetime" : 20,
+		"trace" : 0.3,
+                "startSize" : 40000,
+                "endSize" : 2.0e6,
+                "colors" : [ "#283377", 0.2, "#182266", 0.0 ],
+                "endTime" : 3451545.0
+              } ]
+          }
+	  	  
+	}
+    ]
+}

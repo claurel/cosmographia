@@ -1,0 +1,22 @@
+{
+     "version": "1.0",
+     "name": "All Asteroids",
+
+     "items" :
+     [
+        {
+          "name" : "Asteroids",
+          "center" : "Sun",
+          "bodyFrame" : "EclipticJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "binary",
+              "source" : "allasteroids.dat",
+              "particleSize" : 1.0,
+              "color" : "#aa8855",
+              "opacity" : 0.5
+          }
+        }
+    ]
+}

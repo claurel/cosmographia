@@ -1418,7 +1418,11 @@ UniverseView::setCenterAndFrame(Entity* center, FrameType f)
     }
     else if (f == Frame_Synodic)
     {
-        frame = new TwoBodyRotatingFrame(center->chronology()->firstArc()->center(), center);
+        Entity* target = center->chronology()->firstArc()->center();
+        if (target)
+        {
+            frame = new TwoBodyRotatingFrame(target, center);
+        }
     }
     else
     {

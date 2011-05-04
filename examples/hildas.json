@@ -1,0 +1,22 @@
+{
+     "version": "1.0",
+     "name": "Hilda Family Asteroids",
+
+     "items" :
+     [
+        {
+          "name" : "Hilda Family",
+          "center" : "Sun",
+          "bodyFrame" : "EclipticJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "binary",
+              "source" : "hildas.dat",
+              "particleSize" : 3.0,
+              "color" : "#ff3311",
+              "opacity" : 1.0
+          }
+        }
+    ]
+}

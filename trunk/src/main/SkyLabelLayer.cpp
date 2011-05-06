@@ -37,14 +37,44 @@ SkyLabelLayer::~SkyLabelLayer()
 void
 SkyLabelLayer::render(vesta::RenderContext& rc)
 {
+    rc.setVertexInfo(VertexSpec::Position);
+
+    Material material;
+    material.setDiffuse(Spectrum::White());
+    rc.bindMaterial(&material);
+    glDepthMask(GL_FALSE);
+
+    Quaterniond orientation = Quaterniond::Identity();
+
+    rc.pushModelView();
+    rc.rotateModelView(orientation.cast<float>());
+
+#if 0
+    glPointSize(10.0f);
+    glBegin(GL_POINTS);
+    glVertex3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(-1.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 1.0f, 0.0f);
+    glVertex3f(0.0f, -1.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, 1.0f);
+    glVertex3f(0.0f, 0.0f, -1.0f);
+    glEnd();
+    glPointSize(1.0f);
+#endif
+
     for (vector<SkyLabel>::const_iterator iter = m_labels.begin(); iter != m_labels.end(); ++iter)
     {
         const SkyLabel& label = *iter;
+
         Spectrum color(label.color[0], label.color[1], label.color[2]);
 
-        //std::cerr << label.text << ": " << label.position.transpose() << std::endl;
-        rc.drawText(label.position * 5.0f, label.text, m_font.ptr(), color, m_opacity);
+        rc.pushModelView();
+        rc.translateModelView(label.position);
+        rc.drawText(Vector3f::Zero(), label.text, m_font.ptr(), color, m_opacity);
+        rc.popModelView();
     }
+
+    rc.popModelView();
 }
 
 

@@ -24,6 +24,8 @@
 #include "Viewpoint.h"
 #include "InterpolatedStateTrajectory.h"
 #include "DateUtility.h"
+#include "SkyLabelLayer.h"
+#include "ConstellationInfo.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -1056,27 +1058,28 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         QAction* nameAction = menu->addAction(QString::fromUtf8(body->name().c_str()));
         nameAction->setEnabled(false);
 
+        QAction* centerAction = menu->addAction(tr("Set as Center"));
         QAction* gotoAction = menu->addAction(tr("Go to"));
 
         // Add actions for displaying reference vectors
         menu->addSeparator();
-        QAction* bodyAxesAction = menu->addAction(tr("Body axes"));
-        QAction* frameAxesAction = menu->addAction(tr("Frame axes"));
-        QAction* velocityDirectionAction = menu->addAction("Velocity vector");
+        QAction* bodyAxesAction = menu->addAction(tr("Body Axes"));
+        QAction* frameAxesAction = menu->addAction(tr("Frame Axes"));
+        QAction* velocityDirectionAction = menu->addAction("Velocity Vector");
         QAction* sunDirectionAction = NULL;
         QAction* earthDirectionAction = NULL;
 
         if (body->name() != "Sun")
         {
-            sunDirectionAction = menu->addAction(tr("Sun direction"));
+            sunDirectionAction = menu->addAction(tr("Sun Direction"));
         }
         if (body->name() != "Earth")
         {
-            earthDirectionAction = menu->addAction(tr("Earth direction"));
+            earthDirectionAction = menu->addAction(tr("Earth Direction"));
         }
 
         menu->addSeparator();
-        QAction* plotTrajectoryAction = menu->addAction("Plot trajectory");
+        QAction* plotTrajectoryAction = menu->addAction("Plot Trajectory");
 
         bodyAxesAction->setCheckable(true);
         bodyAxesAction->setChecked(body->visualizer("body axes") != NULL);
@@ -1110,7 +1113,11 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         }
 
         QAction* chosenAction = menu->exec(event->globalPos(), bodyAxesAction);
-        if (chosenAction == gotoAction)
+        if (chosenAction == centerAction)
+        {
+            setCenterAndFrame(body, m_observerFrame);
+        }
+        else if (chosenAction == gotoAction)
         {
             double distanceFromTarget = 500.0;
             if (body->geometry())
@@ -1330,6 +1337,22 @@ UniverseView::initializeSkyLayers()
     constellations->setDefaultConstellations();
     constellations->setVisibility(false);
     m_universe->setLayer("constellation figures", constellations);
+
+    SkyLabelLayer* constellationNamesLayer = new SkyLabelLayer();
+    constellationNamesLayer->setVisibility(false);
+
+    constellationNamesLayer->setFont(m_textFont.ptr());
+    Spectrum labelColor(0.2f, 0.1f, 0.6f);
+    const vector<ConstellationInfo>& allConstellations = ConstellationInfo::constellations();
+    for (unsigned int i = 0; i < allConstellations.size(); ++i)
+    {
+        const ConstellationInfo& info = allConstellations[i];
+        constellationNamesLayer->addLabel(info.name(),
+                                          toRadians(info.labelLocation().y()),
+                                          toRadians(info.labelLocation().x() * 15.0f),
+                                          labelColor);
+    }
+    m_universe->setLayer("constellation names", constellationNamesLayer);
 }
 
 
@@ -1610,6 +1633,17 @@ void
 UniverseView::setConstellationFigureVisibility(bool checked)
 {
     SkyLayer* layer = m_universe->layer("constellation figures");
+    if (layer)
+    {
+        layer->setVisibility(checked);
+    }
+}
+
+
+void
+UniverseView::setConstellationNameVisibility(bool checked)
+{
+    SkyLayer* layer = m_universe->layer("constellation names");
     if (layer)
     {
         layer->setVisibility(checked);

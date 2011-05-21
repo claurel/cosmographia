@@ -258,6 +258,9 @@ Cosmographia::Cosmographia() :
     QAction* figuresAction = new QAction("Constellation &Figures", visualAidsMenu);
     figuresAction->setCheckable(true);
     visualAidsMenu->addAction(figuresAction);
+    QAction* constellationNamesAction = new QAction("Constellation &Names", visualAidsMenu);
+    constellationNamesAction->setCheckable(true);
+    visualAidsMenu->addAction(constellationNamesAction);
     visualAidsMenu->addSeparator();
 
     QAction* planetOrbitsAction = new QAction("Planet &Orbits", visualAidsMenu);
@@ -283,6 +286,7 @@ Cosmographia::Cosmographia() :
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
     connect(labelsAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setLabelVisibility(bool)));
     connect(figuresAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(setConstellationFigureVisibility(bool)));
+    connect(constellationNamesAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(setConstellationNameVisibility(bool)));
 
     connect(planetOrbitsAction, SIGNAL(triggered(bool)), this, SLOT(setPlanetOrbitsVisibility(bool)));
     connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));

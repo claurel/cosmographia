@@ -14,6 +14,8 @@ MAIN_PATH = src/Main
 
 APP_SOURCES = \
     $$MAIN_PATH/main.cpp \
+    $$MAIN_PATH/Addon.cpp \
+    $$MAIN_PATH/ConstellationInfo.cpp \
     $$MAIN_PATH/Cosmographia.cpp \
     $$MAIN_PATH/UniverseView.cpp \
     $$MAIN_PATH/Viewpoint.cpp \
@@ -29,6 +31,7 @@ APP_SOURCES = \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
+    $$MAIN_PATH/SkyLabelLayer.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
     $$MAIN_PATH/TwoVectorFrame.cpp \
     $$MAIN_PATH/WMSRequester.cpp \
@@ -53,6 +56,8 @@ APP_SOURCES = \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp
 
 APP_HEADERS = \
+    $$MAIN_PATH/Addon.h \
+    $$MAIN_PATH/ConstellationInfo.h \
     $$MAIN_PATH/Cosmographia.h \
     $$MAIN_PATH/UniverseView.h \
     $$MAIN_PATH/Viewpoint.h \
@@ -68,6 +73,7 @@ APP_HEADERS = \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/MeshInstanceGeometry.h \
     $$MAIN_PATH/ObserverAction.h \
+    $$MAIN_PATH/SkyLabelLayer.h \
     $$MAIN_PATH/TleTrajectory.h \
     $$MAIN_PATH/TwoVectorFrame.h \
     $$MAIN_PATH/WMSRequester.h \

@@ -1,7 +1,9 @@
 <RCC>
     <qresource prefix="/icons">
+        <file>clear.png</file>
         <file>config.png</file>
         <file>disk.png</file>
         <file>help.png</file>
+        <file>search.png</file>
     </qresource>
 </RCC>

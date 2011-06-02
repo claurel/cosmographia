@@ -85,6 +85,9 @@
 #include <QLocale>
 #include <QPinchGesture>
 
+#include <QDeclarativeEngine>
+#include <QDeclarativeComponent>
+
 using namespace vesta;
 using namespace Eigen;
 using namespace std;
@@ -117,10 +120,46 @@ static string TrajectoryVisualizerName(Entity* entity)
 }
 
 
-static QGraphicsScene* m_guiScene;
+class UniverseGLWidget : public QGLWidget
+{
+    //Q_OBJECT
+
+public:
+    UniverseGLWidget(QWidget* parent, UniverseRenderer* renderer) :
+        QGLWidget(parent),
+        m_renderer(renderer)
+    {
+        setAttribute(Qt::WA_PaintOnScreen);
+        setAttribute(Qt::WA_NoSystemBackground);
+        setAttribute(Qt::WA_OpaquePaintEvent);
+        setBackgroundRole(QPalette::Window);
+    }
+
+
+    virtual ~UniverseGLWidget()
+    {
+    }
+
+
+    virtual void initializeGL()
+    {
+        QGLWidget::initializeGL();
+
+        // Assume that the parent is a UniverseView and call it to
+        // initialize resources.
+        if (dynamic_cast<UniverseView*>(parent()))
+        {
+            dynamic_cast<UniverseView*>(parent())->initializeGL();
+        }
+    }
+
+private:
+    UniverseRenderer* m_renderer;
+};
+
 
 UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog* catalog) :
-    QGLWidget(parent),
+    QDeclarativeView(parent),
     m_mouseMovement(0),
     m_lastDoubleClickTime(0.0),
     m_catalog(catalog),
@@ -149,6 +188,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_sunGlareEnabled(true),
     m_infoTextVisible(true),
     m_labelsVisible(true),
+    m_guiScene(NULL),
     m_videoEncoder(NULL),
     m_timeDisplay(TimeDisplay_UTC),
     m_wireframe(false)
@@ -165,13 +205,29 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_titleFont = new TextureFont();
     m_spacecraftIcon = m_textureLoader->loadTexture(":/icons/disk.png", TextureProperties(TextureProperties::Clamp));
 
+    UniverseGLWidget* glWidget = new UniverseGLWidget(this, m_renderer);
+    glWidget->updateGL();
+    setViewport(glWidget);
+
     initializeObserver();
     initializeSkyLayers();
 
-    m_guiScene = new QGraphicsScene(this);
-    m_guiScene->addWidget(new QPushButton("Big Button"));
-    m_guiScene->addEllipse(QRectF(200.0f, 150.0f, 300.0f, 200.0f), QPen(Qt::red), QBrush(Qt::blue));
-    m_guiScene->setBackgroundBrush(Qt::white);
+    setBackgroundBrush(Qt::transparent);
+
+    setSource(QUrl::fromLocalFile("qml/main.qml"));
+    setResizeMode(SizeRootObjectToView);
+
+    QObject *searchBox = rootObject()->findChild<QObject*>("searchBox");
+    if (searchBox)
+    {
+        connect(searchBox, SIGNAL(searchEntered(QString)), this, SLOT(setSelectedBody(QString)));
+    }
+    else
+    {
+        qDebug() << "searchBox item is missing from QML UI files!";
+    }
+
+    scene()->setBackgroundBrush(Qt::NoBrush);
 
     // Initialize the base time that will be used as a reference for calculating
     // the elapsed time.
@@ -199,7 +255,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
 UniverseView::~UniverseView()
 {
-    makeCurrent();
+    //makeCurrent();
     delete m_renderer;
 }
 
@@ -266,6 +322,8 @@ void UniverseView::initializeGL()
     {
         qCritical("Creating renderer failed because OpenGL couldn't be initialized.");
     }
+
+    m_spacecraftIcon->makeResident();
 
     glShadeModel(GL_FLAT);
     glEnable(GL_DEPTH_TEST);
@@ -398,30 +456,43 @@ UniverseView::initNetwork()
 
 void UniverseView::paintEvent(QPaintEvent* /* event */)
 {
-    makeCurrent();
+    // Make the viewport's GL context current
+    dynamic_cast<QGLWidget*>(viewport())->makeCurrent();
+
+    QPainter painter(viewport());
+
+    // Save the state of the painter
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    // Render the universe using VESTA
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_CULL_FACE);
     paintGL();
-    swapBuffers();
 
-#if 0
-    QPainter painter(this);
-    painter.fillRect(0, 0, 500, 500, QBrush(Qt::green));
+    // Restore the state of the painter
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopAttrib();
 
-    //painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::red);
-    painter.fillRect(0, 0, 500, 500, QBrush(Qt::green));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glUseProgram(0);
+    glShadeModel(GL_FLAT);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
 
-    if (m_guiScene)
-    {
-        //m_guiScene->render(&painter, QRectF(0.0f, 0.0f, 400.0f, 400.0f), m_guiScene->sceneRect());
-    }
+    // Draw the user interface
+    QRectF viewRect(0.0f, 0.0f, width(), height());
+    scene()->render(&painter, viewRect, viewRect);
 
-    painter.drawText(100, 100, GregorianDate::UTCDateFromTDBSec(m_simulationTime).toString().c_str());
-    painter.drawText(200, 200, "This is a test");
-    painter.drawLine(QPointF(100, 100), QPointF(200, 200));
-    painter.drawEllipse(QPoint(200, 200), 150, 150);
-
+    // The painter automatically calls swapBuffers
     painter.end();
-#endif
 }
 
 
@@ -478,141 +549,29 @@ QString formatDate(const GregorianDate& date)
 }
 
 
-void UniverseView::paintGL()
+/*
+// Only required for debugging
+static void drawQuad(float x, float y, float width, float height)
 {
-    // Update the frame counter
-    double elapsedTime = secondsFromBaseTime();
-    if (m_frameCount == 0)
-    {
-        m_frameCountStartTime = elapsedTime;
-    }
-    else if (elapsedTime - m_frameCountStartTime > 1.0)
-    {
-        m_framesPerSecond = m_frameCount / (elapsedTime - m_frameCountStartTime);
-        m_frameCount = 0;
-        m_frameCountStartTime = elapsedTime;
-    }
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(x, y);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(x + width, y);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(x + width, y + height);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(x, y + height);
+    glEnd();
+}
+*/
 
-    m_frameCount++;
 
-    m_textureLoader->incrementFrameCount();
-    m_textureLoader->evictTextures();
-    m_textureLoader->realizeLoadedTextures();
-
-    updateTrajectoryPlots();
-
-    // Adjust the amount of glare based on the window size
-    if (m_glareOverlay.isValid())
-    {
-        m_glareOverlay->setGlareSize(max(width(), height()) / 20.0f);
-    }
-
-    m_renderer->beginViewSet(m_universe.ptr(), m_simulationTime);
-
-    if (m_reflectionsEnabled && !m_reflectionMap.isNull())
-    {
-        // Draw the reflection map; disable sky layers because they look bad when rendered
-        // at low resolution into the reflection map. Visualizers are also disabled because
-        // we want to reflect only physical geometry.
-        Vector3d reflectionCenter = m_observer->absolutePosition(m_simulationTime);
-        m_renderer->setVisualizersEnabled(false);
-        m_renderer->setSkyLayersEnabled(false);
-
-        // Set the near clip plane distance to 1km so that only distant objects are drawn
-        // into the reflection map.
-        m_renderer->renderCubeMap(NULL, reflectionCenter, m_reflectionMap.ptr(), 1.0f);
-
-        // Generate mipmaps
-        // TODO: Move this into GLCubeMapFramebuffer
-        /*
-        glBindTexture(GL_TEXTURE_CUBE_MAP, m_reflectionMap->cubeMapId());
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glGenerateMipmapEXT(GL_TEXTURE_CUBE_MAP);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-        */
-
-        m_renderer->setVisualizersEnabled(true);
-        m_renderer->setSkyLayersEnabled(true);
-    }
-
-    // Draw the 3D scene
-    glDepthMask(GL_TRUE);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    Viewport mainViewport(size().width(), size().height());
-    LightingEnvironment lighting;
-    if (m_reflectionsEnabled && m_reflectionMap.isValid())
-    {
-        // Add reflection map info to the lighting evironment
-        lighting.reset();
-        ReflectionRegion cameraRegion;
-        cameraRegion.cubeMap = m_reflectionMap->colorTexture();
-        cameraRegion.region = BoundingSphere<float>(Vector3f::Zero(), 1.0f);
-        lighting.reflectionRegions().push_back(cameraRegion);
-    }
-
-    if (m_wireframe)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-
-    if (m_anaglyphEnabled)
-    {
-        Quaterniond cameraOrientation = m_observer->absoluteOrientation(m_simulationTime);
-        Vector3d cameraPosition = m_observer->absolutePosition(m_simulationTime);
-        double eyeSeparation = m_observer->position().norm() / 50.0;//0.0001;
-        float focalPlaneDistance = eyeSeparation * 25.0f;
-        float nearDistance = 0.00001f;
-        float farDistance = 1.0e12f;
-        float y = tan(0.5f * m_fovY) * nearDistance;
-        float x = y * mainViewport.aspectRatio();
-
-        float stereoOffset = float(eyeSeparation) * nearDistance / focalPlaneDistance;
-
-        PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + float(stereoOffset), x, -y, y, nearDistance, farDistance);
-        PlanarProjection rightProjection(PlanarProjection::Perspective, -x, x - float(stereoOffset), -y, y, nearDistance, farDistance);
-
-        Vector3d leftEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * -eyeSeparation);
-        Vector3d rightEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * eyeSeparation);
-
-        glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE); // red
-        //glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_TRUE);  // green
-        m_renderer->renderView(&lighting, leftEyePosition, cameraOrientation, leftProjection, mainViewport);
-        glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE); // cyan
-        //glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);   // magenta
-        glDepthMask(GL_TRUE);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        m_renderer->renderView(&lighting, rightEyePosition, cameraOrientation, rightProjection, mainViewport);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    }
-    else
-    {
-        m_renderer->renderView(&lighting, m_observer.ptr(), m_fovY, mainViewport);
-        if (m_sunGlareEnabled && m_glareOverlay.isValid())
-        {
-            m_glareOverlay->adjustBrightness();
-            m_renderer->renderLightGlare(m_glareOverlay.ptr());
-        }
-    }
-
-    if (m_wireframe)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-    m_renderer->endViewSet();
-
-#if FFMPEG_SUPPORT
-    if (m_videoEncoder)
-    {
-        QImage image = grabFrameBuffer(false);
-        image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        m_videoEncoder->encodeImage(image);
-    }
-#endif
-
-    // Draw informational text over the 3D view
+// Draw informational text over the 3D view
+// TODO: Convert this to QML
+void
+UniverseView::drawInfoOverlay()
+{
     int viewportWidth = size().width();
     int viewportHeight = size().height();
     glViewport(0, 0, viewportWidth, viewportHeight);
@@ -642,17 +601,6 @@ void UniverseView::paintGL()
 
     if (m_infoTextVisible)
     {
-#if 0
-        if (m_titleFont.isValid())
-        {
-            m_titleFont->bind();
-
-            const char* title = "Cosmographia";
-            int titleWidth = m_titleFont->textWidth(title);
-            m_titleFont->render(title, Vector2f(floor((viewportWidth - titleWidth) / 2.0f), viewportHeight - 30.0f));
-        }
-#endif
-
         if (m_textFont.isValid())
         {
             const int titleFontHeight = 30;
@@ -758,6 +706,7 @@ void UniverseView::paintGL()
                 QString fovInfo = QString("%1\260 FOV").arg(toDegrees(m_fovY), 6, 'f', 1);
                 m_textFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
             }
+
         }
     }
 
@@ -784,6 +733,144 @@ void UniverseView::paintGL()
 }
 
 
+void UniverseView::paintGL()
+{
+    // Update the frame counter
+    double elapsedTime = secondsFromBaseTime();
+    if (m_frameCount == 0)
+    {
+        m_frameCountStartTime = elapsedTime;
+    }
+    else if (elapsedTime - m_frameCountStartTime > 1.0)
+    {
+        m_framesPerSecond = m_frameCount / (elapsedTime - m_frameCountStartTime);
+        m_frameCount = 0;
+        m_frameCountStartTime = elapsedTime;
+    }
+
+    m_frameCount++;
+
+    m_textureLoader->incrementFrameCount();
+    m_textureLoader->evictTextures();
+    m_textureLoader->realizeLoadedTextures();
+
+    updateTrajectoryPlots();
+
+    // Adjust the amount of glare based on the window size
+    if (m_glareOverlay.isValid())
+    {
+        m_glareOverlay->setGlareSize(max(width(), height()) / 20.0f);
+    }
+
+    m_renderer->beginViewSet(m_universe.ptr(), m_simulationTime);
+
+    if (m_reflectionsEnabled && !m_reflectionMap.isNull())
+    {
+        // Draw the reflection map; disable sky layers because they look bad when rendered
+        // at low resolution into the reflection map. Visualizers are also disabled because
+        // we want to reflect only physical geometry.
+        Vector3d reflectionCenter = m_observer->absolutePosition(m_simulationTime);
+        m_renderer->setVisualizersEnabled(false);
+        m_renderer->setSkyLayersEnabled(false);
+
+        // Set the near clip plane distance to 1km so that only distant objects are drawn
+        // into the reflection map.
+        m_renderer->renderCubeMap(NULL, reflectionCenter, m_reflectionMap.ptr(), 1.0f);
+
+        // Generate mipmaps
+        // TODO: Move this into GLCubeMapFramebuffer
+        /*
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_reflectionMap->cubeMapId());
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glGenerateMipmapEXT(GL_TEXTURE_CUBE_MAP);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        */
+
+        m_renderer->setVisualizersEnabled(true);
+        m_renderer->setSkyLayersEnabled(true);
+    }
+
+    // Draw the 3D scene
+    glDepthMask(GL_TRUE);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    Viewport mainViewport(size().width(), size().height());
+    LightingEnvironment lighting;
+    if (m_reflectionsEnabled && m_reflectionMap.isValid())
+    {
+        // Add reflection map info to the lighting evironment
+        lighting.reset();
+        ReflectionRegion cameraRegion;
+        cameraRegion.cubeMap = m_reflectionMap->colorTexture();
+        cameraRegion.region = BoundingSphere<float>(Vector3f::Zero(), 1.0f);
+        lighting.reflectionRegions().push_back(cameraRegion);
+    }
+
+    if (m_wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+
+    if (m_anaglyphEnabled)
+    {
+        Quaterniond cameraOrientation = m_observer->absoluteOrientation(m_simulationTime);
+        Vector3d cameraPosition = m_observer->absolutePosition(m_simulationTime);
+        double eyeSeparation = m_observer->position().norm() / 50.0;//0.0001;
+        float focalPlaneDistance = eyeSeparation * 25.0f;
+        float nearDistance = 0.00001f;
+        float farDistance = 1.0e12f;
+        float y = tan(0.5f * m_fovY) * nearDistance;
+        float x = y * mainViewport.aspectRatio();
+
+        float stereoOffset = float(eyeSeparation) * nearDistance / focalPlaneDistance;
+
+        PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + float(stereoOffset), x, -y, y, nearDistance, farDistance);
+        PlanarProjection rightProjection(PlanarProjection::Perspective, -x, x - float(stereoOffset), -y, y, nearDistance, farDistance);
+
+        Vector3d leftEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * -eyeSeparation);
+        Vector3d rightEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * eyeSeparation);
+
+        glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE); // red
+        //glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_TRUE);  // green
+        m_renderer->renderView(&lighting, leftEyePosition, cameraOrientation, leftProjection, mainViewport);
+        glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE); // cyan
+        //glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);   // magenta
+        glDepthMask(GL_TRUE);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        m_renderer->renderView(&lighting, rightEyePosition, cameraOrientation, rightProjection, mainViewport);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    }
+    else
+    {
+        m_renderer->renderView(&lighting, m_observer.ptr(), m_fovY, mainViewport);
+        if (m_sunGlareEnabled && m_glareOverlay.isValid())
+        {
+            m_glareOverlay->adjustBrightness();
+            m_renderer->renderLightGlare(m_glareOverlay.ptr());
+        }
+    }
+
+    if (m_wireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+    m_renderer->endViewSet();
+
+#if FFMPEG_SUPPORT
+    if (m_videoEncoder)
+    {
+        QImage image = grabFrameBuffer(false);
+        image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        m_videoEncoder->encodeImage(image);
+    }
+#endif
+
+    drawInfoOverlay();
+}
+
+
 void UniverseView::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -792,6 +879,8 @@ void UniverseView::resizeGL(int width, int height)
 
 void UniverseView::mousePressEvent(QMouseEvent *event)
 {
+    QDeclarativeView::mousePressEvent(event);
+
     m_lastMousePosition = event->pos();
     m_mouseMovement = 0;
 }
@@ -799,6 +888,8 @@ void UniverseView::mousePressEvent(QMouseEvent *event)
 
 void UniverseView::mouseReleaseEvent(QMouseEvent* event)
 {
+    QDeclarativeView::mouseReleaseEvent(event);
+
     // Process the mouse release as a click if the mouse hasn't moved
     // much since the mouse button was pressed
     if (m_mouseMovement < 4)
@@ -814,8 +905,11 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
         }
         else if (event->button() == Qt::RightButton)
         {
-            // Right click invokes the context menu
-            QContextMenuEvent menuEvent(QContextMenuEvent::Other, event->pos(), event->globalPos());
+            // Right click invokes the context menu; lie about the origin of the context
+            // menu event so that the event handler can distinguish standard mouse-generated
+            // context menu events and discard them. Ordinary context menu events interfere with
+            // right-dragging to pan the camera view.
+            QContextMenuEvent menuEvent(QContextMenuEvent::Keyboard, event->pos(), event->globalPos());
             QCoreApplication::sendEvent(this, &menuEvent);
         }
     }
@@ -824,6 +918,8 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
 
 void UniverseView::mouseDoubleClickEvent(QMouseEvent* event)
 {
+    QDeclarativeView::mouseDoubleClickEvent(event);
+
     if (event->button() == Qt::LeftButton)
     {
         double t = secondsFromBaseTime();
@@ -844,6 +940,8 @@ void UniverseView::mouseDoubleClickEvent(QMouseEvent* event)
 
 void UniverseView::mouseMoveEvent(QMouseEvent *event)
 {
+    QDeclarativeView::mouseMoveEvent(event);
+
     int dx = event->x() - m_lastMousePosition.x();
     int dy = event->y() - m_lastMousePosition.y();
     m_mouseMovement += abs(dx) + abs(dy);
@@ -914,6 +1012,8 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
 
 void UniverseView::wheelEvent(QWheelEvent* event)
 {
+    QDeclarativeView::wheelEvent(event);
+
     if (event->orientation() == Qt::Vertical)
     {
         // Delta in steps of 1/8 of degree; typical
@@ -932,6 +1032,8 @@ void UniverseView::wheelEvent(QWheelEvent* event)
 void
 UniverseView::keyPressEvent(QKeyEvent* event)
 {
+    QDeclarativeView::keyPressEvent(event);
+
     switch (event->key())
     {
     case Qt::Key_Left:
@@ -956,6 +1058,8 @@ UniverseView::keyPressEvent(QKeyEvent* event)
 void
 UniverseView::keyReleaseEvent(QKeyEvent* event)
 {
+    QDeclarativeView::keyReleaseEvent(event);
+
     switch (event->key())
     {
     case Qt::Key_Left:
@@ -1007,7 +1111,7 @@ UniverseView::event(QEvent* e)
     }
     else
     {
-        return QGLWidget::event(e);
+        return QDeclarativeView::event(e);
     }
 }
 
@@ -1907,10 +2011,49 @@ UniverseView::finishVideoRecording()
 }
 
 
+QImage
+UniverseView::grabFrameBuffer(bool withAlpha)
+{
+    return dynamic_cast<QGLWidget*>(viewport())->grabFrameBuffer(withAlpha);
+}
+
+
 void
 UniverseView::setSelectedBody(Entity* body)
 {
     m_selectedBody = body;
+}
+
+
+void
+UniverseView::setSelectedBody(const QString& name)
+{
+    Entity* body = NULL;
+
+    QStringList allNames = m_catalog->names();
+    foreach (QString s, allNames)
+    {
+        if (name.compare(s, Qt::CaseInsensitive) == 0)
+        {
+            body = m_catalog->find(s);
+            break;
+        }
+    }
+
+    if (body)
+    {
+        setSelectedBody(body);
+    }
+}
+
+
+void
+UniverseView::findObject()
+{
+    // Show the QML find object widget
+    // This function will be unnecessary once more of the UI moves into QML
+    QVariant returnedValue;
+    QMetaObject::invokeMethod(rootObject(), "showFindObject", Q_RETURN_ARG(QVariant, returnedValue));
 }
 
 

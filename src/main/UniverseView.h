@@ -20,7 +20,7 @@
 
 #include "NetworkTextureLoader.h"
 #include "catalog/UniverseCatalog.h"
-#include <QGLWidget>
+#include <QDeclarativeView>
 #include <QTimer>
 #include <QDateTime>
 #include <QGestureEvent>
@@ -35,6 +35,8 @@ class QVideoEncoder;
 class ObserverAction;
 class Viewpoint;
 
+class QGraphicsScene;
+
 namespace vesta
 {
     class UniverseRenderer;
@@ -48,7 +50,7 @@ namespace vesta
     class GlareOverlay;
 }
 
-class UniverseView : public QGLWidget
+class UniverseView : public QDeclarativeView
 {
      Q_OBJECT
 
@@ -116,8 +118,12 @@ public:
     }
 
     void setSelectedBody(vesta::Entity* body);
+    QImage grabFrameBuffer(bool withAlpha = false);
 
     void replaceEntity(vesta::Entity* entity, const BodyInfo* info);
+
+    void initializeGL();
+
 
 public slots:
     void tick();
@@ -154,9 +160,12 @@ public slots:
     void setTimeDisplay(TimeDisplayMode mode);
 
     void setUpdateInterval(unsigned int msec);
+    void findObject();
+
+private slots:
+    void setSelectedBody(const QString& name);
 
 protected:
-    void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent *event);
@@ -171,6 +180,8 @@ protected:
     bool event(QEvent* event);
 
 private:
+    void drawInfoOverlay();
+
     enum FrameType
     {
         Frame_Inertial,
@@ -256,6 +267,8 @@ private:
     bool m_labelsVisible;
 
     vesta::counted_ptr<ObserverAction> m_observerAction;
+
+    QGraphicsScene* m_guiScene;
 
     QVideoEncoder* m_videoEncoder;
     TimeDisplayMode m_timeDisplay;

@@ -234,7 +234,7 @@ Cosmographia::Cosmographia() :
 
     this->menuBar()->addMenu(cameraMenu);
 
-    connect(findAction,      SIGNAL(triggered()),     this,     SLOT(findObject()));
+    connect(findAction,      SIGNAL(triggered()),     m_view3d, SLOT(findObject()));
     connect(centerAction,    SIGNAL(triggered()),     m_view3d, SLOT(setObserverCenter()));
     connect(gotoAction,      SIGNAL(triggered()),     m_view3d, SLOT(gotoSelectedObject()));
     connect(inertialAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(inertialObserver(bool)));
@@ -567,10 +567,10 @@ Cosmographia::initialize()
 }
 
 
+// This method is rendered obsolete by the new QML-based user interface
 void
 Cosmographia::findObject()
 {
-#if 1
     QDialog findDialog(this);
     findDialog.setWindowTitle(tr("Find Object"));
     QComboBox* nameEntry = new QComboBox(&findDialog);
@@ -606,24 +606,6 @@ Cosmographia::findObject()
             m_view3d->setSelectedBody(body);
         }
     }
-#else
-    m_control->setVisible(!m_control->isVisible());
-
-    if (m_control->isVisible())
-    {
-        m_control->raise();
-        // TODO: If we need to support extremely large numbers of objects, we should
-        // use a abstract item model instead of a completer.
-        QCompleter* completer = new QCompleter(m_catalog->names(), m_control->m_findCombo);
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
-        m_control->m_findCombo->setCompleter(completer);
-        m_control->m_findCombo->setFocus();
-    }
-    else
-    {
-
-    }
-#endif
 }
 
 

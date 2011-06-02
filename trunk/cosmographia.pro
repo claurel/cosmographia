@@ -6,6 +6,7 @@ DESTDIR = build
 
 QT += opengl
 QT += network
+QT += declarative
 
 
 #### App sources ####
@@ -585,6 +586,13 @@ macx {
         data/titan.atmscat
 
     QMAKE_BUNDLE_DATA += DATA
+
+    GUI.path = Contents/Resources/data/qml
+    GUI.files = \
+        data/qml/main.qml \
+        data/qml/SearchBox.qml
+
+    QMAKE_BUNDLE_DATA += GUI
 
     # CONFIG += x86
     # QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.5.sdk

@@ -18,23 +18,51 @@
 import QtQuick 1.0
 
 Item {
-     id: page
-     width: 1680; height: 1050
+    id: page
+    width: 1680; height: 1050
 
-     function showFindObject()
-     {
-         findObject.searchText = "";
-         findObject.opacity = 1;
-	 findObject.focus = true;
-     }
+    function showFindObject()
+    {
+        findObject.searchText = "";
+        findObject.opacity = 1;
+        findObject.focus = true;
+    }
 
-     MouseArea {
-         id: pageArea
-         anchors.fill: parent
-         hoverEnabled: true
-     }
+    MouseArea {
+        id: pageArea
+        anchors.fill: parent
+        hoverEnabled: true
+    }
 
-     Row {
+    TextPanel {
+        id: helpPanel
+        opacity: 0
+        textColor: "white"
+        text:
+"<b>Cosmographia controls</b>
+<br><br>
+<b>Mouse</b>
+<ul>
+<li>Left drag orbits center object</li>
+<li>Right drag pans the view</li>
+<li>Mouse wheel changes distance to center object</li>
+<li>Single click selects an object</li>
+<li>Double click an object to visit it</li>
+</ul>
+<b>Keyboard</b>
+<ul>
+<li>Arrow keys pan the view</li>
+</ul>
+<b>Gestures</b>
+<ul>
+<li>On supported trackpads, pinch or expand to change the field of view</li>
+</ul>
+<br><br>
+For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki/UserInterface\">the Cosmographia website</a>.
+"
+    }
+
+    Row {
          anchors {
              horizontalCenter: parent.horizontalCenter
          }
@@ -80,6 +108,11 @@ Item {
              width: 32; height: 32
              source: "qrc:/icons/help.png"
              smooth: true
+
+             MouseArea {
+                 anchors.fill: parent
+                 onClicked: { helpPanel.show() }
+             }
          }
 
          states: [

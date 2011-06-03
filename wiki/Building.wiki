@@ -11,3 +11,5 @@ Follow these steps to get started:
  * Choose 'Open Build/Run Target Selector' from Qt Creators Build menu; change the build from 'Debug' to Release.
  * Choose 'Build' from the Build menu (Ctrl-B, or Command-B on the Mac)
  * Choose 'Run' from the Build menu (Ctrl-R, or Command-R on the Mac)
+
+*Cosmographia requires Qt version 4.7.1 or later!* The user interface of Cosmographia is written (partly) in the QML language, which is a recent addition to the Qt framework.

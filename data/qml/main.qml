@@ -25,6 +25,7 @@ Item {
      {
          findObject.searchText = "";
          findObject.opacity = 1;
+	 findObject.focus = true;
      }
 
      MouseArea {

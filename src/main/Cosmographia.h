@@ -18,6 +18,7 @@
 #ifndef _COSMOGRAPHIA_H_
 #define _COSMOGRAPHIA_H_
 
+#include "Addon.h"
 #include <vesta/Universe.h>
 #include <QMainWindow>
 #include <QNetworkAccessManager>
@@ -67,6 +68,7 @@ protected:
 private slots:
     void setFullScreen(bool enabled);
     void loadCatalog();
+    void unloadLastCatalog();
 
 private:
     void initializeUniverse();
@@ -74,6 +76,7 @@ private:
     void loadSettings();
     void saveSettings();
 
+    void updateUnloadAction();
     void loadCatalogFile(const QString& fileName);
 
     void showCatalogErrorDialog(const QString& errorMessages);
@@ -89,6 +92,9 @@ private:
     QAction* m_fullScreenAction;
 
     QNetworkAccessManager* m_networkManager;
+
+    QList<AddOn*> m_loadedAddOns;
+    QAction* m_unloadLastCatalogAction;
 };
 
 #endif // _COSMOGRAPHIA_H_

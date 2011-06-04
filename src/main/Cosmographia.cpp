@@ -122,6 +122,8 @@ Cosmographia::Cosmographia() :
 #endif
     fileMenu->addSeparator();
     QAction* loadCatalogAction = fileMenu->addAction("&Load Catalog...");
+    m_unloadLastCatalogAction = fileMenu->addAction("&Unload Last Catalog");
+    m_unloadLastCatalogAction->setDisabled(true);
     fileMenu->addSeparator();
     QAction* quitAction = fileMenu->addAction("&Quit");
     this->menuBar()->addMenu(fileMenu);
@@ -129,6 +131,7 @@ Cosmographia::Cosmographia() :
     connect(saveScreenShotAction, SIGNAL(triggered()), this, SLOT(saveScreenShot()));
     connect(recordVideoAction, SIGNAL(triggered()), this, SLOT(recordVideo()));
     connect(loadCatalogAction, SIGNAL(triggered()), this, SLOT(loadCatalog()));
+    connect(m_unloadLastCatalogAction, SIGNAL(triggered()), this, SLOT(unloadLastCatalog()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     /*** Time Menu ***/
@@ -558,6 +561,14 @@ Cosmographia::initialize()
     loadCatalogFile("solarsys.json");
     loadCatalogFile("start-viewpoints.json");
 
+    // Clear the list of loaded add-ons so that the basic catalogs can't be unloaded
+    foreach (AddOn* addOn, m_loadedAddOns)
+    {
+        delete addOn;
+    }
+    m_loadedAddOns.clear();
+    updateUnloadAction();
+
     QStringList viewpointNames = m_catalog->viewpointNames();
     if (!viewpointNames.isEmpty())
     {
@@ -884,6 +895,50 @@ Cosmographia::loadCatalog()
 
 
 void
+Cosmographia::unloadLastCatalog()
+{
+    if (!m_loadedAddOns.empty())
+    {
+        AddOn* addOn = m_loadedAddOns.last();
+
+        // Remove all objects from the catalog file
+        foreach (QString objectName, addOn->objects())
+        {
+            Entity* e = m_catalog->find(objectName);
+            m_catalog->removeBody(objectName);
+            if (e)
+            {
+                m_universe->removeEntity(e);
+            }
+        }
+
+        // Delete the addOn
+        m_loadedAddOns.removeLast();
+        delete addOn;
+    }
+
+    updateUnloadAction();
+}
+
+
+// Adjust the unload last catalog action after loading or unloading a catalog
+void
+Cosmographia::updateUnloadAction()
+{
+    // Update the action
+    if (m_loadedAddOns.empty())
+    {
+        m_unloadLastCatalogAction->setDisabled(true);
+        m_unloadLastCatalogAction->setText("Unload Last Catalog");
+    }
+    else
+    {
+        m_unloadLastCatalogAction->setEnabled(true);
+        m_unloadLastCatalogAction->setText(QString("Unload Catalog %1").arg(m_loadedAddOns.last()->title()));
+    }
+}
+
+void
 Cosmographia::showCatalogErrorDialog(const QString& errorMessages)
 {
     QDialog errorDialog;
@@ -940,6 +995,30 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         if (!errorMessages.isEmpty())
         {
             showCatalogErrorDialog(errorMessages);
+        }
+        else
+        {
+            AddOn* addOn = new AddOn();
+            addOn->setSource(info.absoluteFilePath());
+            addOn->setTitle(info.fileName());
+            foreach (QString name, bodyNames)
+            {
+                addOn->addObject(name);
+            }
+
+            // If we've previously loaded this add-on, remove it
+            for (int i = 0; i < m_loadedAddOns.size(); ++i)
+            {
+                if (m_loadedAddOns[i]->source() == addOn->source())
+                {
+                    delete m_loadedAddOns[i];
+                    m_loadedAddOns.removeAt(i);
+                    break;
+                }
+            }
+
+            m_loadedAddOns << addOn;
+            updateUnloadAction();
         }
 
         foreach (QString name, bodyNames)
@@ -1002,7 +1081,6 @@ Cosmographia::loadCatalogFile(const QString& fileName)
             Entity* e = m_catalog->find(name);
             if (e)
             {
-                qDebug() << "Adding: " << name;
                 m_view3d->replaceEntity(e, m_catalog->findInfo(name));
             }
         }

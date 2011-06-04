@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2011 Chris Laurel <claurel@gmail.com>
 //
-// Eigen is free software; you can redistribute it and/or
+// Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
@@ -25,26 +25,32 @@
 class AddOn
 {
 public:
-    AddOn(const QString&);
+    AddOn();
     ~AddOn();
 
-    QString fileName() const
+    QString source() const
     {
-        return m_fileName;
+        return m_source;
     }
+
+    void setSource(const QString& source);
 
     QString title() const
     {
         return m_title;
     }
 
+    void setTitle(const QString& title);
+
     QStringList objects() const
     {
         return m_objects;
     }
 
+    void addObject(const QString& objectName);
+
 private:
-    QString m_fileName;
+    QString m_source;
     QString m_title;
     QStringList m_objects;
 };

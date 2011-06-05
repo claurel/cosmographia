@@ -48,6 +48,7 @@ using namespace std;
 
 static const char* StarVertexShaderSource =
 "uniform vec2 viewportSize;       \n"
+"uniform vec2 viewportCoord;      \n"
 "varying vec2 pointCenter;        \n"
 "varying vec4 color;              \n"
 "varying float brightness;        \n"
@@ -66,7 +67,7 @@ static const char* StarVertexShaderSource =
 "    position.z = sqrt(1.0 - dot(position.xy, position.xy)) * sign(gl_Color.a - 0.5);\n"
 "    vec4 projectedPosition = gl_ModelViewProjectionMatrix * position;        \n"
 "    vec2 devicePosition = projectedPosition.xy / projectedPosition.w;        \n"
-"    pointCenter = (devicePosition * 0.5 + vec2(0.5, 0.5)) * viewportSize;    \n"
+"    pointCenter = (devicePosition * 0.5 + vec2(0.5, 0.5)) * viewportSize + viewportCoord;    \n"
 "    color = gl_Color;                                                        \n"
 "    float b = pow(2.512, -appMag * magScale);\n"
 "    float r2 = -log(thresholdBrightness / (exposure * b)) * 2.0 * sigma2;          \n"
@@ -395,8 +396,14 @@ StarsLayer::render(RenderContext& rc)
         }
 
         starShader->bind();
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        float viewportX = viewport[0];
+        float viewportY = viewport[1];
+        Vector2f viewportCoord(viewportX, viewportY);
         Vector2f viewportSize(rc.viewportWidth(), rc.viewportHeight());
         starShader->setConstant("viewportSize", viewportSize);
+        starShader->setConstant("viewportCoord", viewportCoord);
         starShader->setConstant("sigma2", 0.35f);
         starShader->setConstant("glareFalloff", 1.0f / 15.0f);
         starShader->setConstant("glareBrightness", 0.003f);

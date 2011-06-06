@@ -58,6 +58,7 @@ public slots:
     void plotTrajectoryObserver();
     void setPlanetOrbitsVisibility(bool enabled);
     void setStarStyle(QAction* action);
+    void setStereoMode(QAction* action);
     void setTimeDisplay(QAction* action);
 
     void processReceivedResource(QNetworkReply* reply);

@@ -184,7 +184,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_frameCountStartTime(0.0),
     m_framesPerSecond(0.0),
     m_reflectionsEnabled(false),
-    m_anaglyphEnabled(false),
+    m_stereoMode(Mono),
     m_sunGlareEnabled(true),
     m_infoTextVisible(true),
     m_labelsVisible(true),
@@ -812,34 +812,64 @@ void UniverseView::paintGL()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
-    if (m_anaglyphEnabled)
+    if (m_stereoMode != Mono)
     {
         Quaterniond cameraOrientation = m_observer->absoluteOrientation(m_simulationTime);
         Vector3d cameraPosition = m_observer->absolutePosition(m_simulationTime);
-        double eyeSeparation = m_observer->position().norm() / 50.0;//0.0001;
-        float focalPlaneDistance = eyeSeparation * 25.0f;
+        Entity* focusObject = m_observer->center();
+        double focusObjectDistance = m_observer->position().norm();
+        if (focusObject && focusObject->geometry() && focusObject->geometry()->isEllipsoidal())
+        {
+            double r = focusObject->geometry()->ellipsoid().semiMajorAxisLength();
+            if (r < focusObjectDistance)
+            {
+                focusObjectDistance -= r;
+            }
+        }
+        double eyeSeparation = focusObjectDistance / 30.0;
+        float screenPlaneDistance = float(focusObjectDistance * 0.85);
         float nearDistance = 0.00001f;
         float farDistance = 1.0e12f;
         float y = tan(0.5f * m_fovY) * nearDistance;
         float x = y * mainViewport.aspectRatio();
 
-        float stereoOffset = float(eyeSeparation) * nearDistance / focalPlaneDistance;
-
-        PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + float(stereoOffset), x, -y, y, nearDistance, farDistance);
-        PlanarProjection rightProjection(PlanarProjection::Perspective, -x, x - float(stereoOffset), -y, y, nearDistance, farDistance);
+        float frustumOffset = float(eyeSeparation) * nearDistance / screenPlaneDistance;
 
         Vector3d leftEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * -eyeSeparation);
         Vector3d rightEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * eyeSeparation);
 
-        glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE); // red
-        //glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_TRUE);  // green
-        m_renderer->renderView(&lighting, leftEyePosition, cameraOrientation, leftProjection, mainViewport);
-        glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE); // cyan
-        //glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);   // magenta
-        glDepthMask(GL_TRUE);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        m_renderer->renderView(&lighting, rightEyePosition, cameraOrientation, rightProjection, mainViewport);
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        if (m_stereoMode == SideBySide)
+        {
+            x *= 0.5f;
+            PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + frustumOffset, x + frustumOffset, -y, y, nearDistance, farDistance);
+            PlanarProjection rightProjection(PlanarProjection::Perspective, -x - frustumOffset, x - frustumOffset, -y, y, nearDistance, farDistance);
+
+            Viewport leftViewport(0, 0, width() / 2, height());
+            Viewport rightViewport(width() / 2, 0, width() / 2, height());
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(leftViewport.x(), leftViewport.y(), leftViewport.width(), leftViewport.height());
+            m_renderer->renderView(&lighting, leftEyePosition, cameraOrientation, leftProjection, leftViewport);
+            glScissor(rightViewport.x(), rightViewport.y(), rightViewport.width(), rightViewport.height());
+            m_renderer->renderView(&lighting, rightEyePosition, cameraOrientation, rightProjection, rightViewport);
+            glDisable(GL_SCISSOR_TEST);
+        }
+        else  // anaglyph stereo
+        {
+            PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + frustumOffset, x + frustumOffset, -y, y, nearDistance, farDistance);
+            PlanarProjection rightProjection(PlanarProjection::Perspective, -x - frustumOffset, x - frustumOffset, -y, y, nearDistance, farDistance);
+            //PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + float(frustumOffset), x, -y, y, nearDistance, farDistance);
+            //PlanarProjection rightProjection(PlanarProjection::Perspective, -x, x - float(frustumOffset), -y, y, nearDistance, farDistance);
+
+            glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE); // red
+            //glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_TRUE);  // green
+            m_renderer->renderView(&lighting, leftEyePosition, cameraOrientation, leftProjection, mainViewport);
+            glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE); // cyan
+            //glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);   // magenta
+            glDepthMask(GL_TRUE);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            m_renderer->renderView(&lighting, rightEyePosition, cameraOrientation, rightProjection, mainViewport);
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        }
     }
     else
     {
@@ -1550,6 +1580,10 @@ UniverseView::setCenterAndFrame(Entity* center, FrameType f)
         {
             frame = new TwoBodyRotatingFrame(target, center);
         }
+        else
+        {
+            frame = InertialFrame::equatorJ2000();
+        }
     }
     else
     {
@@ -1984,9 +2018,9 @@ UniverseView::setSunGlare(bool enable)
 
 
 void
-UniverseView::setAnaglyphStereo(bool enable)
+UniverseView::setStereoMode(StereoMode stereoMode)
 {
-    m_anaglyphEnabled = enable;
+    m_stereoMode = stereoMode;
 }
 
 

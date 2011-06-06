@@ -109,12 +109,25 @@ public:
     {
         TimeDisplay_UTC       = 0,
         TimeDisplay_Local     = 1,
-        TimeDisplay_Multiple  = 2,
+        TimeDisplay_Multiple  = 2
     };
 
     TimeDisplayMode timeDisplay() const
     {
         return m_timeDisplay;
+    }
+
+    enum StereoMode
+    {
+        Mono               = 0,
+        SideBySide         = 1,
+        AnaglyphRedCyan    = 2,
+        AnaglyphCyanRed    = 3
+    };
+
+    StereoMode stereoMode() const
+    {
+        return m_stereoMode;
     }
 
     void setSelectedBody(vesta::Entity* body);
@@ -149,7 +162,7 @@ public slots:
     void setAtmospheres(bool enable);
     void setAmbientLight(bool enable);
     void setReflections(bool enable);
-    void setAnaglyphStereo(bool enable);
+    void setStereoMode(StereoMode stereoMode);
     void setSunGlare(bool enable);
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
@@ -249,7 +262,7 @@ private:
     vesta::counted_ptr<vesta::MeshGeometry> m_defaultSpacecraftMesh;
 
     bool m_reflectionsEnabled;
-    bool m_anaglyphEnabled;
+    StereoMode m_stereoMode;
     bool m_sunGlareEnabled;
 
     struct TrajectoryPlotEntry

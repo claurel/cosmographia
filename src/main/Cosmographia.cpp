@@ -297,7 +297,7 @@ Cosmographia::Cosmographia() :
     connect(infoTextAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setInfoText(bool)));
 
     /*** Star style menu ***/
-    QMenu* starStyleMenu = new QMenu("Star style");
+    QMenu* starStyleMenu = new QMenu("Star Style");
     QActionGroup* starStyleGroup = new QActionGroup(starStyleMenu);
     QAction* pointStarsAction = new QAction("&Points", starStyleGroup);
     pointStarsAction->setCheckable(true);
@@ -312,6 +312,26 @@ Cosmographia::Cosmographia() :
     diffractionSpikeStarsAction->setCheckable(true);
     diffractionSpikeStarsAction->setData(2);
     starStyleMenu->addAction(diffractionSpikeStarsAction);
+
+    /*** Stereo mode menu ***/
+    QMenu* stereoModeMenu = new QMenu("Stereo Mode");
+    QActionGroup* stereoModeGroup = new QActionGroup(stereoModeMenu);
+    QAction* monoAction = new QAction("Stereo Disabled", stereoModeGroup);
+    monoAction->setCheckable(true);
+    monoAction->setChecked(true);
+    monoAction->setData((int) UniverseView::Mono);
+    monoAction->setShortcut(QKeySequence("Shift+Ctrl+M"));
+    stereoModeMenu->addAction(monoAction);
+    QAction* anaglyphRedCyanAction = new QAction("Anaglyph (Red-Cyan)", stereoModeGroup);
+    anaglyphRedCyanAction->setCheckable(true);
+    anaglyphRedCyanAction->setData((int) UniverseView::AnaglyphRedCyan);
+    anaglyphRedCyanAction->setShortcut(QKeySequence("Shift+Ctrl+A"));
+    stereoModeMenu->addAction(anaglyphRedCyanAction);
+    QAction* sideBySideAction = new QAction("Side-by-side", stereoModeGroup);
+    sideBySideAction->setCheckable(true);
+    sideBySideAction->setData((int) UniverseView::SideBySide);
+    sideBySideAction->setShortcut(QKeySequence("Shift+Ctrl+S"));
+    stereoModeMenu->addAction(sideBySideAction);
 
     /*** Graphics menu ***/
     QMenu* graphicsMenu = new QMenu("&Graphics", this);
@@ -349,10 +369,13 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction->setCheckable(true);
     graphicsMenu->addAction(m_fullScreenAction);
     connect(m_fullScreenAction, SIGNAL(toggled(bool)), this, SLOT(setFullScreen(bool)));
+#if 0
     QAction* anaglyphAction = new QAction("Anaglyph Stereo", graphicsMenu);
     anaglyphAction->setShortcut(QKeySequence("Ctrl+Shift+A"));
     anaglyphAction->setCheckable(true);
     graphicsMenu->addAction(anaglyphAction);
+#endif
+    graphicsMenu->addMenu(stereoModeMenu);
 
     this->menuBar()->addMenu(graphicsMenu);
 
@@ -364,8 +387,8 @@ Cosmographia::Cosmographia() :
     connect(sunGlareAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setSunGlare(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));
     connect(milkyWayAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setMilkyWayVisibility(bool)));
-    connect(anaglyphAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setAnaglyphStereo(bool)));
     connect(starStyleGroup,         SIGNAL(selected(QAction*)), this, SLOT(setStarStyle(QAction*)));
+    connect(stereoModeGroup,        SIGNAL(selected(QAction*)), this, SLOT(setStereoMode(QAction*)));
 
     /*** Help menu ***/
     QMenu* helpMenu = new QMenu("Help", this);
@@ -1146,6 +1169,13 @@ Cosmographia::setStarStyle(QAction *action)
             break;
         }
     }
+}
+
+
+void
+Cosmographia::setStereoMode(QAction* action)
+{
+    m_view3d->setStereoMode(UniverseView::StereoMode(action->data().toInt()));
 }
 
 

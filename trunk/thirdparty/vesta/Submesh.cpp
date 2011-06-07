@@ -746,14 +746,16 @@ private:
 };
 
 
+// Merge multiple triangle lists into a single list. This optimizes rendering by reducing the number
+// of GL draw calls that need to be issued.
 static PrimitiveBatch*
-mergeTriangleLists(const vector<PrimitiveBatch*>& batches, unsigned int firstBatch, unsigned int count)
+mergeTriangleLists(const vector<PrimitiveBatch*>& batches, unsigned int firstBatch, unsigned int batchCount)
 {
-    assert(count > 0);
+    assert(batchCount > 0);
 
     unsigned int totalIndexCount = 0;
     PrimitiveBatch::IndexSize indexSize = PrimitiveBatch::Index16;
-    for (unsigned int i = firstBatch; i < firstBatch + count; ++i)
+    for (unsigned int i = firstBatch; i < firstBatch + batchCount; ++i)
     {
         // Only triangles for now
         assert(batches[i]->primitiveType() == PrimitiveBatch::Triangles);
@@ -774,7 +776,7 @@ mergeTriangleLists(const vector<PrimitiveBatch*>& batches, unsigned int firstBat
         // All indices are 16-bit
         v_uint16* indices = new v_uint16[totalIndexCount];
         unsigned int baseIndex = 0;
-        for (unsigned int i = firstBatch; i < firstBatch + count; ++i)
+        for (unsigned int i = firstBatch; i < firstBatch + batchCount; ++i)
         {
             unsigned int batchIndexCount = batches[i]->indexCount();
             const v_uint16* batchIndices = reinterpret_cast<v_uint16*>(batches[i]->indexData());
@@ -791,7 +793,7 @@ mergeTriangleLists(const vector<PrimitiveBatch*>& batches, unsigned int firstBat
         // At least some indices are 32-bit
         v_uint32* indices = new v_uint32[totalIndexCount];
         unsigned int baseIndex = 0;
-        for (unsigned int i = firstBatch; i < firstBatch + count; ++i)
+        for (unsigned int i = firstBatch; i < firstBatch + batchCount; ++i)
         {
             unsigned int batchIndexCount = batches[i]->indexCount();
             if (batches[i]->indexSize() == PrimitiveBatch::Index16)
@@ -800,7 +802,7 @@ mergeTriangleLists(const vector<PrimitiveBatch*>& batches, unsigned int firstBat
                 const v_uint16* batchIndices = reinterpret_cast<v_uint16*>(batches[i]->indexData());
                 for (unsigned int j = 0; j < batchIndexCount; ++j)
                 {
-                    indices[count + j] = batchIndices[j];
+                    indices[baseIndex + j] = batchIndices[j];
                 }
             }
             else
@@ -863,7 +865,7 @@ Submesh::mergeMaterials()
     std::vector<PrimitiveBatch*> unusedBatches;
     std::vector<unsigned int> mergedMaterials;
     unsigned int firstMergeIndex = 0;
-    for (unsigned int i = 0; i <= orderedMaterials.size(); ++i)
+    for (unsigned int i = 1; i <= orderedMaterials.size(); ++i)
     {
         bool isFinalBatch = i == orderedMaterials.size();
         bool materialChanged = false;

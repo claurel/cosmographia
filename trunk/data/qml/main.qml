@@ -34,6 +34,12 @@ Item {
         hoverEnabled: true
     }
 
+    SettingsPanel {
+        id: settingsPanel
+        opacity: 0
+        textColor: "white"
+    }
+
     TextPanel {
         id: helpPanel
         opacity: 0
@@ -102,6 +108,11 @@ For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki
              width: 32; height: 32
              source: "qrc:/icons/config.png"
              smooth: true
+
+             MouseArea {
+                 anchors.fill: parent
+                 onClicked: { settingsPanel.show(); helpPanel.hide() }
+             }
          }
 
          Image {
@@ -111,7 +122,7 @@ For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki
 
              MouseArea {
                  anchors.fill: parent
-                 onClicked: { helpPanel.show() }
+                 onClicked: { helpPanel.show(); settingsPanel.hide() }
              }
          }
 

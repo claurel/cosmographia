@@ -1685,22 +1685,14 @@ UniverseView::setMilkyWayVisibility(bool checked)
 void
 UniverseView::setEquatorialGridVisibility(bool checked)
 {
-    SkyLayer* equatorialGrid = m_universe->layer("equatorial grid");
-    if (equatorialGrid)
-    {
-        equatorialGrid->setVisibility(checked);
-    }
+    setSkyLayerVisible("equatorial grid", checked);
 }
 
 
 void
 UniverseView::setEclipticVisibility(bool checked)
 {
-    SkyLayer* ecliptic = m_universe->layer("ecliptic");
-    if (ecliptic)
-    {
-        ecliptic->setVisibility(checked);
-    }
+    setSkyLayerVisible("ecliptic", checked);
 }
 
 
@@ -1770,10 +1762,26 @@ UniverseView::setLabelVisibility(bool enable)
 }
 
 
-void
-UniverseView::setConstellationFigureVisibility(bool checked)
+
+bool
+UniverseView::skyLayerVisible(const std::string& layerName) const
 {
-    SkyLayer* layer = m_universe->layer("constellation figures");
+    SkyLayer* layer = m_universe->layer(layerName);
+    if (layer)
+    {
+        return layer->isVisible();
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+void
+UniverseView::setSkyLayerVisible(const std::string& layerName, bool checked)
+{
+    SkyLayer* layer = m_universe->layer(layerName);
     if (layer)
     {
         layer->setVisibility(checked);
@@ -1781,14 +1789,43 @@ UniverseView::setConstellationFigureVisibility(bool checked)
 }
 
 
+bool
+UniverseView::constellationFigureVisibility() const
+{
+    return skyLayerVisible("constellation figures");
+}
+
+
+bool
+UniverseView::constellationNameVisibility() const
+{
+    return skyLayerVisible("constellation names");
+}
+
+
+bool UniverseView::equatorialGridVisibility() const
+{
+    return skyLayerVisible("equatorial grid");
+}
+
+
+bool UniverseView::eclipticVisibility() const
+{
+    return skyLayerVisible("ecliptic");
+}
+
+
+void
+UniverseView::setConstellationFigureVisibility(bool checked)
+{
+    setSkyLayerVisible("constellation figures", checked);
+}
+
+
 void
 UniverseView::setConstellationNameVisibility(bool checked)
 {
-    SkyLayer* layer = m_universe->layer("constellation names");
-    if (layer)
-    {
-        layer->setVisibility(checked);
-    }
+    setSkyLayerVisible("constellation names", checked);
 }
 
 

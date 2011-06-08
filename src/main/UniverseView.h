@@ -61,6 +61,12 @@ public:
     ~UniverseView();
 
     Q_PROPERTY(double realTime READ realTime);
+    Q_PROPERTY(bool labelsVisible READ labelVisibility WRITE setLabelVisibility);
+    Q_PROPERTY(bool constellationFiguresVisible READ constellationFigureVisibility WRITE setConstellationFigureVisibility);
+    Q_PROPERTY(bool constellationNamesVisible READ constellationNameVisibility WRITE setConstellationNameVisibility);
+    Q_PROPERTY(bool equatorialGridVisible READ equatorialGridVisibility WRITE setEquatorialGridVisibility);
+    Q_PROPERTY(bool eclipticVisible READ eclipticVisibility WRITE setEclipticVisibility);
+
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
@@ -110,6 +116,16 @@ public:
     {
         return m_realTime;
     }
+
+    bool labelVisibility() const
+    {
+        return m_labelsVisible;
+    }
+
+    bool constellationFigureVisibility() const;
+    bool constellationNameVisibility() const;
+    bool equatorialGridVisibility() const;
+    bool eclipticVisibility() const;
 
     enum TimeDisplayMode
     {
@@ -200,6 +216,8 @@ protected:
 
 private:
     void drawInfoOverlay();
+    bool skyLayerVisible(const std::string& layerName) const;
+    void setSkyLayerVisible(const std::string& layerName, bool enable);
 
     enum FrameType
     {

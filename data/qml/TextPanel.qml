@@ -22,8 +22,8 @@ Item {
     height: 600
     opacity: 0
 
+    x: 32
     anchors {
-        horizontalCenter: parent.horizontalCenter
         verticalCenter: parent.verticalCenter
     }
 

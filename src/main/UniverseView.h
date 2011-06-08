@@ -60,6 +60,7 @@ public:
     UniverseView(QWidget *parent, vesta::Universe* universe, UniverseCatalog* catalog);
     ~UniverseView();
 
+    Q_PROPERTY(double realTime READ realTime);
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
@@ -103,6 +104,11 @@ public:
     vesta::Entity* selectedBody() const
     {
         return m_selectedBody.ptr();
+    }
+
+    double realTime() const
+    {
+        return m_realTime;
     }
 
     enum TimeDisplayMode

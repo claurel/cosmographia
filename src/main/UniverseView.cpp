@@ -87,6 +87,7 @@
 
 #include <QDeclarativeEngine>
 #include <QDeclarativeComponent>
+#include <QDeclarativeContext>
 
 using namespace vesta;
 using namespace Eigen;
@@ -214,6 +215,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
     setBackgroundBrush(Qt::transparent);
 
+    qmlRegisterUncreatableType<UniverseView>("Comsmographia", 1, 0, "UniverseView", "Use global universeView");
+    rootContext()->setContextProperty("universeView", this);
     setSource(QUrl::fromLocalFile("qml/main.qml"));
     setResizeMode(SizeRootObjectToView);
 
@@ -1559,7 +1562,7 @@ UniverseView::tick()
         }
     }
 
-    update();
+    viewport()->update();
 }
 
 

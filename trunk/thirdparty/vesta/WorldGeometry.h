@@ -1,5 +1,5 @@
 /*
- * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
+ * $Revision: 614 $ $Date: 2011-06-09 12:01:42 -0700 (Thu, 09 Jun 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -234,6 +234,34 @@ public:
     bool hasLayers() const;
     void clearLayers();
 
+    /** Returns whether clouds are visible for all WorldGeometry objects.
+      */
+    static bool cloudLayersVisible()
+    {
+        return ms_cloudLayersVisible;
+    }
+
+    /** Set whether clouds are visible for all WorldGeometry objects.
+      */
+    static void setCloudLayersVisible(bool visible)
+    {
+        ms_cloudLayersVisible = visible;
+    }
+
+    /** Returns whether atmospheres are visible for all WorldGeometry objects.
+      */
+    static bool atmospheresVisible()
+    {
+        return ms_atmospheresVisible;
+    }
+
+    /** Set whether atmospheres are visible for all WorldGeometry objects.
+      */
+    static void setAtmospheresVisible(bool visible)
+    {
+        ms_atmospheresVisible = visible;
+    }
+
 protected:
     virtual bool handleRayPick(const Eigen::Vector3d& pickOrigin,
                                const Eigen::Vector3d& pickDirection,
@@ -272,6 +300,9 @@ private:
     float m_cloudAltitude;
 
     QuadtreeTileAllocator* m_tileAllocator;
+
+    static bool ms_atmospheresVisible;
+    static bool ms_cloudLayersVisible;
 };
 
 }

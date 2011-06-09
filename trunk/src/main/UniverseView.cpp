@@ -245,7 +245,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
     m_timer = new QTimer(this);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(tick()));
-    m_timer->setInterval(10);
+    m_timer->setInterval(0);
     m_timer->start();
 
     setFocusPolicy(Qt::StrongFocus);
@@ -2009,10 +2009,24 @@ UniverseView::plotTrajectoryObserver(const BodyInfo* info)
 }
 
 
+bool
+UniverseView::shadows() const
+{
+    return m_renderer->shadowsEnabled();
+}
+
+
 void
 UniverseView::setShadows(bool enable)
 {
     m_renderer->setShadowsEnabled(enable);
+}
+
+
+bool
+UniverseView::eclipseShadows() const
+{
+    return m_renderer->eclipseShadowsEnabled();
 }
 
 
@@ -2023,6 +2037,13 @@ UniverseView::setEclipseShadows(bool enable)
 }
 
 
+bool
+UniverseView::reflections() const
+{
+    return m_reflectionsEnabled;
+}
+
+
 void
 UniverseView::setReflections(bool enable)
 {
@@ -2030,15 +2051,31 @@ UniverseView::setReflections(bool enable)
 }
 
 
-void
-UniverseView::setAtmospheres(bool /* enable */)
+bool
+UniverseView::atmospheresVisible() const
 {
+    return WorldGeometry::atmospheresVisible();
 }
 
 
 void
-UniverseView::setCloudLayers(bool /* enable */)
+UniverseView::setAtmospheresVisible(bool enable)
 {
+    WorldGeometry::setAtmospheresVisible(enable);
+}
+
+
+bool
+UniverseView::cloudsVisible() const
+{
+    return WorldGeometry::cloudLayersVisible();
+}
+
+
+void
+UniverseView::setCloudsVisible(bool enable)
+{
+    WorldGeometry::setCloudLayersVisible(enable);
 }
 
 

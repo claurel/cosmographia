@@ -67,6 +67,12 @@ public:
     Q_PROPERTY(bool equatorialGridVisible READ equatorialGridVisibility WRITE setEquatorialGridVisibility);
     Q_PROPERTY(bool eclipticVisible READ eclipticVisibility WRITE setEclipticVisibility);
 
+    Q_PROPERTY(bool shadows READ shadows WRITE setShadows);
+    Q_PROPERTY(bool eclipseShadows READ eclipseShadows WRITE setEclipseShadows);
+    Q_PROPERTY(bool reflections READ reflections WRITE setReflections);
+    Q_PROPERTY(bool cloudsVisible READ cloudsVisible WRITE setCloudsVisible);
+    Q_PROPERTY(bool atmospheresVisible READ atmospheresVisible WRITE setAtmospheresVisible);
+
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
@@ -127,6 +133,12 @@ public:
     bool equatorialGridVisibility() const;
     bool eclipticVisibility() const;
 
+    bool shadows() const;
+    bool eclipseShadows() const;
+    bool reflections() const;
+    bool cloudsVisible() const;
+    bool atmospheresVisible() const;
+
     enum TimeDisplayMode
     {
         TimeDisplay_UTC       = 0,
@@ -180,8 +192,8 @@ public slots:
     void setLabelVisibility(bool enable);
     void setShadows(bool enable);
     void setEclipseShadows(bool enable);
-    void setCloudLayers(bool enable);
-    void setAtmospheres(bool enable);
+    void setCloudsVisible(bool enable);
+    void setAtmospheresVisible(bool enable);
     void setAmbientLight(bool enable);
     void setReflections(bool enable);
     void setStereoMode(StereoMode stereoMode);

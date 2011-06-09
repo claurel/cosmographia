@@ -18,6 +18,7 @@
 import QtQuick 1.0
 
 Text {
+    id: toggle
     width: 60
 
     property bool enabled: false
@@ -34,9 +35,18 @@ Text {
     text: enabled ? "On" : "Off"
     horizontalAlignment: Text.AlignRight
 
+    ColorAnimation {
+        id: animation
+        target: toggle
+        property: "color"
+        to: "#72c0ff"
+        duration: 300
+    }
+
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
-        onClicked: { parent.enabled = !parent.enabled; toggled(parent.enabled) }
+        onClicked: { parent.enabled = !parent.enabled; toggled(parent.enabled);toggle.color = "white"; animation.start() }
     }
 }
 

@@ -168,6 +168,69 @@ Item {
                 onToggled: { universeView.constellationNamesVisible = enabled }
                 enabled: false
             }
+
+            Item { height: 20; width: 10 }
+            Item { height: 20; width: 10 }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Clouds"
+            }
+
+            TextToggle {
+                onToggled: { universeView.cloudsVisible = enabled }
+                enabled: true
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Atmospheres"
+            }
+
+            TextToggle {
+                onToggled: { universeView.atmospheresVisible = enabled }
+                enabled: true
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Eclipse Shadows"
+            }
+
+            TextToggle {
+                onToggled: { universeView.eclipseShadows = enabled }
+                enabled: false
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Other Shadows"
+            }
+
+            TextToggle {
+                onToggled: { universeView.shadows = enabled }
+                enabled: false
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Reflections"
+            }
+
+            TextToggle {
+                onToggled: { universeView.reflections = enabled }
+                enabled: false
+            }
         }
     }
 

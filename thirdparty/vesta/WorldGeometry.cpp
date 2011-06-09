@@ -1,5 +1,5 @@
 /*
- * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
+ * $Revision: 614 $ $Date: 2011-06-09 12:01:42 -0700 (Thu, 09 Jun 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -44,6 +44,9 @@ static VertexAttribute posNormTexTangentAttributes[] = {
 static VertexSpec PositionNormalTexTangent(4, posNormTexTangentAttributes);
 
 static const float MaxTileSquareSize = 256.0f;  // size in pixels
+
+bool WorldGeometry::ms_atmospheresVisible = true;
+bool WorldGeometry::ms_cloudLayersVisible = true;
 
 
 WorldGeometry::WorldGeometry() :
@@ -252,7 +255,7 @@ WorldGeometry::render(RenderContext& rc, double clock) const
 
     float atmosphereHeight = 0.0f;
 
-    if (!m_atmosphere.isNull())
+    if (!m_atmosphere.isNull() && ms_atmospheresVisible)
     {
         float r = maxRadius();
 
@@ -392,7 +395,7 @@ WorldGeometry::render(RenderContext& rc, double clock) const
     // Set vertex info for cloud layer rendering
     rc.setVertexInfo(VertexSpec::PositionNormalTex);
 
-    if (!m_cloudMap.isNull())
+    if (!m_cloudMap.isNull() && ms_cloudLayersVisible)
     {
         float scale = 1.0f + m_cloudAltitude / maxRadius();
 
@@ -446,7 +449,7 @@ WorldGeometry::render(RenderContext& rc, double clock) const
     }
 
     // Draw the atmosphere as a pixel shaded 'shell'
-    if (!m_atmosphere.isNull())
+    if (!m_atmosphere.isNull() && ms_atmospheresVisible)
     {
         // Scale the scattering parameters as well as the geometry
         float scale = 1.0f + atmosphereHeight;
@@ -1114,7 +1117,7 @@ WorldGeometry::boundingSphereRadius() const
         atmosphereHeight = m_atmosphere->transparentHeight();
     }
 
-    if (m_cloudMap.isValid())
+    if (m_cloudMap.isValid() && ms_cloudLayersVisible)
     {
         atmosphereHeight = max(atmosphereHeight, m_cloudAltitude);
     }

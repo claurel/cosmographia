@@ -369,20 +369,14 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction->setCheckable(true);
     graphicsMenu->addAction(m_fullScreenAction);
     connect(m_fullScreenAction, SIGNAL(toggled(bool)), this, SLOT(setFullScreen(bool)));
-#if 0
-    QAction* anaglyphAction = new QAction("Anaglyph Stereo", graphicsMenu);
-    anaglyphAction->setShortcut(QKeySequence("Ctrl+Shift+A"));
-    anaglyphAction->setCheckable(true);
-    graphicsMenu->addAction(anaglyphAction);
-#endif
     graphicsMenu->addMenu(stereoModeMenu);
 
     this->menuBar()->addMenu(graphicsMenu);
 
     connect(shadowsAction,          SIGNAL(triggered(bool)), m_view3d, SLOT(setShadows(bool)));
     connect(eclipsesAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipseShadows(bool)));
-    connect(atmospheresAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setAtmospheres(bool)));
-    connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudLayers(bool)));
+    connect(atmospheresAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setAtmospheresVisible(bool)));
+    connect(cloudLayerAction,       SIGNAL(triggered(bool)), m_view3d, SLOT(setCloudsVisible(bool)));
     connect(ambientLightAction,     SIGNAL(triggered(bool)), m_view3d, SLOT(setAmbientLight(bool)));
     connect(sunGlareAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setSunGlare(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));

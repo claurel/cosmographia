@@ -570,6 +570,38 @@ static void drawQuad(float x, float y, float width, float height)
 */
 
 
+QString
+UniverseView::currentTimeString() const
+{
+    GregorianDate date = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
+
+    if (m_timeDisplay == TimeDisplay_UTC)
+    {
+        return formatDate(date);
+        //m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(dateX, dateY));
+    }
+    else if (m_timeDisplay == TimeDisplay_Local)
+    {
+        QDateTime localTime = VestaDateToQtDate(date).toLocalTime();
+        return localTime.toString("yyyy-MMM-dd hh:mm:ss 'Local'");
+        //m_textFont->render(localTime.toString("yyyy-MMM-dd hh:mm:ss 'Local'").toLatin1().constData(), Vector2f(dateX, dateY));
+    }
+    else if (m_timeDisplay == TimeDisplay_Multiple)
+    {
+        //m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(dateX, dateY));
+        GregorianDate ttDate = GregorianDate::TDBDateFromTDBSec(m_simulationTime);
+        ttDate.setTimeScale(TimeScale_TT);
+        //m_textFont->render(formatDate(ttDate).toUtf8().data(), Vector2f(dateX, dateY));
+        //m_textFont->render(QString("JD %1 TT").arg(ttDate.toTTJD(), 0, 'f', 6).toLatin1().constData(), Vector2f(dateX, dateY));
+        return formatDate(date) + "\n" + formatDate(ttDate) + "\n" + QString("JD %1 TT").arg(ttDate.toTTJD());
+    }
+    else
+    {
+        return "";
+    }
+}
+
+
 // Draw informational text over the 3D view
 // TODO: Convert this to QML
 void
@@ -613,7 +645,7 @@ UniverseView::drawInfoOverlay()
             GregorianDate date = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
 
             m_textFont->bind();
-
+#if 0
             float dateY = float(viewportHeight - titleFontHeight);
             float dateX = viewportWidth - 250.0f;
 
@@ -651,6 +683,7 @@ UniverseView::drawInfoOverlay()
                 QString timeScaleString = QString("%1x time").arg(m_timeScale);
                 m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
             }
+#endif
 
             QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
             m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
@@ -740,6 +773,7 @@ void UniverseView::paintGL()
 {
     // Update the frame counter
     double elapsedTime = secondsFromBaseTime();
+
     if (m_frameCount == 0)
     {
         m_frameCountStartTime = elapsedTime;
@@ -1065,7 +1099,11 @@ void UniverseView::wheelEvent(QWheelEvent* event)
 void
 UniverseView::keyPressEvent(QKeyEvent* event)
 {
-    QDeclarativeView::keyPressEvent(event);
+    if (scene()->focusItem())
+    {
+        QDeclarativeView::keyPressEvent(event);
+        return;
+    }
 
     switch (event->key())
     {
@@ -1091,7 +1129,11 @@ UniverseView::keyPressEvent(QKeyEvent* event)
 void
 UniverseView::keyReleaseEvent(QKeyEvent* event)
 {
-    QDeclarativeView::keyReleaseEvent(event);
+    if (scene()->focusItem())
+    {
+        QDeclarativeView::keyReleaseEvent(event);
+        return;
+    }
 
     switch (event->key())
     {
@@ -1531,7 +1573,7 @@ UniverseView::tick()
 
     if (!isPaused())
     {
-        m_simulationTime += dt * timeScale();
+        setSimulationTime(m_simulationTime + dt * timeScale());
     }
 
     if (m_rollLeft)
@@ -1563,6 +1605,11 @@ UniverseView::tick()
     }
 
     viewport()->update();
+
+    if (dt != 0.0)
+    {
+        emit timeChanged();
+    }
 }
 
 
@@ -1630,14 +1677,45 @@ UniverseView::setCurrentTime()
 void
 UniverseView::setTimeScale(double timeScale)
 {
-    m_timeScale = timeScale;
+    if (timeScale != m_timeScale)
+    {
+        m_timeScale = timeScale;
+        emit timeScaleChanged(timeScale);
+    }
 }
 
 
+/** Set the simulation time.
+  *
+  * \param tsec seconds since J2000 TDB
+  */
 void
 UniverseView::setSimulationTime(double tsec)
 {
     m_simulationTime = tsec;
+    emit simulationDateTimeChanged();
+}
+
+
+/** Get the current simulation time as a Qt QDateTime structure.
+  * Note that Qt's DateTime structure doesn't handle leap seconds.
+  */
+QDateTime
+UniverseView::simulationDateTime() const
+{
+    GregorianDate calendarDate = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
+    return QDateTime(QDate(calendarDate.year(), calendarDate.month(), calendarDate.day()),
+                     QTime(calendarDate.hour(), calendarDate.minute(), std::min(59u, calendarDate.second()), calendarDate.usec() / 1000),
+                     Qt::UTC);
+}
+
+
+void
+UniverseView::setSimulationDateTime(QDateTime dateTime)
+{
+    GregorianDate startDate(dateTime.date().year(), dateTime.date().month(), dateTime.date().day(),
+                            dateTime.time().hour(), dateTime.time().minute(), dateTime.time().second());
+    setSimulationTime(startDate.toTDBSec());
 }
 
 

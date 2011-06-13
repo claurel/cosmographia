@@ -52,14 +52,7 @@ namespace vesta
 
 class UniverseView : public QDeclarativeView
 {
-     Q_OBJECT
-
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    UniverseView(QWidget *parent, vesta::Universe* universe, UniverseCatalog* catalog);
-    ~UniverseView();
-
+    Q_OBJECT
     Q_PROPERTY(double realTime READ realTime);
     Q_PROPERTY(bool labelsVisible READ labelVisibility WRITE setLabelVisibility);
     Q_PROPERTY(bool constellationFiguresVisible READ constellationFigureVisibility WRITE setConstellationFigureVisibility);
@@ -72,6 +65,17 @@ public:
     Q_PROPERTY(bool reflections READ reflections WRITE setReflections);
     Q_PROPERTY(bool cloudsVisible READ cloudsVisible WRITE setCloudsVisible);
     Q_PROPERTY(bool atmospheresVisible READ atmospheresVisible WRITE setAtmospheresVisible);
+
+    Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
+    Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
+    Q_PROPERTY(double timeScale READ timeScale WRITE setTimeScale NOTIFY timeScaleChanged);
+
+
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    UniverseView(QWidget *parent, vesta::Universe* universe, UniverseCatalog* catalog);
+    ~UniverseView();
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
@@ -86,10 +90,15 @@ public:
         return m_timeScale;
     }
 
+    /** Get the current simulation time as the number of seconds elapsed
+      * since J2000 TDB.
+      */
     double simulationTime() const
     {
         return m_simulationTime;
     }
+
+    QDateTime simulationDateTime() const;
 
     void startVideoRecording(QVideoEncoder* encoder);
     void finishVideoRecording();
@@ -139,6 +148,8 @@ public:
     bool cloudsVisible() const;
     bool atmospheresVisible() const;
 
+    QString currentTimeString() const;
+
     enum TimeDisplayMode
     {
         TimeDisplay_UTC       = 0,
@@ -171,6 +182,10 @@ public:
 
     void initializeGL();
 
+signals:
+    void timeChanged();
+    void simulationDateTimeChanged();
+    void timeScaleChanged(double);
 
 public slots:
     void tick();
@@ -178,6 +193,7 @@ public slots:
     void setCurrentTime();
     void setTimeScale(double scale);
     void setSimulationTime(double tsec);
+    void setSimulationDateTime(QDateTime dateTime);
     void inertialObserver(bool checked);
     void bodyFixedObserver(bool checked);
     void synodicObserver(bool checked);

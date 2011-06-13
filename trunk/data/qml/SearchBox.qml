@@ -12,6 +12,21 @@ FocusScope {
 
      width: 250; height: 32
 
+     function show()
+     {
+         opacity = 1;
+         focus = true;
+         textInput.focus = true;
+     }
+
+     function hide()
+     {
+         opacity = 0;
+         clear.opacity = 0;
+         focus = false;
+         textInput.focus = false;
+     }
+
      Rectangle {
          width: parent.width; height: parent.height
          color: "gray"
@@ -48,7 +63,13 @@ FocusScope {
          color: textColor
          font.family: fontFamily
          font.pixelSize: fontSize
-         onAccepted: { container.opacity = 0; container.searchEntered(text); clear.opacity = 0 }
+         onAccepted: {
+             container.searchEntered(text);
+             container.hide();
+
+             // This is necessary to set the focus item to null. But why?
+             parent.focus = false;
+         }
      }
 
      Image {
@@ -61,7 +82,7 @@ FocusScope {
 
          MouseArea {
              anchors.fill: parent
-             onClicked: { textInput.text = ''; container.focus = true }
+             onClicked: { textInput.text = ''; container.focus = true; }
          }
      }
 

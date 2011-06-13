@@ -24,20 +24,28 @@ Item {
     function showFindObject()
     {
         findObject.searchText = "";
-        findObject.opacity = 1;
-        findObject.focus = true;
+        findObject.show()
     }
 
     MouseArea {
         id: pageArea
         anchors.fill: parent
         hoverEnabled: true
+        onClicked:  { timePanel.unfocus() }
     }
 
     SettingsPanel {
         id: settingsPanel
         opacity: 0
         textColor: "white"
+    }
+
+    TimePanel {
+        id: timePanel
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
     }
 
     TextPanel {
@@ -76,7 +84,6 @@ For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki
          SearchBox {
              id: findObject;
              objectName: "searchBox"
-             focus: true
              opacity: 0
          }
      }

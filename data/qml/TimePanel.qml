@@ -18,12 +18,19 @@
 import QtQuick 1.0
 
 Column {
+    width: 250
     id: container
     
+    /*
     InfoText {
         id: timeDisplay
         width: 250
         text: universeView.currentTimeString
+    }
+    */
+    function unfocus()
+    {
+        timeEdit.unfocus()
     }
 
     Row {
@@ -38,13 +45,51 @@ Column {
 
         property color textColor: state =="" ? "#72c0ff" : "white"
 
-        /*
-        function jsdate()
-        {
-            console.log(new Date(Qt.formatDateTime(currentDate, "yyyy/MM/dd hh:mm:ss")).toUTCString());
-            return new Date(Qt.formatDateTime(currentDate, "yyyy/MM/dd hh:mm:ss"));
+        Connections {
+            target: universeView;
+            onSimulationDateTimeChanged: {
+                if (timeEdit.state != "inputActive")
+                {
+                    var d = universeView.simulationDateTime;
+                    timeEdit.year = d.getUTCFullYear();
+                    timeEdit.month = d.getUTCMonth() + 1;
+                    timeEdit.day = d.getUTCDate();
+                    timeEdit.hour = d.getUTCHours();
+                    timeEdit.minute = d.getUTCMinutes();
+                    timeEdit.second = d.getUTCSeconds();
+                }
+            }
         }
-        */
+
+        function unfocus()
+        {
+            yearText.focus = false
+            monthText.focus = false
+            dayText.focus = false
+            hourText.focus = false
+            minuteText.focus = false
+            secondText.focus = false
+        }
+
+        function currentDate()
+        {
+            var d = new Date();
+            /*
+            d.setUTCFullYear(year);
+            d.setUTCMonth(month - 1);
+            d.setUTCDate(day);
+            d.setUTCHours(hour);
+            d.setUTCMinutes(minute);
+            d.setUTCSeconds(second);
+            */
+            d.setFullYear(year);
+            d.setMonth(month - 1);
+            d.setDate(day);
+            d.setHours(hour);
+            d.setMinutes(minute);
+            d.setSeconds(second);
+            return d;
+        }
 
         function isLeapYear(y)
         {
@@ -139,6 +184,58 @@ Column {
             }
         }
 
+        function nextHour()
+        {
+            if (hour == 23)
+            {
+                hour = 0;
+                nextDay();
+            }
+            else
+            {
+                hour++;
+            }
+        }
+
+        function prevHour()
+        {
+            if (hour == 0)
+            {
+                hour = 23;
+                prevDay();
+            }
+            else
+            {
+                hour--;
+            }
+        }
+
+        function nextMinute()
+        {
+            if (minute == 59)
+            {
+                minute = 0;
+                nextHour();
+            }
+            else
+            {
+                minute++;
+            }
+        }
+
+        function prevMinute()
+        {
+            if (minute == 0)
+            {
+                minute = 59;
+                prevHour();
+            }
+            else
+            {
+                minute--;
+            }
+        }
+
         InfoText {
             id: yearText
             text: "" + timeEdit.year
@@ -157,10 +254,12 @@ Column {
 
             Keys.onUpPressed: {
                 timeEdit.nextYear()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onDownPressed: {
                 timeEdit.prevYear()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onRightPressed: { monthText.focus = true; }
@@ -190,10 +289,12 @@ Column {
 
             Keys.onUpPressed: {
                 timeEdit.nextMonth()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onDownPressed: {
                 timeEdit.prevMonth()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onLeftPressed: { yearText.focus = true; }
@@ -224,9 +325,11 @@ Column {
 
             Keys.onUpPressed: {
                 timeEdit.nextDay()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onDownPressed: {
+                universeView.simulationDateTime = timeEdit.currentDate()
                 timeEdit.prevDay()
             }
 
@@ -256,11 +359,13 @@ Column {
             }
 
             Keys.onUpPressed: {
-                hour = (hour + 1) % 24
+                timeEdit.nextHour()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onDownPressed: {
-                hour = (hour - 1) % 24
+                timeEdit.prevHour()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onLeftPressed: { dayText.focus = true; }
@@ -290,9 +395,13 @@ Column {
             }
 
             Keys.onUpPressed: {
+                timeEdit.nextMinute()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onDownPressed: {
+                timeEdit.prevMinute()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onLeftPressed: { hourText.focus = true; }
@@ -329,6 +438,12 @@ Column {
 
             Keys.onLeftPressed: { minuteText.focus = true; }
             Keys.onReturnPressed:  { focus = false; }
+        }
+
+        InfoText {
+            id: timeMode
+            text: " UTC"
+            color: timeEdit.textColor
         }
 
         states: State {

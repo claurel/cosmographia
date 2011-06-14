@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
+        <file>check.png</file>
         <file>clear.png</file>
         <file>config.png</file>
         <file>disk.png</file>

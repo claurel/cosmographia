@@ -1,3 +1,20 @@
+// This file is part of Cosmographia.
+//
+// Copyright (C) 2011 Chris Laurel <claurel@gmail.com>
+//
+// Cosmographia is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// Cosmographia is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
+
 import QtQuick 1.0
 
 Item {
@@ -33,6 +50,28 @@ Item {
         opacity: 0.5
     }
 
+    Flickable
+    {
+        clip: true
+        anchors.fill: parent
+        anchors.margins: 12
+
+        contentWidth: contents.width; contentHeight: contents.height
+        flickableDirection: Flickable.VerticalFlick
+
+        Text {
+             id: contents
+             width: 450
+             //anchors.margins: 12
+             color: textColor
+             font.family: fontFamily
+             font.pixelSize: fontSize
+             wrapMode: Text.WordWrap
+
+             onLinkActivated: { Qt.openUrlExternally(link) }
+         }
+     }
+
     Image {
         id: close
         width: 20; height: 20
@@ -51,19 +90,7 @@ Item {
         }
     }
 
-    Text {
-         id: contents
-         anchors.fill: parent
-         anchors.margins: 12
-         color: textColor
-         font.family: fontFamily
-         font.pixelSize: fontSize
-         wrapMode: Text.WordWrap
-
-         onLinkActivated: { Qt.openUrlExternally(link) }
-     }
-
-     states: State {
+    states: State {
          name: "visible"
          PropertyChanges { target: container; opacity: 1 }
      }

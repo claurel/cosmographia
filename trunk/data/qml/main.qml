@@ -27,11 +27,20 @@ Item {
         findObject.show()
     }
 
+    Connections {
+        target: universeView;
+        onContextMenuTriggered: {
+            contextMenu.show(x, y, body);
+        }
+    }
+
     MouseArea {
         id: pageArea
         anchors.fill: parent
         hoverEnabled: true
-        onClicked:  { timePanel.unfocus() }
+        onClicked:  {
+            timePanel.unfocus();
+        }
     }
 
     SettingsPanel {
@@ -52,28 +61,6 @@ Item {
         id: helpPanel
         opacity: 0
         textColor: "white"
-        text:
-"<b>Cosmographia controls</b>
-<br><br>
-<b>Mouse</b>
-<ul>
-<li>Left drag orbits center object</li>
-<li>Right drag pans the view</li>
-<li>Mouse wheel changes distance to center object</li>
-<li>Single click selects an object</li>
-<li>Double click an object to visit it</li>
-</ul>
-<b>Keyboard</b>
-<ul>
-<li>Arrow keys pan the view</li>
-</ul>
-<b>Gestures</b>
-<ul>
-<li>On supported trackpads, pinch or expand to change the field of view</li>
-</ul>
-<br><br>
-For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki/UserInterface\">the Cosmographia website</a>.
-"
     }
 
     Row {
@@ -100,37 +87,46 @@ For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki
 
          spacing: 10
 
-         Image {
-             width: 32; height: 32
-             source: "qrc:/icons/search.png"
-             smooth: true
+         Column {
+             Image {
+                 width: 32; height: 32
+                 source: "qrc:/icons/search.png"
+                 smooth: true
 
-             MouseArea {
-                 anchors.fill: parent
-                 onClicked: { page.showFindObject() }                 
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: { page.showFindObject() }
+                 }
              }
+             //Text { width: 32; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
-         Image {
-             width: 32; height: 32
-             source: "qrc:/icons/config.png"
-             smooth: true
+         Column {
+             Image {
+                 width: 32; height: 32
+                 source: "qrc:/icons/config.png"
+                 smooth: true
 
-             MouseArea {
-                 anchors.fill: parent
-                 onClicked: { settingsPanel.show(); helpPanel.hide() }
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: { settingsPanel.show(); helpPanel.hide() }
+                 }
              }
+             //Text { width: 32; color: "white"; text: "settings"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
-         Image {
-             width: 32; height: 32
-             source: "qrc:/icons/help.png"
-             smooth: true
+         Column {
+             Image {
+                 width: 32; height: 32
+                 source: "qrc:/icons/help.png"
+                 smooth: true
 
-             MouseArea {
-                 anchors.fill: parent
-                 onClicked: { helpPanel.show(); settingsPanel.hide() }
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: { helpPanel.text = universeView.getHelpText(); helpPanel.show(); settingsPanel.hide() }
+                 }
              }
+             //Text { width: 32; color: "white"; text: "help"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
          states: [
@@ -150,5 +146,10 @@ For more information, visit <a href=\"http://code.google.com/p/cosmographia/wiki
                  NumberAnimation { properties: "opacity" }
              }
          ]
+     }
+
+     ContextMenu {
+         id: contextMenu
+         opacity: 0
      }
  }

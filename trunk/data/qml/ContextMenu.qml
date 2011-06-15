@@ -28,9 +28,11 @@ Item
 
     function show(x, y, body)
     {
+        state = "visible"
+        wholeWindow.enabled = true;
+
         container.x = x
         container.y = y        
-        opacity = 1
         menuView.currentIndex = -1
 
         selection = body
@@ -52,12 +54,22 @@ Item
 
     function hide()
     {
-        opacity = 0
+        state = ""
+        wholeWindow.enabled = false
     }
 
     function menuAction(item)
     {
-        if (item.action == "bodyaxes")
+        if (item.action == "center")
+        {
+            universeView.setCentralBody(selection);
+        }
+        else if (item.action == "goto")
+        {
+            universeView.setSelectedBody(selection);
+            universeView.gotoSelectedObject();
+        }
+        else if (item.action == "bodyaxes")
         {
             selection.bodyAxes = !selection.bodyAxes;
         }
@@ -93,6 +105,16 @@ Item
         }
     }
 
+    // This mouse area is activated when the context menu is shown. It is used
+    // to dismiss the context menu when the user clicks outside of it.
+    MouseArea {
+        id: wholeWindow
+        x: -5000; y: -5000
+        width: 10000; height: 10000;
+        enabled: false
+        onClicked: { parent.hide(); }
+    }
+
     Rectangle {
         anchors.fill: parent
         opacity: 0.7
@@ -115,11 +137,13 @@ Item
         spacing: 3
 
         interactive: false
+        highlightMoveSpeed: 5000
 
         delegate: Row {
             spacing: 3
 
             Image {
+                anchors.verticalCenter:  parent.verticalCenter
                 opacity: checked ? 1.0 : 0.01
                 smooth: true
                 width: 12; height: 12
@@ -151,5 +175,21 @@ Item
             }
         }
     }
+
+    states: State {
+        name: "visible"
+        PropertyChanges { target: container; opacity: 1 }
+    }
+
+    transitions: [
+        Transition {
+            from: ""; to: "visible"
+            NumberAnimation { properties: "opacity"; duration: 125 }
+        },
+        Transition {
+            from: "visible"; to: ""
+            NumberAnimation { properties: "opacity"; duration: 125 }
+        }
+    ]
 }
 

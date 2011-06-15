@@ -454,7 +454,7 @@ Column {
 
     InfoText {
         id: timeScaleDisplay
-        text: "Time rate: " + universeView.timeScale           
+        text: "Time rate: " + universeView.timeScale + (universeView.paused ? "x (paused)" : "x")
     }
 }
 

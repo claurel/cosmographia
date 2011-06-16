@@ -54,7 +54,10 @@ APP_SOURCES = \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/CmodLoader.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
-    $$MAIN_PATH/compatibility/TransformCatalog.cpp
+    $$MAIN_PATH/compatibility/TransformCatalog.cpp \
+    $$MAIN_PATH/qtwrapper/BodyObject.cpp \
+    $$MAIN_PATH/qtwrapper/VisualizerObject.cpp
+
 
 APP_HEADERS = \
     $$MAIN_PATH/Addon.h \
@@ -99,7 +102,10 @@ APP_HEADERS = \
     $$MAIN_PATH/compatibility/CatalogParser.h \
     $$MAIN_PATH/compatibility/CmodLoader.h \
     $$MAIN_PATH/compatibility/Scanner.h \
-    $$MAIN_PATH/compatibility/TransformCatalog.h
+    $$MAIN_PATH/compatibility/TransformCatalog.h \
+    $$MAIN_PATH/qtwrapper/BodyObject.h \
+    $$MAIN_PATH/qtwrapper/VisualizerObject.h
+
 
 
 VESTA_PATH = thirdparty/vesta
@@ -508,6 +514,8 @@ win32 {
 }
 
 macx {
+    ICON = resources/cosmographia.icns
+
     # Media files for the Mac bundle
     TEXTURES.path = Contents/Resources/data/textures
     TEXTURES.files = \
@@ -590,9 +598,22 @@ macx {
     GUI.path = Contents/Resources/data/qml
     GUI.files = \
         data/qml/main.qml \
-        data/qml/SearchBox.qml
+        data/qml/ContextMenu.qml \
+        data/qml/InfoText.qml \
+        data/qml/SearchBox.qml \
+        data/qml/SettingsPanel.qml \
+        data/qml/TextPanel.qml \
+        data/qml/TextToggle.qml \
+        data/qml/TimePanel.qml
 
     QMAKE_BUNDLE_DATA += GUI
+
+    HELPFILES.path = Contents/Resources/data/help
+    HELPFILES.files = \
+        data/help/help.html \
+        data/help/jupiter.jpg
+
+    QMAKE_BUNDLE_DATA += HELPFILES
 
     # CONFIG += x86
     # QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.5.sdk

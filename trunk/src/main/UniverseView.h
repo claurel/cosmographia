@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
 //
-// Eigen is free software; you can redistribute it and/or
+// Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
@@ -20,10 +20,13 @@
 
 #include "NetworkTextureLoader.h"
 #include "catalog/UniverseCatalog.h"
+#include "qtwrapper/BodyObject.h"
+#include "qtwrapper/VisualizerObject.h"
 #include <QDeclarativeView>
 #include <QTimer>
 #include <QDateTime>
 #include <QGestureEvent>
+#include <QUrl>
 #include <vesta/Universe.h>
 #include <vesta/Observer.h>
 #include <vesta/TextureMapLoader.h>
@@ -69,7 +72,18 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
     Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
     Q_PROPERTY(double timeScale READ timeScale WRITE setTimeScale NOTIFY timeScaleChanged);
+    Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pauseStateChanged);
 
+public:
+    Q_INVOKABLE BodyObject* getSelectedBody() const;
+    Q_INVOKABLE void setSelectedBody(BodyObject* body);
+    Q_INVOKABLE BodyObject* getCentralBody() const;
+    Q_INVOKABLE void setCentralBody(BodyObject* body);
+    Q_INVOKABLE BodyObject* getEarth() const;
+    Q_INVOKABLE BodyObject* getSun() const;
+    Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
+    Q_INVOKABLE QString getHelpText();
+    Q_INVOKABLE void setStateFromUrl(const QUrl& url);
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -182,10 +196,14 @@ public:
 
     void initializeGL();
 
+    QUrl getStateUrl();
+
 signals:
     void timeChanged();
     void simulationDateTimeChanged();
     void timeScaleChanged(double);
+    void pauseStateChanged(bool);
+    void contextMenuTriggered(int x, int y, BodyObject* body);
 
 public slots:
     void tick();
@@ -225,8 +243,11 @@ public slots:
     void setUpdateInterval(unsigned int msec);
     void findObject();
 
+    void setStatusMessage(const QString& message);
+
 private slots:
     void setSelectedBody(const QString& name);
+    void setFOV(double fovY);
 
 protected:
     void paintGL();
@@ -338,6 +359,9 @@ private:
     QVideoEncoder* m_videoEncoder;
     TimeDisplayMode m_timeDisplay;
     bool m_wireframe;
+
+    double m_statusUpdateTime;
+    QString m_statusMessage;
 };
 
 #endif // _UNIVERSE_VIEW_H_

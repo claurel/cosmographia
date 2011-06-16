@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
 //
-// Eigen is free software; you can redistribute it and/or
+// Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
@@ -100,9 +100,12 @@ static const unsigned int ShadowMapSize = 2048;
 static const unsigned int ReflectionMapSize = 512;
 
 static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
+static double EndOfTime   = GregorianDate(2100, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
 
 static const double MinimumFOV = toRadians(0.1);
 static const double MaximumFOV = toRadians(90.0);
+
+static const double StatusMessageDuration = 2.5;
 
 
 static TextureProperties SkyLayerTextureProperties()
@@ -192,7 +195,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_guiScene(NULL),
     m_videoEncoder(NULL),
     m_timeDisplay(TimeDisplay_UTC),
-    m_wireframe(false)
+    m_wireframe(false),
+    m_statusUpdateTime(0.0)
 {
     setAutoFillBackground(false);
 
@@ -215,7 +219,10 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
     setBackgroundBrush(Qt::transparent);
 
-    qmlRegisterUncreatableType<UniverseView>("Comsmographia", 1, 0, "UniverseView", "Use global universeView");
+    qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "UniverseView", "Use global universeView");
+    //qmlRegisterUncreatableType<BodyObject>("Cosmographia", 1, 0, "Body", "Use universeView and catalog methods");
+    qmlRegisterType<BodyObject>("Comsmographia", 1, 0, "Body");
+    qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
     rootContext()->setContextProperty("universeView", this);
     setSource(QUrl::fromLocalFile("qml/main.qml"));
     setResizeMode(SizeRootObjectToView);
@@ -645,6 +652,9 @@ UniverseView::drawInfoOverlay()
             GregorianDate date = GregorianDate::UTCDateFromTDBSec(m_simulationTime);
 
             m_textFont->bind();
+
+
+            // Display of date and time rate now handled by QML
 #if 0
             float dateY = float(viewportHeight - titleFontHeight);
             float dateX = viewportWidth - 250.0f;
@@ -738,9 +748,24 @@ UniverseView::drawInfoOverlay()
                 }
             }
 
+#if 0
             {
-                QString fovInfo = QString("%1\260 FOV").arg(toDegrees(m_fovY), 6, 'f', 1);
+                double fovX = atan(tan(m_fovY / 2.0) * double(width()) / double(height())) * 2.0;
+                QString fovInfo = QString("%1\260 x %2\260 FOV").arg(toDegrees(fovX), 0, 'f', 1).arg(toDegrees(m_fovY), 0, 'f', 1);
                 m_textFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
+            }
+#endif
+
+            // Show the status message
+            {
+                float alpha = 1.0f - ((m_realTime - m_statusUpdateTime) / StatusMessageDuration);
+                if (alpha > 0.0f)
+                {
+                    alpha = min(1.0f, alpha * 2.0f);
+                    float textWidth = m_textFont->textWidth(m_statusMessage.toLatin1().data());
+                    glColor4f(titleColor.x(), titleColor.y(), titleColor.z(), alpha);
+                    m_textFont->render(m_statusMessage.toLatin1().data(), Vector2f(float(viewportWidth / 2) - textWidth / 2, viewportHeight - 20.0f));
+                }
             }
 
         }
@@ -1030,15 +1055,14 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
     else if (rightButton && shift)
     {
         double zoomFactor = exp(dy / 1000.0);
-        m_fovY *= zoomFactor;
-        m_fovY = max(MinimumFOV, min(MaximumFOV, m_fovY));
+        setFOV(m_fovY * zoomFactor);
     }
     else if (rightButton || (leftButton && alt))
     {
         // Right dragging changes the observer's orientation without
         // modifying the position. Rotate by an amount that depends on
         // the current field of view.
-        double fovAdjust = toDegrees(m_fovY) / 50.0;
+        double fovAdjust = toDegrees(m_fovY) / 25.0;
         double xrotation = (double) dy / 100.0 * fovAdjust;
         double yrotation = (double) dx / 100.0 * fovAdjust;
 
@@ -1080,6 +1104,11 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
 void UniverseView::wheelEvent(QWheelEvent* event)
 {
     QDeclarativeView::wheelEvent(event);
+    if (event->isAccepted())
+    {
+        // Event was eaten by QML
+        return;
+    }
 
     if (event->orientation() == Qt::Vertical)
     {
@@ -1198,7 +1227,13 @@ UniverseView::gestureEvent(QGestureEvent* event)
     if (pinch)
     {
         float fovScale = pinch->lastScaleFactor() / pinch->scaleFactor();
-        m_fovY = max(MinimumFOV, min(MaximumFOV, m_fovY * fovScale));
+
+        // Setting the field of view will generate a status message; don't show this if the
+        // FOV hasn't changed appreciably.
+        if (abs(fovScale - 1.0f) > 1.0e-4f)
+        {
+            setFOV(m_fovY * fovScale);
+        }
 
         float rotationAngle = float(toRadians(pinch->rotationAngle() - pinch->lastRotationAngle()));
         m_controller->roll(rotationAngle * 5);
@@ -1225,6 +1260,11 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
     Entity* body = pickObject(event->pos());
     if (body)
     {
+        BodyObject* o = new BodyObject(body);
+        QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+        emit contextMenuTriggered(event->pos().x(), event->pos().y(), o);
+
+        return;
         float visualizerSize = 1.0f;
         if (body->geometry())
         {
@@ -1643,6 +1683,11 @@ UniverseView::setCenterAndFrame(Entity* center, FrameType f)
     m_observer->updateCenter(center, m_simulationTime);
     m_observer->updatePositionFrame(frame, m_simulationTime);
     m_observer->updatePointingFrame(frame, m_simulationTime);
+
+    if (center)
+    {
+        setStatusMessage(QString("Set center to %1").arg(center->name().c_str()));
+    }
 }
 
 
@@ -1659,7 +1704,12 @@ UniverseView::setObserverCenter()
 void
 UniverseView::setPaused(bool paused)
 {
-    m_paused = paused;
+    getStateUrl();
+    if (paused != m_paused)
+    {
+        m_paused = paused;
+        emit pauseStateChanged(paused);
+    }
 }
 
 
@@ -1904,6 +1954,14 @@ void
 UniverseView::setConstellationNameVisibility(bool checked)
 {
     setSkyLayerVisible("constellation names", checked);
+}
+
+
+void
+UniverseView::setStatusMessage(const QString& message)
+{
+    m_statusMessage = message;
+    m_statusUpdateTime = m_realTime;
 }
 
 
@@ -2237,6 +2295,16 @@ UniverseView::setSelectedBody(const QString& name)
 
 
 void
+UniverseView::setFOV(double fovY)
+{
+    m_fovY = max(MinimumFOV, min(MaximumFOV, fovY));
+
+    double fovX = atan(tan(m_fovY / 2.0) * double(width()) / double(height())) * 2.0;
+    setStatusMessage(QString("%1\260 x %2\260 FOV").arg(toDegrees(fovX), 0, 'f', 1).arg(toDegrees(m_fovY), 0, 'f', 1));
+}
+
+
+void
 UniverseView::findObject()
 {
     // Show the QML find object widget
@@ -2341,5 +2409,193 @@ UniverseView::TrajectoryPlotEntry::TrajectoryPlotEntry() :
 }
 
 
+// Wrapper functions
+BodyObject*
+UniverseView::getSelectedBody() const
+{
+    BodyObject* o = new BodyObject(m_selectedBody.ptr());
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
 
 
+void
+UniverseView::setSelectedBody(BodyObject* body)
+{
+    if (body && body->body())
+    {
+        this->m_selectedBody = body->body();
+    }
+    else
+    {
+        this->m_selectedBody = NULL;
+    }
+}
+
+
+BodyObject*
+UniverseView::getCentralBody() const
+{
+    BodyObject* o = new BodyObject(m_observer->center());
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
+
+
+void
+UniverseView::setCentralBody(BodyObject* body)
+{
+    if (body && body->body())
+    {
+        setCenterAndFrame(body->body(), m_observerFrame);
+    }
+}
+
+
+BodyObject*
+UniverseView::getEarth() const
+{
+    BodyObject* o = new BodyObject(m_universe->findFirst("Earth"));
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
+
+
+BodyObject*
+UniverseView::getSun() const
+{
+    BodyObject* o = new BodyObject(m_universe->findFirst("Sun"));
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
+
+
+VisualizerObject*
+UniverseView::createBodyDirectionVisualizer(BodyObject* from, BodyObject* target)
+{
+    if (from == NULL   || from->body() == NULL ||
+        target == NULL || target->body() == NULL)
+    {
+        return NULL;
+    }
+
+    float visualizerSize = 1.0f;
+    if (from->body()->geometry())
+    {
+        visualizerSize = from->body()->geometry()->boundingSphereRadius() * 2.0f;
+    }
+
+    ArrowVisualizer* arrow = new BodyDirectionVisualizer(visualizerSize, target->body());
+    arrow->setVisibility(true);
+    arrow->setColor(Spectrum(1.0f, 1.0f, 0.7f));
+    arrow->setLabelEnabled(true);
+    arrow->setLabelText(target->body()->name());
+
+    VisualizerObject* o = new VisualizerObject(arrow);
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
+
+
+QString
+UniverseView::getHelpText()
+{
+    QFile helpFile("help/help.html");
+    if (!helpFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Error opening help file " << QFileInfo(helpFile).absoluteFilePath();
+        return QString();
+    }
+
+    return QString(helpFile.readAll());
+}
+
+
+QUrl
+UniverseView::getStateUrl()
+{
+    QUrl url;
+
+    url.setScheme("cosmo");
+    url.setPath(QString::fromUtf8(m_observer->center()->name().c_str()));
+
+    double jd = secondsToDays(m_simulationTime) + vesta::J2000;
+    Vector3d position = m_observer->position();
+    Quaterniond orientation = m_observer->orientation();
+    url.addQueryItem("frame", "icrf");
+    url.addQueryItem("jd", QString::number(jd, 'f'));
+    url.addQueryItem("x", QString::number(position.x(), 'f'));
+    url.addQueryItem("y", QString::number(position.y(), 'f'));
+    url.addQueryItem("z", QString::number(position.z(), 'f'));
+    url.addQueryItem("qw", QString::number(orientation.w(), 'f'));
+    url.addQueryItem("qx", QString::number(orientation.x(), 'f'));
+    url.addQueryItem("qy", QString::number(orientation.y(), 'f'));
+    url.addQueryItem("qz", QString::number(orientation.z(), 'f'));
+
+    qDebug() << "URL: " << url.toString();
+
+    return url;
+}
+
+
+void
+UniverseView::setStateFromUrl(const QUrl& url)
+{
+    if (url.scheme() != "cosmo")
+    {
+        qDebug() << "Not a Cosmographia URL";
+        return;
+    }
+
+    QString centerBodyName = url.path();
+    if (centerBodyName.isEmpty())
+    {
+        qDebug() << "Central body is missing from URL";
+        return;
+    }
+
+    Entity* centerBody = m_catalog->find(centerBodyName);
+    if (!centerBody)
+    {
+        qDebug() << "Central body " << centerBodyName << " from URL not found in catalog";
+        return;
+    }
+
+    double jd = 0.0;
+    Vector3d position = Vector3d::Zero();
+    Quaterniond orientation = Quaterniond::Identity();
+
+    position.x() = url.queryItemValue("x").toDouble();
+    position.y() = url.queryItemValue("y").toDouble();
+    position.z() = url.queryItemValue("z").toDouble();
+
+    orientation.w() = url.queryItemValue("qw").toDouble();
+    orientation.x() = url.queryItemValue("qx").toDouble();
+    orientation.y() = url.queryItemValue("qy").toDouble();
+    orientation.z() = url.queryItemValue("qz").toDouble();
+
+    jd = url.queryItemValue("jd").toDouble();
+
+    if (orientation.coeffs().isZero())
+    {
+        qDebug() << "Bad or missing orientation in URL";
+        return;
+    }
+
+    // Ensure that we have a unit quaternion so that the view transform doesn't
+    // get messed up.
+    orientation.normalize();
+
+    double tdbSec = daysToSeconds(jd - vesta::J2000);
+    if (tdbSec < StartOfTime || tdbSec > EndOfTime)
+    {
+        qDebug() << "URL time is outside the allowed range";
+        return;
+    }
+
+    // Now actually set the state
+    setSimulationTime(tdbSec);
+    setCenterAndFrame(centerBody, m_observerFrame);
+    m_observer->setPosition(position);
+    m_observer->setOrientation(orientation);
+}

@@ -68,7 +68,16 @@ Item {
              font.pixelSize: fontSize
              wrapMode: Text.WordWrap
 
-             onLinkActivated: { Qt.openUrlExternally(link) }
+             onLinkActivated: {
+                 if (link.substr(0, 6) == "cosmo:")
+                 {
+                     universeView.setStateFromUrl(link)
+                 }
+                 else
+                 {
+                    Qt.openUrlExternally(link)
+                 }
+             }
          }
      }
 

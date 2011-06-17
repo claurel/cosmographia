@@ -4,7 +4,9 @@
         <file>clear.png</file>
         <file>config.png</file>
         <file>disk.png</file>
+        <file>down.png</file>
         <file>help.png</file>
         <file>search.png</file>
+        <file>up.png</file>
     </qresource>
 </RCC>

@@ -17,8 +17,6 @@ import re
 astorb = open(sys.argv[1], 'r')
 out = open(sys.argv[2], 'wb')
 
-magThreshold = 7.5
-
 j2000 = datetime.datetime(2000, 1, 1, 12, 0, 0)
 provisionalDesignation = re.compile('[0-9]{4,4} [A-Z]{2,2}[0-9]*')
 

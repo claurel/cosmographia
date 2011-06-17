@@ -2511,6 +2511,16 @@ UniverseView::getHelpText()
 }
 
 
+/** Construct a URL from the current observer state, time, and time rate.
+  *
+  * A Cosmographia URL has the scheme cosmo and a path equal to the current
+  * center object. The stored position and orientation are relative to the center object
+  * in the observer frame.
+  *
+  * The time scale and fov are optional fields.
+  *
+  *
+  */
 QUrl
 UniverseView::getStateUrl()
 {
@@ -2522,6 +2532,8 @@ UniverseView::getStateUrl()
     double jd = secondsToDays(m_simulationTime) + vesta::J2000;
     Vector3d position = m_observer->position();
     Quaterniond orientation = m_observer->orientation();
+    double ts = isPaused() ? 0.0 : timeScale();
+
     url.addQueryItem("frame", "icrf");
     url.addQueryItem("jd", QString::number(jd, 'f'));
     url.addQueryItem("x", QString::number(position.x(), 'f'));
@@ -2531,6 +2543,8 @@ UniverseView::getStateUrl()
     url.addQueryItem("qx", QString::number(orientation.x(), 'f'));
     url.addQueryItem("qy", QString::number(orientation.y(), 'f'));
     url.addQueryItem("qz", QString::number(orientation.z(), 'f'));
+    url.addQueryItem("ts", QString::number(ts));
+    url.addQueryItem("fov", QString::number(toDegrees(m_fovY)));
 
     qDebug() << "URL: " << url.toString();
 
@@ -2598,4 +2612,29 @@ UniverseView::setStateFromUrl(const QUrl& url)
     setCenterAndFrame(centerBody, m_observerFrame);
     m_observer->setPosition(position);
     m_observer->setOrientation(orientation);
+
+    bool ok = false;
+    double fov = toRadians(url.queryItemValue("fov").toDouble(&ok));
+    if (ok)
+    {
+        // Only set the field of view we have a valid value
+        if (fov >= MinimumFOV && fov <= MaximumFOV)
+        {
+            setFOV(fov);
+        }
+    }
+
+    double timeScale = url.queryItemValue("ts").toDouble(&ok);
+    if (ok)
+    {
+        if (timeScale == 0.0)
+        {
+            setPaused(true);
+        }
+        else if (abs(timeScale) >= 0.01 && abs(timeScale) <= 1.0e8)
+        {
+            setPaused(false);
+            setTimeScale(timeScale);
+        }
+    }
 }

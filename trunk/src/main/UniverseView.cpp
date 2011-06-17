@@ -473,6 +473,7 @@ void UniverseView::paintEvent(QPaintEvent* /* event */)
 
     // Save the state of the painter
     glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -488,10 +489,19 @@ void UniverseView::paintEvent(QPaintEvent* /* event */)
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
+    glPopClientAttrib();
     glPopAttrib();
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glUseProgram(0);
+    if (GLEW_VERSION_1_5)
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    if (GLEW_VERSION_2_0)
+    {
+        glUseProgram(0);
+    }
+
     glShadeModel(GL_FLAT);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);

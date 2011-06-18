@@ -602,6 +602,7 @@ macx {
         data/qml/InfoText.qml \
         data/qml/SearchBox.qml \
         data/qml/SettingsPanel.qml \
+        data/qml/SpinBox.qml \
         data/qml/TextPanel.qml \
         data/qml/TextToggle.qml \
         data/qml/TimePanel.qml

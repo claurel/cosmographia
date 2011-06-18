@@ -50,8 +50,11 @@ Example of a !ParticleSystem geometry definition:
   * startSize - size of particles when they are generated (in kilometers)
   * endSize - the size of particles at the end of their lifetimes
   * colors - a list of color and opacity values
-  * startTime
-  * endTime
+  * startTime - date when the first particle is emitted (default is 1 Jan 2000)
+  * endTime - date when the last particle is emitted
+
+As with all dates in catalog files, the startTime and endTime may be given as Julian Dates or ISO 8601 date strings (e.g. "2011-03-15T15:36:14")
+
 = Generators =
 
 == Point ==

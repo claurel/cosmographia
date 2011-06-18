@@ -17,6 +17,8 @@
               "radius" : 1820
           },
 
+          "startTime" : "1990-01-01",
+
           "bodyFrame" : {
               "type" : "TwoVector",
               "primaryAxis" : "-z",
@@ -60,7 +62,8 @@
                    "#5566ff", 0.4,
                    "#5566ff", 0.0
                 ],
-                "endTime" : 3451545.0
+                "startTime" : "1990-01-01",
+                "endTime" : "2100-01-01"
               } ]
           }
 

@@ -21,6 +21,8 @@ Item {
     id: page
     width: 1680; height: 1050
 
+    property int panelY: 100
+
     function showFindObject()
     {
         findObject.searchText = "";
@@ -45,6 +47,7 @@ Item {
 
     SettingsPanel {
         id: settingsPanel
+        x: 32; y: panelY
         opacity: 0
         textColor: "white"
     }
@@ -59,6 +62,7 @@ Item {
 
     TextPanel {
         id: helpPanel
+        x: 32; y: panelY
         opacity: 0
         textColor: "white"
     }
@@ -81,9 +85,7 @@ Item {
          opacity: 0
          state: ""
 
-         anchors {
-             verticalCenter: parent.verticalCenter
-         }
+         x: 0; y: panelY
 
          spacing: 10
 

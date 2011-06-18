@@ -39,11 +39,6 @@ Item {
     height: 600
     opacity: 0
 
-    x: 32
-    anchors {
-        verticalCenter: parent.verticalCenter
-    }
-
     Rectangle {
         anchors.fill: parent
         color: "#404040"

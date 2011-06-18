@@ -236,28 +236,43 @@ Column {
             }
         }
 
-        InfoText {
+        function nextSecond()
+        {
+            if (second == 59)
+            {
+                second = 0;
+                nextMinute();
+            }
+            else
+            {
+                second++;
+            }
+        }
+
+        function prevSecond()
+        {
+            if (second == 0)
+            {
+                second = 59;
+                prevMinute();
+            }
+            else
+            {
+                second--;
+            }
+        }
+
+        SpinBox {
             id: yearText
-            text: "" + timeEdit.year
+            text: timeEdit.year + "-"
             color: timeEdit.textColor
 
-            MouseArea {
-                anchors.fill: parent
-                onPressed: { parent.focus = true }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: parent.focus ? 0.3 : 0
-            }
-
-            Keys.onUpPressed: {
+            onUp: {
                 timeEdit.nextYear()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
 
-            Keys.onDownPressed: {
+            onDown: {
                 timeEdit.prevYear()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
@@ -266,33 +281,17 @@ Column {
             Keys.onReturnPressed:  { focus = false; }
         }
 
-        InfoText {
-            text: "-"
-            color: timeEdit.textColor
-        }
-
-        InfoText {
+        SpinBox {
             id: monthText
-            text: Qt.formatDate(new Date(2000, timeEdit.month - 1, 3), "MMM")
+            text: Qt.formatDate(new Date(2000, timeEdit.month - 1, 3), "MMM") + "-"
             color: timeEdit.textColor
 
-            MouseArea {
-                anchors.fill: parent
-                onPressed: { parent.focus = true }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: parent.focus ? 0.3 : 0
-            }
-
-            Keys.onUpPressed: {
+            onUp: {
                 timeEdit.nextMonth()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
 
-            Keys.onDownPressed: {
+            onDown: {
                 timeEdit.prevMonth()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
@@ -302,33 +301,17 @@ Column {
             Keys.onReturnPressed:  { focus = false; }
         }
 
-        InfoText {
-            text: "-"
-            color: timeEdit.textColor
-        }
-
-        InfoText {
+        SpinBox {
             id: dayText
-            text: timeEdit.day < 10 ? "0" + timeEdit.day : timeEdit.day
+            text: (timeEdit.day < 10 ? "0" + timeEdit.day : timeEdit.day) + " "
             color: timeEdit.textColor
 
-            MouseArea {
-                anchors.fill: parent
-                onPressed: { parent.focus = true }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: parent.focus ? 0.3 : 0
-            }
-
-            Keys.onUpPressed: {
+            onUp: {
                 timeEdit.nextDay()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
 
-            Keys.onDownPressed: {
+            onDown: {
                 universeView.simulationDateTime = timeEdit.currentDate()
                 timeEdit.prevDay()
             }
@@ -338,32 +321,17 @@ Column {
             Keys.onReturnPressed:  { focus = false; }
         }
 
-        InfoText {
-            text: " "
-        }
-
-        InfoText {
+        SpinBox {
             id: hourText
-            text: timeEdit.hour < 10 ? "0" + timeEdit.hour : timeEdit.hour
+            text: (timeEdit.hour < 10 ? "0" + timeEdit.hour : timeEdit.hour) + ":"
             color: timeEdit.textColor
 
-            MouseArea {
-                anchors.fill: parent
-                onPressed: { parent.focus = true }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: parent.focus ? 0.3 : 0
-            }
-
-            Keys.onUpPressed: {
+            onUp: {
                 timeEdit.nextHour()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
 
-            Keys.onDownPressed: {
+            onDown: {
                 timeEdit.prevHour()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
@@ -373,33 +341,17 @@ Column {
             Keys.onReturnPressed:  { focus = false; }
         }
 
-        InfoText {
-            text: ":"
-            color: timeEdit.textColor
-        }
-
-        InfoText {
+        SpinBox {
             id: minuteText
-            text: timeEdit.minute < 10 ? "0" + timeEdit.minute : timeEdit.minute
+            text: (timeEdit.minute < 10 ? "0" + timeEdit.minute : timeEdit.minute) + ":"
             color: timeEdit.textColor
 
-            MouseArea {
-                anchors.fill: parent
-                onPressed: { parent.focus = true }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: parent.focus ? 0.3 : 0
-            }
-
-            Keys.onUpPressed: {
+            onUp: {
                 timeEdit.nextMinute()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
 
-            Keys.onDownPressed: {
+            onDown: {
                 timeEdit.prevMinute()
                 universeView.simulationDateTime = timeEdit.currentDate()
             }
@@ -409,31 +361,19 @@ Column {
             Keys.onReturnPressed:  { focus = false; }
         }
 
-        InfoText {
-            text: ":"
-            color: timeEdit.textColor
-        }
-
-        InfoText {
+        SpinBox {
             id: secondText
             text: timeEdit.second < 10 ? "0" + timeEdit.second : timeEdit.second
             color: timeEdit.textColor
 
-            MouseArea {
-                anchors.fill: parent
-                onPressed: { parent.focus = true }
+            onUp: {
+                timeEdit.nextSecond()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: parent.focus ? 0.3 : 0
-            }
-
-            Keys.onUpPressed: {
-            }
-
-            Keys.onDownPressed: {
+            onDown: {
+                timeEdit.prevSecond()
+                universeView.simulationDateTime = timeEdit.currentDate()
             }
 
             Keys.onLeftPressed: { minuteText.focus = true; }
@@ -444,6 +384,7 @@ Column {
             id: timeMode
             text: " UTC"
             color: timeEdit.textColor
+            anchors.verticalCenter: secondText.verticalCenter
         }
 
         states: State {

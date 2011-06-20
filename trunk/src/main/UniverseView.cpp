@@ -2272,6 +2272,13 @@ UniverseView::setAmbientLight(double brightness)
 }
 
 
+bool
+UniverseView::sunGlare() const
+{
+    return m_sunGlareEnabled;
+}
+
+
 void
 UniverseView::setSunGlare(bool enable)
 {

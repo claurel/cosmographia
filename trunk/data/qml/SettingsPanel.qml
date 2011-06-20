@@ -239,6 +239,20 @@ Item {
                 enabled: false
             }
 
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Sun Glare"
+            }
+
+            TextToggle {
+                onToggled: { universeView.sunGlare = enabled }
+                enabled: true
+            }
+
+
+            // Spacer
             Item { height: 20; width: 10 }
             Item { height: 20; width: 10 }
 
@@ -265,6 +279,10 @@ Item {
                 }
             }
             Item { width: 1; height: 1 }
+
+            // Spacer
+            Item { height: 10; width: 10 }
+            Item { height: 10; width: 10 }
 
             Column {
                 width: ambientLightSlider.width

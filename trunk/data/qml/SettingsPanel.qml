@@ -38,6 +38,18 @@ Item {
     height: 600
     opacity: 0
 
+    Connections
+    {
+        target: universeView;
+        onLimitingMagnitudeChanged: {
+            magnitudeSlider.value = universeView.limitingMagnitude
+        }
+
+        onAmbientLightChanged: {
+            ambientLightSlider.value = universeView.ambientLight
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         color: "#404040"
@@ -226,6 +238,57 @@ Item {
                 onToggled: { universeView.reflections = enabled }
                 enabled: false
             }
+
+            Item { height: 20; width: 10 }
+            Item { height: 20; width: 10 }
+
+            Column {
+                width: magnitudeSlider.width
+
+                spacing: 5
+                Text {
+                    font.family: fontFamily
+                    font.pixelSize: fontSize
+                    color: textColor
+                    text: "Star Brightness"
+                }
+
+                Slider {
+                    id: magnitudeSlider
+
+                    value: 8.0
+                    minValue: 3.0
+                    maxValue: 13.0
+
+                    width: 200
+                    onValueChanged: { universeView.limitingMagnitude = value }
+                }
+            }
+            Item { width: 1; height: 1 }
+
+            Column {
+                width: ambientLightSlider.width
+
+                spacing: 5
+                Text {
+                    font.family: fontFamily
+                    font.pixelSize: fontSize
+                    color: textColor
+                    text: "Extra Light"
+                }
+
+                Slider {
+                    id: ambientLightSlider
+
+                    value: 0.0
+                    minValue: 0.0
+                    maxValue: 0.5
+
+                    width: 200
+                    onValueChanged: { universeView.ambientLight = value }
+                }
+            }
+            Item {}
         }
     }
 

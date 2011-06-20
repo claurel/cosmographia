@@ -74,6 +74,9 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(double timeScale READ timeScale WRITE setTimeScale NOTIFY timeScaleChanged);
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pauseStateChanged);
 
+    Q_PROPERTY(double limitingMagnitude READ limitingMagnitude WRITE setLimitingMagnitude NOTIFY limitingMagnitudeChanged);
+    Q_PROPERTY(double ambientLight READ ambientLight WRITE setAmbientLight NOTIFY ambientLightChanged);
+
 public:
     Q_INVOKABLE BodyObject* getSelectedBody() const;
     Q_INVOKABLE void setSelectedBody(BodyObject* body);
@@ -162,6 +165,9 @@ public:
     bool cloudsVisible() const;
     bool atmospheresVisible() const;
 
+    double limitingMagnitude() const;
+    double ambientLight() const;
+
     QString currentTimeString() const;
 
     enum TimeDisplayMode
@@ -204,6 +210,8 @@ signals:
     void timeScaleChanged(double);
     void pauseStateChanged(bool);
     void contextMenuTriggered(int x, int y, BodyObject* body);
+    void limitingMagnitudeChanged(double);
+    void ambientLightChanged(double);
 
 public slots:
     void tick();
@@ -229,6 +237,7 @@ public slots:
     void setCloudsVisible(bool enable);
     void setAtmospheresVisible(bool enable);
     void setAmbientLight(bool enable);
+    void setAmbientLight(double brightness);
     void setReflections(bool enable);
     void setStereoMode(StereoMode stereoMode);
     void setSunGlare(bool enable);
@@ -239,6 +248,7 @@ public slots:
     void gotoSelectedObject();
     void setViewpoint(Viewpoint* viewpoint);
     void setTimeDisplay(TimeDisplayMode mode);
+    void setLimitingMagnitude(double appMag);
 
     void setUpdateInterval(unsigned int msec);
     void findObject();

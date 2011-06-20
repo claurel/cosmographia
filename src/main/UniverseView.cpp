@@ -260,6 +260,10 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     initNetwork();
 
     grabGesture(Qt::PinchGesture);
+
+    // Initialize settings
+    setLimitingMagnitude(8.0);
+    emit limitingMagnitudeChanged(limitingMagnitude()); // Force a notification
 }
 
 
@@ -1194,17 +1198,13 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
     }
 
     // Star brightness adjustment
-    StarsLayer* stars = dynamic_cast<StarsLayer*>(m_universe->layer("stars"));
-    if (stars)
+    if (event->text() == "[")
     {
-        if (event->text() == "[")
-        {
-            stars->setLimitingMagnitude(max(3.0f, stars->limitingMagnitude() - 0.2f));
-        }
-        else if (event->text() == "]")
-        {
-            stars->setLimitingMagnitude(min(13.0f, stars->limitingMagnitude() + 0.2f));
-        }
+        setLimitingMagnitude(max(3.0, limitingMagnitude() - 0.2));
+    }
+    else if (event->text() == "]")
+    {
+        setLimitingMagnitude(min(13.0, limitingMagnitude() + 0.2));
     }
 
     // Alt+Shift+W enables wireframe mode
@@ -2230,6 +2230,45 @@ UniverseView::setAmbientLight(bool enable)
 {
     float light = enable ? 0.15f : 0.0f;
     m_renderer->setAmbientLight(Spectrum(light, light, light));
+}
+
+
+double
+UniverseView::limitingMagnitude() const
+{
+    StarsLayer* stars = dynamic_cast<StarsLayer*>(m_universe->layer("stars"));
+    return double(stars->limitingMagnitude());
+}
+
+
+void
+UniverseView::setLimitingMagnitude(double appMag)
+{
+    StarsLayer* stars = dynamic_cast<StarsLayer*>(m_universe->layer("stars"));
+    if (stars->limitingMagnitude() != (float) appMag)
+    {
+        stars->setLimitingMagnitude(float(appMag));
+        emit limitingMagnitudeChanged(appMag);
+    }
+}
+
+
+double
+UniverseView::ambientLight() const
+{
+    return double(m_renderer->ambientLight().green());
+}
+
+
+void
+UniverseView::setAmbientLight(double brightness)
+{
+    double currentBrightness = m_renderer->ambientLight().green();
+    if (currentBrightness != brightness)
+    {
+        m_renderer->setAmbientLight(Spectrum::Flat(float(brightness)));
+        emit ambientLightChanged(brightness);
+    }
 }
 
 

@@ -29,7 +29,8 @@ Item {
         findObject.show()
     }
 
-    Connections {
+    Connections
+    {
         target: universeView;
         onContextMenuTriggered: {
             contextMenu.show(x, y, body);
@@ -42,6 +43,7 @@ Item {
         hoverEnabled: true
         onClicked:  {
             timePanel.unfocus();
+            mouse.accepted = false
         }
     }
 

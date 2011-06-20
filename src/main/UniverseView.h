@@ -68,6 +68,7 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(bool reflections READ reflections WRITE setReflections);
     Q_PROPERTY(bool cloudsVisible READ cloudsVisible WRITE setCloudsVisible);
     Q_PROPERTY(bool atmospheresVisible READ atmospheresVisible WRITE setAtmospheresVisible);
+    Q_PROPERTY(bool sunGlare READ sunGlare WRITE setSunGlare);
 
     Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
     Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
@@ -164,6 +165,7 @@ public:
     bool reflections() const;
     bool cloudsVisible() const;
     bool atmospheresVisible() const;
+    bool sunGlare() const;
 
     double limitingMagnitude() const;
     double ambientLight() const;

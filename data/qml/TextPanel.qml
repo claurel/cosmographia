@@ -56,7 +56,7 @@ Item {
 
         Text {
              id: contents
-             width: 450
+             width: container.width - 40
              //anchors.margins: 12
              color: textColor
              font.family: fontFamily

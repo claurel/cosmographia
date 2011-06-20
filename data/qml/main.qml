@@ -64,6 +64,7 @@ Item {
 
     TextPanel {
         id: helpPanel
+        width: 400
         x: 32; y: panelY
         opacity: 0
         textColor: "white"
@@ -102,7 +103,7 @@ Item {
                      onClicked: { page.showFindObject() }
                  }
              }
-             //Text { width: 32; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+             //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
          Column {
@@ -116,7 +117,7 @@ Item {
                      onClicked: { settingsPanel.show(); helpPanel.hide() }
                  }
              }
-             //Text { width: 32; color: "white"; text: "settings"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+             //Text { width: 48; color: "white"; text: "settings"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
          Column {

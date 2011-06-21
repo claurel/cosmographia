@@ -19,7 +19,11 @@
 // Celestia format. All transformations are performed on variant maps.
 
 #include "TransformCatalog.h"
+#include <QDebug>
 
+
+TransformSscStatus
+TransformSscFrame(QVariantMap* obj, const QString& oldName, const QString& newName);
 
 // Change the name of the property from oldKey to newKey.
 // Returns true if the old key was found
@@ -361,6 +365,13 @@ transformTwoVectorDirection(const QVariantMap& direction)
         {
             QVariantMap constantVec = constantVecVar.toMap();
             newDirection.insert("type", "ConstantVector");
+            MoveProperty(&constantVec, "Vector", &newDirection, "direction");
+            MoveProperty(&constantVec, "Frame", &newDirection, "frame");
+            TransformSscStatus status = TransformSscFrame(&newDirection, "frame", "frame");
+            if (status != SscOk)
+            {
+                qDebug() << "Error transforming ConstantVector in TwoVector frame";
+            }
         }
     }
 
@@ -457,7 +468,10 @@ TransformSscFrame(QVariantMap* obj, const QString& oldName, const QString& newNa
             obj->insert(newName, "EquatorJ2000");
         }
 
-        obj->remove(oldName);
+        if (newName != oldName)
+        {
+            obj->remove(oldName);
+        }
     }
 
     return SscOk;

@@ -1,0 +1,75 @@
+{
+     "version": "1.0",
+     "name": "Cassini Mission",
+
+     "items" :
+     [
+        {
+          "name" : "Cassini",
+
+          "startTime" : "1997-10-15 09:27",
+
+          "arcs" : [
+            {
+              "center" : "Sun",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" :
+              {
+                "type" : "InterpolatedStates",
+                "source" : "trajectories/cassini-cruise.xyzv"
+              },
+              "rotationModel" :
+              {
+                "type" : "Fixed",
+                "quaternion" : [ 0.707, 0.707, 0.0, 0.0 ]
+              },
+              "endTime" : 2453177.0424
+            },
+            {
+              "center" : "Saturn",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" :
+              {
+                "type" : "InterpolatedStates",
+                "source" : "trajectories/cassini-orbit.xyzv"
+              },
+              "rotationModel" :
+              {
+                "type" : "Fixed",
+                "quaternion" : [ 0.707, 0.707, 0.0, 0.0 ]
+              },
+              "endTime" : 2455387.0
+            },
+            {
+              "center" : "Saturn",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" :
+              {
+                "type" : "InterpolatedStates",
+                "source" : "trajectories/cassini-solstice.xyzv"
+              },
+              "rotationModel" :
+              {
+                "type" : "Fixed",
+                "quaternion" : [ 0.707, 0.707, 0.0, 0.0 ]
+              },
+              "endTime" : 2458018.0
+            }
+          ],
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/cassini.cmod"
+          },
+
+          "label" : { "color" : "#00ff00" },
+          "trajectoryPlot" :
+          {
+              "duration" : "1 y",
+              "fade" : 0.5
+          }
+        }
+    ]
+}

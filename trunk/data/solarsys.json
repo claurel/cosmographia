@@ -12,6 +12,7 @@
         "saturn.json",
         "uranus.json",
         "neptune.json",
-        "pluto.json"
+        "pluto.json",
+        "cassini.json"
     ]
 }

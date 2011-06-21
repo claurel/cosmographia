@@ -564,9 +564,18 @@ macx {
         data/models/jason.obj \
         data/models/jason.mtl \
         data/models/jas_solr.png \
-        data/models/jas_brsh.png
+        data/models/jas_brsh.png \
+        data/models/cassini.cmod
 
     QMAKE_BUNDLE_DATA += MODELS
+
+    TRAJECTORIES.path = Contents/Resources/data/trajectories
+    TRAJECTORIES.files = \
+        data/trajectories/cassini-cruise.xyzv \
+        data/trajectories/cassini-orbit.xyzv \
+        data/trajectories/cassini-solstice.xyzv
+
+    QMAKE_BUNDLE_DATA += TRAJECTORIES
 
     DATA.path = Contents/Resources/data
     DATA.files = \
@@ -582,6 +591,7 @@ macx {
         data/uranus.json \
         data/neptune.json \
         data/pluto.json \
+        data/cassini.json \
         data/start-viewpoints.json \
         data/sans-12.txf \
         data/sans-24.txf \
@@ -602,6 +612,7 @@ macx {
         data/qml/InfoText.qml \
         data/qml/SearchBox.qml \
         data/qml/SettingsPanel.qml \
+        data/qml/Slider.qml \
         data/qml/SpinBox.qml \
         data/qml/TextPanel.qml \
         data/qml/TextToggle.qml \

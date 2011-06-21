@@ -30,6 +30,7 @@ APP_SOURCES = \
     $$MAIN_PATH/JPLEphemeris.cpp \
     $$MAIN_PATH/KeplerianSwarm.cpp \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
+    $$MAIN_PATH/MarkerLayer.cpp \
     $$MAIN_PATH/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/SkyLabelLayer.cpp \
@@ -75,6 +76,7 @@ APP_HEADERS = \
     $$MAIN_PATH/JPLEphemeris.h \
     $$MAIN_PATH/KeplerianSwarm.h \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
+    $$MAIN_PATH/MarkerLayer.h \
     $$MAIN_PATH/MeshInstanceGeometry.h \
     $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/SkyLabelLayer.h \

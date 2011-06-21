@@ -19,6 +19,7 @@
 
 #include <vesta/OGLHeaders.h>
 #include "UniverseView.h"
+#include "MarkerLayer.h"
 
 #include "ObserverAction.h"
 #include "Viewpoint.h"
@@ -197,7 +198,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_videoEncoder(NULL),
     m_timeDisplay(TimeDisplay_UTC),
     m_wireframe(false),
-    m_statusUpdateTime(0.0)
+    m_statusUpdateTime(0.0),
+    m_markers(NULL)
 {
     setAutoFillBackground(false);
 
@@ -210,6 +212,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_textFont = new TextureFont();
     m_titleFont = new TextureFont();
     m_spacecraftIcon = m_textureLoader->loadTexture(":/icons/disk.png", TextureProperties(TextureProperties::Clamp));
+
+    m_markers = new MarkerLayer();
 
     UniverseGLWidget* glWidget = new UniverseGLWidget(this, m_renderer);
     glWidget->updateGL();
@@ -788,6 +792,19 @@ UniverseView::drawInfoOverlay()
 
     glDisable(GL_TEXTURE_2D);
 
+    if (m_markers)
+    {
+        Viewport viewport(size().width(), size().height());
+        PlanarProjection projection = PlanarProjection::CreatePerspective(m_fovY, viewport.aspectRatio(), 1.0f, 100.0f);
+
+        m_markers->renderMarkers(m_observer->absolutePosition(m_simulationTime),
+                                 m_observer->absoluteOrientation(m_simulationTime),
+                                 projection,
+                                 viewport,
+                                 m_simulationTime,
+                                 m_realTime);
+    }
+
     // Intro fade animation
     if (m_realTime < 5.0)
     {
@@ -1008,6 +1025,7 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
             if (secondsFromBaseTime() - m_lastDoubleClickTime > 0.2)
             {
                 m_selectedBody = pickObject(event->pos());
+                m_markers->addMarker(m_selectedBody.ptr(), Spectrum(1.0f, 1.0f, 1.0f), 20.0f, m_realTime, 0.5);
             }
         }
         else if (event->button() == Qt::RightButton)
@@ -1656,6 +1674,11 @@ UniverseView::tick()
     }
 
     viewport()->update();
+
+    if (m_markers)
+    {
+        m_markers->expireMarkers(m_realTime);
+    }
 
     if (dt != 0.0)
     {
@@ -2348,7 +2371,10 @@ UniverseView::grabFrameBuffer(bool withAlpha)
 void
 UniverseView::setSelectedBody(Entity* body)
 {
-    m_selectedBody = body;
+    if (body != m_selectedBody.ptr())
+    {
+        m_selectedBody = body;
+    }
 }
 
 

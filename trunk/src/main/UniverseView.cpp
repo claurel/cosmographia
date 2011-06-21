@@ -26,6 +26,7 @@
 #include "DateUtility.h"
 #include "SkyLabelLayer.h"
 #include "ConstellationInfo.h"
+#include "TwoVectorFrame.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -1685,6 +1686,19 @@ UniverseView::setCenterAndFrame(Entity* center, FrameType f)
             frame = InertialFrame::equatorJ2000();
         }
     }
+    else if (f == Frame_Locked)
+    {
+        if (center == m_selectedBody.ptr() || m_selectedBody.isNull())
+        {
+            frame = InertialFrame::equatorJ2000();
+        }
+        else
+        {
+            RelativePositionVector* primary = new RelativePositionVector(center, m_selectedBody.ptr());
+            ConstantFrameDirection* secondary = new ConstantFrameDirection(InertialFrame::icrf(), Vector3d::UnitZ());
+            frame = new TwoVectorFrame(primary, TwoVectorFrame::PositiveX, secondary, TwoVectorFrame::PositiveY);
+        }
+    }
     else
     {
         frame = InertialFrame::equatorJ2000();
@@ -1805,6 +1819,16 @@ UniverseView::synodicObserver(bool checked)
     if (checked)
     {
         setCenterAndFrame(m_observer->center(), Frame_Synodic);
+    }
+}
+
+
+void
+UniverseView::lockedObserver(bool checked)
+{
+    if (checked)
+    {
+        setCenterAndFrame(m_observer->center(), Frame_Locked);
     }
 }
 

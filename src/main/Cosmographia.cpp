@@ -234,6 +234,10 @@ Cosmographia::Cosmographia() :
     synodicAction->setShortcut(QKeySequence("Ctrl+Y"));
     synodicAction->setCheckable(true);
     cameraMenu->addAction(synodicAction);
+    QAction* lockedAction = new QAction("&Locked Frame", cameraFrameGroup);
+    lockedAction->setShortcut(QKeySequence("Ctrl+Shift+Y"));
+    lockedAction->setCheckable(true);
+    cameraMenu->addAction(lockedAction);
 
     this->menuBar()->addMenu(cameraMenu);
 
@@ -243,6 +247,7 @@ Cosmographia::Cosmographia() :
     connect(inertialAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(inertialObserver(bool)));
     connect(bodyFixedAction, SIGNAL(triggered(bool)), m_view3d, SLOT(bodyFixedObserver(bool)));
     connect(synodicAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(synodicObserver(bool)));
+    connect(lockedAction,    SIGNAL(triggered(bool)), m_view3d, SLOT(lockedObserver(bool)));
 
     /*** Visual aids menu ***/
     QMenu* visualAidsMenu = new QMenu("&Visualization", this);

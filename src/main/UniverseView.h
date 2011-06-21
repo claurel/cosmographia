@@ -225,6 +225,7 @@ public slots:
     void inertialObserver(bool checked);
     void bodyFixedObserver(bool checked);
     void synodicObserver(bool checked);
+    void lockedObserver(bool checked);
     void setObserverCenter();
     void setMilkyWayVisibility(bool checked);
     void setEquatorialGridVisibility(bool checked);
@@ -285,6 +286,7 @@ private:
         Frame_Inertial,
         Frame_BodyFixed,
         Frame_Synodic,
+        Frame_Locked
     };
 
     void setCenterAndFrame(vesta::Entity* center, FrameType f);

@@ -1089,6 +1089,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
 
         QVariantMap contents;
         contents.insert("name", fileName);
+        contents.insert("version", "1.0");
         contents.insert("items", items);
 
         QStringList bodyNames = m_loader->loadCatalogItems(contents, m_catalog);

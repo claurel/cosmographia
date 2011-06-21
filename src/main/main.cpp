@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
     CFRelease(appUrlRef);
     CFRelease(macPath);
 #else
+    QDir::setCurrent(QCoreApplication::applicationDirPath());
     if (QDir("../data").exists())
     {
         dataPath = "../data";

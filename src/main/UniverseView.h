@@ -37,6 +37,7 @@
 class QVideoEncoder;
 class ObserverAction;
 class Viewpoint;
+class MarkerLayer;
 
 class QGraphicsScene;
 
@@ -376,6 +377,8 @@ private:
 
     double m_statusUpdateTime;
     QString m_statusMessage;
+
+    MarkerLayer* m_markers;
 };
 
 #endif // _UNIVERSE_VIEW_H_

@@ -23,6 +23,7 @@
 
 #include "GLBufferObject.h"
 #include "../Debug.h"
+#include <cstddef>
 
 using namespace vesta;
 

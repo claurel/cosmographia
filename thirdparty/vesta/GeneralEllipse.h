@@ -27,6 +27,8 @@ namespace vesta
 class GeneralEllipse
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     /** Create an ellipse with the specified center and generating vectors.
       */
     GeneralEllipse(const Eigen::Vector3d& center,

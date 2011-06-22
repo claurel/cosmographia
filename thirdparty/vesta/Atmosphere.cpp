@@ -1,5 +1,5 @@
 /*
- * $Revision: 578 $ $Date: 2011-03-17 10:10:30 -0700 (Thu, 17 Mar 2011) $
+ * $Revision: 615 $ $Date: 2011-06-22 12:02:16 -0700 (Wed, 22 Jun 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -409,7 +409,7 @@ Atmosphere::transmittance(float r, float cosZenithAngle) const
     float fx = x - ix;
     float fy = y - iy;
 
-    float index = width * iy + ix;
+    int index = width * iy + ix;
     Vector3f v0 = m_transmittanceTable[index] * (1.0f - fx) + m_transmittanceTable[index + 1] * fx;
     Vector3f v1 = m_transmittanceTable[index + width] * (1.0f - fx) + m_transmittanceTable[index + width + 1] * fx;
 

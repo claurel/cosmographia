@@ -132,7 +132,7 @@ public:
 
     bool isValid() const
     {
-        return m_p;
+        return m_p != 0;
     }
 
     T* ptr() const

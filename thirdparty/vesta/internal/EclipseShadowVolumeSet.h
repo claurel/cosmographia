@@ -42,6 +42,7 @@ public:
         float umbraSlope;
         float penumbraSlope;
     };
+    typedef std::vector<EclipseShadow, Eigen::aligned_allocator<EclipseShadow> > EclipseShadowVector;
 
     void clear();
     void addShadow(const Entity* occluder,
@@ -52,7 +53,7 @@ public:
     bool frustumCull(const Frustum& frustum);
     bool findIntersectingShadows(const Entity* entity, const Eigen::Vector3d& sphereCenter, double sphereRadius);
 
-    const std::vector<EclipseShadow>& intersectingShadows() const
+    const EclipseShadowVector& intersectingShadows() const
     {
         return m_intersectingShadows;
     }
@@ -94,7 +95,7 @@ private:
 
     ShadowVolumeVector m_allShadows;
     std::vector<ConicShadowVolume*> m_frustumShadows;
-    std::vector<EclipseShadow> m_intersectingShadows;
+    EclipseShadowVector m_intersectingShadows;
     bool m_insideUmbra;
 };
 

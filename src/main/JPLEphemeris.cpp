@@ -209,7 +209,7 @@ JPLEphemeris::load(const string& filename)
     for (unsigned int objectIndex = 0; objectIndex < JplEph_ObjectCount - 1; ++objectIndex)
     {
         ChebyshevPolyTrajectory* trajectory =
-                new ChebyshevPolyTrajectory(objectCoeffs[objectIndex].data(),
+                new ChebyshevPolyTrajectory(&objectCoeffs[objectIndex][0],
                                             coeffInfo[objectIndex].coeffCount - 1,
                                             coeffInfo[objectIndex].granuleCount * recordCount,
                                             startSec,

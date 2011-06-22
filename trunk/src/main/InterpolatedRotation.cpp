@@ -93,7 +93,7 @@ InterpolatedRotation::orientation(double tdbSec) const
 Vector3d
 InterpolatedRotation::angularVelocity(double tdbSec) const
 {
-    if (!m_orientations.size() > 1)
+    if (m_orientations.size() > 1)
     {
         TimeOrientation t0;
         TimeOrientation t1;

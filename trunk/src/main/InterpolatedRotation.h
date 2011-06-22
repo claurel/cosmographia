@@ -41,10 +41,11 @@ class InterpolatedRotation : public vesta::RotationModel
 public:
     struct TimeOrientation
     {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         double tsec;
         Eigen::Quaterniond orientation;
     };
-    typedef std::vector<TimeOrientation> TimeOrientationList;
+    typedef std::vector<TimeOrientation, Eigen::aligned_allocator<TimeOrientation> > TimeOrientationList;
 
     InterpolatedRotation(const TimeOrientationList& orientations);
     ~InterpolatedRotation();

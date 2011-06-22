@@ -170,7 +170,7 @@ LoadBinaryAstorbFile(const QString& fileName)
         // Read dates
         in >> epoch >> discoveryDate;
 
-        double periodYears = pow(smaAU, 1.5);
+        double periodYears = pow(double(smaAU), 1.5);
 
         if (in.status() == QDataStream::Ok)
         {

@@ -126,7 +126,7 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
 
     if (m_vertexBuffer.isNull())
     {
-        m_vertexBuffer = VertexBuffer::Create(m_objects.size() * sizeof(KeplerianObject), VertexBuffer::StaticDraw, m_objects.data());
+        m_vertexBuffer = VertexBuffer::Create(m_objects.size() * sizeof(KeplerianObject), VertexBuffer::StaticDraw, &m_objects[0]);
     }
 
     if (rc.shaderCapability() != RenderContext::FixedFunction && m_vertexBuffer.isValid())

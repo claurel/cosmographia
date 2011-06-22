@@ -1,5 +1,5 @@
 /*
- * $Revision: 603 $ $Date: 2011-04-13 17:06:42 -0700 (Wed, 13 Apr 2011) $
+ * $Revision: 615 $ $Date: 2011-06-22 12:02:16 -0700 (Wed, 22 Jun 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -1836,7 +1836,7 @@ UniverseRenderer::setupEclipseShadows(const VisibleItem &item)
         else
         {
             // The object is only partly shadowed. Set up the lighting.
-            const vector<EclipseShadowVolumeSet::EclipseShadow>& shadows = m_eclipseShadows->intersectingShadows();
+            const EclipseShadowVolumeSet::EclipseShadowVector& shadows = m_eclipseShadows->intersectingShadows();
 
             unsigned int shadowCount = min((unsigned int) RenderContext::MaxEclipseShadows, (unsigned int) shadows.size());
             Matrix4f invCameraTransform = Transform3f(m_renderContext->cameraOrientation()).matrix();

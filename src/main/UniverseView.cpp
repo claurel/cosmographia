@@ -2471,6 +2471,8 @@ UniverseView::gotoSelectedObject()
         double currentDistance = (body->position(m_simulationTime) - m_observer->absolutePosition(m_simulationTime)).norm();
         if (currentDistance > distanceFromTarget * 1.1)
         {
+            setStatusMessage(QString("Go to %1").arg(QString::fromUtf8(body->name().c_str())));
+
             m_observerAction = new GotoObserverAction(m_observer.ptr(),
                                                       body,
                                                       6.0,
@@ -2478,6 +2480,22 @@ UniverseView::gotoSelectedObject()
                                                       m_simulationTime,
                                                       distanceFromTarget);
         }
+    }
+}
+
+
+void
+UniverseView::centerSelectedObject()
+{
+    if (m_selectedBody.isValid())
+    {
+        setStatusMessage(QString("Center %1 in view").arg(QString::fromUtf8(m_selectedBody->name().c_str())));
+
+        m_observerAction = new CenterObserverAction(m_observer.ptr(),
+                                                    m_selectedBody.ptr(),
+                                                    1.0,
+                                                    secondsFromBaseTime(),
+                                                    m_simulationTime);
     }
 }
 

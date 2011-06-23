@@ -48,26 +48,28 @@ Item {
         opacity: 0.5
     }
 
-    Column {
-        anchors.fill: parent
-        anchors.margins: 8
-        spacing: 5
+    Item {
+        id: title
+        width: parent.width
+        height: 36
 
-        Item {
-            width: parent.width
-            height: 36
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: 0
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                font.weight: Font.Bold
-                color: "white"
-                text: "Find Object"
-            }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            font.family: fontFamily
+            font.pixelSize: fontSize
+            font.weight: Font.Bold
+            color: "white"
+            text: "Find Object"
         }
+    }
+
+    Column {
+        anchors.top: title.bottom
+        x: 8
+
+        spacing: 5
 
         Text {
             color: textColor
@@ -78,6 +80,7 @@ Item {
 
         TextInput {
             id: textInput
+            x: 3
             width: 200
 
             focus: true
@@ -94,7 +97,7 @@ Item {
                 var body = universeView.lookupBody(text);
                 if (body)
                 {
-                    infoText.text = body.name;
+                    infoText.text = "<b>" + body.name + "</b><br>" + body.description;
                     buttons.opacity = 1;
                 }
                 else
@@ -143,17 +146,27 @@ Item {
                 TextButton {
                     id: selectButton
                     text: "Select"
-                    onPressed: { universeView.setSelectedBody(universeView.lookupBody(text)); }
+                    onPressed: {
+                        universeView.setSelectedBody(textInput.text);
+                    }
                 }
 
                 TextButton {
                     id: centerButton
                     text: "Center"
+                    onPressed: {
+                        universeView.setSelectedBody(textInput.text);
+                        universeView.centerSelectedObject();
+                    }
                 }
 
                 TextButton {
                     id: gotoButton
                     text: "Go To"
+                    onPressed: {
+                        universeView.setSelectedBody(textInput.text);
+                        universeView.gotoSelectedObject();
+                    }
                 }
             }
         }

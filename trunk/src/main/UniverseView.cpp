@@ -232,16 +232,6 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     setSource(QUrl::fromLocalFile("qml/main.qml"));
     setResizeMode(SizeRootObjectToView);
 
-    QObject *searchBox = rootObject()->findChild<QObject*>("searchBox");
-    if (searchBox)
-    {
-        connect(searchBox, SIGNAL(searchEntered(QString)), this, SLOT(setSelectedBody(QString)));
-    }
-    else
-    {
-        qDebug() << "searchBox item is missing from QML UI files!";
-    }
-
     scene()->setBackgroundBrush(Qt::NoBrush);
 
     // Initialize the base time that will be used as a reference for calculating
@@ -2573,6 +2563,23 @@ UniverseView::getSun() const
     BodyObject* o = new BodyObject(m_universe->findFirst("Sun"));
     QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
     return o;
+}
+
+
+BodyObject*
+UniverseView::lookupBody(const QString& name) const
+{
+    Entity* body = m_catalog->find(name, Qt::CaseInsensitive);
+    if (body)
+    {
+        BodyObject* o = new BodyObject(body);
+        QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+        return o;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 

@@ -132,12 +132,33 @@ Item {
                 font.family: fontFamily
                 font.pixelSize: fontSize
                 color: textColor
+                text: "Center Indicator"
+            }
+
+            TextToggle {
+                id: centerIndicatorToggle
+                enabled: true
+                onToggled: { universeView.centerIndicatorVisible = enabled }
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
                 text: "Equatorial Grid"
             }
 
             TextToggle {
+                id: equatorialGridToggle
                 enabled: false
-                onToggled: { universeView.equatorialGridVisible = enabled }
+                onToggled: { universeView.equatorialGridVisible = enabled; }
+                Connections
+                {
+                    target: universeView;
+                    onEquatorialGridVisibleChanged: {
+                        equatorialGridToggle.enabled = universeView.equatorialGridVisible
+                    }
+                }
             }
 
             Text {

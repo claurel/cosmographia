@@ -59,9 +59,10 @@ class UniverseView : public QDeclarativeView
     Q_OBJECT
     Q_PROPERTY(double realTime READ realTime);
     Q_PROPERTY(bool labelsVisible READ labelVisibility WRITE setLabelVisibility);
+    Q_PROPERTY(bool centerIndicatorVisible READ centerIndicatorVisibility WRITE setCenterIndicatorVisibility NOTIFY centerIndicatorVisibilityChanged);
     Q_PROPERTY(bool constellationFiguresVisible READ constellationFigureVisibility WRITE setConstellationFigureVisibility);
     Q_PROPERTY(bool constellationNamesVisible READ constellationNameVisibility WRITE setConstellationNameVisibility);
-    Q_PROPERTY(bool equatorialGridVisible READ equatorialGridVisibility WRITE setEquatorialGridVisibility);
+    Q_PROPERTY(bool equatorialGridVisible READ equatorialGridVisibility WRITE setEquatorialGridVisibility NOTIFY equatorialGridVisibilityChanged);
     Q_PROPERTY(bool eclipticVisible READ eclipticVisibility WRITE setEclipticVisibility);
 
     Q_PROPERTY(bool shadows READ shadows WRITE setShadows);
@@ -158,6 +159,11 @@ public:
         return m_labelsVisible;
     }
 
+    bool centerIndicatorVisibility() const
+    {
+        return m_centerIndicatorVisible;
+    }
+
     bool constellationFigureVisibility() const;
     bool constellationNameVisibility() const;
     bool equatorialGridVisibility() const;
@@ -217,6 +223,8 @@ signals:
     void contextMenuTriggered(int x, int y, BodyObject* body);
     void limitingMagnitudeChanged(double);
     void ambientLightChanged(double);
+    void equatorialGridVisibilityChanged(bool);
+    void centerIndicatorVisibilityChanged(bool);
 
 public slots:
     void tick();
@@ -238,6 +246,7 @@ public slots:
     void setConstellationFigureVisibility(bool checked);
     void setConstellationNameVisibility(bool checked);
     void setLabelVisibility(bool enable);
+    void setCenterIndicatorVisibility(bool enable);
     void setShadows(bool enable);
     void setEclipseShadows(bool enable);
     void setCloudsVisible(bool enable);
@@ -371,6 +380,7 @@ private:
 
     bool m_infoTextVisible;
     bool m_labelsVisible;
+    bool m_centerIndicatorVisible;
 
     vesta::counted_ptr<ObserverAction> m_observerAction;
 

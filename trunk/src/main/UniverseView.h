@@ -252,6 +252,7 @@ public slots:
     void clearTrajectory(vesta::Entity* body);
     void setSelectedBody(const QString& name);
     void gotoSelectedObject();
+    void centerSelectedObject();
     void setViewpoint(Viewpoint* viewpoint);
     void setTimeDisplay(TimeDisplayMode mode);
     void setLimitingMagnitude(double appMag);

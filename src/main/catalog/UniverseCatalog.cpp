@@ -39,9 +39,27 @@ bool UniverseCatalog::contains(const QString& name) const
 
 /** Lookup the VESTA body with the specified name.
   */
-Entity* UniverseCatalog::find(const QString& name) const
+Entity* UniverseCatalog::find(const QString& name, Qt::CaseSensitivity caseSensitivity) const
 {
-    return m_bodies.value(name).ptr();
+    Entity* body = NULL;
+
+    if (caseSensitivity == Qt::CaseSensitive)
+    {
+        body = m_bodies.value(name).ptr();
+    }
+    else
+    {
+        foreach (QString s, m_bodies.keys())
+        {
+            if (name.compare(s, Qt::CaseInsensitive) == 0)
+            {
+                body = m_bodies.value(s).ptr();
+                break;
+            }
+        }
+    }
+
+    return body;
 }
 
 

@@ -61,7 +61,7 @@ public:
     void removeBody(const QString& name);
     void addBody(const QString& name, vesta::Entity* body, BodyInfo* info = NULL);
     void setBodyInfo(const QString& name, BodyInfo* info);
-    vesta::Entity* find(const QString& name) const;
+    vesta::Entity* find(const QString& name, Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive) const;
     BodyInfo* findInfo(const QString& name) const;
     bool contains(const QString& name) const;
 

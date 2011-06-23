@@ -27,6 +27,8 @@ Item {
     {
         findObject.searchText = "";
         findObject.show()
+        settingsPanel.hide()
+        helpPanel.hide()
     }
 
     Connections
@@ -70,6 +72,7 @@ Item {
         textColor: "white"
     }
 
+/*
     Row {
          anchors {
              horizontalCenter: parent.horizontalCenter
@@ -80,6 +83,15 @@ Item {
              objectName: "searchBox"
              opacity: 0
          }
+     }
+*/
+     FindObjectPanel {
+         id: findObject
+         objectName: "searchBox"
+
+         width: 300; height: 300
+         x: 32; y: panelY
+         opacity: 0
      }
 
      Column {
@@ -100,7 +112,7 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { page.showFindObject() }
+                     onClicked: { page.showFindObject(); settingsPanel.hide(); helpPanel.hide() }
                  }
              }
              //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
@@ -114,7 +126,7 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { settingsPanel.show(); helpPanel.hide() }
+                     onClicked: { findObject.hide(); settingsPanel.show(); helpPanel.hide() }
                  }
              }
              //Text { width: 48; color: "white"; text: "settings"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
@@ -128,7 +140,7 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { helpPanel.text = universeView.getHelpText(); helpPanel.show(); settingsPanel.hide() }
+                     onClicked: { helpPanel.text = universeView.getHelpText(); findObject.hide(); helpPanel.show(); settingsPanel.hide() }
                  }
              }
              //Text { width: 32; color: "white"; text: "help"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }

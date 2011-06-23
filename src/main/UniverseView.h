@@ -86,6 +86,7 @@ public:
     Q_INVOKABLE void setCentralBody(BodyObject* body);
     Q_INVOKABLE BodyObject* getEarth() const;
     Q_INVOKABLE BodyObject* getSun() const;
+    Q_INVOKABLE BodyObject* lookupBody(const QString& name) const;
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
     Q_INVOKABLE QString getHelpText();
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
@@ -249,6 +250,7 @@ public slots:
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
     void plotTrajectoryObserver(const BodyInfo* info);
     void clearTrajectory(vesta::Entity* body);
+    void setSelectedBody(const QString& name);
     void gotoSelectedObject();
     void setViewpoint(Viewpoint* viewpoint);
     void setTimeDisplay(TimeDisplayMode mode);
@@ -260,7 +262,6 @@ public slots:
     void setStatusMessage(const QString& message);
 
 private slots:
-    void setSelectedBody(const QString& name);
     void setFOV(double fovY);
 
 protected:

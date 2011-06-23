@@ -43,9 +43,10 @@ Item {
         id: pageArea
         anchors.fill: parent
         hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked:  {
             timePanel.unfocus();
-            mouse.accepted = false
+            universeView.setMouseEventProcessed(false)
         }
     }
 

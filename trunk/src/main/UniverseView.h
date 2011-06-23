@@ -90,6 +90,7 @@ public:
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
     Q_INVOKABLE QString getHelpText();
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
+    Q_INVOKABLE void setMouseEventProcessed(bool accepted);
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -311,6 +312,8 @@ private:
     QPoint m_mouseDownPosition;
     QPoint m_lastMousePosition;
     double m_lastDoubleClickTime;
+    bool m_mouseEventProcessed;
+
     vesta::counted_ptr<vesta::Universe> m_universe;
     UniverseCatalog* m_catalog;
     vesta::counted_ptr<vesta::Observer> m_observer;

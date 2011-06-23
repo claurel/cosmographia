@@ -18,6 +18,7 @@
 #include "BodyObject.h"
 #include "vesta/AxesVisualizer.h"
 #include "vesta/VelocityVisualizer.h"
+#include "vesta/Arc.h"
 #include <QDebug>
 
 using namespace vesta;
@@ -155,4 +156,62 @@ BodyObject::visualizerSize() const
     }
 
     return size;
+}
+
+
+/** Return a one-line description of the object.
+  */
+QString
+BodyObject::description() const
+{
+    if (m_body.isNull())
+    {
+        return "";
+    }
+
+    // TODO: Provide some means of customizing the text. At the moment,
+    // we just guess based on object orbit and size
+    Geometry* geometry = m_body->geometry();
+    if (geometry == NULL)
+    {
+        return "Reference point";
+    }
+
+    float radius = geometry->boundingSphereRadius();
+
+    if (radius < 1.0f)
+    {
+        return "Spacecraft";
+    }
+
+    // Special case for the sun
+    if (m_body->name() == "Sun")
+    {
+        return "Star";
+    }
+
+    Entity* center = m_body->chronology()->firstArc()->center();
+    if (center == NULL || center->name() == "Sun")
+    {
+        if (radius > 10000.0f)
+        {
+            return "Planet (gas giant)";
+        }
+        else if (radius > 1500.0f)
+        {
+            return "Planet (terrestrial)";
+        }
+        else if (radius > 400.0f)
+        {
+            return "Dwarf planet";
+        }
+        else
+        {
+            return "Asteroid";
+        }
+    }
+    else
+    {
+        return QString("Moon of %1").arg(QString::fromUtf8(center->name().c_str(), center->name().length()));
+    }
 }

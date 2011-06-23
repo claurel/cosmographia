@@ -597,6 +597,23 @@ Cosmographia::initialize()
         qsrand((uint) QTime::currentTime().msecsTo(QTime(0, 0, 0)));
         m_view3d->setViewpoint(m_catalog->findViewpoint(viewpointNames.at(abs(qrand()) % viewpointNames.size())));
     }
+
+    // Load catalog files that were listed on the command line
+    QStringList args = QCoreApplication::arguments();
+    if (!args.isEmpty())
+    {
+        // Remove the program name
+        args.removeAt(0);
+
+        QString saveDir = QDir::currentPath();
+        QDir::setCurrent(QCoreApplication::applicationDirPath());
+        foreach (QString arg, args)
+        {
+            QFileInfo fileInfo(arg);
+            loadCatalogFile(fileInfo.absoluteFilePath());
+        }
+        QDir::setCurrent(saveDir);
+    }
 }
 
 

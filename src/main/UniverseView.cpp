@@ -168,6 +168,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     QDeclarativeView(parent),
     m_mouseMovement(0),
     m_lastDoubleClickTime(0.0),
+    m_mouseEventProcessed(false),
     m_catalog(catalog),
     m_controller(new ObserverController()),
     m_renderer(NULL),
@@ -618,6 +619,15 @@ UniverseView::currentTimeString() const
 }
 
 
+// Called by QML to report when a mouse event is missed and should instead
+// be processed by the C++ event handler.
+void
+UniverseView::setMouseEventProcessed(bool accepted)
+{
+    m_mouseEventProcessed = accepted;
+}
+
+
 // Draw informational text over the 3D view
 // TODO: Convert this to QML
 void
@@ -1002,7 +1012,12 @@ void UniverseView::mousePressEvent(QMouseEvent *event)
 
 void UniverseView::mouseReleaseEvent(QMouseEvent* event)
 {
+    setMouseEventProcessed(true);
     QDeclarativeView::mouseReleaseEvent(event);
+    if (m_mouseEventProcessed)
+    {
+        return;
+    }
 
     // Process the mouse release as a click if the mouse hasn't moved
     // much since the mouse button was pressed

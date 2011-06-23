@@ -83,7 +83,7 @@ Item {
             x: 3
             width: 200
 
-            focus: true
+            focus: false
             selectByMouse: true
             color: textColor
             font.family: fontFamily

@@ -1,0 +1,75 @@
+{
+    "version": "1.0",
+    "name": "Main Belt Asteroids",
+
+    "items" :
+    [
+        {
+          "name" : "Ceres",
+          "label" : { "color" : "#aa8855" },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 413832000,
+              "eccentricity" : 0.079834,
+              "period" : 1680.5,
+              "inclination" : 10.585,
+              "ascendingNode" : 80.399,
+              "argumentOfPeriapsis" : 72.825,
+              "meanAnomaly" : 27.448
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.3781,
+              "inclination" : 31.0
+          },
+
+          "geometry" :
+          {
+              "type" : "Globe",
+              "radii" : [ 500, 500, 480 ]
+          }
+        },
+
+        {
+          "name" : "Vesta",
+          "label" : { "color" : "#aa8855" },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "epoch" : 2455400.5,
+              "semiMajorAxis" : "2.361229952618449au",
+              "eccentricity" : 0.08862258545936168,
+              "period" : 1325.849059878629,
+              "inclination" : 7.13406257854299,
+              "ascendingNode" : 103.9096808087324,
+              "argumentOfPeriapsis" : 149.8373992529071,
+              "meanAnomaly" : 307.8010497902699
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.222583,
+              "inclination" : 31.0
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/4vesta.obj"
+          }
+        }
+    ]
+}

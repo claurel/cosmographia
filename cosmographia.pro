@@ -563,6 +563,7 @@ macx {
     MODELS.files = \
         data/models/phobos.obj \
         data/models/deimos.obj \
+        data/models/4vesta.obj \
         data/models/jason.obj \
         data/models/jason.mtl \
         data/models/jas_solr.png \
@@ -593,6 +594,7 @@ macx {
         data/uranus.json \
         data/neptune.json \
         data/pluto.json \
+        data/mainbelt.json \
         data/cassini.json \
         data/start-viewpoints.json \
         data/sans-12.txf \
@@ -611,11 +613,13 @@ macx {
     GUI.files = \
         data/qml/main.qml \
         data/qml/ContextMenu.qml \
+        data/qml/FindObjectPanel.qml \
         data/qml/InfoText.qml \
         data/qml/SearchBox.qml \
         data/qml/SettingsPanel.qml \
         data/qml/Slider.qml \
         data/qml/SpinBox.qml \
+        data/qml/TextButton.qml \
         data/qml/TextPanel.qml \
         data/qml/TextToggle.qml \
         data/qml/TimePanel.qml

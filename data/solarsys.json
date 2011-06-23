@@ -13,6 +13,7 @@
         "uranus.json",
         "neptune.json",
         "pluto.json",
+        "mainbelt.json",
         "cassini.json"
     ]
 }

@@ -51,6 +51,7 @@ using namespace std;
 
 static const char* SwarmVertexShaderSource =
 "uniform float time;              \n"
+"uniform float pointSize;         \n"
 "uniform vec4 color;              \n"
 "varying vec4 pointColor;         \n"
 "\n"
@@ -77,6 +78,7 @@ static const char* SwarmVertexShaderSource =
 "        pointColor = vec4(0.0, 0.0, 0.0, 0.0);                               \n"
 "    else                                                                     \n"
 "        pointColor = mix(vec4(1.0, 1.0, 1.0, 1.0), color, min(t / (86400.0 * 50.0), 1.0));  \n"
+"    gl_PointSize = pointSize;\n"
 "    gl_Position = gl_ModelViewProjectionMatrix * vec4(position, 1.0);        \n"
 "}                                                                            \n"
 ;
@@ -140,8 +142,6 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
 
         if (m_swarmShader.isValid())
         {
-            glPointSize(m_pointSize);
-
             //rc.bindVertexBuffer(VertexSpec::PositionNormalTex, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
             rc.bindVertexBuffer(*m_vertexSpec, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
 
@@ -152,6 +152,7 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
             rc.enableCustomShader(m_swarmShader.ptr());
             m_swarmShader->bind();
             m_swarmShader->setConstant("time", float(clock - m_epoch));
+            m_swarmShader->setConstant("pointSize", m_pointSize);
             m_swarmShader->setConstant("color", Vector4f(m_color.red(), m_color.green(), m_color.blue(), m_opacity));
 
             rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::Points, m_objects.size()));

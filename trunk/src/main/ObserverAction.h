@@ -60,6 +60,10 @@ public:
                        double simulationTime,
                        double finalDistanceFromTarget);
     virtual bool updateObserver(vesta::Observer* observer, double realTime, double simTime);
+    vesta::Entity* target() const
+    {
+        return m_target.ptr();
+    }
 
 private:
     double m_duration;

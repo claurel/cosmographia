@@ -109,6 +109,7 @@ static const double MaximumFOV = toRadians(90.0);
 
 static const double StatusMessageDuration = 2.5;
 
+static const float CenterMarkerSize = 10.0f;
 
 static TextureProperties SkyLayerTextureProperties()
 {
@@ -195,6 +196,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_sunGlareEnabled(true),
     m_infoTextVisible(true),
     m_labelsVisible(true),
+    m_centerIndicatorVisible(true),
     m_guiScene(NULL),
     m_videoEncoder(NULL),
     m_timeDisplay(TimeDisplay_UTC),
@@ -796,14 +798,44 @@ UniverseView::drawInfoOverlay()
     {
         Viewport viewport(size().width(), size().height());
         PlanarProjection projection = PlanarProjection::CreatePerspective(m_fovY, viewport.aspectRatio(), 1.0f, 100.0f);
+        Vector3d observerPosition = m_observer->absolutePosition(m_simulationTime);
+        Quaterniond observerOrientation = m_observer->absoluteOrientation(m_simulationTime);
 
-        m_markers->renderMarkers(m_observer->absolutePosition(m_simulationTime),
-                                 m_observer->absoluteOrientation(m_simulationTime),
+        m_markers->renderMarkers(observerPosition,
+                                 observerOrientation,
                                  projection,
                                  viewport,
                                  m_simulationTime,
                                  m_realTime);
+
+        if (m_centerIndicatorVisible)
+        {
+            Marker centerMarker;
+
+            Entity* centerBody = m_observer->center();
+            if (dynamic_cast<GotoObserverAction*>(m_observerAction.ptr()) != NULL)
+            {
+                // During a goto action, we mark the goto target instead; if the goto action is
+                // allowed to complete, the goto target will become the center object
+                centerBody = dynamic_cast<GotoObserverAction*>(m_observerAction.ptr())->target();
+            }
+
+            centerMarker.setBody(centerBody);
+            centerMarker.setColor(Spectrum(0.8f, 0.8f, 1.0f));
+            centerMarker.setSize(CenterMarkerSize);
+            centerMarker.setStyle(Marker::Spin);
+            centerMarker.setTargetSizeThreshold(CenterMarkerSize / 2.0f);
+            centerMarker.setDirectionIndicatorEnabled(true);
+            m_markers->renderMarker(observerPosition,
+                                    observerOrientation,
+                                    projection,
+                                    viewport,
+                                    m_simulationTime,
+                                    m_realTime,
+                                    &centerMarker);
+        }
     }
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Intro fade animation
     if (m_realTime < 5.0)
@@ -1030,7 +1062,7 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
             if (secondsFromBaseTime() - m_lastDoubleClickTime > 0.2)
             {
                 m_selectedBody = pickObject(event->pos());
-                m_markers->addMarker(m_selectedBody.ptr(), Spectrum(1.0f, 1.0f, 1.0f), 20.0f, m_realTime, 0.5);
+                m_markers->addMarker(m_selectedBody.ptr(), Spectrum(1.0f, 1.0f, 1.0f), 20.0f, Marker::Pulse, m_realTime, 0.5);
             }
         }
         else if (event->button() == Qt::RightButton)
@@ -1873,13 +1905,6 @@ UniverseView::setMilkyWayVisibility(bool checked)
 
 
 void
-UniverseView::setEquatorialGridVisibility(bool checked)
-{
-    setSkyLayerVisible("equatorial grid", checked);
-}
-
-
-void
 UniverseView::setEclipticVisibility(bool checked)
 {
     setSkyLayerVisible("ecliptic", checked);
@@ -1952,6 +1977,16 @@ UniverseView::setLabelVisibility(bool enable)
 }
 
 
+void
+UniverseView::setCenterIndicatorVisibility(bool enable)
+{
+    if (enable != m_centerIndicatorVisible)
+    {
+        m_centerIndicatorVisible = enable;
+        emit centerIndicatorVisibilityChanged(enable);
+    }
+}
+
 
 bool
 UniverseView::skyLayerVisible(const std::string& layerName) const
@@ -1996,6 +2031,17 @@ UniverseView::constellationNameVisibility() const
 bool UniverseView::equatorialGridVisibility() const
 {
     return skyLayerVisible("equatorial grid");
+}
+
+
+void
+UniverseView::setEquatorialGridVisibility(bool checked)
+{
+    if (checked != equatorialGridVisibility())
+    {
+        setSkyLayerVisible("equatorial grid", checked);
+        emit equatorialGridVisibilityChanged(checked);
+    }
 }
 
 

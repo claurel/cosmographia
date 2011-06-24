@@ -107,6 +107,8 @@ Item {
                 }
             }
 
+            Keys.onEscapePressed: { container.hide(); }
+
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: -2

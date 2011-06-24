@@ -74,37 +74,30 @@ Item {
         }
     }
 
-    Column {
-        anchors.fill: parent
-        spacing: 5
+    Item {
+        id: title
+        width: parent.width
+        height: 36
 
-        Item {
-            width: parent.width
-            height: 36
-
-/*            
-            Rectangle {
-                anchors.fill: parent
-                opacity: 0.25
-                border.color: "#ffffff"
-                border.width: 1
-                color: "transparent"
-            }
-*/
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: 8
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                font.weight: Font.Bold
-                color: "white"
-                text: "Settings"
-            }
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            font.family: fontFamily
+            font.pixelSize: fontSize
+            font.weight: Font.Bold
+            color: "white"
+            text: "Settings"
         }
+    }
+
+    TabWidget {
+        anchors.top:  title.bottom
+        width: container.width
 
         Grid {
+            property string title: " Graphics"
+            y: 30
             anchors {
                 left: parent.left
                 margins: 8
@@ -112,93 +105,6 @@ Item {
 
             columns: 2
             spacing: 8
-
-            // Blank line
-            Item { height: 20 } Item {}
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Labels"
-            }
-
-            TextToggle {
-                enabled: true
-                onToggled: { universeView.labelsVisible = enabled }
-            }
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Center Indicator"
-            }
-
-            TextToggle {
-                id: centerIndicatorToggle
-                enabled: true
-                onToggled: { universeView.centerIndicatorVisible = enabled }
-            }
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Equatorial Grid"
-            }
-
-            TextToggle {
-                id: equatorialGridToggle
-                enabled: false
-                onToggled: { universeView.equatorialGridVisible = enabled; }
-                Connections
-                {
-                    target: universeView;
-                    onEquatorialGridVisibleChanged: {
-                        equatorialGridToggle.enabled = universeView.equatorialGridVisible
-                    }
-                }
-            }
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Ecliptic"
-            }
-
-            TextToggle {
-                onToggled: { universeView.eclipticVisible = enabled }
-                enabled: false
-            }
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Constellation Figures"
-            }
-
-            TextToggle {
-                onToggled: { universeView.constellationFiguresVisible = enabled }
-                enabled: false
-            }
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Constellation Names"
-            }
-
-            TextToggle {
-                onToggled: { universeView.constellationNamesVisible = enabled }
-                enabled: false
-            }
-
-            Item { height: 20; width: 10 }
-            Item { height: 20; width: 10 }
 
             Text {
                 font.family: fontFamily
@@ -328,6 +234,108 @@ Item {
                 }
             }
             Item {}
+        }
+
+        Grid {
+            property string title: " Guides"
+            y: 30
+            anchors {
+                left: parent.left
+                margins: 8
+            }
+
+            columns: 2
+            spacing: 8
+
+            // Blank line
+            //Item { height: 20; width: 200 } Item { height: 20; width: 20 }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Labels"
+            }
+
+            TextToggle {
+                enabled: true
+                onToggled: { universeView.labelsVisible = enabled }
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Center Indicator"
+            }
+
+            TextToggle {
+                id: centerIndicatorToggle
+                enabled: true
+                onToggled: { universeView.centerIndicatorVisible = enabled }
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Equatorial Grid"
+            }
+
+            TextToggle {
+                id: equatorialGridToggle
+                enabled: false
+                onToggled: { universeView.equatorialGridVisible = enabled; }
+                Connections
+                {
+                    target: universeView;
+                    onEquatorialGridVisibleChanged: {
+                        equatorialGridToggle.enabled = universeView.equatorialGridVisible
+                    }
+                }
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Ecliptic"
+            }
+
+            TextToggle {
+                onToggled: { universeView.eclipticVisible = enabled }
+                enabled: false
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Constellation Figures"
+            }
+
+            TextToggle {
+                onToggled: { universeView.constellationFiguresVisible = enabled }
+                enabled: false
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "Constellation Names"
+            }
+
+            TextToggle {
+                onToggled: { universeView.constellationNamesVisible = enabled }
+                enabled: false
+            }
+
+            Item { height: 20; width: 200 } Item { height: 20; width: 20 }
+        }
+
+        Item {
+            property string title: " Interface"
         }
     }
 

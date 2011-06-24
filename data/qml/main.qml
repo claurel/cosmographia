@@ -73,29 +73,16 @@ Item {
         textColor: "white"
     }
 
-/*
-    Row {
-         anchors {
-             horizontalCenter: parent.horizontalCenter
-         }
+    FindObjectPanel {
+        id: findObject
+        objectName: "searchBox"
 
-         SearchBox {
-             id: findObject;
-             objectName: "searchBox"
-             opacity: 0
-         }
-     }
-*/
-     FindObjectPanel {
-         id: findObject
-         objectName: "searchBox"
+        width: 300; height: 300
+        x: 32; y: panelY
+        opacity: 0
+    }
 
-         width: 300; height: 300
-         x: 32; y: panelY
-         opacity: 0
-     }
-
-     Column {
+    Column {
          id: toolBar
 
          opacity: 0
@@ -107,6 +94,7 @@ Item {
 
          Column {
              Image {
+                 id: searchButton
                  width: 32; height: 32
                  source: "qrc:/icons/search.png"
                  smooth: true
@@ -121,6 +109,7 @@ Item {
 
          Column {
              Image {
+                 id: settingsButton
                  width: 32; height: 32
                  source: "qrc:/icons/config.png"
                  smooth: true
@@ -135,6 +124,7 @@ Item {
 
          Column {
              Image {
+                 id: helpButton
                  width: 32; height: 32
                  source: "qrc:/icons/help.png"
                  smooth: true
@@ -164,6 +154,22 @@ Item {
                  NumberAnimation { properties: "opacity" }
              }
          ]
+     }
+
+     Image {
+         id: quitButton
+         width: 32; height: 32
+         source: "qrc:/icons/power.png"
+         smooth: true
+         opacity: toolBar.opacity
+
+         anchors.left: page.left
+         anchors.bottom: page.bottom
+
+         MouseArea {
+             anchors.fill: parent
+             onClicked: { Qt.quit() }
+         }
      }
 
      ContextMenu {

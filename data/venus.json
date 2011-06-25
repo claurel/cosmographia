@@ -29,7 +29,8 @@
           {
               "type" : "Globe",
               "radius" : 6051.8,
-              "baseMap" : "textures/venus.jpg"
+              "baseMap" : "textures/venus.dds",
+              "cloudMap" : "textures/venus-clouds.jpg"
           }
         }
     ]

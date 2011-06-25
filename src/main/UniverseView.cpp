@@ -197,7 +197,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_infoTextVisible(true),
     m_labelsVisible(true),
     m_centerIndicatorVisible(true),
-    m_guiScene(NULL),
+    m_gotoObjectTime(6.0),
     m_videoEncoder(NULL),
     m_timeDisplay(TimeDisplay_UTC),
     m_wireframe(false),
@@ -233,6 +233,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
     rootContext()->setContextProperty("universeView", this);
     setSource(QUrl::fromLocalFile("qml/main.qml"));
+    connect(engine(), SIGNAL(quit()), QCoreApplication::instance(), SLOT(quit()));
+
     setResizeMode(SizeRootObjectToView);
 
     scene()->setBackgroundBrush(Qt::NoBrush);
@@ -1102,7 +1104,12 @@ void UniverseView::mouseDoubleClickEvent(QMouseEvent* event)
 
 void UniverseView::mouseMoveEvent(QMouseEvent *event)
 {
+    setMouseEventProcessed(true);
     QDeclarativeView::mouseMoveEvent(event);
+    if (m_mouseEventProcessed)
+    {
+        return;
+    }
 
     int dx = event->x() - m_lastMousePosition.x();
     int dy = event->y() - m_lastMousePosition.y();
@@ -1247,6 +1254,13 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
         break;
     case Qt::Key_Down:
         m_pitchDown = false;
+        break;
+    case Qt::Key_Escape:
+        if (m_observerAction.isValid())
+        {
+            setStatusMessage("Motion canceled");
+            m_observerAction = NULL;
+        }
         break;
     default:
         QWidget::keyReleaseEvent(event);
@@ -1412,7 +1426,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
 
             m_observerAction = new GotoObserverAction(m_observer.ptr(),
                                                       body,
-                                                      6.0,
+                                                      m_gotoObjectTime,
                                                       secondsFromBaseTime(),
                                                       m_simulationTime,
                                                       distanceFromTarget);
@@ -1894,7 +1908,7 @@ UniverseView::lockedObserver(bool checked)
 
 
 void
-UniverseView::setMilkyWayVisibility(bool checked)
+UniverseView::setMilkyWayVisible(bool checked)
 {
     SkyLayer* layer = m_universe->layer("milky way");
     if (layer)
@@ -2062,6 +2076,13 @@ void
 UniverseView::setConstellationNameVisibility(bool checked)
 {
     setSkyLayerVisible("constellation names", checked);
+}
+
+
+bool
+UniverseView::milkyWayVisible() const
+{
+    return skyLayerVisible("milky way");
 }
 
 
@@ -2536,7 +2557,7 @@ UniverseView::gotoSelectedObject()
 
             m_observerAction = new GotoObserverAction(m_observer.ptr(),
                                                       body,
-                                                      6.0,
+                                                      m_gotoObjectTime,
                                                       secondsFromBaseTime(),
                                                       m_simulationTime,
                                                       distanceFromTarget);

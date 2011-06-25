@@ -48,6 +48,10 @@ Item {
             timePanel.unfocus();
             universeView.setMouseEventProcessed(false)
         }
+
+        onPositionChanged: {
+            universeView.setMouseEventProcessed(false)
+        }
     }
 
     SettingsPanel {

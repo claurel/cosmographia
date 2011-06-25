@@ -71,6 +71,7 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(bool cloudsVisible READ cloudsVisible WRITE setCloudsVisible);
     Q_PROPERTY(bool atmospheresVisible READ atmospheresVisible WRITE setAtmospheresVisible);
     Q_PROPERTY(bool sunGlare READ sunGlare WRITE setSunGlare);
+    Q_PROPERTY(bool milkyWayVisible READ milkyWayVisible WRITE setMilkyWayVisible);
 
     Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
     Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
@@ -79,6 +80,8 @@ class UniverseView : public QDeclarativeView
 
     Q_PROPERTY(double limitingMagnitude READ limitingMagnitude WRITE setLimitingMagnitude NOTIFY limitingMagnitudeChanged);
     Q_PROPERTY(double ambientLight READ ambientLight WRITE setAmbientLight NOTIFY ambientLightChanged);
+
+    Q_PROPERTY(double gotoObjectTime READ gotoObjectTime WRITE setGotoObjectTime);
 
 public:
     Q_INVOKABLE BodyObject* getSelectedBody() const;
@@ -175,6 +178,17 @@ public:
     bool cloudsVisible() const;
     bool atmospheresVisible() const;
     bool sunGlare() const;
+    bool milkyWayVisible() const;
+
+    double gotoObjectTime() const
+    {
+        return m_gotoObjectTime;
+    }
+
+    void setGotoObjectTime(double tsec)
+    {
+        m_gotoObjectTime = tsec;
+    }
 
     double limitingMagnitude() const;
     double ambientLight() const;
@@ -238,7 +252,7 @@ public slots:
     void synodicObserver(bool checked);
     void lockedObserver(bool checked);
     void setObserverCenter();
-    void setMilkyWayVisibility(bool checked);
+    void setMilkyWayVisible(bool checked);
     void setEquatorialGridVisibility(bool checked);
     void setEclipticVisibility(bool checked);
     void setEquatorialPlaneVisibility(bool checked);
@@ -256,6 +270,7 @@ public slots:
     void setReflections(bool enable);
     void setStereoMode(StereoMode stereoMode);
     void setSunGlare(bool enable);
+
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
     void plotTrajectoryObserver(const BodyInfo* info);
@@ -381,10 +396,9 @@ private:
     bool m_infoTextVisible;
     bool m_labelsVisible;
     bool m_centerIndicatorVisible;
+    double m_gotoObjectTime;
 
     vesta::counted_ptr<ObserverAction> m_observerAction;
-
-    QGraphicsScene* m_guiScene;
 
     QVideoEncoder* m_videoEncoder;
     TimeDisplayMode m_timeDisplay;

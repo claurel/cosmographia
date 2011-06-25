@@ -110,6 +110,18 @@ Item {
                 font.family: fontFamily
                 font.pixelSize: fontSize
                 color: textColor
+                text: "Milky Way"
+            }
+
+            TextToggle {
+                onToggled: { universeView.milkyWayVisible = enabled }
+                enabled: false
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
                 text: "Clouds"
             }
 
@@ -247,9 +259,6 @@ Item {
             columns: 2
             spacing: 8
 
-            // Blank line
-            //Item { height: 20; width: 200 } Item { height: 20; width: 20 }
-
             Text {
                 font.family: fontFamily
                 font.pixelSize: fontSize
@@ -334,8 +343,48 @@ Item {
             Item { height: 20; width: 200 } Item { height: 20; width: 20 }
         }
 
-        Item {
+        Grid {
             property string title: " Interface"
+            y: 30
+            anchors {
+                left: parent.left
+                margins: 8
+            }
+
+            columns: 2
+            spacing: 8
+
+            Column {
+                width: gotoTimeSlider.width
+
+                spacing: 5
+                Text {
+                    font.family: fontFamily
+                    font.pixelSize: fontSize
+                    color: textColor
+                    text: "Goto Speed"
+                }
+
+                Slider {
+                    id: gotoTimeSlider
+
+                    value: 5.0
+                    minValue: 1.0
+                    maxValue: 20.0
+
+                    width: 200
+                    onValueChanged: { universeView.gotoObjectTime = value }
+                    Component.onCompleted: { value = universeView.gotoObjectTime }
+                }
+            }
+
+            Text {
+                font.family: fontFamily
+                font.pixelSize: fontSize
+                color: textColor
+                text: "" + Math.round(gotoTimeSlider.value) + " sec";
+                verticalAlignment: Text.AlignBottom
+            }
         }
     }
 

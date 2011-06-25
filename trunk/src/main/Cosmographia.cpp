@@ -385,7 +385,7 @@ Cosmographia::Cosmographia() :
     connect(ambientLightAction,     SIGNAL(triggered(bool)), m_view3d, SLOT(setAmbientLight(bool)));
     connect(sunGlareAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setSunGlare(bool)));
     connect(reflectionsAction,      SIGNAL(triggered(bool)), m_view3d, SLOT(setReflections(bool)));
-    connect(milkyWayAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setMilkyWayVisibility(bool)));
+    connect(milkyWayAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setMilkyWayVisible(bool)));
     connect(starStyleGroup,         SIGNAL(selected(QAction*)), this, SLOT(setStarStyle(QAction*)));
     connect(stereoModeGroup,        SIGNAL(selected(QAction*)), this, SLOT(setStereoMode(QAction*)));
 
@@ -396,7 +396,7 @@ Cosmographia::Cosmographia() :
     helpMenu->addAction(aboutAction);
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
-    this->menuBar()->addMenu(helpMenu);
+    menuBar()->addMenu(helpMenu);
 
     setCursor(QCursor(Qt::CrossCursor));
 

@@ -9,7 +9,10 @@ here: http://planetpixelemporium.com/planets.html
 mercury.jpg, jupiter.dds - Created by Steve Albers for the Science on a
 Sphere project.
 
-venus.jpg, saturn.jpg - Created by Bj�rn J�nsson and available at
+venus.dds - Mosaic of Magellan radar mapping swaths from Steve Albers (who
+improved a map originally created by Emily Lakdawalla and Calvin Hamilton)
+
+venus-clouds.jpg, saturn.jpg - Created by Bj�rn J�nsson and available at
 http://www.mmedia.is/~bjj/
 
 earth-clouds.dds - Earth cloud map from NASA's Blue Marble data set:

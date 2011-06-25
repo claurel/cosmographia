@@ -527,7 +527,8 @@ macx {
         data/textures/moon-normal.dds \
         data/textures/earth-normal.dds \
         data/textures/mercury.jpg \
-        data/textures/venus.jpg \
+        data/textures/venus.dds \
+        data/textures/venus-clouds.jpg \
         data/textures/mars.dds \
         data/textures/jupiter.dds \
         data/textures/saturn.jpg \
@@ -619,6 +620,7 @@ macx {
         data/qml/SettingsPanel.qml \
         data/qml/Slider.qml \
         data/qml/SpinBox.qml \
+        data/qml/TabWidget.qml \
         data/qml/TextButton.qml \
         data/qml/TextPanel.qml \
         data/qml/TextToggle.qml \

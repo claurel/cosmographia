@@ -1,0 +1,41 @@
+{
+     "version": "1.0",
+     "name": "2011 MD",
+
+     "items" :
+     [
+        {
+          "name" : "2011 MD",
+          "label" : { "color" : "#ffbb88" },
+	  "trajectoryPlot": {
+              "fade" : 0.5,
+	      "duration" : "10y"
+	  }, 
+
+	  "startTime" : "2011-06-23",
+	  "endTime" : "2011-07-02",
+	  "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "2011MD.xyzv"
+          },
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "1h",
+              "inclination" : 25.57,
+              "ascendingNode" : 358.05,
+              "meridianAngle" : 284.95
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.01,
+              "source" : "smallbodies/25143itokawa.cmod"
+          }
+        }
+    ]
+}

@@ -26,9 +26,7 @@ Item {
     function showFindObject()
     {
         findObjectPanel.searchText = "";
-        findObjectPanel.show()
-        settingsPanel.hide()
-        helpPanel.hide()
+        setActivePanel("findObjectPanel");
     }
 
     function setActivePanel(name)

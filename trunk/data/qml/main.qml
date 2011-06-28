@@ -25,14 +25,16 @@ Item {
 
     function showFindObject()
     {
-        findObjectPanel.searchText = "";
         setActivePanel("findObjectPanel");
     }
 
     function setActivePanel(name)
     {
         if (name == "findObjectPanel")
-            page.showFindObject();
+        {
+            findObjectPanel.searchText = "";
+            findObjectPanel.show();
+        }
         else
             findObjectPanel.hide();
 

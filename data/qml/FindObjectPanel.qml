@@ -134,18 +134,20 @@ Item {
             id: buttons
             opacity: 0
 
+            spacing: 5
+
             Text {
                 font.family: fontFamily
                 font.pixelSize: fontSize
                 font.weight: Font.Bold
                 color: "white"
-                text: "Actions:"
+                text: "Actions"
             }
 
             Row {
                 spacing: 40
 
-                TextButton {
+                Button {
                     id: selectButton
                     text: "Select"
                     onPressed: {
@@ -153,7 +155,7 @@ Item {
                     }
                 }
 
-                TextButton {
+                Button {
                     id: centerButton
                     text: "Center"
                     onPressed: {
@@ -162,7 +164,7 @@ Item {
                     }
                 }
 
-                TextButton {
+                Button {
                     id: gotoButton
                     text: "Go To"
                     onPressed: {

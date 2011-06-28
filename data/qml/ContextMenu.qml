@@ -63,7 +63,11 @@ Item
 
     function menuAction(item)
     {
-        if (item.action == "center")
+        if (!item)
+        {
+            // nothing to do
+        }
+        else if (item.action == "center")
         {
             universeView.setCentralBody(selection);
         }

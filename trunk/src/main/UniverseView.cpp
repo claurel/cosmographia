@@ -226,15 +226,6 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     initializeSkyLayers();
 
     setBackgroundBrush(Qt::transparent);
-
-    qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "UniverseView", "Use global universeView");
-    //qmlRegisterUncreatableType<BodyObject>("Cosmographia", 1, 0, "Body", "Use universeView and catalog methods");
-    qmlRegisterType<BodyObject>("Comsmographia", 1, 0, "Body");
-    qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
-    rootContext()->setContextProperty("universeView", this);
-    setSource(QUrl::fromLocalFile("qml/main.qml"));
-    connect(engine(), SIGNAL(quit()), QCoreApplication::instance(), SLOT(quit()));
-
     setResizeMode(SizeRootObjectToView);
 
     scene()->setBackgroundBrush(Qt::NoBrush);
@@ -271,6 +262,14 @@ UniverseView::~UniverseView()
 {
     //makeCurrent();
     delete m_renderer;
+}
+
+
+void
+UniverseView::initializeDeclarativeUi(const QString& qmlFileName)
+{
+    setSource(QUrl::fromLocalFile(qmlFileName));
+    connect(engine(), SIGNAL(quit()), QCoreApplication::instance(), SLOT(quit()));
 }
 
 
@@ -718,8 +717,8 @@ UniverseView::drawInfoOverlay()
             }
 #endif
 
-            QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
-            m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
+            //QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
+            //m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
 
             // Display information about the selection
             if (m_selectedBody.isValid())
@@ -2710,20 +2709,6 @@ UniverseView::createBodyDirectionVisualizer(BodyObject* from, BodyObject* target
 }
 
 
-QString
-UniverseView::getHelpText()
-{
-    QFile helpFile("help/help.html");
-    if (!helpFile.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "Error opening help file " << QFileInfo(helpFile).absoluteFilePath();
-        return QString();
-    }
-
-    return QString(helpFile.readAll());
-}
-
-
 /** Construct a URL from the current observer state, time, and time rate.
   *
   * A Cosmographia URL has the scheme cosmo and a path equal to the current
@@ -2731,8 +2716,6 @@ UniverseView::getHelpText()
   * in the observer frame.
   *
   * The time scale and fov are optional fields.
-  *
-  *
   */
 QUrl
 UniverseView::getStateUrl()

@@ -19,6 +19,7 @@
 #define _COSMOGRAPHIA_H_
 
 #include "Addon.h"
+#include "HelpCatalog.h"
 #include <vesta/Universe.h>
 #include <QMainWindow>
 #include <QNetworkAccessManager>
@@ -27,7 +28,7 @@
 class UniverseView;
 class UniverseCatalog;
 class UniverseLoader;
-class ControlWidget;
+class HelpCatalog;
 
 class Cosmographia : public QMainWindow
 {
@@ -88,7 +89,7 @@ private:
     UniverseCatalog *m_catalog;
     UniverseView *m_view3d;
     UniverseLoader *m_loader;
-    ControlWidget* m_control;
+    HelpCatalog* m_helpCatalog;
 
     QAction* m_fullScreenAction;
 

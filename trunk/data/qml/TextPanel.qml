@@ -45,11 +45,38 @@ Item {
         opacity: 0.5
     }
 
+    // More contents above indicator arrow
+    Image {
+        width: 16; height: 8
+        anchors.top: parent.top
+        anchors.topMargin: 4
+        anchors.horizontalCenter: parent.horizontalCenter
+        source: "qrc:/icons/up.png"
+        smooth: true
+        opacity: flickable.atYBeginning ? 0 : 1
+    }
+
+    // More contents below indicator arrow
+    Image {
+        width: 16; height: 8
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 4
+        anchors.horizontalCenter: parent.horizontalCenter
+        source: "qrc:/icons/down.png"
+        smooth: true
+        opacity: flickable.atYEnd ? 0 : 1
+    }
+
     Flickable
     {
+        id: flickable
+
         clip: true
         anchors.fill: parent
-        anchors.margins: 12
+        anchors.topMargin: 20
+        anchors.bottomMargin: 20
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
 
         contentWidth: contents.width; contentHeight: contents.height
         flickableDirection: Flickable.VerticalFlick
@@ -67,6 +94,14 @@ Item {
                  if (link.substr(0, 6) == "cosmo:")
                  {
                      universeView.setStateFromUrl(link)
+                 }
+                 else if (link.substr(0, 5) == "help:")
+                 {
+                     var newText = helpCatalog.getHelpText(link.substr(5));
+                     if (newText.length > 0)
+                     {
+                         text = newText
+                     }
                  }
                  else
                  {

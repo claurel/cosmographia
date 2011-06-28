@@ -82,11 +82,11 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked:  {
             timePanel.unfocus();
-            universeView.setMouseEventProcessed(false)
+            universeView.setMouseClickEventProcessed(false)
         }
 
         onPositionChanged: {
-            universeView.setMouseEventProcessed(false)
+            universeView.setMouseMoveEventProcessed(false)
         }
     }
 
@@ -125,7 +125,7 @@ Item {
         id: findObjectPanel
         objectName: "searchBox"
 
-        width: 300; height: 300
+        width: 350; height: 300
         x: 32; y: panelY
         opacity: 0
     }

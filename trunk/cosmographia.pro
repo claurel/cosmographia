@@ -615,6 +615,7 @@ macx {
     GUI.path = Contents/Resources/data/qml
     GUI.files = \
         data/qml/main.qml \
+        data/qml/Button.qml \
         data/qml/ContextMenu.qml \
         data/qml/FindObjectPanel.qml \
         data/qml/InfoText.qml \
@@ -635,8 +636,13 @@ macx {
         data/help/help.html \
         data/help/mercury.html \
         data/help/venus.html \
+        data/help/jupiter.html \
         data/help/io.html \
         data/help/callisto.html \
+        data/help/saturn.html \
+        data/help/dione.html \
+        data/help/ceres.html \
+        data/help/vesta.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg
 

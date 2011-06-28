@@ -93,7 +93,8 @@ public:
     Q_INVOKABLE BodyObject* lookupBody(const QString& name) const;
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
-    Q_INVOKABLE void setMouseEventProcessed(bool accepted);
+    Q_INVOKABLE void setMouseClickEventProcessed(bool accepted);
+    Q_INVOKABLE void setMouseMoveEventProcessed(bool accepted);
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -337,7 +338,8 @@ private:
     QPoint m_mouseDownPosition;
     QPoint m_lastMousePosition;
     double m_lastDoubleClickTime;
-    bool m_mouseEventProcessed;
+    bool m_mouseClickEventProcessed;
+    bool m_mouseMoveEventProcessed;
 
     vesta::counted_ptr<vesta::Universe> m_universe;
     UniverseCatalog* m_catalog;

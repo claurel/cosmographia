@@ -25,10 +25,33 @@ Item {
 
     function showFindObject()
     {
-        findObject.searchText = "";
-        findObject.show()
+        findObjectPanel.searchText = "";
+        findObjectPanel.show()
         settingsPanel.hide()
         helpPanel.hide()
+    }
+
+    function setActivePanel(name)
+    {
+        if (name == "findObjectPanel")
+            page.showFindObject();
+        else
+            findObjectPanel.hide();
+
+        if (name == "infoPanel")
+            infoPanel.show();
+        else
+            infoPanel.hide();
+
+        if (name == "settingsPanel")
+            settingsPanel.show();
+        else
+            settingsPanel.hide();
+
+        if (name == "helpPanel")
+            helpPanel.show();
+        else
+            helpPanel.hide();
     }
 
     Connections
@@ -36,6 +59,19 @@ Item {
         target: universeView;
         onContextMenuTriggered: {
             contextMenu.show(x, y, body);
+        }
+    }
+
+    Connections
+    {
+        target: contextMenu;
+        onShowInfo: {
+            var body = universeView.getSelectedBody()
+            if (body !== null)
+            {
+                infoPanel.text = helpCatalog.getHelpText(body.name);
+            }
+            setActivePanel("infoPanel")
         }
     }
 
@@ -54,19 +90,19 @@ Item {
         }
     }
 
-    SettingsPanel {
-        id: settingsPanel
-        x: 32; y: panelY
-        opacity: 0
-        textColor: "white"
-    }
-
     TimePanel {
         id: timePanel
         anchors {
             top: parent.top
             right: parent.right
         }
+    }
+
+    SettingsPanel {
+        id: settingsPanel
+        x: 32; y: panelY
+        opacity: 0
+        textColor: "white"
     }
 
     TextPanel {
@@ -77,8 +113,16 @@ Item {
         textColor: "white"
     }
 
+    TextPanel {
+        id: infoPanel
+        width: 400
+        x: 32; y: panelY
+        opacity: 0
+        textColor: "white"
+    }
+
     FindObjectPanel {
-        id: findObject
+        id: findObjectPanel
         objectName: "searchBox"
 
         width: 300; height: 300
@@ -105,11 +149,34 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { page.showFindObject(); settingsPanel.hide(); helpPanel.hide() }
+                     onClicked: { setActivePanel("findObjectPanel") }
                  }
              }
              //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
+
+         /*
+         Column {
+             Image {
+                 id: infoButton
+                 width: 32; height: 32
+                 source: "qrc:/icons/info.png"
+                 smooth: true
+
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: {
+                         var body = universeView.getSelectedBody()
+                         if (body !== null)
+                         {
+                             infoPanel.text = helpCatalog.getHelpText(body.name);
+                         }
+                         setActivePanel("infoPanel")
+                     }
+                 }
+             }
+         }
+         */
 
          Column {
              Image {
@@ -120,7 +187,7 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { findObject.hide(); settingsPanel.show(); helpPanel.hide() }
+                     onClicked: { setActivePanel("settingsPanel") }
                  }
              }
              //Text { width: 48; color: "white"; text: "settings"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
@@ -135,7 +202,7 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { helpPanel.text = universeView.getHelpText(); findObject.hide(); helpPanel.show(); settingsPanel.hide() }
+                     onClicked: { helpPanel.text = helpCatalog.getHelpText("help"); setActivePanel("helpPanel") }
                  }
              }
              //Text { width: 32; color: "white"; text: "help"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }

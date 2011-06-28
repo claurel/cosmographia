@@ -18,6 +18,7 @@ APP_SOURCES = \
     $$MAIN_PATH/Addon.cpp \
     $$MAIN_PATH/ConstellationInfo.cpp \
     $$MAIN_PATH/Cosmographia.cpp \
+    $$MAIN_PATH/HelpCatalog.cpp \
     $$MAIN_PATH/UniverseView.cpp \
     $$MAIN_PATH/Viewpoint.cpp \
     $$MAIN_PATH/NetworkTextureLoader.cpp \
@@ -64,6 +65,7 @@ APP_HEADERS = \
     $$MAIN_PATH/Addon.h \
     $$MAIN_PATH/ConstellationInfo.h \
     $$MAIN_PATH/Cosmographia.h \
+    $$MAIN_PATH/HelpCatalog.h \
     $$MAIN_PATH/UniverseView.h \
     $$MAIN_PATH/Viewpoint.h \
     $$MAIN_PATH/NetworkTextureLoader.h \
@@ -631,7 +633,12 @@ macx {
     HELPFILES.path = Contents/Resources/data/help
     HELPFILES.files = \
         data/help/help.html \
-        data/help/jupiter.jpg
+        data/help/mercury.html \
+        data/help/venus.html \
+        data/help/io.html \
+        data/help/callisto.html \
+        data/help/jupiter.jpg \
+        data/help/PIA01971.jpg
 
     QMAKE_BUNDLE_DATA += HELPFILES
 

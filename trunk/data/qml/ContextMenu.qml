@@ -26,6 +26,8 @@ Item
     property string selectionName: ""
     property variant selection: null
 
+    signal showInfo()
+
     function show(x, y, body)
     {
         state = "visible"
@@ -41,6 +43,7 @@ Item
         menuModel.clear();
         menuModel.append({ action: "center",      labelText: "Set As Center" });
         menuModel.append({ action: "goto",        labelText: "Go To" });
+        menuModel.append({ action: "info",        labelText: "Show Information" });
         menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes });
         menuModel.append({ action: "frameaxes",   labelText: "Frame Axes", checked: body.frameAxes });
         menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow });
@@ -68,6 +71,11 @@ Item
         {
             universeView.setSelectedBody(selection);
             universeView.gotoSelectedObject();
+        }
+        else if (item.action == "info")
+        {
+            universeView.setSelectedBody(selection);
+            showInfo()
         }
         else if (item.action == "bodyaxes")
         {

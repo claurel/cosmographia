@@ -57,32 +57,12 @@
 
 #include <QNetworkDiskCache>
 #include <QNetworkRequest>
+#include <QDeclarativeEngine>
+#include <QDeclarativeComponent>
+#include <QDeclarativeContext>
 
 using namespace vesta;
 using namespace Eigen;
-
-
-class ControlWidget : public QWidget
-{
-public:
-    ControlWidget(QWidget* parent = NULL) :
-        QWidget(parent)
-    {
-        m_findCombo = new QComboBox(this);
-        m_findCombo->setEditable(true);
-
-        QHBoxLayout* layout = new QHBoxLayout(this);
-        setLayout(layout);
-        layout->setContentsMargins(QMargins(2, 2, 2, 2));
-        layout->addWidget(new QLabel("Find Object", this));
-        layout->addWidget(m_findCombo);
-        layout->addStretch(1);
-        setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
-    }
-
-public:
-    QComboBox* m_findCombo;
-};
 
 
 Cosmographia::Cosmographia() :
@@ -90,7 +70,7 @@ Cosmographia::Cosmographia() :
     m_catalog(NULL),
     m_view3d(NULL),
     m_loader(NULL),
-    m_control(NULL),
+    m_helpCatalog(NULL),
     m_fullScreenAction(NULL),
     m_networkManager(NULL)
 {
@@ -104,9 +84,22 @@ Cosmographia::Cosmographia() :
 
     initializeUniverse();
 
+    m_helpCatalog = new HelpCatalog();
+    m_helpCatalog->loadHelpFiles("./help");
+
     m_catalog = new UniverseCatalog();
     m_view3d = new UniverseView(this, m_universe.ptr(), m_catalog);
     m_loader = new UniverseLoader();
+
+    // Initialize QML types
+    qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "UniverseView", "Use global universeView");
+    qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "HelpCatalog", "Use global helpCatalog");
+    qmlRegisterType<BodyObject>("Comsmographia", 1, 0, "Body");
+    qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
+    m_view3d->rootContext()->setContextProperty("universeView", m_view3d);
+    m_view3d->rootContext()->setContextProperty("helpCatalog", m_helpCatalog);
+
+    m_view3d->initializeDeclarativeUi("qml/main.qml");
 
     setCentralWidget(m_view3d);
 

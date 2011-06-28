@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
 //
 // Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -92,7 +92,6 @@ public:
     Q_INVOKABLE BodyObject* getSun() const;
     Q_INVOKABLE BodyObject* lookupBody(const QString& name) const;
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
-    Q_INVOKABLE QString getHelpText();
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
     Q_INVOKABLE void setMouseEventProcessed(bool accepted);
 
@@ -101,6 +100,8 @@ public:
 
     UniverseView(QWidget *parent, vesta::Universe* universe, UniverseCatalog* catalog);
     ~UniverseView();
+
+    void initializeDeclarativeUi(const QString& qmlFileName);
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;

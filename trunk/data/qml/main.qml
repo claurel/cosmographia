@@ -58,7 +58,16 @@ Item {
     {
         target: universeView;
         onContextMenuTriggered: {
-            contextMenu.show(x, y, body);
+            var cx = x
+            var cy = y
+
+            // Constrain context menu to fit in the main window
+            if (cx + contextMenu.width > page.width)
+                cx = x - contextMenu.width;
+            if (cy + contextMenu.height > page.height)
+                cy = page.height - contextMenu.height;
+
+            contextMenu.show(cx, cy, body);
         }
     }
 

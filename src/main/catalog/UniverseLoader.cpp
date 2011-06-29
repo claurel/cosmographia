@@ -27,6 +27,8 @@
 #include "../NetworkTextureLoader.h"
 #include "../compatibility/Scanner.h"
 #include "../compatibility/CmodLoader.h"
+#include "../compatibility/CatalogParser.h"
+#include "../compatibility/TransformCatalog.h"
 #include "../vext/SimpleRotationModel.h"
 #include "../vext/StripParticleGenerator.h"
 #include "../vext/ArcStripParticleGenerator.h"
@@ -2466,6 +2468,7 @@ loadParticleEmitter(const QVariantMap& map)
     emitter->setColorCount(colorCount);
     for (unsigned int i = 0; i < colorCount; ++i)
     {
+        qDebug() << "color: " << i << ", " << opacities[i];
         emitter->setColor(i, colors[i], opacities[i]);
     }
 
@@ -2881,7 +2884,101 @@ QStringList
 UniverseLoader::loadCatalogFile(const QString& fileName,
                                 UniverseCatalog* catalog)
 {
-    return loadCatalogFile(fileName, catalog, 0);
+    if (fileName.toLower().endsWith(".ssc"))
+    {
+        return loadSSC(fileName, catalog, 0);
+    }
+    else
+    {
+        return loadCatalogFile(fileName, catalog, 0);
+    }
+}
+
+
+// Load a Celestia SSC (Solar System Catalog) file
+QStringList
+UniverseLoader::loadSSC(const QString& fileName,
+                        UniverseCatalog* catalog,
+                        unsigned int requireDepth)
+{
+    QStringList bodyNames;
+
+    QString path = dataFileName(fileName);
+
+    QFileInfo info(path);
+    path = info.canonicalFilePath();
+
+    QFile catalogFile(path);
+    if (!catalogFile.open(QIODevice::ReadOnly))
+    {
+        errorMessage(QString("Cannot open SSC file %1").arg(path));
+        return bodyNames;
+    }
+
+    // Save search paths
+    QString searchPath = info.absolutePath();
+    QString saveDataSearchPath = m_dataSearchPath;
+    QString saveTextureSearchPath = m_textureSearchPath;
+    QString saveModelSearchPath = m_modelSearchPath;
+
+    // SSC files expect media and trajectory data files in subdirectories:
+    //   trajectories and rotation models - ./data
+    //   textures - ./textures/medres
+    //   mesh files - ./models
+    // Where '.' is the directory containing the ssc file
+    setDataSearchPath(searchPath + "/data");
+    setModelSearchPath(searchPath + "/models");
+    setTextureSearchPath(searchPath + "/textures/medres");
+
+    if (m_textureLoader.isValid())
+    {
+        m_textureLoader->setLocalSearchPath(searchPath + "/textures/medres");
+    }
+    setTexturesInModelDirectory(false);
+
+    QVariantList items;
+
+    CatalogParser parser(&catalogFile);
+    QVariant obj = parser.nextSscObject();
+    while (obj.type() == QVariant::Map)
+    {
+        QJson::Serializer serializer;
+#if DEBUG_SSC_CONVERSION
+        qDebug() << serializer.serialize(obj);
+#endif
+
+        QVariantMap map = obj.toMap();
+        TransformSscObject(&map);
+#if DEBUG_SSC_CONVERSION
+        qDebug() << "Converted: " << serializer.serialize(map);
+#endif
+
+        QString fullName = map.value("_parent").toString() + "/" + map.value("name").toString();
+        map.insert("name", fullName);
+        items << map;
+
+        obj = parser.nextSscObject();
+    }
+
+    QVariantMap contents;
+    contents.insert("name", fileName);
+    contents.insert("version", "1.0");
+    contents.insert("items", items);
+
+    bodyNames = loadCatalogItems(contents, catalog, requireDepth + 1);
+
+    // Restore search paths
+    setDataSearchPath(saveDataSearchPath);
+    setModelSearchPath(saveModelSearchPath);
+    if (m_textureLoader.isValid())
+    {
+        m_textureLoader->setLocalSearchPath(saveTextureSearchPath);
+    }
+
+    // Reset the textures in model directory bit
+    setTexturesInModelDirectory(true);
+
+    return bodyNames;
 }
 
 
@@ -2994,7 +3091,15 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
             {
                 if (v.type() == QVariant::String)
                 {
-                    bodyNames << loadCatalogFile(v.toString(), catalog, requireDepth);
+                    QString fileName = v.toString();
+                    if (fileName.toLower().endsWith(".ssc"))
+                    {
+                        bodyNames << loadSSC(fileName, catalog, requireDepth);
+                    }
+                    else
+                    {
+                        bodyNames << loadCatalogFile(fileName, catalog, requireDepth);
+                    }
                 }
             }
         }

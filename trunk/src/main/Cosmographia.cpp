@@ -27,8 +27,6 @@
 #include "JPLEphemeris.h"
 #include "NetworkTextureLoader.h"
 #include "LinearCombinationTrajectory.h"
-#include "compatibility/CatalogParser.h"
-#include "compatibility/TransformCatalog.h"
 #include "astro/IAULunarRotationModel.h"
 #include "astro/MarsSat.h"
 #include "astro/L1.h"
@@ -1019,107 +1017,45 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         textureLoader->setLocalSearchPath(path);
     }
 
-    if (fileName.toLower().endsWith(".json"))
+    m_loader->clearMessageLog();
+    QStringList bodyNames = m_loader->loadCatalogFile(info.fileName(), m_catalog);
+    QString errorMessages = m_loader->messageLog();
+    if (!errorMessages.isEmpty())
     {
-        m_loader->clearMessageLog();
-        QStringList bodyNames = m_loader->loadCatalogFile(info.fileName(), m_catalog);
-        QString errorMessages = m_loader->messageLog();
-        if (!errorMessages.isEmpty())
-        {
-            showCatalogErrorDialog(errorMessages);
-        }
-        else
-        {
-            AddOn* addOn = new AddOn();
-            addOn->setSource(info.absoluteFilePath());
-            addOn->setTitle(info.fileName());
-            foreach (QString name, bodyNames)
-            {
-                addOn->addObject(name);
-            }
-
-            // If we've previously loaded this add-on, remove it
-            for (int i = 0; i < m_loadedAddOns.size(); ++i)
-            {
-                if (m_loadedAddOns[i]->source() == addOn->source())
-                {
-                    delete m_loadedAddOns[i];
-                    m_loadedAddOns.removeAt(i);
-                    break;
-                }
-            }
-
-            m_loadedAddOns << addOn;
-            updateUnloadAction();
-        }
-
-        foreach (QString name, bodyNames)
-        {
-            Entity* e = m_catalog->find(name);
-            if (e)
-            {
-                m_view3d->replaceEntity(e, m_catalog->findInfo(name));
-            }
-        }
+        showCatalogErrorDialog(errorMessages);
     }
-    else if (fileName.toLower().endsWith(".ssc"))
+    else
     {
-        // SSC files expect media and trajectory data files in subdirectories:
-        //   trajectories and rotation models - ./data
-        //   textures - ./textures/medres
-        //   mesh files - ./models
-        // Where '.' is the directory containing the ssc file
-        m_loader->setDataSearchPath(path + "/data");
-        m_loader->setModelSearchPath(path + "/models");
-        if (textureLoader)
-        {
-            textureLoader->setLocalSearchPath(path + "/textures/medres");
-        }
-        m_loader->setTexturesInModelDirectory(false);
-
-        QVariantList items;
-
-        CatalogParser parser(&catalogFile);
-        QVariant obj = parser.nextSscObject();
-        while (obj.type() == QVariant::Map)
-        {
-            QJson::Serializer serializer;
-            qDebug() << serializer.serialize(obj);
-
-            QVariantMap map = obj.toMap();
-            TransformSscObject(&map);
-            qDebug() << "Converted: " << serializer.serialize(map);
-
-            QString fullName = map.value("_parent").toString() + "/" + map.value("name").toString();
-            map.insert("name", fullName);
-            items << map;
-
-            obj = parser.nextSscObject();
-        }
-
-        QVariantMap contents;
-        contents.insert("name", fileName);
-        contents.insert("version", "1.0");
-        contents.insert("items", items);
-
-        QStringList bodyNames = m_loader->loadCatalogItems(contents, m_catalog);
-        QString errorMessages = m_loader->messageLog();
-        if (!errorMessages.isEmpty())
-        {
-            showCatalogErrorDialog(errorMessages);
-        }
-
+        AddOn* addOn = new AddOn();
+        addOn->setSource(info.absoluteFilePath());
+        addOn->setTitle(info.fileName());
         foreach (QString name, bodyNames)
         {
-            Entity* e = m_catalog->find(name);
-            if (e)
+            addOn->addObject(name);
+        }
+
+        // If we've previously loaded this add-on, remove it
+        for (int i = 0; i < m_loadedAddOns.size(); ++i)
+        {
+            if (m_loadedAddOns[i]->source() == addOn->source())
             {
-                m_view3d->replaceEntity(e, m_catalog->findInfo(name));
+                delete m_loadedAddOns[i];
+                m_loadedAddOns.removeAt(i);
+                break;
             }
         }
 
-        // Reset the textures in model directory bit
-        m_loader->setTexturesInModelDirectory(true);
+        m_loadedAddOns << addOn;
+        updateUnloadAction();
+    }
+
+    foreach (QString name, bodyNames)
+    {
+        Entity* e = m_catalog->find(name);
+        if (e)
+        {
+            m_view3d->replaceEntity(e, m_catalog->findInfo(name));
+        }
     }
 
     QSet<QString> resourceRequests = m_loader->resourceRequests();

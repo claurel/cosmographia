@@ -146,6 +146,9 @@ private:
     QStringList loadCatalogFile(const QString& fileName,
                                 UniverseCatalog* catalog,
                                 unsigned int requireDepth);
+    QStringList loadSSC(const QString& fileName,
+                        UniverseCatalog* catalog,
+                        unsigned int requireDepth);
     void errorMessage(const QString& message);
     void warningMessage(const QString& message);
 

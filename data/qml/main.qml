@@ -262,7 +262,7 @@ Item {
          anchors.horizontalCenter: page.horizontalCenter
          anchors.bottom: page.bottom
          anchors.bottomMargin: 30
-         opacity: 1//universeView.recordingVideo ? 1 : 0
+         opacity: universeView.recordingVideo ? 1 : 0
 
          text: "Recording video (" + universeView.recordedVideoLength.toFixed(1) + " sec)"
 

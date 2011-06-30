@@ -111,7 +111,6 @@ APP_HEADERS = \
     $$MAIN_PATH/qtwrapper/VisualizerObject.h
 
 
-
 VESTA_PATH = thirdparty/vesta
 LIB3DS_PATH = thirdparty/lib3ds
 GLEW_PATH = thirdparty/glew
@@ -445,8 +444,21 @@ INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 
 #CONFIG += ffmpeg
 
+macx {
+    # Always enable QTKit support on Mac
+    message("Building with QTKit support for video")
+
+    DEFINES += QTKIT_SUPPORT=1
+    QMAKE_LFLAGS += -framework QTKit -framework Cocoa
+
+    HEADERS += \
+        src/video/VideoEncoder.h
+    OBJECTIVE_SOURCES += \
+        src/video/VideoEncoder.mm
+}
+
 ffmpeg {
-    message("Using FFMPEG")
+    message("Building with FFMPEG for video")
 
     # ##############################################################################
     # ##############################################################################
@@ -641,6 +653,10 @@ macx {
         data/help/callisto.html \
         data/help/saturn.html \
         data/help/dione.html \
+        data/help/titan.html \
+        data/help/uranus.html \
+        data/help/umbriel.html \
+        data/help/oberon.html \
         data/help/ceres.html \
         data/help/vesta.html \
         data/help/jupiter.jpg \

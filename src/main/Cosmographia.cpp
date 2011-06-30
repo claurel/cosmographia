@@ -23,6 +23,8 @@
 #include "Cosmographia.h"
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
+#elif QTKIT_SUPPORT
+#include "../video/VideoEncoder.h"
 #endif
 #include "JPLEphemeris.h"
 #include "NetworkTextureLoader.h"
@@ -108,7 +110,7 @@ Cosmographia::Cosmographia() :
     QAction* saveScreenShotAction = fileMenu->addAction("&Save Screen Shot");
     QAction* recordVideoAction = fileMenu->addAction("&Record Video");
     recordVideoAction->setShortcut(QKeySequence("Ctrl+R"));
-#if !FFMPEG_SUPPORT
+#if !FFMPEG_SUPPORT && !QTKIT_SUPPORT
     recordVideoAction->setEnabled(false);
 #endif
     fileMenu->addSeparator();
@@ -887,7 +889,7 @@ Cosmographia::saveSettings()
 void
 Cosmographia::recordVideo()
 {
-#if FFMPEG_SUPPORT
+#if FFMPEG_SUPPORT || QTKIT_SUPPORT
     if (m_view3d->isRecordingVideo())
     {
         m_view3d->videoEncoder()->close();
@@ -895,8 +897,15 @@ Cosmographia::recordVideo()
     }
     else
     {
-        QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/cosmo.mpeg";
-        QString saveFileName = QFileDialog::getSaveFileName(this, "Save Video As...", defaultFileName, "Video (*.mkv *.mpeg *.avi)");
+#ifdef QTKIT_SUPPORT
+        QString defaultExtension = "mov";
+        QString extensions = "Video (*.mov)";
+#else
+        QString defaultExtension = "mpeg";
+        QString extensions = "Video (*.mkv *.mpeg *.avi)";
+#endif
+        QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/cosmo." + defaultExtension;
+        QString saveFileName = QFileDialog::getSaveFileName(this, "Save Video As...", defaultFileName, extensions);
         if (!saveFileName.isEmpty())
         {
             QVideoEncoder* encoder = new QVideoEncoder();

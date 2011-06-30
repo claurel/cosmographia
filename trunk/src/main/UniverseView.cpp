@@ -31,6 +31,8 @@
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
+#elif QTKIT_SUPPORT
+#include "../video/VideoEncoder.h"
 #endif
 
 #include <vesta/Chronology.h>
@@ -1025,11 +1027,14 @@ void UniverseView::paintGL()
 
     m_renderer->endViewSet();
 
-#if FFMPEG_SUPPORT
+#if FFMPEG_SUPPORT || QTKIT_SUPPORT
     if (m_videoEncoder)
     {
         QImage image = grabFrameBuffer(false);
         image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+#if QTKIT_SUPPORT
+        image = image.rgbSwapped();
+#endif
         m_videoEncoder->encodeImage(image);
     }
 #endif
@@ -1690,7 +1695,7 @@ UniverseView::tick()
     double dt = t - m_lastTickTime;
     m_lastTickTime = t;
 
-#if FFMPEG_SUPPORT
+#if FFMPEG_SUPPORT || QTKIT_SUPPORT
     if (m_videoEncoder)
     {
         // Lock time step when recording video

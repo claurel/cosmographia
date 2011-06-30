@@ -83,6 +83,9 @@ class UniverseView : public QDeclarativeView
 
     Q_PROPERTY(double gotoObjectTime READ gotoObjectTime WRITE setGotoObjectTime);
 
+    Q_PROPERTY(bool recordingVideo READ isRecordingVideo NOTIFY recordingVideoChanged)
+    Q_PROPERTY(double recordedVideoLength READ recordedVideoLength NOTIFY recordedVideoLengthChanged)
+
 public:
     Q_INVOKABLE BodyObject* getSelectedBody() const;
     Q_INVOKABLE void setSelectedBody(BodyObject* body);
@@ -133,6 +136,8 @@ public:
     {
         return m_videoEncoder != NULL;
     }
+
+    double recordedVideoLength() const;
 
     QVideoEncoder* videoEncoder() const
     {
@@ -241,6 +246,8 @@ signals:
     void ambientLightChanged(double);
     void equatorialGridVisibilityChanged(bool);
     void centerIndicatorVisibilityChanged(bool);
+    void recordingVideoChanged();
+    void recordedVideoLengthChanged(double);
 
 public slots:
     void tick();
@@ -404,6 +411,8 @@ private:
     vesta::counted_ptr<ObserverAction> m_observerAction;
 
     QVideoEncoder* m_videoEncoder;
+    double m_videoRecordingStartTime;
+
     TimeDisplayMode m_timeDisplay;
     bool m_wireframe;
 

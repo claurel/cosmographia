@@ -202,6 +202,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_centerIndicatorVisible(true),
     m_gotoObjectTime(6.0),
     m_videoEncoder(NULL),
+    m_videoRecordingStartTime(0.0),
     m_timeDisplay(TimeDisplay_UTC),
     m_wireframe(false),
     m_statusUpdateTime(0.0),
@@ -1710,6 +1711,13 @@ UniverseView::tick()
         setSimulationTime(m_simulationTime + dt * timeScale());
     }
 
+    if (m_videoEncoder)
+    {
+        // If we're recording video, notify any listeners that the length has
+        // changed.
+        emit recordedVideoLengthChanged(recordedVideoLength());
+    }
+
     if (m_rollLeft)
     {
         m_controller->roll(dt * KeyboardRotationAcceleration);
@@ -2437,6 +2445,8 @@ void
 UniverseView::startVideoRecording(QVideoEncoder* encoder)
 {
     m_videoEncoder = encoder;
+    m_videoRecordingStartTime = m_realTime;
+    emit recordingVideoChanged();
 }
 
 
@@ -2444,6 +2454,21 @@ void
 UniverseView::finishVideoRecording()
 {
     m_videoEncoder = NULL;
+    emit recordingVideoChanged();
+}
+
+
+double
+UniverseView::recordedVideoLength() const
+{
+    if (m_videoEncoder)
+    {
+        return m_realTime - m_videoRecordingStartTime;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 

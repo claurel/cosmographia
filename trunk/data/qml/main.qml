@@ -256,4 +256,16 @@ Item {
          id: contextMenu
          opacity: 0
      }
+
+     InfoText {
+         id: recordingAlert
+         anchors.horizontalCenter: page.horizontalCenter
+         anchors.bottom: page.bottom
+         anchors.bottomMargin: 30
+         opacity: 1//universeView.recordingVideo ? 1 : 0
+
+         text: "Recording video (" + universeView.recordedVideoLength.toFixed(1) + " sec)"
+
+         color: "white"
+     }
  }

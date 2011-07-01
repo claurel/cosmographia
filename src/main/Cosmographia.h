@@ -30,6 +30,8 @@ class UniverseCatalog;
 class UniverseLoader;
 class HelpCatalog;
 
+class UniverseCatalogObject;
+
 class Cosmographia : public QMainWindow
 {
     Q_OBJECT
@@ -97,6 +99,8 @@ private:
 
     QList<AddOn*> m_loadedAddOns;
     QAction* m_unloadLastCatalogAction;
+
+    UniverseCatalogObject* m_catalogWrapper;
 };
 
 #endif // _COSMOGRAPHIA_H_

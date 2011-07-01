@@ -20,6 +20,7 @@
 #include "UniverseView.h"
 #include "catalog/UniverseCatalog.h"
 #include "catalog/UniverseLoader.h"
+#include "qtwrapper/UniverseCatalogObject.h"
 #include "Cosmographia.h"
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -72,7 +73,8 @@ Cosmographia::Cosmographia() :
     m_loader(NULL),
     m_helpCatalog(NULL),
     m_fullScreenAction(NULL),
-    m_networkManager(NULL)
+    m_networkManager(NULL),
+    m_catalogWrapper(NULL)
 {
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -91,12 +93,16 @@ Cosmographia::Cosmographia() :
     m_view3d = new UniverseView(this, m_universe.ptr(), m_catalog);
     m_loader = new UniverseLoader();
 
+    m_catalogWrapper = new UniverseCatalogObject(m_catalog);
+
     // Initialize QML types
     qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "UniverseView", "Use global universeView");
-    qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "HelpCatalog", "Use global helpCatalog");
+    qmlRegisterUncreatableType<HelpCatalog>("Cosmographia", 1, 0, "HelpCatalog", "Use global helpCatalog");
+    qmlRegisterUncreatableType<UniverseCatalogObject>("Cosmographia", 1, 0, "UniverseCatalog", "Use global universeCatalog");
     qmlRegisterType<BodyObject>("Comsmographia", 1, 0, "Body");
     qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
     m_view3d->rootContext()->setContextProperty("universeView", m_view3d);
+    m_view3d->rootContext()->setContextProperty("universeCatalog", m_catalogWrapper);
     m_view3d->rootContext()->setContextProperty("helpCatalog", m_helpCatalog);
 
     m_view3d->initializeDeclarativeUi("qml/main.qml");
@@ -400,6 +406,7 @@ Cosmographia::Cosmographia() :
 Cosmographia::~Cosmographia()
 {
     saveSettings();
+    delete m_catalogWrapper;
 }
 
 
@@ -909,7 +916,8 @@ Cosmographia::recordVideo()
         if (!saveFileName.isEmpty())
         {
             QVideoEncoder* encoder = new QVideoEncoder();
-            encoder->createFile(saveFileName, 848, 480, 5000000, 20);
+            //encoder->createFile(saveFileName, 848, 480, 5000000, 20);
+            encoder->createFile(saveFileName, 1280, 720, 5000000, 20);
             m_view3d->startVideoRecording(encoder);
         }
     }

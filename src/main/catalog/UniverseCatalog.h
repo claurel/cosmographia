@@ -66,6 +66,7 @@ public:
     bool contains(const QString& name) const;
 
     QStringList names() const;
+    QStringList matchingNames(const QString& pattern) const;
 
     Viewpoint* findViewpoint(const QString& name);
     void addViewpoint(const QString& name, Viewpoint* viewpoint);

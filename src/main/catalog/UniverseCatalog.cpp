@@ -17,6 +17,7 @@
 
 #include "UniverseCatalog.h"
 #include "../Viewpoint.h"
+#include <QRegExp>
 
 using namespace vesta;
 
@@ -105,6 +106,27 @@ void UniverseCatalog::setBodyInfo(const QString& name, BodyInfo* info)
 QStringList UniverseCatalog::names() const
 {
     return m_bodies.keys();
+}
+
+
+/** Return a list of the names of all objects in the catalog that match the specified
+  * regular expression.
+  */
+QStringList
+UniverseCatalog::matchingNames(const QString& pattern) const
+{
+    QRegExp regex(pattern, Qt::CaseInsensitive);
+
+    QStringList matches;
+    foreach (QString name, m_bodies.keys())
+    {
+        if (regex.exactMatch(name))
+        {
+            matches << name;
+        }
+    }
+
+    return matches;
 }
 
 

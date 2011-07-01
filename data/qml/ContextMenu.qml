@@ -132,7 +132,7 @@ Item
         opacity: 0.7
         color: "#404040"
         border.width: 1
-        border.color: "#cccccc"
+        border.color: "#606060"
     }
 
     ListModel {

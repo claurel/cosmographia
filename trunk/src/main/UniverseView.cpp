@@ -1032,6 +1032,19 @@ void UniverseView::paintGL()
     if (m_videoEncoder)
     {
         QImage image = grabFrameBuffer(false);
+
+        float imageAspectRatio = float(image.width()) / float(image.height());
+        float videoAspectRatio = float(m_videoEncoder->getWidth()) / float(m_videoEncoder->getHeight());
+        if (videoAspectRatio > imageAspectRatio)
+        {
+            int h = int(image.width() / videoAspectRatio + 0.5f);
+            image = image.copy(0, (image.height() - h) / 2, image.width(), h);
+        }
+        else
+        {
+            int w = int(image.height() * videoAspectRatio + 0.5f);
+            image = image.copy((image.width() - w) / 2, 0, 2, image.height());
+        }
         image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 #if QTKIT_SUPPORT
         image = image.rgbSwapped();

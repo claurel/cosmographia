@@ -579,6 +579,7 @@ macx {
         data/models/phobos.obj \
         data/models/deimos.obj \
         data/models/4vesta.obj \
+        data/models/hyperion.cmod \
         data/models/jason.obj \
         data/models/jason.mtl \
         data/models/jas_solr.png \
@@ -650,17 +651,26 @@ macx {
         data/help/venus.html \
         data/help/jupiter.html \
         data/help/io.html \
+        data/help/europa.html \
+        data/help/ganymede.html \
         data/help/callisto.html \
         data/help/saturn.html \
+        data/help/mimas.html \
         data/help/dione.html \
+        data/help/hyperion.html \
         data/help/titan.html \
+        data/help/iapetus.html \
         data/help/uranus.html \
         data/help/umbriel.html \
         data/help/oberon.html \
         data/help/ceres.html \
         data/help/vesta.html \
+        data/help/pluto.html \
+        data/help/charon.html \
         data/help/jupiter.jpg \
-        data/help/PIA01971.jpg
+        data/help/PIA01971.jpg \
+        data/help/hyperion.jpg \
+        data/help/iapetus-global.jpg
 
     QMAKE_BUNDLE_DATA += HELPFILES
 

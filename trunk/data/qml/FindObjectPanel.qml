@@ -102,9 +102,14 @@ Item {
                     infoText.text = "<b>" + body.name + "</b><br>" + body.description;
                     buttons.opacity = 1;
                 }
-                else
+                else if (text == "")
                 {
                     infoText.text = "";
+                    buttons.opacity = 0;
+                }
+                else
+                {
+                    infoText.text = universeCatalog.getCompletionString(text, 6);
                     buttons.opacity = 0;
                 }
             }
@@ -124,10 +129,13 @@ Item {
 
         Text {
             id: infoText
+            width: 300
+            height: 40
             color: textColor
             font.family: fontFamily
             font.pixelSize: fontSize
             text: " "
+            wrapMode: Text.WordWrap
         }
 
         Item { width: 1; height: 20 }

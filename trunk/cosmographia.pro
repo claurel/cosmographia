@@ -58,6 +58,7 @@ APP_SOURCES = \
     $$MAIN_PATH/compatibility/Scanner.cpp \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp \
     $$MAIN_PATH/qtwrapper/BodyObject.cpp \
+    $$MAIN_PATH/qtwrapper/UniverseCatalogObject.cpp \
     $$MAIN_PATH/qtwrapper/VisualizerObject.cpp
 
 
@@ -108,6 +109,7 @@ APP_HEADERS = \
     $$MAIN_PATH/compatibility/Scanner.h \
     $$MAIN_PATH/compatibility/TransformCatalog.h \
     $$MAIN_PATH/qtwrapper/BodyObject.h \
+    $$MAIN_PATH/qtwrapper/UniverseCatalogObject.h \
     $$MAIN_PATH/qtwrapper/VisualizerObject.h
 
 

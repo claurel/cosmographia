@@ -36,8 +36,11 @@ public:
     {
     }
 
-    bool startRecording(const QString& fileName)
+    bool startRecording(const QString& fileName, int width, int height)
     {
+        m_width = width;
+        m_height = height;
+
         if (!m_movie)
         {
             NSString* nsFileName = [NSString stringWithUTF8String: fileName.toUtf8().data() ];
@@ -118,6 +121,7 @@ public:
             [m_movie release];
             m_movie = NULL;
         }
+        return true;
     }
 
 private:
@@ -185,10 +189,10 @@ QVideoEncoder::close()
 
 bool
 QVideoEncoder::createFile(QString fileName,
-                          unsigned int /* width */,
-                          unsigned int /* height */,
+                          unsigned int width,
+                          unsigned int height,
                           unsigned int /* bitrate */,
                           unsigned int /* gop */)
 {
-    return m_impl->startRecording(fileName);
+    return m_impl->startRecording(fileName, width, height);
 }

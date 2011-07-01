@@ -257,9 +257,8 @@
 
           "geometry" :
           {
-              "type" : "Globe",
-              "radii" : [ 164, 130, 107 ],
-              "baseMap" : "textures/hyperion.dds"
+              "type" : "Mesh",
+              "source" : "models/hyperion.cmod"
           }
         },
 

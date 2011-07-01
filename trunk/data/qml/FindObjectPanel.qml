@@ -38,6 +38,8 @@ Item {
         textInput.focus = false
     }
 
+    signal showInfo()
+
     width: 400
     height: 300
     opacity: 0
@@ -134,15 +136,7 @@ Item {
             id: buttons
             opacity: 0
 
-            spacing: 5
-
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                font.weight: Font.Bold
-                color: "white"
-                text: "Actions"
-            }
+            spacing: 10
 
             Row {
                 spacing: 40
@@ -170,6 +164,18 @@ Item {
                     onPressed: {
                         universeView.setSelectedBody(textInput.text);
                         universeView.gotoSelectedObject();
+                    }
+                }
+            }
+
+            Row {
+                spacing: 40
+                Button {
+                    id: infoButton
+                    text: "View Info"
+                    onPressed: {
+                        universeView.setSelectedBody(textInput.text);
+                        container.showInfo()
                     }
                 }
             }

@@ -84,6 +84,19 @@ Item {
         }
     }
 
+    Connections
+    {
+        target: findObjectPanel;
+        onShowInfo: {
+            var body = universeView.getSelectedBody()
+            if (body !== null)
+            {
+                infoPanel.text = helpCatalog.getHelpText(body.name);
+            }
+            setActivePanel("infoPanel")
+        }
+    }
+
     MouseArea {
         id: pageArea
         anchors.fill: parent

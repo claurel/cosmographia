@@ -2237,6 +2237,60 @@ UniverseView::clearTrajectory(Entity* body)
 }
 
 
+/** Plot a trajectory for a body using the default plotting
+  * parameters.
+  */
+void
+UniverseView::plotTrajectory(QObject *bodyObj)
+{
+    BodyObject* body = qobject_cast<BodyObject*>(bodyObj);
+    if (!body || !body->body())
+    {
+        return;
+    }
+
+    BodyInfo* info = m_catalog->findInfo(body->body());
+    plotTrajectory(body->body(), info);
+}
+
+
+/** Clear all trajectory plots for a body.
+  */
+void
+UniverseView::clearTrajectoryPlots(QObject* bodyObj)
+{
+    BodyObject* body = qobject_cast<BodyObject*>(bodyObj);
+    if (body && body->body())
+    {
+        clearTrajectory(body->body());
+    }
+}
+
+
+/** Return true if there are any trajectory plots visible for a body.
+  */
+bool
+UniverseView::hasTrajectoryPlots(QObject* bodyObj) const
+{
+    BodyObject* body = qobject_cast<BodyObject*>(bodyObj);
+    if (!body || !body->body())
+    {
+        return false;
+    }
+
+    vesta::Arc* arc = body->body()->chronology()->activeArc(m_simulationTime);
+    if (!arc)
+    {
+        return false;
+    }
+
+    string visName = TrajectoryVisualizerName(body->body());
+    Visualizer* oldVisualizer = arc->center()->visualizer(visName);
+
+    return oldVisualizer != NULL;
+}
+
+
 class BodyPositionSampleGenerator : public TrajectoryPlotGenerator
 {
 public:
@@ -2748,7 +2802,13 @@ UniverseView::getStateUrl()
     Quaterniond orientation = m_observer->orientation();
     double ts = isPaused() ? 0.0 : timeScale();
 
-    url.addQueryItem("frame", "icrf");
+    QString frame = "icrf";
+    if (m_observerFrame == Frame_BodyFixed)
+    {
+        frame = "bfix";
+    }
+
+    url.addQueryItem("frame", frame);
     url.addQueryItem("jd", QString::number(jd, 'f'));
     url.addQueryItem("x", QString::number(position.x(), 'f'));
     url.addQueryItem("y", QString::number(position.y(), 'f'));
@@ -2821,9 +2881,21 @@ UniverseView::setStateFromUrl(const QUrl& url)
         return;
     }
 
+    // Get the frame from the URL
+    QString frame = url.queryItemValue("frame");
+    FrameType newFrame = m_observerFrame;
+    if (frame == "icrf")
+    {
+        newFrame = Frame_Inertial;
+    }
+    else if (frame == "bfix")
+    {
+        newFrame = Frame_BodyFixed;
+    }
+
     // Now actually set the state
     setSimulationTime(tdbSec);
-    setCenterAndFrame(centerBody, m_observerFrame);
+    setCenterAndFrame(centerBody, newFrame);
     m_observer->setPosition(position);
     m_observer->setOrientation(orientation);
 

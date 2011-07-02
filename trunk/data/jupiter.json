@@ -172,7 +172,7 @@
               "eccentricity": 0.0052545651677151388, 
               "ascendingNode": 330.36426514971453, 
               "meanAnomaly": 36.403128793495902, 
-              "argumentOfPeriapsis": 258.07562242237009,
+              "argumentOfPeriapsis": 258.07562242237009
           },
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :

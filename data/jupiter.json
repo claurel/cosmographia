@@ -152,7 +152,43 @@
               "radius" : 2410.3,
               "baseMap" : "textures/callisto.dds"
           }
-        }
+        },
 
+        {
+          "name" : "Amalthea",
+          "label" : { "color" : [ 0.6, 0.3, 0.3 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Jupiter",
+
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "epoch" : "2002-11-05",
+              "period": 0.498179254460797,
+              "semiMajorAxis": 181993.6317129891, 
+              "inclination": 1.948418913819651,
+              "eccentricity": 0.0052545651677151388, 
+              "ascendingNode": 330.36426514971453, 
+              "meanAnomaly": 36.403128793495902, 
+              "argumentOfPeriapsis": 258.07562242237009,
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period": 0.498179254460797,
+              "inclination" : 25.51,
+              "ascendingNode" : 358.05,
+              "meridianAngle" : 231.67
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/amalthea.cmod"
+          }
+        }
     ]
 }

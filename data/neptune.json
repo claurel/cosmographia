@@ -21,7 +21,7 @@
               "type" : "Uniform",
               "period" : "16.109999998858875h",
               "inclination" : 46.54,
-              "ascendingNode" : 19.36,
+              "ascendingNode" : 29.36,
               "meridianAngle" : 253.18
           },
 
@@ -70,7 +70,41 @@
               "radius" : 1352.6,
               "baseMap" : "textures/triton.dds"
           }
-        }
+        },
 
+        {
+          "name" : "Proteus",
+          "label" : { "color" : [ 0.4, 0.6, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Neptune",
+
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory": {
+              "type": "Keplerian", 
+              "argumentOfPeriapsis": 298.14200271586873, 
+              "semiMajorAxis": 117673.0508736895, 
+              "eccentricity": 0.00053279631278782243,
+              "meanAnomaly": 286.52455774346652, 
+              "ascendingNode": 48.49707473757536, 
+              "period": 1.122315481692249,
+              "inclination": 29.097746844067299
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period": 1.122315481692249,
+              "inclination" : 47.09,
+              "ascendingNode" : 29.27,
+              "meridianAngle" : 93.38
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/proteus.cmod"
+          }
+        }
     ]
 }

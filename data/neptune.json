@@ -105,6 +105,42 @@
               "type" : "Mesh",
               "source" : "models/proteus.cmod"
           }
+        },
+
+        {
+          "name" : "Nereid",
+          "label" : { "color" : [ 0.2, 0.2, 0.4 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Neptune",
+
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory": {
+              "type": "Keplerian", 
+              "period": 360.1362,
+              "semiMajorAxis": 5510011.0252191667, 
+              "eccentricity": 0.74606196284150827, 
+              "inclination": 5.0665402443461254,
+              "ascendingNode": 318.89987636897621, 
+              "argumentOfPeriapsis": 297.48805022729402, 
+              "meanAnomaly": 93.176303478351883
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period": "11.52h",
+              "inclination" : 47.09,
+              "ascendingNode" : 29.27,
+              "meridianAngle" : 93.38
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/hyperion.cmod",
+              "size" : 170
+          }
         }
     ]
 }

@@ -160,3 +160,34 @@ UniverseCatalog::viewpointNames() const
 {
     return m_viewpoints.keys();
 }
+
+
+struct ClassificationName
+{
+    BodyInfo::Classification classification;
+    const char* name;
+};
+
+static ClassificationName classificationNames[] =
+{
+    { BodyInfo::Planet, "planet" },
+    { BodyInfo::DwarfPlanet, "dwarf planet" },
+    { BodyInfo::Satellite, "satellite" },
+    { BodyInfo::Spacecraft, "spacecraft" },
+    { BodyInfo::Asteroid, "asteroid" },
+    { BodyInfo::ReferencePoint, "reference point" }
+};
+
+
+BodyInfo::Classification
+BodyInfo::parseClassification(const QString& classificationName)
+{
+    for (unsigned int i = 0; i < sizeof(classificationNames) / sizeof(classificationNames[0]); ++i)
+    {
+        if (classificationName == classificationNames[i].name)
+        {
+            return classificationNames[i].classification;
+        }
+    }
+    return BodyInfo::Other;
+}

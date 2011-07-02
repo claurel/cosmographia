@@ -6,6 +6,7 @@
     [
         {
           "name" : "Ceres",
+          "class" : "dwarf planet",
           "label" : { "color" : "#aa8855" },
           "trajectoryPlot" : { "fade" : 0.3 },
 
@@ -39,6 +40,7 @@
 
         {
           "name" : "Vesta",
+          "class" : "asteroid",
           "label" : { "color" : "#aa8855" },
           "trajectoryPlot" : { "fade" : 0.3 },
 

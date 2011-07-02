@@ -33,7 +33,6 @@ class BodyObject : public QObject
     Q_PROPERTY(bool bodyAxes READ bodyAxes WRITE setBodyAxes)
     Q_PROPERTY(bool frameAxes READ frameAxes WRITE setFrameAxes)
     Q_PROPERTY(bool velocityArrow READ velocityArrow WRITE setVelocityArrow)
-    Q_PROPERTY(QString description READ description);
 
 public:
     Q_INVOKABLE bool hasVisualizer(const QString& name) const;
@@ -57,7 +56,6 @@ public:
     void setFrameAxes(bool enabled);
     bool velocityArrow() const;
     void setVelocityArrow(bool enabled);
-    QString description() const;
 
 private:
     float visualizerSize() const;

@@ -99,7 +99,7 @@ Item {
                 var body = universeCatalog.lookupBody(text);
                 if (body)
                 {
-                    infoText.text = "<b>" + body.name + "</b><br>" + body.description;
+                    infoText.text = "<b>" + body.name + "</b><br>" + universeCatalog.getDescription(body);
                     buttons.opacity = 1;
                 }
                 else if (text == "")

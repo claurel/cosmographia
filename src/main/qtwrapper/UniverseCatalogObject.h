@@ -35,6 +35,8 @@ public:
     Q_INVOKABLE BodyObject* getSun() const;
     Q_INVOKABLE BodyObject* lookupBody(const QString& name) const;
 
+    Q_INVOKABLE QString getDescription(QObject* bodyObj);
+
 public:
     UniverseCatalogObject(UniverseCatalog* catalog, QObject* parent = NULL);
     ~UniverseCatalogObject();

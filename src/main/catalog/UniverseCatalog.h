@@ -32,6 +32,7 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     BodyInfo() :
+        classification(Other),
         labelColor(vesta::Spectrum::White()),
         labelFadeSize(0.0),
         trajectoryPlotDuration(0.0),
@@ -50,11 +51,13 @@ public:
         Asteroid,
         DwarfPlanet,
         Spacecraft,
+        Star,
         Other
     };
 
     static Classification parseClassification(const QString& classificationName);
 
+    Classification classification;
     vesta::Spectrum labelColor;
     double labelFadeSize;
     double trajectoryPlotDuration;
@@ -62,6 +65,7 @@ public:
     vesta::Spectrum trajectoryPlotColor;
     double trajectoryPlotLead;
     double trajectoryPlotFade;
+    QString description;
 };
 
 

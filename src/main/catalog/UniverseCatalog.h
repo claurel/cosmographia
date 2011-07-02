@@ -80,6 +80,7 @@ public:
     void setBodyInfo(const QString& name, BodyInfo* info);
     vesta::Entity* find(const QString& name, Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive) const;
     BodyInfo* findInfo(const QString& name) const;
+    BodyInfo* findInfo(const vesta::Entity* body) const;
     bool contains(const QString& name) const;
 
     QStringList names() const;

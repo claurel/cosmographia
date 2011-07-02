@@ -75,6 +75,16 @@ BodyInfo* UniverseCatalog::findInfo(const QString& name) const
 }
 
 
+/** Look up the extra (i.e. non-VESTA) information for
+  * named body. This method returns null if it doesn't have any extra
+  * information.
+  */
+BodyInfo* UniverseCatalog::findInfo(const Entity* body) const
+{
+    return m_info.value(QString::fromUtf8(body->name().c_str())).ptr();
+}
+
+
 void UniverseCatalog::removeBody(const QString& name)
 {
     m_bodies.remove(name);

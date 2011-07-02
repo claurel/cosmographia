@@ -92,6 +92,9 @@ public:
     Q_INVOKABLE BodyObject* getCentralBody() const;
     Q_INVOKABLE void setCentralBody(BodyObject* body);
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
+    Q_INVOKABLE void plotTrajectory(QObject* body);
+    Q_INVOKABLE void clearTrajectoryPlots(QObject* body);
+    Q_INVOKABLE bool hasTrajectoryPlots(QObject* body) const;
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
     Q_INVOKABLE void setMouseClickEventProcessed(bool accepted);
     Q_INVOKABLE void setMouseMoveEventProcessed(bool accepted);

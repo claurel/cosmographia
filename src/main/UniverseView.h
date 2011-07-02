@@ -91,9 +91,6 @@ public:
     Q_INVOKABLE void setSelectedBody(BodyObject* body);
     Q_INVOKABLE BodyObject* getCentralBody() const;
     Q_INVOKABLE void setCentralBody(BodyObject* body);
-    Q_INVOKABLE BodyObject* getEarth() const;
-    Q_INVOKABLE BodyObject* getSun() const;
-    Q_INVOKABLE BodyObject* lookupBody(const QString& name) const;
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
     Q_INVOKABLE void setMouseClickEventProcessed(bool accepted);

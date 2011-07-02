@@ -101,7 +101,7 @@ Item
             }
             else
             {
-                selection.setVisualizer("sun direction", universeView.createBodyDirectionVisualizer(selection, universeView.getSun()));
+                selection.setVisualizer("sun direction", universeView.createBodyDirectionVisualizer(selection, universeCatalog.getSun()));
             }
         }
         else if (item.action == "earth")
@@ -112,7 +112,7 @@ Item
             }
             else
             {
-                selection.setVisualizer("earth direction", universeView.createBodyDirectionVisualizer(selection, universeView.getEarth()));
+                selection.setVisualizer("earth direction", universeView.createBodyDirectionVisualizer(selection, universeCatalog.getEarth()));
             }
         }
     }

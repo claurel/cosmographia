@@ -96,7 +96,7 @@ Item {
             }
 
             onTextChanged: {
-                var body = universeView.lookupBody(text);
+                var body = universeCatalog.lookupBody(text);
                 if (body)
                 {
                     infoText.text = "<b>" + body.name + "</b><br>" + body.description;

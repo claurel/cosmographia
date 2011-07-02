@@ -16,7 +16,10 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "UniverseCatalogObject.h"
+#include <QDeclarativeEngine>
 #include <algorithm>
+
+using namespace vesta;
 
 
 /** Wrap a UniverseCatalog with a new UniverseCatalogObject. The lifetime of the UniverseCatalog
@@ -60,3 +63,39 @@ UniverseCatalogObject::getCompletionString(const QString& partialName, int maxNa
 
     return completionList;
 }
+
+
+BodyObject*
+UniverseCatalogObject::getEarth() const
+{
+    BodyObject* o = new BodyObject(m_catalog->find("Earth"));
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
+
+
+BodyObject*
+UniverseCatalogObject::getSun() const
+{
+    BodyObject* o = new BodyObject(m_catalog->find("Sun"));
+    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+    return o;
+}
+
+
+BodyObject*
+UniverseCatalogObject::lookupBody(const QString& name) const
+{
+    Entity* body = m_catalog->find(name, Qt::CaseInsensitive);
+    if (body)
+    {
+        BodyObject* o = new BodyObject(body);
+        QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
+        return o;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+

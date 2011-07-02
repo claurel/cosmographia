@@ -2700,41 +2700,6 @@ UniverseView::setCentralBody(BodyObject* body)
 }
 
 
-BodyObject*
-UniverseView::getEarth() const
-{
-    BodyObject* o = new BodyObject(m_universe->findFirst("Earth"));
-    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
-    return o;
-}
-
-
-BodyObject*
-UniverseView::getSun() const
-{
-    BodyObject* o = new BodyObject(m_universe->findFirst("Sun"));
-    QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
-    return o;
-}
-
-
-BodyObject*
-UniverseView::lookupBody(const QString& name) const
-{
-    Entity* body = m_catalog->find(name, Qt::CaseInsensitive);
-    if (body)
-    {
-        BodyObject* o = new BodyObject(body);
-        QDeclarativeEngine::setObjectOwnership(o, QDeclarativeEngine::JavaScriptOwnership);
-        return o;
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-
 VisualizerObject*
 UniverseView::createBodyDirectionVisualizer(BodyObject* from, BodyObject* target)
 {
@@ -2885,5 +2850,17 @@ UniverseView::setStateFromUrl(const QUrl& url)
             setPaused(false);
             setTimeScale(timeScale);
         }
+    }
+
+    int clouds = url.queryItemValue("clouds").toInt(&ok);
+    if (ok)
+    {
+        setCloudsVisible(clouds != 0);
+    }
+
+    int atmospheres = url.queryItemValue("atm").toInt(&ok);
+    if (ok)
+    {
+        setAtmospheresVisible(atmospheres != 0);
     }
 }

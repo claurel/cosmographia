@@ -19,7 +19,7 @@
 #define _QTWRAPPER_UNIVERSE_CATALOG_OBJECT_H_
 
 #include "../catalog/UniverseCatalog.h"
-
+#include "BodyObject.h"
 
 /** Qt wrapper for Cosmographia's UniverseCatalog class
   */
@@ -30,6 +30,10 @@ class UniverseCatalogObject : public QObject
 public:
     Q_INVOKABLE QStringList getMatchingNames(const QString& pattern) const;
     Q_INVOKABLE QString getCompletionString(const QString& partialName, int maxNames) const;
+
+    Q_INVOKABLE BodyObject* getEarth() const;
+    Q_INVOKABLE BodyObject* getSun() const;
+    Q_INVOKABLE BodyObject* lookupBody(const QString& name) const;
 
 public:
     UniverseCatalogObject(UniverseCatalog* catalog, QObject* parent = NULL);

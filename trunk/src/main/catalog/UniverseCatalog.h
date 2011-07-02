@@ -42,6 +42,19 @@ public:
     {
     }
 
+    enum Classification
+    {
+        ReferencePoint,
+        Planet,
+        Satellite,
+        Asteroid,
+        DwarfPlanet,
+        Spacecraft,
+        Other
+    };
+
+    static Classification parseClassification(const QString& classificationName);
+
     vesta::Spectrum labelColor;
     double labelFadeSize;
     double trajectoryPlotDuration;

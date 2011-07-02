@@ -2852,6 +2852,18 @@ loadBodyInfo(const QVariantMap& item)
 {
     BodyInfo* info = new BodyInfo();
 
+    QVariant classVar = item.value("class");
+    if (classVar.type() == QVariant::String)
+    {
+        info->classification = BodyInfo::parseClassification(classVar.toString());
+    }
+
+    QVariant descVar = item.value("description");
+    if (descVar.type() == QVariant::String)
+    {
+        info->description = descVar.toString();
+    }
+
     QVariant labelVar = item.value("label");
     if (labelVar.type() == QVariant::Map)
     {

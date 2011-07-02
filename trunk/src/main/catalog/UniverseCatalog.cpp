@@ -175,7 +175,9 @@ static ClassificationName classificationNames[] =
     { BodyInfo::Satellite, "satellite" },
     { BodyInfo::Spacecraft, "spacecraft" },
     { BodyInfo::Asteroid, "asteroid" },
-    { BodyInfo::ReferencePoint, "reference point" }
+    { BodyInfo::ReferencePoint, "reference point" },
+    { BodyInfo::Star, "star" },
+    { BodyInfo::Other, "other" }
 };
 
 

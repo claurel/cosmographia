@@ -44,6 +44,7 @@ Item
         menuModel.append({ action: "center",      labelText: "Set As Center" });
         menuModel.append({ action: "goto",        labelText: "Go To" });
         menuModel.append({ action: "info",        labelText: "Show Information" });
+        menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body) });
         menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes });
         menuModel.append({ action: "frameaxes",   labelText: "Frame Axes", checked: body.frameAxes });
         menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow });
@@ -80,6 +81,14 @@ Item
         {
             universeView.setSelectedBody(selection);
             showInfo()
+        }
+        else if (item.action == "plot")
+        {
+            universeView.setSelectedBody(selection);
+            if (universeView.hasTrajectoryPlots(selection))
+                universeView.clearTrajectoryPlots(selection);
+            else
+                universeView.plotTrajectory(selection);
         }
         else if (item.action == "bodyaxes")
         {

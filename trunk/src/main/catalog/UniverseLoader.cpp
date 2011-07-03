@@ -2700,7 +2700,8 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     QVariant referenceVar = map.value("reference");
     QVariant altitudeVar = map.value("altitude");
     QVariant azimuthVar = map.value("azimuth");
-    QVariant elevationVar = map.value("azimuth");
+    QVariant elevationVar = map.value("elevation");
+    QVariant upVar = map.value("up");
 
     if (!nameVar.isValid())
     {
@@ -2724,6 +2725,28 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     {
         errorMessage("Bad or missing altitude for viewpoint.");
         return NULL;
+    }
+
+    Viewpoint::UpVectorDirection up = Viewpoint::CenterNorth;
+    if (upVar.isValid())
+    {
+        QString ups = upVar.toString();
+        if (ups == "CenterNorth")
+        {
+            up = Viewpoint::CenterNorth;
+        }
+        else if (ups == "CenterSouth")
+        {
+            up = Viewpoint::CenterSouth;
+        }
+        else if (ups == "EclipticNorth")
+        {
+            up = Viewpoint::EclipticNorth;
+        }
+        else if (ups == "EclipticSouth")
+        {
+            up = Viewpoint::EclipticSouth;
+        }
     }
 
     double azimuth = 0.0;
@@ -2781,6 +2804,7 @@ UniverseLoader::loadViewpoint(const QVariantMap& map,
     viewpoint->setAzimuth(azimuth);
     viewpoint->setElevation(elevation);
     viewpoint->setName(nameVar.toString().toUtf8().constData());
+    viewpoint->setUpDirection(up);
 
     return viewpoint;
 }

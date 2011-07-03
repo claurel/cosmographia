@@ -595,7 +595,13 @@ Cosmographia::initialize()
     if (!viewpointNames.isEmpty())
     {
         qsrand((uint) QTime::currentTime().msecsTo(QTime(0, 0, 0)));
-        m_view3d->setViewpoint(m_catalog->findViewpoint(viewpointNames.at(abs(qrand()) % viewpointNames.size())));
+        QString viewpointName = "Default Start";
+        if (!m_catalog->findViewpoint(viewpointName))
+        {
+            viewpointName = viewpointNames.at(abs(qrand()) % viewpointNames.size());
+        }
+
+        m_view3d->setViewpoint(m_catalog->findViewpoint(viewpointName));
     }
 
     // Load catalog files that were listed on the command line

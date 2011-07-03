@@ -92,6 +92,24 @@ public:
 
     void positionObserver(vesta::Observer* observer, double tdbSec);
 
+    enum UpVectorDirection
+    {
+        CenterNorth,
+        CenterSouth,
+        EclipticNorth,
+        EclipticSouth
+    };
+
+    UpVectorDirection upDirection() const
+    {
+        return m_upDirection;
+    }
+
+    void setUpDirection(UpVectorDirection upDirection)
+    {
+        m_upDirection = upDirection;
+    }
+
 private:
     vesta::counted_ptr<vesta::Entity> m_centerBody;
     vesta::counted_ptr<vesta::Entity> m_referenceBody;
@@ -99,6 +117,7 @@ private:
     double m_azimuth;
     double m_elevation;
     std::string m_name;
+    UpVectorDirection m_upDirection;
 };
 
 #endif // _VIEWPOINT_H_

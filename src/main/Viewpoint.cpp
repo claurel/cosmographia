@@ -29,7 +29,8 @@ Viewpoint::Viewpoint(vesta::Entity* centerBody, double distance) :
     m_referenceBody(NULL),
     m_centerDistance(distance),
     m_azimuth(0.0),
-    m_elevation(0.0)
+    m_elevation(0.0),
+    m_upDirection(CenterNorth)
 {
 }
 
@@ -50,13 +51,32 @@ Viewpoint::positionObserver(vesta::Observer* observer, double tdbSec)
     Vector3d toRef = m_referenceBody->position(tdbSec) - m_centerBody->position(tdbSec);
     Vector3d toRefDir = toRef.normalized();
 
-    Vector3d up = m_centerBody->orientation(tdbSec) * Vector3d::UnitZ();
+    Vector3d up;
+    switch (m_upDirection)
+    {
+    case EclipticNorth:
+        up = InertialFrame::eclipticJ2000()->orientation() * Vector3d::UnitZ();
+        break;
+    case EclipticSouth:
+        up = InertialFrame::eclipticJ2000()->orientation() * -Vector3d::UnitZ();
+        break;
+    case CenterSouth:
+        up = m_centerBody->orientation(tdbSec) * -Vector3d::UnitZ();
+        break;
+    case CenterNorth:
+    default:
+        up = m_centerBody->orientation(tdbSec) * Vector3d::UnitZ();
+        break;
+    }
 
     // Compute the vector w, which points in the direction of up and is perpendicular to the
     // center to reference direction.
-    Vector3d v = toRefDir.cross(up);
+    Vector3d v = toRefDir.cross(up).normalized();
     Vector3d w = v.cross(toRefDir);
-    Vector3d position = AngleAxisd(toRadians(m_azimuth), w).toRotationMatrix() * (toRefDir * m_centerDistance);
+    Vector3d u = toRefDir.cross(w);
+    Vector3d position = AngleAxisd(toRadians(m_azimuth), w).toRotationMatrix() *
+                        AngleAxisd(toRadians(m_elevation), u).toRotationMatrix() *
+                        (toRefDir * m_centerDistance);
 
     observer->setCenter(m_centerBody.ptr());
     observer->setPositionFrame(InertialFrame::icrf());

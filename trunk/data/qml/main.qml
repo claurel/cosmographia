@@ -133,6 +133,7 @@ Item {
         x: 32; y: panelY
         opacity: 0
         textColor: "white"
+        homeLink: "help:help"
     }
 
     HelpBrowser {
@@ -141,6 +142,7 @@ Item {
         x: 32; y: panelY
         opacity: 0
         textColor: "white"
+        homeLink: "help:solarsysguide"
     }
 
     FindObjectPanel {

@@ -10,6 +10,11 @@ function setHome(u)
     LinkStack[0] = u;
 }
 
+function currentLink()
+{
+    return LinkStack[stackIndex]
+}
+
 function navigateTo(u)
 {
     stackIndex++;

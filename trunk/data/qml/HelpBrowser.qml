@@ -21,6 +21,8 @@ import "LinkStack.js" as BrowserStack
 Item {
     id: container
 
+    property string homeLink: "help:help"
+
     property string fontFamily: "Century Gothic"
     property int fontSize: 14
     property color textColor: "#72c0ff"
@@ -55,6 +57,7 @@ Item {
     {
         previousButton.opacity = BrowserStack.atBeginning() ? 0.3 : 1.0
         nextButton.opacity = BrowserStack.atEnd() ? 0.3 : 1.0
+        homeButton.opacity = BrowserStack.currentLink() == homeLink ? 0.3 : 1.0
     }
 
     function updateContents(helpUrl)
@@ -64,7 +67,7 @@ Item {
 
     Component.onCompleted:
     {
-        BrowserStack.setHome("help:help")
+        BrowserStack.setHome(homeLink)
     }
 
     width: 500
@@ -83,7 +86,7 @@ Item {
         width: 20; height: 20
         x: 8
         anchors.top: parent.top
-        anchors.topMargin: 4
+        anchors.topMargin: 8
         source: "qrc:/icons/previous.png"
         smooth: true
         opacity: 0.3
@@ -105,7 +108,7 @@ Item {
         width: 20; height: 20
         x: 36
         anchors.top: parent.top
-        anchors.topMargin: 4
+        anchors.topMargin: 8
         source: "qrc:/icons/next.png"
         smooth: true
         opacity: 0.3
@@ -117,6 +120,28 @@ Item {
                 if (u.length > 0)
                     updateContents(u);
                 updateNavigationButtons();
+            }
+        }
+    }
+
+    // Home button
+    Image {
+        id: homeButton
+        width: 20; height: 20
+        x: 64
+        anchors.top: parent.top
+        anchors.topMargin: 8
+        source: "qrc:/icons/home.png"
+        smooth: true
+        opacity: 0.3
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (BrowserStack.currentLink() != homeLink)
+                {
+                    container.navigateTo(homeLink)
+                }
             }
         }
     }

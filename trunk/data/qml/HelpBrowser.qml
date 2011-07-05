@@ -49,6 +49,7 @@ Item {
                 BrowserStack.navigateTo(link);
                 updateNavigationButtons();
                 text = newText;
+                flickable.contentY = 0;
             }
         }
     }
@@ -63,6 +64,7 @@ Item {
     function updateContents(helpUrl)
     {
         contents.text = helpCatalog.getHelpText(helpUrl.substr(5));
+        flickable.contentY = 0;
     }
 
     Component.onCompleted:
@@ -83,10 +85,10 @@ Item {
     // Back button
     Image {
         id: previousButton
-        width: 20; height: 20
+        width: 16; height: 16
         x: 8
         anchors.top: parent.top
-        anchors.topMargin: 8
+        anchors.topMargin: 10
         source: "qrc:/icons/previous.png"
         smooth: true
         opacity: 0.3
@@ -105,10 +107,10 @@ Item {
     // Forward button
     Image {
         id: nextButton
-        width: 20; height: 20
+        width: 16; height: 16
         x: 36
         anchors.top: parent.top
-        anchors.topMargin: 8
+        anchors.topMargin: 10
         source: "qrc:/icons/next.png"
         smooth: true
         opacity: 0.3

@@ -78,7 +78,7 @@ Item {
             var body = universeView.getSelectedBody()
             if (body !== null)
             {
-                infoPanel.text = helpCatalog.getHelpText(body.name);
+                infoPanel.navigateTo("help:" + body.name);
             }
             setActivePanel("infoPanel")
         }
@@ -91,7 +91,7 @@ Item {
             var body = universeView.getSelectedBody()
             if (body !== null)
             {
-                infoPanel.text = helpCatalog.getHelpText(body.name);
+                infoPanel.navigateTo("help:" + body.name);
             }
             setActivePanel("infoPanel")
         }
@@ -127,7 +127,7 @@ Item {
         textColor: "white"
     }
 
-    TextPanel {
+    HelpBrowser {
         id: helpPanel
         width: 400
         x: 32; y: panelY
@@ -135,7 +135,7 @@ Item {
         textColor: "white"
     }
 
-    TextPanel {
+    HelpBrowser {
         id: infoPanel
         width: 400
         x: 32; y: panelY

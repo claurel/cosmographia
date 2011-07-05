@@ -80,11 +80,13 @@ class UniverseView : public QDeclarativeView
 
     Q_PROPERTY(double limitingMagnitude READ limitingMagnitude WRITE setLimitingMagnitude NOTIFY limitingMagnitudeChanged);
     Q_PROPERTY(double ambientLight READ ambientLight WRITE setAmbientLight NOTIFY ambientLightChanged);
-
+    Q_PROPERTY(StereoMode stereoMode READ stereoMode WRITE setStereoMode);
     Q_PROPERTY(double gotoObjectTime READ gotoObjectTime WRITE setGotoObjectTime);
 
     Q_PROPERTY(bool recordingVideo READ isRecordingVideo NOTIFY recordingVideoChanged)
     Q_PROPERTY(double recordedVideoLength READ recordedVideoLength NOTIFY recordedVideoLengthChanged)
+
+    Q_ENUMS(StereoMode)
 
 public:
     Q_INVOKABLE BodyObject* getSelectedBody() const;

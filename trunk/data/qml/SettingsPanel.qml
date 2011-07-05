@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 import QtQuick 1.0
+import Cosmographia 1.0
 
 Item {
     id: container
@@ -106,85 +107,43 @@ Item {
             columns: 2
             spacing: 8
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Milky Way"
-            }
-
+            PanelText { text: "Milky Way" }
             TextToggle {
                 onToggled: { universeView.milkyWayVisible = enabled }
                 enabled: false
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Clouds"
-            }
-
+            PanelText { text: "Clouds" }
             TextToggle {
                 onToggled: { universeView.cloudsVisible = enabled }
                 enabled: true
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Atmospheres"
-            }
-
+            PanelText { text: "Atmospheres" }
             TextToggle {
                 onToggled: { universeView.atmospheresVisible = enabled }
                 enabled: true
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Eclipse Shadows"
-            }
-
+            PanelText { text: "Eclipse Shadows" }
             TextToggle {
                 onToggled: { universeView.eclipseShadows = enabled }
                 enabled: false
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Other Shadows"
-            }
-
+            PanelText { text: "Other Shadows" }
             TextToggle {
                 onToggled: { universeView.shadows = enabled }
                 enabled: false
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Reflections"
-            }
-
+            PanelText { text: "Reflection" }
             TextToggle {
                 onToggled: { universeView.reflections = enabled }
                 enabled: false
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Sun Glare"
-            }
-
+            PanelText { text: "Sun Glare" }
             TextToggle {
                 onToggled: { universeView.sunGlare = enabled }
                 enabled: true
@@ -199,13 +158,8 @@ Item {
                 width: magnitudeSlider.width
 
                 spacing: 5
-                Text {
-                    font.family: fontFamily
-                    font.pixelSize: fontSize
-                    color: textColor
-                    text: "Star Brightness"
-                }
 
+                PanelText { text: "Star Brightness" }
                 Slider {
                     id: magnitudeSlider
 
@@ -227,13 +181,8 @@ Item {
                 width: ambientLightSlider.width
 
                 spacing: 5
-                Text {
-                    font.family: fontFamily
-                    font.pixelSize: fontSize
-                    color: textColor
-                    text: "Extra Light"
-                }
 
+                PanelText { text: "Extra Light" }
                 Slider {
                     id: ambientLightSlider
 
@@ -245,7 +194,29 @@ Item {
                     onValueChanged: { universeView.ambientLight = value }
                 }
             }
-            Item {}
+            Item { width: 1; height: 1 }
+
+            // Spacer
+            Item { height: 10; width: 10 }
+            Item { height: 10; width: 10 }
+
+            PanelText {
+                text: "Anaglyph Stereo"
+            }
+
+            TextToggle {
+                onToggled: {
+                    if (enabled)
+                    {
+                        universeView.stereoMode = UniverseView.AnaglyphRedCyan;
+                    }
+                    else
+                    {
+                        universeView.stereoMode = UniverseView.Mono;
+                    }
+                }
+                enabled: false
+            }
         }
 
         Grid {
@@ -259,38 +230,20 @@ Item {
             columns: 2
             spacing: 8
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Labels"
-            }
-
+            PanelText { text: "Labels" }
             TextToggle {
                 enabled: true
                 onToggled: { universeView.labelsVisible = enabled }
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Center Indicator"
-            }
-
+            PanelText { text: "Center Indicator" }
             TextToggle {
                 id: centerIndicatorToggle
                 enabled: true
                 onToggled: { universeView.centerIndicatorVisible = enabled }
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Equatorial Grid"
-            }
-
+            PanelText { text: "Equatorial Grid" }
             TextToggle {
                 id: equatorialGridToggle
                 enabled: false
@@ -304,37 +257,19 @@ Item {
                 }
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Ecliptic"
-            }
-
+            PanelText { text: "Ecliptic" }
             TextToggle {
                 onToggled: { universeView.eclipticVisible = enabled }
                 enabled: false
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Constellation Figures"
-            }
-
+            PanelText { text: "Constellation Figures" }
             TextToggle {
                 onToggled: { universeView.constellationFiguresVisible = enabled }
                 enabled: false
             }
 
-            Text {
-                font.family: fontFamily
-                font.pixelSize: fontSize
-                color: textColor
-                text: "Constellation Names"
-            }
-
+            PanelText { text: "Constellation Names" }
             TextToggle {
                 onToggled: { universeView.constellationNamesVisible = enabled }
                 enabled: false
@@ -358,13 +293,8 @@ Item {
                 width: gotoTimeSlider.width
 
                 spacing: 5
-                Text {
-                    font.family: fontFamily
-                    font.pixelSize: fontSize
-                    color: textColor
-                    text: "Goto Speed"
-                }
 
+                PanelText { text: "Goto Time" }
                 Slider {
                     id: gotoTimeSlider
 

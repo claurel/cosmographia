@@ -348,6 +348,7 @@ private:
     bool gestureEvent(QGestureEvent* event);
 
     vesta::Entity* pickObject(const QPoint& point);
+    void constrainViewerPosition(double maxRange);
 
 private:
     int m_mouseMovement;

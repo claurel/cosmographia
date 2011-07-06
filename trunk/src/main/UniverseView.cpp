@@ -64,6 +64,7 @@
 #include <vesta/PlanetGridLayer.h>
 #include <vesta/GlareOverlay.h>
 #include <vesta/GregorianDate.h>
+#include <vesta/Intersect.h>
 
 #include <vesta/interaction/ObserverController.h>
 
@@ -110,6 +111,7 @@ static double EndOfTime   = GregorianDate(2100, 1, 1, 0, 0, 0, 0, TimeScale_TDB)
 
 static const double MinimumFOV = toRadians(0.1);
 static const double MaximumFOV = toRadians(90.0);
+static const double MaximumDistanceFromSun = 5.0e11;
 
 static const double StatusMessageDuration = 2.5;
 
@@ -1602,6 +1604,40 @@ UniverseView::pickObject(const QPoint& point)
 }
 
 
+// Constrain the viewer's position to lie within maxRange kilometers of the origin
+void
+UniverseView::constrainViewerPosition(double maxRange)
+{
+    Vector3d absPos = m_observer->absolutePosition(m_simulationTime);
+    if (absPos.norm() > maxRange)
+    {
+        Vector3d constrainedPos = absPos.normalized() * maxRange;
+        if (m_observer->center())
+        {
+            // Constrain the viewer's position to a point on the origin centered sphere of
+            // radius MaxDistanceFromSun, but preserve the direction to the center object.
+            Vector3d centerPos = m_observer->center()->position(m_simulationTime);
+
+            // If the test below fails, it means that the center object is beyond the allowed
+            // distance from the Sun.
+            double d = 0.0;
+            if (TestRaySphereIntersection(centerPos, (absPos - centerPos).normalized(), Vector3d::Zero(), maxRange, &d))
+            {
+                constrainedPos = centerPos + (absPos - centerPos).normalized() * d;
+            }
+
+            // Transform the constrained position into the observer's frame
+            Vector3d p = m_observer->positionFrame()->orientation(m_simulationTime).conjugate() * (constrainedPos - centerPos);
+            m_observer->setPosition(p);
+        }
+        else
+        {
+            m_observer->setPosition(constrainedPos);
+        }
+    }
+}
+
+
 void
 UniverseView::updateTrajectoryPlots()
 {
@@ -1775,6 +1811,8 @@ UniverseView::tick()
             m_observerAction = NULL;
         }
     }
+
+    constrainViewerPosition(MaximumDistanceFromSun);
 
     viewport()->update();
 

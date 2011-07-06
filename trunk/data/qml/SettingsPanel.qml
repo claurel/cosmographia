@@ -217,6 +217,19 @@ Item {
                 }
                 enabled: false
             }
+
+            PanelText {
+                text: "Anti-aliasing<br><font size=-1>(requires restarting Cosmographia)</font>";
+            }
+
+            TextToggle {
+                Component.onCompleted: { enabled = universeView.antialiasingSamples > 1 }
+                onToggled: {
+                    universeView.antialiasingSamples = enabled ? 4 : 1;
+                }
+                enabled: false
+            }
+
         }
 
         Grid {

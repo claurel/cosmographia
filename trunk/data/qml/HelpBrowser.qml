@@ -40,7 +40,6 @@ Item {
 
     function navigateTo(link)
     {
-        console.log(link);
         if (link.substr(0, 5) == "help:")
         {
             var newText = helpCatalog.getHelpText(link.substr(5));

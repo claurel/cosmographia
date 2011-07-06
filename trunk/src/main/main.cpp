@@ -9,7 +9,6 @@
  */
 
 #include <QApplication>
-#include <QGLFormat>
 #include <QDir>
 #include <QMessageBox>
 #include <QDebug>
@@ -27,13 +26,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Periapsis Visual Software");
     QCoreApplication::setOrganizationDomain("periapsisvisual.com");
     QCoreApplication::setApplicationName("Cosmographia");
-
-    // Enable multisample antialiasing
-    QGLFormat format;
-    format.setSampleBuffers(true);
-    format.setSamples(4);
-    format.setSwapInterval(1); // sync to vertical retrace
-    QGLFormat::setDefaultFormat(format);
 
     // Set current directory so that we find the needed data files. On the Mac, we
     // just look in the app bundle. On other platforms we make some guesses, since we

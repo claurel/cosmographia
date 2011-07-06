@@ -98,6 +98,8 @@ using namespace Eigen;
 using namespace std;
 
 
+static const int MaxAntialiasingSampleCount = 8;
+
 static const double KeyboardRotationAcceleration = 3.5;
 
 static const unsigned int ShadowMapSize = 2048;
@@ -134,8 +136,8 @@ class UniverseGLWidget : public QGLWidget
     //Q_OBJECT
 
 public:
-    UniverseGLWidget(QWidget* parent, UniverseRenderer* renderer) :
-        QGLWidget(parent),
+    UniverseGLWidget(QWidget* parent, UniverseRenderer* renderer, const QGLFormat& format) :
+        QGLWidget(format, parent),
         m_renderer(renderer)
     {
         setAttribute(Qt::WA_PaintOnScreen);
@@ -196,6 +198,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_framesPerSecond(0.0),
     m_reflectionsEnabled(false),
     m_stereoMode(Mono),
+    m_antialiasingSamples(1),
     m_sunGlareEnabled(true),
     m_infoTextVisible(true),
     m_labelsVisible(true),
@@ -222,7 +225,21 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 
     m_markers = new MarkerLayer();
 
-    UniverseGLWidget* glWidget = new UniverseGLWidget(this, m_renderer);
+    // Enable multisample antialiasing if its enabled in the settings
+    {
+        QSettings settings;
+        m_antialiasingSamples = std::max(1, std::min(MaxAntialiasingSampleCount, settings.value("AntialiasingSamples", 1).toInt()));
+    }
+
+    QGLFormat format = QGLFormat::defaultFormat();
+    if (m_antialiasingSamples > 1)
+    {
+        format.setSampleBuffers(true);
+        format.setSamples(m_antialiasingSamples);
+    }
+    format.setSwapInterval(1); // sync to vertical retrace
+
+    UniverseGLWidget* glWidget = new UniverseGLWidget(this, m_renderer, format);
     glWidget->updateGL();
     setViewport(glWidget);
 
@@ -2498,6 +2515,21 @@ void
 UniverseView::setStereoMode(StereoMode stereoMode)
 {
     m_stereoMode = stereoMode;
+}
+
+
+/** Set the number of anti-aliasing samples to use for multisampling. Setting
+  * the sample count to 1 will disable anti-aliasing. The results of changing
+  * the anti-aliasing mode do not take effect until the application is restarted.
+  */
+void
+UniverseView::setAntialiasingSamples(int samples)
+{
+    m_antialiasingSamples = std::max(1, std::min(MaxAntialiasingSampleCount, samples));
+
+    // Don't set anything, just save the value in the settings.
+    QSettings settings;
+    settings.setValue("AntialiasingSamples", m_antialiasingSamples);
 }
 
 

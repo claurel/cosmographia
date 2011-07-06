@@ -81,6 +81,7 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(double limitingMagnitude READ limitingMagnitude WRITE setLimitingMagnitude NOTIFY limitingMagnitudeChanged);
     Q_PROPERTY(double ambientLight READ ambientLight WRITE setAmbientLight NOTIFY ambientLightChanged);
     Q_PROPERTY(StereoMode stereoMode READ stereoMode WRITE setStereoMode);
+    Q_PROPERTY(int antialiasingSamples READ antialiasingSamples WRITE setAntialiasingSamples);
     Q_PROPERTY(double gotoObjectTime READ gotoObjectTime WRITE setGotoObjectTime);
 
     Q_PROPERTY(bool recordingVideo READ isRecordingVideo NOTIFY recordingVideoChanged)
@@ -229,6 +230,11 @@ public:
         return m_stereoMode;
     }
 
+    int antialiasingSamples() const
+    {
+        return m_antialiasingSamples;
+    }
+
     void setSelectedBody(vesta::Entity* body);
     QImage grabFrameBuffer(bool withAlpha = false);
 
@@ -280,6 +286,7 @@ public slots:
     void setAmbientLight(double brightness);
     void setReflections(bool enable);
     void setStereoMode(StereoMode stereoMode);
+    void setAntialiasingSamples(int samples);
     void setSunGlare(bool enable);
 
     void setInfoText(bool enable);
@@ -392,6 +399,7 @@ private:
 
     bool m_reflectionsEnabled;
     StereoMode m_stereoMode;
+    int m_antialiasingSamples;
     bool m_sunGlareEnabled;
 
     struct TrajectoryPlotEntry

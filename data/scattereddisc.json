@@ -1,0 +1,32 @@
+{
+    "version": "1.0",
+    "name": "Scattered Disc Objects",
+
+    "items" :
+    [
+      {
+         "name" : "Eris",
+         "class" : "dwarf planet",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "561.335507843y",
+           "semiMajorAxis": "68.0479443au",
+           "eccentricity": 0.43365042,
+           "inclination": 43.86701,
+           "ascendingNode": 36.039327,
+           "argumentOfPeriapsis": 151.212095,
+           "meanAnomaly": 200.3785
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "type": "Globe",
+           "radius": 750
+         }
+      }
+    ]
+}
+

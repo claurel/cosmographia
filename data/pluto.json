@@ -21,7 +21,7 @@
 
         {
           "name" : "Pluto",
-	  "class" : "dwarf planet",
+          "class" : "dwarf planet",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ], "fadeSize" : 6.0e9 },
           "trajectoryPlot" : { "fade" : 0.3 },
 

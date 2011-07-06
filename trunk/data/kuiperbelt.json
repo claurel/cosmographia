@@ -1,0 +1,128 @@
+{
+    "version": "1.0",
+    "name": "Large Kuiper Belt Objects",
+
+    "items" :
+    [
+      {
+         "name" : "Haumea",
+         "class" : "dwarf planet",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "281.920881176y",
+           "semiMajorAxis": "42.99502074au",
+           "eccentricity": 0.19813833,
+           "inclination": 28.21833,
+           "ascendingNode": 122.052251,
+           "argumentOfPeriapsis": 239.881175,
+           "meanAnomaly": 203.967199
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry" :
+         {
+            "type" : "Globe",
+            "radii" : [ 980, 759, 498 ]
+         }
+      },
+
+      {
+         "name" : "Makemake",
+         "class" : "dwarf planet",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "305.335708737y",
+           "semiMajorAxis": "45.34385068au",
+           "eccentricity": 0.16384521,
+           "inclination": 29.004564,
+           "ascendingNode": 79.438723,
+           "argumentOfPeriapsis": 295.510755,
+           "meanAnomaly": 153.074909
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "type": "Globe",
+           "radius": 750
+         }
+      },
+
+      {
+         "name" : "Varuna",
+         "class" : "asteroid",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "281.023602989y",
+           "semiMajorAxis": "42.90374457au",
+           "eccentricity": 0.05616306,
+           "inclination": 17.186252,
+           "ascendingNode": 97.30317,
+           "argumentOfPeriapsis": 266.734648,
+           "meanAnomaly": 101.765285
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "type": "Globe",
+           "radius": 250
+         }
+      },
+
+      {
+         "name" : "Orcus",
+         "class" : "asteroid",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "245.17544463y",
+           "semiMajorAxis": "39.17280293au",
+           "eccentricity": 0.22718238,
+           "inclination": 20.573289,
+           "ascendingNode": 268.60575,
+           "argumentOfPeriapsis": 73.031202,
+           "meanAnomaly": 166.378973
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "type": "Globe",
+           "radius": 473
+         }
+      },
+
+      {
+         "name" : "Ixion",
+         "class" : "asteroid",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "248.986536693y",
+           "semiMajorAxis": "39.57770219au",
+           "eccentricity": 0.24584474,
+           "inclination": 19.638219,
+           "ascendingNode": 71.038824,
+           "argumentOfPeriapsis": 299.414903,
+           "meanAnomaly": 273.441635
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "type": "Globe",
+           "radius": 325
+         }
+      }
+    ]
+}

@@ -21,11 +21,79 @@
            "argumentOfPeriapsis": 239.881175,
            "meanAnomaly": 203.967199
          },
-         "bodyFrame": "EquatorJ2000",
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "3.9152h",
+            "inclination" : 255,
+            "ascendingNode": 25
+         },
          "geometry" :
          {
             "type" : "Globe",
             "radii" : [ 980, 759, 498 ]
+         }
+      },
+
+      {
+         "name" : "Hi'iaka",
+         "class" : "satellite",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Haumea",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "49.12d",
+           "semiMajorAxis": 49500,
+           "eccentricity": 0.0513,
+           "inclination": 234.8,
+           "ascendingNode": 26.1,
+           "argumentOfPeriapsis": 278.6,
+           "meanAnomaly": 16.71
+         },
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "49.12d",
+            "inclination" : 235
+         },
+         "geometry" :
+         {
+            "type" : "Globe",
+            "radius" : 170
+         }
+      },
+
+      {
+         "name" : "Namaka",
+         "class" : "satellite",
+         "label" : { "color" : "#88ffbb" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Haumea",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "34.1d",
+           "semiMajorAxis": 25657,
+           "eccentricity": 0.249,
+           "inclination": 275,
+           "ascendingNode": 25
+         },
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "34.1d",
+            "inclination" : 275,
+            "ascendingNode" : 25
+         },
+         "geometry" :
+         {
+            "type" : "Globe",
+            "radius" : 85
          }
       },
 

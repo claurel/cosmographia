@@ -37,7 +37,7 @@ Item
         // Should be able to use bar.width instead of (slider.width - handle.width), but it
         // isn't being calculated in time to correctly process the first update
         //handle.x = ((value - minValue) * bar.width) / (maxValue - minValue)
-        handle.x = ((value - minValue) * (slider.width - handle.width)) / (maxValue - minValue)
+        handle.x = (value - minValue) / (maxValue - minValue) * (slider.width - handle.width)
     }
 
     Rectangle {

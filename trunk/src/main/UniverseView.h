@@ -95,6 +95,8 @@ public:
     Q_INVOKABLE void setSelectedBody(BodyObject* body);
     Q_INVOKABLE BodyObject* getCentralBody() const;
     Q_INVOKABLE void setCentralBody(BodyObject* body);
+    Q_INVOKABLE void setCentralBodyFixed(BodyObject* body);
+    Q_INVOKABLE void trackBody(BodyObject* body);
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
     Q_INVOKABLE void plotTrajectory(QObject* body);
     Q_INVOKABLE void clearTrajectoryPlots(QObject* body);
@@ -299,6 +301,7 @@ public slots:
     void setSelectedBody(const QString& name);
     void gotoSelectedObject();
     void centerSelectedObject();
+    void gotoHome();
     void setViewpoint(Viewpoint* viewpoint);
     void setTimeDisplay(TimeDisplayMode mode);
     void setLimitingMagnitude(double appMag);

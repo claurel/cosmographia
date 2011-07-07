@@ -105,8 +105,6 @@ Cosmographia::Cosmographia() :
     m_view3d->rootContext()->setContextProperty("universeCatalog", m_catalogWrapper);
     m_view3d->rootContext()->setContextProperty("helpCatalog", m_helpCatalog);
 
-    m_view3d->initializeDeclarativeUi("qml/main.qml");
-
     setCentralWidget(m_view3d);
 
     setWindowTitle(tr("Cosmographia"));
@@ -116,6 +114,10 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction->setCheckable(true);
 
     loadSettings();
+
+    // Set up the UI *after* settings are loaded so that the
+    // controls are sync'ed
+    m_view3d->initializeDeclarativeUi("qml/main.qml");
 
     /*** File Menu ***/
     QMenu* fileMenu = new QMenu("&File", this);

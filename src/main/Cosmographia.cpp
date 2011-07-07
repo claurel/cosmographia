@@ -111,6 +111,12 @@ Cosmographia::Cosmographia() :
 
     setWindowTitle(tr("Cosmographia"));
 
+    m_fullScreenAction = new QAction("Full Screen", this);
+    m_fullScreenAction->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    m_fullScreenAction->setCheckable(true);
+
+    loadSettings();
+
     /*** File Menu ***/
     QMenu* fileMenu = new QMenu("&File", this);
     QAction* saveScreenShotAction = fileMenu->addAction("&Save Screen Shot");
@@ -341,36 +347,40 @@ Cosmographia::Cosmographia() :
     QMenu* graphicsMenu = new QMenu("&Graphics", this);
     QAction* shadowsAction = new QAction("&Shadows", graphicsMenu);
     shadowsAction->setCheckable(true);
+    shadowsAction->setChecked(m_view3d->shadows());
     graphicsMenu->addAction(shadowsAction);
     QAction* eclipsesAction = new QAction("&Eclipse Shadows", graphicsMenu);
     eclipsesAction->setCheckable(true);
+    eclipsesAction->setChecked(m_view3d->eclipseShadows());
     graphicsMenu->addAction(eclipsesAction);
     QAction* atmospheresAction = new QAction("&Atmosphere", graphicsMenu);
     atmospheresAction->setCheckable(true);
+    atmospheresAction->setChecked(m_view3d->atmospheresVisible());
     atmospheresAction->setShortcut(QKeySequence("Ctrl+A"));
     graphicsMenu->addAction(atmospheresAction);
     QAction* cloudLayerAction = new QAction("&Cloud Layers", graphicsMenu);
     cloudLayerAction->setCheckable(true);
+    cloudLayerAction->setChecked(m_view3d->cloudsVisible());
     graphicsMenu->addAction(cloudLayerAction);
     QAction* ambientLightAction = new QAction("Extra &Light", graphicsMenu);
     ambientLightAction->setCheckable(true);
+    ambientLightAction->setChecked(m_view3d->ambientLight() > 0.0);
     graphicsMenu->addAction(ambientLightAction);
     QAction* sunGlareAction = new QAction("Sun &Glare", graphicsMenu);
     sunGlareAction->setCheckable(true);
-    sunGlareAction->setChecked(true);
+    sunGlareAction->setChecked(m_view3d->sunGlare());
     graphicsMenu->addAction(sunGlareAction);
     QAction* reflectionsAction = new QAction("&Reflections", graphicsMenu);
     reflectionsAction->setCheckable(true);
+    reflectionsAction->setChecked(m_view3d->reflections());
     graphicsMenu->addAction(reflectionsAction);
     QAction* milkyWayAction = new QAction("&Milky Way", graphicsMenu);
     milkyWayAction->setCheckable(true);
+    milkyWayAction->setChecked(m_view3d->milkyWayVisible());
     milkyWayAction->setShortcut(QKeySequence("Ctrl+M"));
     graphicsMenu->addAction(milkyWayAction);
     graphicsMenu->addMenu(starStyleMenu);
     graphicsMenu->addSeparator();
-    m_fullScreenAction = new QAction("Full Screen", graphicsMenu);
-    m_fullScreenAction->setShortcut(QKeySequence("Ctrl+Shift+F"));
-    m_fullScreenAction->setCheckable(true);
     graphicsMenu->addAction(m_fullScreenAction);
     connect(m_fullScreenAction, SIGNAL(toggled(bool)), this, SLOT(setFullScreen(bool)));
     graphicsMenu->addMenu(stereoModeMenu);
@@ -398,8 +408,6 @@ Cosmographia::Cosmographia() :
     menuBar()->addMenu(helpMenu);
 
     setCursor(QCursor(Qt::CrossCursor));
-
-    loadSettings();
 }
 
 
@@ -881,6 +889,10 @@ Cosmographia::loadSettings()
 {
     QSettings settings;
 
+    double ambientLight = settings.value("ambientLight", 0.15).toDouble();
+    m_view3d->setAmbientLight(ambientLight);
+    m_view3d->setEclipseShadows(true);
+
     settings.beginGroup("ui");
     m_fullScreenAction->setChecked(settings.value("fullscreen", true).toBool());
     setFullScreen(m_fullScreenAction->isChecked());
@@ -892,6 +904,8 @@ void
 Cosmographia::saveSettings()
 {
     QSettings settings;
+
+    settings.setValue("ambientLight", m_view3d->ambientLight());
 
     settings.beginGroup("ui");
     settings.setValue("fullscreen", m_fullScreenAction->isChecked());

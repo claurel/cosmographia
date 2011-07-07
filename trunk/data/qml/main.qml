@@ -232,6 +232,20 @@ Item {
              //Text { width: 32; color: "white"; text: "help"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
+         Column {
+             Image {
+                 id: defaultViewButton
+                 width: 32; height: 32
+                 source: "qrc:/icons/solarsys.png"
+                 smooth: true
+
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: { universeView.gotoHome() }
+                 }
+             }
+         }
+
          states: [
              State {
                  name: "visible"; when: pageArea.mouseX < 32

@@ -17,6 +17,7 @@
 
 #include "ObserverAction.h"
 #include "RotationUtility.h"
+#include <vesta/InertialFrame.h>
 #include <algorithm>
 #include <cmath>
 
@@ -172,6 +173,22 @@ static double smoothStepExp(double t, double v0, double accelerationTime)
 }
 
 
+static Vector3d slerp(double t, const Vector3d& v0, const Vector3d& v1)
+{
+    Vector3d n = v0.cross(v1);
+    double sinTheta = n.norm();
+    if (abs(sinTheta) > 1.0e-14)
+    {
+        double theta = asin(sinTheta);
+        return ((v0 * sin((1.0 - t) * theta)) + (v1 * sin(t * theta))) / sinTheta;
+    }
+    else
+    {
+        return v1;
+    }
+}
+
+
 GotoObserverAction::GotoObserverAction(Observer* observer,
                                        Entity* target,
                                        double duration,
@@ -236,6 +253,99 @@ GotoObserverAction::updateObserver(Observer* observer, double realTime, double s
         observer->updateCenter(m_target.ptr(), simTime);
         m_switchedFrames = true;
     }
+
+    return t >= 1.0;
+}
+
+
+/** OrbitGoto is a specialized observer action that does the following:
+  *   - Zooms away from the current center object
+  *   - Orients the observer to point at the target
+  *   - Orbits around the target so that the observer is above and
+  *     facing down at the target.
+  *
+  * This class makes assumptions about the final offset from the target
+  * object; in it's current state, it is really only suitable for the
+  * the UniverseView::gotoHom function.
+  */
+OrbitGotoObserverAction::OrbitGotoObserverAction(Observer* observer,
+                                                 Entity* target,
+                                                 double duration,
+                                                 double realTime,
+                                                 double simulationTime,
+                                                 double finalDistanceFromTarget) :
+    m_duration(duration),
+    m_startTime(realTime),
+    m_switchedFrames(false),
+    m_target(target),
+    m_finalDistanceFromTarget(finalDistanceFromTarget),
+    m_startDistance(0.0),
+    m_up(Vector3d::UnitZ())
+{
+    m_startOrientation = observer->absoluteOrientation(simulationTime);
+    m_startPosition = observer->absolutePosition(simulationTime);
+
+    Vector3d targetPosition = target->position(simulationTime);
+    m_startDistance = observer->position().norm();
+
+    Vector3d up = observer->absoluteOrientation(simulationTime) * Vector3d::UnitY();
+    m_finalOrientation = LookRotation(observer->absolutePosition(simulationTime),
+                                      targetPosition,
+                                      up);
+}
+
+
+bool
+OrbitGotoObserverAction::updateObserver(Observer* observer, double realTime, double simTime)
+{
+    double t;
+    if (m_duration == 0.0)
+    {
+        t = 1.0;
+    }
+    else
+    {
+        t = min(1.0, (realTime - m_startTime) / m_duration);
+    }
+
+    Vector3d targetPosition = m_target->position(simTime);
+
+    if (t <= 0.5)
+    {
+        double u = smoothStepExp(t * 2, 0.1 / m_startDistance, 0.5);
+        double distance = (1.0 - u) * m_startDistance + u * m_finalDistanceFromTarget * 0.1;
+        observer->setPosition(observer->position().normalized() * distance);
+    }
+    else
+    {
+        if (!m_switchedFrames)
+        {
+            // Switch to the target frame
+            observer->updateCenter(m_target.ptr(), simTime);
+            m_startPosition = observer->position();
+            m_startDistance = observer->position().norm();
+            m_up = observer->absoluteOrientation(simTime) * Vector3d::UnitY();
+            m_switchedFrames = true;
+        }
+
+        double u = smoothstep2((t - 0.5) * 2);
+        double distance = (1.0 - u) * m_startDistance + u * m_finalDistanceFromTarget;
+        Vector3d finalPosition = InertialFrame::eclipticJ2000()->orientation() * Vector3d::UnitZ() * m_finalDistanceFromTarget;
+        Vector3d v0 = m_startPosition.normalized();
+        Vector3d v1 = finalPosition.normalized();
+        Vector3d w = slerp(u, v0, v1);
+        observer->setPosition(distance * w);
+    }
+
+    double rt = smoothstep2(min(1.0, t * 4.0));
+    Vector3d up = Vector3d::UnitZ();
+    Quaterniond finalOrientation = LookRotation(observer->absolutePosition(simTime),
+                                                targetPosition,
+                                                up);
+
+    Quaterniond q = m_startOrientation.slerp(rt, finalOrientation);
+    q = observer->pointingFrame()->orientation(simTime).conjugate() * q;
+    observer->setOrientation(q);
 
     return t >= 1.0;
 }

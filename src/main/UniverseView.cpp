@@ -1870,8 +1870,9 @@ UniverseView::setCenterAndFrame(Entity* center, FrameType f)
         else
         {
             RelativePositionVector* primary = new RelativePositionVector(center, m_selectedBody.ptr());
-            ConstantFrameDirection* secondary = new ConstantFrameDirection(InertialFrame::icrf(), Vector3d::UnitZ());
-            frame = new TwoVectorFrame(primary, TwoVectorFrame::PositiveX, secondary, TwoVectorFrame::PositiveY);
+            RelativeVelocityVector* secondary = new RelativeVelocityVector(center, m_selectedBody.ptr());
+            //ConstantFrameDirection* secondary = new ConstantFrameDirection(InertialFrame::icrf(), Vector3d::UnitZ());
+            frame = new TwoVectorFrame(primary, TwoVectorFrame::NegativeZ, secondary, TwoVectorFrame::PositiveY);
         }
     }
     else
@@ -1895,7 +1896,7 @@ UniverseView::setObserverCenter()
 {
     if (m_selectedBody.isValid())
     {
-        setCenterAndFrame(m_selectedBody.ptr(), m_observerFrame);
+        setCenterAndFrame(m_selectedBody.ptr(), Frame_Inertial);
     }
 }
 
@@ -2241,7 +2242,7 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
     }
 
     vesta::Arc* arc = body->chronology()->activeArc(m_simulationTime);
-    if (!arc)
+    if (!arc || !arc->center())
     {
         return;
     }
@@ -2807,6 +2808,18 @@ UniverseView::centerSelectedObject()
 
 
 void
+UniverseView::gotoHome()
+{
+    m_observerAction = new OrbitGotoObserverAction(m_observer.ptr(),
+                                                   m_catalog->find("Sun"),
+                                                   7.0,
+                                                   secondsFromBaseTime(),
+                                                   m_simulationTime,
+                                                   1.0e9);
+}
+
+
+void
 UniverseView::setViewpoint(Viewpoint *viewpoint)
 {
     viewpoint->positionObserver(m_observer.ptr(), m_simulationTime);
@@ -2867,7 +2880,34 @@ UniverseView::setCentralBody(BodyObject* body)
 {
     if (body && body->body())
     {
-        setCenterAndFrame(body->body(), m_observerFrame);
+        setCenterAndFrame(body->body(), Frame_Inertial);
+        setStatusMessage(QString("Set center to %1").arg(QString::fromUtf8(body->body()->name().c_str())));
+    }
+}
+
+
+void
+UniverseView::setCentralBodyFixed(BodyObject* body)
+{
+    if (body && body->body())
+    {
+        setCenterAndFrame(body->body(), Frame_BodyFixed);
+        setStatusMessage(QString("Set fixed center to %1").arg(QString::fromUtf8(body->body()->name().c_str())));
+    }
+}
+
+
+void
+UniverseView::trackBody(BodyObject* body)
+{
+    if (body && body->body())
+    {
+        if (m_observer->center() != body->body())
+        {
+            setSelectedBody(body->body());
+            setCenterAndFrame(m_observer->center(), Frame_Locked);
+            setStatusMessage(QString("Tracking %1").arg(QString::fromUtf8(body->body()->name().c_str())));
+        }
     }
 }
 

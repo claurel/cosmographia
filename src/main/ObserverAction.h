@@ -76,4 +76,35 @@ private:
     double m_finalDistanceFromTarget;
 };
 
+
+class OrbitGotoObserverAction : public ObserverAction
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    OrbitGotoObserverAction(vesta::Observer* observer,
+                       vesta::Entity* target,
+                       double duration,
+                       double realTime,
+                       double simulationTime,
+                       double finalDistanceFromTarget);
+    virtual bool updateObserver(vesta::Observer* observer, double realTime, double simTime);
+    vesta::Entity* target() const
+    {
+        return m_target.ptr();
+    }
+
+private:
+    double m_duration;
+    double m_startTime;
+    Eigen::Quaterniond m_startOrientation;
+    Eigen::Quaterniond m_finalOrientation;
+    Eigen::Vector3d m_startPosition;
+    bool m_switchedFrames;
+    vesta::counted_ptr<vesta::Entity> m_target;
+    double m_finalDistanceFromTarget;
+    double m_startDistance;
+    Eigen::Vector3d m_up;
+};
+
 #endif // _OBSERVER_ACTION_H_

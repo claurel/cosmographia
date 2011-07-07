@@ -1,0 +1,160 @@
+{
+"version": "1.0",
+"name": "CLUSTER Satellites",
+
+"items" :
+[
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "CLUSTER II-FM6", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/science.txt", 
+        "type": "TLE", 
+        "name": "CLUSTER II-FM6", 
+        "line1": "1 26410U 00041A   11177.00000000  .00002449  00000-0  00000-0 0  6801", 
+        "line2": "2 26410 139.4361 253.7450 8815674  75.1790 350.2554  0.44223246  7835"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM6"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM6"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "white"
+    }
+},
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "CLUSTER II-FM7", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/science.txt", 
+        "type": "TLE", 
+        "name": "CLUSTER II-FM7", 
+        "line1": "1 26411U 00041B   11176.95833333  .00002447  00000-0  00000-0 0  6783", 
+        "line2": "2 26411 139.4040 253.5847 8813078  75.0537 352.4187  0.44224540  7915"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM7"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM7"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "white"
+    }
+},
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "CLUSTER II-FM5", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/science.txt", 
+        "type": "TLE", 
+        "name": "CLUSTER II-FM5", 
+        "line1": "1 26463U 00045A   11177.00000000  .00002343  00000-0  00000-0 0  6693", 
+        "line2": "2 26463 140.9336 249.9002 8686169  71.2375 353.8814  0.44224161  8413"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM5"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM5"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "white"
+    }
+},
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "CLUSTER II-FM8", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/science.txt", 
+        "type": "TLE", 
+        "name": "CLUSTER II-FM8", 
+        "line1": "1 26464U 00045B   11176.91666667  .00002774  00000-0  00000-0 0  6575", 
+        "line2": "2 26464 137.4343 237.8741 9045410  60.7140 354.0060  0.44240856  7808"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM8"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "CLUSTER II-FM8"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "white"
+    }
+}
+]
+}

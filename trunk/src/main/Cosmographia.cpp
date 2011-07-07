@@ -303,7 +303,7 @@ Cosmographia::Cosmographia() :
     connect(figuresAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(setConstellationFigureVisibility(bool)));
     connect(constellationNamesAction,  SIGNAL(triggered(bool)), m_view3d, SLOT(setConstellationNameVisibility(bool)));
 
-    connect(planetOrbitsAction, SIGNAL(triggered(bool)), this, SLOT(setPlanetOrbitsVisibility(bool)));
+    connect(planetOrbitsAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setPlanetOrbitsVisibility(bool)));
     connect(plotTrajectoryAction, SIGNAL(triggered()), this, SLOT(plotTrajectory()));
     connect(plotTrajectoryObserverAction, SIGNAL(triggered()), this, SLOT(plotTrajectoryObserver()));
     connect(infoTextAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setInfoText(bool)));
@@ -580,10 +580,16 @@ Cosmographia::initialize()
     // Set up builtin rotation models
     m_loader->addBuiltinRotationModel("IAU Moon", new IAULunarRotationModel());
 
-    // Set up the network manager
+    // Set up the network manager. Eventually, the texture tile loader and resource loader should share
+    // the same QNetworkAccessManager. However, there is a noticeable lag when loading a TLE orbit
+    // over the network, and it disappears when the cache is disabled. Although reading over the network
+    // is asynchronous, loading the cache the directory for the first time blocks for about a second.
+    // Using a second network manager with its own cache directory with many fewer entries solves the
+    // problem. The lag could return if the resource loader has thousands of files in its cache, but
+    // since it currently is used just for TLEs, it's not a problem now.
     m_networkManager = new QNetworkAccessManager();
-    QNetworkDiskCache* cache = new QNetworkDiskCache();
-    cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
+    QNetworkDiskCache* cache = new QNetworkDiskCache();    
+    cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/catalog");
     m_networkManager->setCache(cache);
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processReceivedResource(QNetworkReply*)));
 
@@ -819,30 +825,6 @@ Cosmographia::plotTrajectoryObserver()
         BodyInfo* info = m_catalog->findInfo(name);
 
         m_view3d->plotTrajectoryObserver(info);
-    }
-}
-
-
-void
-Cosmographia::setPlanetOrbitsVisibility(bool enabled)
-{
-    const char* planetNames[] = {
-        "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon"
-    };
-
-    for (unsigned int i = 0; i < sizeof(planetNames) / sizeof(planetNames[0]); ++i)
-    {
-        Entity* planet = m_catalog->find(planetNames[i]);
-        BodyInfo* info = m_catalog->findInfo(planetNames[i]);
-
-        if (enabled)
-        {
-            m_view3d->plotTrajectory(planet, info);
-        }
-        else
-        {
-            m_view3d->clearTrajectory(planet);
-        }
     }
 }
 

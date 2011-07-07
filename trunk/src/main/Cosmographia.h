@@ -59,7 +59,6 @@ public slots:
     void recordVideo();
     void plotTrajectory();
     void plotTrajectoryObserver();
-    void setPlanetOrbitsVisibility(bool enabled);
     void setStarStyle(QAction* action);
     void setStereoMode(QAction* action);
     void setTimeDisplay(QAction* action);

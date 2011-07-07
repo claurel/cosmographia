@@ -72,6 +72,7 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(bool atmospheresVisible READ atmospheresVisible WRITE setAtmospheresVisible);
     Q_PROPERTY(bool sunGlare READ sunGlare WRITE setSunGlare);
     Q_PROPERTY(bool milkyWayVisible READ milkyWayVisible WRITE setMilkyWayVisible);
+    Q_PROPERTY(bool planetOrbitsVisible READ planetOrbitsVisibility WRITE setPlanetOrbitsVisibility);
 
     Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
     Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
@@ -181,6 +182,7 @@ public:
     bool constellationNameVisibility() const;
     bool equatorialGridVisibility() const;
     bool eclipticVisibility() const;
+    bool planetOrbitsVisibility() const;
 
     bool shadows() const;
     bool eclipseShadows() const;
@@ -270,6 +272,7 @@ public slots:
     void lockedObserver(bool checked);
     void setObserverCenter();
     void setMilkyWayVisible(bool checked);
+    void setPlanetOrbitsVisibility(bool checked);
     void setEquatorialGridVisibility(bool checked);
     void setEclipticVisibility(bool checked);
     void setEquatorialPlaneVisibility(bool checked);
@@ -414,6 +417,7 @@ private:
     };
     std::vector<TrajectoryPlotEntry> m_trajectoryPlots;
 
+    bool m_planetOrbitsVisible;
     bool m_infoTextVisible;
     bool m_labelsVisible;
     bool m_centerIndicatorVisible;

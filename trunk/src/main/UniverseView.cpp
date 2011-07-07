@@ -202,6 +202,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_stereoMode(Mono),
     m_antialiasingSamples(1),
     m_sunGlareEnabled(true),
+    m_planetOrbitsVisible(false),
     m_infoTextVisible(true),
     m_labelsVisible(true),
     m_centerIndicatorVisible(true),
@@ -985,7 +986,7 @@ void UniverseView::paintGL()
                 focusObjectDistance -= r;
             }
         }
-        double eyeSeparation = focusObjectDistance / 30.0;
+        double eyeSeparation = focusObjectDistance / 60.0;
         float screenPlaneDistance = float(focusObjectDistance * 0.85);
         float nearDistance = 0.00001f;
         float farDistance = 1.0e12f;
@@ -1111,7 +1112,17 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
             if (secondsFromBaseTime() - m_lastDoubleClickTime > 0.2)
             {
                 m_selectedBody = pickObject(event->pos());
-                m_markers->addMarker(m_selectedBody.ptr(), Spectrum(1.0f, 1.0f, 1.0f), 20.0f, Marker::Pulse, m_realTime, 0.5);
+                if (m_selectedBody.isValid())
+                {
+                    BodyInfo* info = m_catalog->findInfo(m_selectedBody->name().c_str());
+                    Spectrum markerColor = Spectrum::White();
+                    if (info)
+                    {
+                        markerColor = info->labelColor;
+                    }
+
+                    m_markers->addMarker(m_selectedBody.ptr(), markerColor, 20.0f, Marker::Pulse, m_realTime, 0.5);
+                }
             }
         }
         else if (event->button() == Qt::RightButton)
@@ -2009,6 +2020,37 @@ UniverseView::setMilkyWayVisible(bool checked)
 
 
 void
+UniverseView::setPlanetOrbitsVisibility(bool enabled)
+{
+    const char* planetNames[] =
+    {
+        "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon"
+    };
+
+    for (unsigned int i = 0; i < sizeof(planetNames) / sizeof(planetNames[0]); ++i)
+    {
+        Entity* planet = m_catalog->find(planetNames[i]);
+        BodyInfo* info = m_catalog->findInfo(planetNames[i]);
+
+        if (enabled)
+        {
+            plotTrajectory(planet, info);
+        }
+        else
+        {
+            clearTrajectory(planet);
+        }
+    }
+
+    if (enabled != m_planetOrbitsVisible)
+    {
+        m_planetOrbitsVisible = enabled;
+        //emit planetOrbitsVisibileChanged();
+    }
+}
+
+
+void
 UniverseView::setEclipticVisibility(bool checked)
 {
     setSkyLayerVisible("ecliptic", checked);
@@ -2146,6 +2188,12 @@ UniverseView::setEquatorialGridVisibility(bool checked)
         setSkyLayerVisible("equatorial grid", checked);
         emit equatorialGridVisibilityChanged(checked);
     }
+}
+
+
+bool UniverseView::planetOrbitsVisibility() const
+{
+    return m_planetOrbitsVisible;
 }
 
 

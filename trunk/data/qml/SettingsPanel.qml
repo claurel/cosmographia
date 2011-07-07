@@ -128,6 +128,7 @@ Item {
             PanelText { text: "Eclipse Shadows" }
             TextToggle {
                 onToggled: { universeView.eclipseShadows = enabled }
+                Component.onCompleted: { enabled = universeView.eclipseShadows }
                 enabled: false
             }
 
@@ -259,15 +260,7 @@ Item {
             PanelText { text: "Equatorial Grid" }
             TextToggle {
                 id: equatorialGridToggle
-                enabled: false
-                onToggled: { universeView.equatorialGridVisible = enabled; }
-                Connections
-                {
-                    target: universeView;
-                    onEquatorialGridVisibleChanged: {
-                        equatorialGridToggle.enabled = universeView.equatorialGridVisible
-                    }
-                }
+                onToggled: { universeView.equatorialGridVisible = enabled }
             }
 
             PanelText { text: "Ecliptic" }

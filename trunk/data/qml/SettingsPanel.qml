@@ -250,6 +250,12 @@ Item {
                 onToggled: { universeView.labelsVisible = enabled }
             }
 
+            PanelText { text: "Planet Orbits" }
+            TextToggle {
+                enabled: true
+                onToggled: { universeView.planetOrbitsVisible = enabled }
+            }
+
             PanelText { text: "Center Indicator" }
             TextToggle {
                 id: centerIndicatorToggle

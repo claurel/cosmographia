@@ -164,12 +164,13 @@ Item {
                 Slider {
                     id: magnitudeSlider
 
-                    value: 8.0
-                    minValue: 3.0
+                    minValue: 4.0
                     maxValue: 13.0
+                    value: 1.0
 
                     width: 200
                     onValueChanged: { universeView.limitingMagnitude = value }
+                    Component.onCompleted: { value = universeView.limitingMagnitude }
                 }
             }
             Item { width: 1; height: 1 }
@@ -193,6 +194,7 @@ Item {
 
                     width: 200
                     onValueChanged: { universeView.ambientLight = value }
+                    Component.onCompleted: { value = universeView.ambientLight }
                 }
             }
             Item { width: 1; height: 1 }

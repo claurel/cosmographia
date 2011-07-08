@@ -87,7 +87,7 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "source" : "models/deimos.obj"
+              "source" : "models/deimos.cmod"
           }
         }
 

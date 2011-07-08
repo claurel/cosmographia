@@ -579,14 +579,18 @@ macx {
     MODELS.path = Contents/Resources/data/models
     MODELS.files = \
         data/models/phobos.obj \
-        data/models/deimos.obj \
+        data/models/deimos.cmod \
+        data/models/deimos.dds \
         data/models/4vesta.obj \
+        data/models/amalthea.cmod \
         data/models/hyperion.cmod \
+        data/models/proteus.cmod \
         data/models/jason.obj \
         data/models/jason.mtl \
         data/models/jas_solr.png \
         data/models/jas_brsh.png \
         data/models/cassini.cmod
+
 
     QMAKE_BUNDLE_DATA += MODELS
 
@@ -633,8 +637,9 @@ macx {
         data/qml/Button.qml \
         data/qml/ContextMenu.qml \
         data/qml/FindObjectPanel.qml \
+        data/qml/HelpBrowser.qml \
         data/qml/InfoText.qml \
-        data/qml/SearchBox.qml \
+        data/qml/PanelText.qml \
         data/qml/SettingsPanel.qml \
         data/qml/Slider.qml \
         data/qml/SpinBox.qml \
@@ -642,37 +647,57 @@ macx {
         data/qml/TextButton.qml \
         data/qml/TextPanel.qml \
         data/qml/TextToggle.qml \
-        data/qml/TimePanel.qml
+        data/qml/TimePanel.qml \
+        data/qml/LinkStack.js
 
     QMAKE_BUNDLE_DATA += GUI
 
     HELPFILES.path = Contents/Resources/data/help
     HELPFILES.files = \
         data/help/help.html \
+        data/help/solarsysguide.html \
         data/help/mercury.html \
         data/help/venus.html \
+        data/help/mars.html \
+        data/help/phobos.html \
+        data/help/deimos.html \
         data/help/jupiter.html \
+        data/help/amalthea.html \
         data/help/io.html \
         data/help/europa.html \
         data/help/ganymede.html \
         data/help/callisto.html \
         data/help/saturn.html \
         data/help/mimas.html \
+        data/help/enceladus.html \
+        data/help/tethys.html \
         data/help/dione.html \
+        data/help/rhea.html \
         data/help/hyperion.html \
         data/help/titan.html \
         data/help/iapetus.html \
+        data/help/phoebe.html \
         data/help/uranus.html \
+        data/help/miranda.html \
+        data/help/ariel.html \
         data/help/umbriel.html \
+        data/help/titania.html \
         data/help/oberon.html \
+        data/help/neptune.html \
+        data/help/triton.html \
+        data/help/proteus.html \
+        data/help/nereid.html \
         data/help/ceres.html \
         data/help/vesta.html \
         data/help/pluto.html \
         data/help/charon.html \
+        data/help/nix.html \
+        data/help/hydra.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \
         data/help/hyperion.jpg \
-        data/help/iapetus-global.jpg
+        data/help/iapetus-global.jpg \
+        data/help/miranda.jpg
 
     QMAKE_BUNDLE_DATA += HELPFILES
 

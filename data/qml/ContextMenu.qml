@@ -21,7 +21,7 @@ import Cosmographia 1.0
 Item
 {
     id: container
-    width: 200; height: 300
+    width: 200; height: 320
 
     property string selectionName: ""
     property variant selection: null
@@ -41,18 +41,21 @@ Item
         selectionName = selection.name
 
         menuModel.clear();
-        menuModel.append({ action: "center",      labelText: "Set As Center" });
-        menuModel.append({ action: "goto",        labelText: "Go To" });
-        menuModel.append({ action: "info",        labelText: "Show Information" });
-        menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body) });
-        menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes });
-        menuModel.append({ action: "frameaxes",   labelText: "Frame Axes", checked: body.frameAxes });
-        menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow });
+        menuModel.append({ action: "goto",        labelText: "Go To", checked: false, type: "camera" });
+        menuModel.append({ action: "center",      labelText: "Set As Center", checked: false, type: "camera" });
+        menuModel.append({ action: "fixcenter",   labelText: "Set As Fixed Center", checked: false, type: "camera" });
+        menuModel.append({ action: "track",       labelText: "Track", checked: false, type: "camera" });
+        menuModel.append({ action: "info",        labelText: "Show Information", checked: false, type: "camera" });
+        menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body), type: "camera" });
+        menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
+        menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes, type: "vectors" });
+        menuModel.append({ action: "frameaxes",   labelText: "Frame Axes", checked: body.frameAxes, type: "vectors" });
+        menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow, type: "vectors" });
         if (selectionName != "Sun") {
-            menuModel.append({ action: "sun",         labelText: "Sun Direction", checked: body.hasVisualizer("sun direction") });
+            menuModel.append({ action: "sun",         labelText: "Sun Direction", checked: body.hasVisualizer("sun direction"), type: "vectors" });
         }
         if (selectionName != "Earth") {
-            menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction") });
+            menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction"), type: "vectors" });
         }
     }
 
@@ -71,6 +74,14 @@ Item
         else if (item.action == "center")
         {
             universeView.setCentralBody(selection);
+        }
+        else if (item.action == "fixcenter")
+        {
+            universeView.setCentralBodyFixed(selection);
+        }
+        else if (item.action == "track")
+        {
+            universeView.trackBody(selection);
         }
         else if (item.action == "goto")
         {
@@ -160,19 +171,30 @@ Item
         interactive: false
         highlightMoveSpeed: 5000
 
-        delegate: Row {
-            spacing: 3
+        delegate: Item {
+            id: menuItem
+            width: row.width; height: row.height
+            Row {
+                id: row
+                spacing: 3
 
-            Image {
-                anchors.verticalCenter:  parent.verticalCenter
-                opacity: checked ? 1.0 : 0.01
-                smooth: true
-                width: 12; height: 12
-                source:  "qrc:/icons/check.png"
+                Image {
+                    anchors.verticalCenter:  parent.verticalCenter
+                    opacity: checked ? 1.0 : 0.01
+                    smooth: true
+                    width: 12; height: 12
+                    source:  "qrc:/icons/check.png"
+                }
+
+                InfoText {
+                    text: labelText; color: "white"
+                }
             }
 
-            InfoText {
-                text: labelText
+            Rectangle {
+                x: 4; width: 180; height: 1;
+                opacity: labelText === " " ? 0.1 : 0.0
+                anchors.verticalCenter:  parent.verticalCenter
             }
         }
 

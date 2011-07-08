@@ -58,7 +58,7 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "source" : "models/phobos.obj"
+              "source" : "models/phobos.cmod"
           }
         },
 

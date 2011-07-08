@@ -24,6 +24,12 @@ The Mars map is derived from the Viking merged color mosaic, available here:
 http://www.mars.asu.edu/data/mdim_color/  The original was globally
 desaturated and color adjusted to produce the compressed texture map mars.dds.
 
+The map of Phobos is a mosaic of Mars Express images assembled by DLR / ESA. It
+was modified by Chris Laurel to remove the sharp seam at 0 degree meridian.
+
+The Deimos map was created by Phil Stooke and is used unmodified except for
+compression and a 180 degree shift.
+
 The Saturn and Uranus ring textures are from Celestia 1.6.0. The Saturn ring
 texture was created by Grant Hutchison from Cassini images and opacities
 derived from stellar transit measurements: 

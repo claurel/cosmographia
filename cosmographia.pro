@@ -578,7 +578,8 @@ macx {
 
     MODELS.path = Contents/Resources/data/models
     MODELS.files = \
-        data/models/phobos.obj \
+        data/models/phobos.cmod \
+        data/models/phobos.dds \
         data/models/deimos.cmod \
         data/models/deimos.dds \
         data/models/4vesta.obj \

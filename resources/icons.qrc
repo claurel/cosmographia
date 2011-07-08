@@ -5,13 +5,18 @@
         <file>config.png</file>
         <file>disk.png</file>
         <file>down.png</file>
+        <file>faster.png</file>
         <file>help.png</file>
         <file>home.png</file>
         <file>info.png</file>
         <file>next.png</file>
+        <file>pause.png</file>
+        <file>play.png</file>
         <file>previous.png</file>
         <file>power.png</file>
+        <file>reverse.png</file>
         <file>search.png</file>
+        <file>slower.png</file>
         <file>solarsys.png</file>
         <file>up.png</file>
     </qresource>

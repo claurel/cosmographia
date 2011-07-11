@@ -104,6 +104,7 @@ public:
     Q_INVOKABLE void setStateFromUrl(const QUrl& url);
     Q_INVOKABLE void setMouseClickEventProcessed(bool accepted);
     Q_INVOKABLE void setMouseMoveEventProcessed(bool accepted);
+    Q_INVOKABLE QVariant getSetting(const QString& key);
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

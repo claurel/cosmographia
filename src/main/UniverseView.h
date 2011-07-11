@@ -329,6 +329,7 @@ protected:
     bool event(QEvent* event);
 
 private:
+    QString bodyName(const vesta::Entity* body) const;
     void drawInfoOverlay();
     bool skyLayerVisible(const std::string& layerName) const;
     void setSkyLayerVisible(const std::string& layerName, bool enable);

@@ -708,9 +708,6 @@ UniverseView::drawInfoOverlay()
 
             m_textFont->bind();
 
-
-            // Display of date and time rate now handled by QML
-#if 0
             float dateY = float(viewportHeight - titleFontHeight);
             float dateX = viewportWidth - 250.0f;
 
@@ -748,7 +745,6 @@ UniverseView::drawInfoOverlay()
                 QString timeScaleString = QString("%1x time").arg(m_timeScale);
                 m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
             }
-#endif
 
             //QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
             //m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));

@@ -59,6 +59,15 @@ Item {
             timePanel.hide();
     }
 
+    Component.onCompleted:
+    {
+        // Only show the intro panel if Cosmographia has not been run previously
+        if (!universeView.getSetting("previouslyRun"))
+        {
+            intro.show();
+        }
+    }
+
     Connections
     {
         target: universeView;
@@ -156,6 +165,20 @@ Item {
         width: 350; height: 300
         x: 32; y: panelY
         opacity: 0
+    }
+
+    // Intro text panel is shown the first time Cosmographia is run
+    TextPanel {
+        id: intro
+        width: 500; height: 420
+        textColor: "white"
+        anchors.horizontalCenter: page.horizontalCenter;
+        anchors.top: page.top
+        anchors.topMargin: 100
+
+        Component.onCompleted: {
+            text = helpCatalog.getHelpText("intro")
+        }
     }
 
     Column {

@@ -923,6 +923,7 @@ Cosmographia::saveSettings()
     QSettings settings;
 
     settings.setValue("ambientLight", m_view3d->ambientLight());
+    settings.setValue("previouslyRun", true);
 
     settings.beginGroup("ui");
     settings.setValue("fullscreen", m_fullScreenAction->isChecked());

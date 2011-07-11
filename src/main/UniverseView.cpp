@@ -664,6 +664,15 @@ UniverseView::setMouseMoveEventProcessed(bool accepted)
 }
 
 
+// Necessary because QML doesn't currently allow access to QSettings
+QVariant
+UniverseView::getSetting(const QString &key)
+{
+    QSettings settings;
+    return settings.value(key);
+}
+
+
 // Get the name of a body as a QString
 QString
 UniverseView::bodyName(const Entity* body) const
@@ -702,7 +711,8 @@ UniverseView::drawInfoOverlay()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
 
-    float alpha = max(0.0f, min(1.0f, float((m_realTime - 5.0) / 5.0)));
+    const double textFadeDuration = 1.0;
+    float alpha = max(0.0f, min(1.0f, float((m_realTime - 3.0) / textFadeDuration)));
     Vector4f textColor(0.3f, 0.5f, 1.0f, alpha);
     Vector4f titleColor(0.45f, 0.75f, 1.0f, alpha);
 

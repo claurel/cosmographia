@@ -664,8 +664,22 @@ UniverseView::setMouseMoveEventProcessed(bool accepted)
 }
 
 
+// Get the name of a body as a QString
+QString
+UniverseView::bodyName(const Entity* body) const
+{
+    if (!body)
+    {
+        return QString();
+    }
+    else
+    {
+        return QString::fromUtf8(body->name().c_str(), body->name().size());
+    }
+}
+
+
 // Draw informational text over the 3D view
-// TODO: Convert this to QML
 void
 UniverseView::drawInfoOverlay()
 {
@@ -1408,7 +1422,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
         // Build the context menu. The first item in the menu
         // is the object name (non-selectable.)
         QMenu* menu = new QMenu(this);
-        QAction* nameAction = menu->addAction(QString::fromUtf8(body->name().c_str()));
+        QAction* nameAction = menu->addAction(bodyName(body));
         nameAction->setEnabled(false);
 
         QAction* centerAction = menu->addAction(tr("Set as Center"));
@@ -1971,6 +1985,7 @@ UniverseView::bodyFixedObserver(bool checked)
     if (checked)
     {
         setCenterAndFrame(m_observer->center(), Frame_BodyFixed);
+        setStatusMessage(QString("Set %1 fixed frame").arg(bodyName(m_observer->center())));
     }
 }
 
@@ -2730,7 +2745,7 @@ UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
 
     m_universe->addEntity(entity);
 
-    QString labelText = QString::fromUtf8(entity->name().c_str());
+    QString labelText = bodyName(entity);
     int slashPos = labelText.lastIndexOf('/');
     if (slashPos >= 0)
     {
@@ -2774,7 +2789,7 @@ UniverseView::gotoSelectedObject()
         double currentDistance = (body->position(m_simulationTime) - m_observer->absolutePosition(m_simulationTime)).norm();
         if (currentDistance > distanceFromTarget * 1.1)
         {
-            setStatusMessage(QString("Go to %1").arg(QString::fromUtf8(body->name().c_str())));
+            setStatusMessage(QString("Go to %1").arg(bodyName(body)));
 
             m_observerAction = new GotoObserverAction(m_observer.ptr(),
                                                       body,
@@ -2792,7 +2807,7 @@ UniverseView::centerSelectedObject()
 {
     if (m_selectedBody.isValid())
     {
-        setStatusMessage(QString("Center %1 in view").arg(QString::fromUtf8(m_selectedBody->name().c_str())));
+        setStatusMessage(QString("Center %1 in view").arg(bodyName(m_selectedBody.ptr())));
 
         m_observerAction = new CenterObserverAction(m_observer.ptr(),
                                                     m_selectedBody.ptr(),
@@ -2877,7 +2892,7 @@ UniverseView::setCentralBody(BodyObject* body)
     if (body && body->body())
     {
         setCenterAndFrame(body->body(), Frame_Inertial);
-        setStatusMessage(QString("Set center to %1").arg(QString::fromUtf8(body->body()->name().c_str())));
+        setStatusMessage(QString("Set center to %1").arg(bodyName(body->body())));
     }
 }
 
@@ -2888,7 +2903,7 @@ UniverseView::setCentralBodyFixed(BodyObject* body)
     if (body && body->body())
     {
         setCenterAndFrame(body->body(), Frame_BodyFixed);
-        setStatusMessage(QString("Set fixed center to %1").arg(QString::fromUtf8(body->body()->name().c_str())));
+        setStatusMessage(QString("Set fixed center to %1").arg(bodyName(body->body())));
     }
 }
 
@@ -2902,7 +2917,7 @@ UniverseView::trackBody(BodyObject* body)
         {
             setSelectedBody(body->body());
             setCenterAndFrame(m_observer->center(), Frame_Locked);
-            setStatusMessage(QString("Tracking %1").arg(QString::fromUtf8(body->body()->name().c_str())));
+            setStatusMessage(QString("Tracking %1").arg(bodyName(body->body())));
         }
     }
 }

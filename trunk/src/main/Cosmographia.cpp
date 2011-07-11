@@ -119,6 +119,22 @@ Cosmographia::Cosmographia() :
     // controls are sync'ed
     m_view3d->initializeDeclarativeUi("qml/main.qml");
 
+    setupMenuBar();
+
+    setCursor(QCursor(Qt::CrossCursor));
+}
+
+
+Cosmographia::~Cosmographia()
+{
+    saveSettings();
+    delete m_catalogWrapper;
+}
+
+
+void
+Cosmographia::setupMenuBar()
+{
     /*** File Menu ***/
     QMenu* fileMenu = new QMenu("&File", this);
     QAction* saveScreenShotAction = fileMenu->addAction("&Save Screen Shot");
@@ -128,12 +144,14 @@ Cosmographia::Cosmographia() :
     recordVideoAction->setEnabled(false);
 #endif
     fileMenu->addSeparator();
-    QAction* loadCatalogAction = fileMenu->addAction("&Load Catalog...");
+    QAction* loadCatalogAction = fileMenu->addAction("&Open Catalog...");
+    loadCatalogAction->setShortcut(QKeySequence("Ctrl+O"));
     m_unloadLastCatalogAction = fileMenu->addAction("&Unload Last Catalog");
     m_unloadLastCatalogAction->setDisabled(true);
+    m_unloadLastCatalogAction->setShortcut(QKeySequence("Ctrl+U"));
     fileMenu->addSeparator();
     QAction* quitAction = fileMenu->addAction("&Quit");
-    this->menuBar()->addMenu(fileMenu);
+    menuBar()->addMenu(fileMenu);
 
     connect(saveScreenShotAction, SIGNAL(triggered()), this, SLOT(saveScreenShot()));
     connect(recordVideoAction, SIGNAL(triggered()), this, SLOT(recordVideo()));
@@ -143,15 +161,15 @@ Cosmographia::Cosmographia() :
 
     /*** Time Menu ***/
     QMenu* timeMenu = new QMenu("&Time", this);
-    QAction* setTimeAction = new QAction("Set &Time...", timeMenu);
+    QAction* setTimeAction = new QAction("Set &Time...", this);
     setTimeAction->setShortcut(QKeySequence("Ctrl+T"));
     timeMenu->addAction(setTimeAction);
-    QAction* nowAction = new QAction("&Current time", timeMenu);
+    QAction* nowAction = new QAction("&Current time", this);
     timeMenu->addAction(nowAction);
-    this->menuBar()->addMenu(timeMenu);
+    menuBar()->addMenu(timeMenu);
 
-    QMenu* timeDisplayMenu = new QMenu("&Time Display", timeMenu);
-    QActionGroup* timeDisplayGroup = new QActionGroup(timeDisplayMenu);
+    QMenu* timeDisplayMenu = new QMenu("&Time Display", this);
+    QActionGroup* timeDisplayGroup = new QActionGroup(this);
     QAction* utcAction = new QAction("UTC", timeDisplayGroup);
     utcAction->setCheckable(true);
     utcAction->setChecked(true);
@@ -169,35 +187,35 @@ Cosmographia::Cosmographia() :
     connect(timeDisplayGroup, SIGNAL(selected(QAction*)), this, SLOT(setTimeDisplay(QAction*)));
 
     timeMenu->addSeparator();
-    QAction* pauseAction = new QAction("&Pause", timeMenu);
+    QAction* pauseAction = new QAction("&Pause", this);
     pauseAction->setCheckable(true);
     pauseAction->setShortcut(Qt::Key_Space);
     timeMenu->addAction(pauseAction);
-    QAction* fasterAction = new QAction("&Faster", timeMenu);
+    QAction* fasterAction = new QAction("&Faster", this);
     fasterAction->setShortcut(QKeySequence("Ctrl+L"));
     timeMenu->addAction(fasterAction);
-    QAction* slowerAction = new QAction("&Slower", timeMenu);
+    QAction* slowerAction = new QAction("&Slower", this);
     slowerAction->setShortcut(QKeySequence("Ctrl+K"));
     timeMenu->addAction(slowerAction);
-    QAction* faster2Action = new QAction("2x Faster", timeMenu);
+    QAction* faster2Action = new QAction("2x Faster", this);
     faster2Action->setShortcut(QKeySequence("Ctrl+Shift+L"));
     timeMenu->addAction(faster2Action);
-    QAction* slower2Action = new QAction("2x Slower", timeMenu);
+    QAction* slower2Action = new QAction("2x Slower", this);
     slower2Action->setShortcut(QKeySequence("Ctrl+Shift+K"));
     timeMenu->addAction(slower2Action);
-    QAction* backDayAction = new QAction("Back One Day", timeMenu);
+    QAction* backDayAction = new QAction("Back One Day", this);
     backDayAction->setShortcut(QKeySequence("Ctrl+["));
     timeMenu->addAction(backDayAction);
-    QAction* forwardDayAction = new QAction("Forward One Day", timeMenu);
+    QAction* forwardDayAction = new QAction("Forward One Day", this);
     forwardDayAction->setShortcut(QKeySequence("Ctrl+]"));
     timeMenu->addAction(forwardDayAction);
-    QAction* backYearAction = new QAction("Back One Year", timeMenu);
+    QAction* backYearAction = new QAction("Back One Year", this);
     backYearAction->setShortcut(QKeySequence("Ctrl+Shift+["));
     timeMenu->addAction(backYearAction);
-    QAction* forwardYearAction = new QAction("Forward One Year", timeMenu);
+    QAction* forwardYearAction = new QAction("Forward One Year", this);
     forwardYearAction->setShortcut(QKeySequence("Ctrl+Shift+]"));
     timeMenu->addAction(forwardYearAction);
-    QAction* reverseAction = new QAction("&Reverse", timeMenu);
+    QAction* reverseAction = new QAction("&Reverse", this);
     reverseAction->setShortcut(QKeySequence("Ctrl+J"));
     timeMenu->addAction(reverseAction);
 
@@ -246,7 +264,7 @@ Cosmographia::Cosmographia() :
     lockedAction->setCheckable(true);
     cameraMenu->addAction(lockedAction);
 
-    this->menuBar()->addMenu(cameraMenu);
+    menuBar()->addMenu(cameraMenu);
 
     connect(findAction,      SIGNAL(triggered()),     m_view3d, SLOT(findObject()));
     connect(centerAction,    SIGNAL(triggered()),     m_view3d, SLOT(setObserverCenter()));
@@ -279,7 +297,7 @@ Cosmographia::Cosmographia() :
     visualAidsMenu->addSeparator();
 
     QAction* planetOrbitsAction = new QAction("Planet &Orbits", visualAidsMenu);
-    planetOrbitsAction->setShortcut(QKeySequence("Ctrl+O"));
+    planetOrbitsAction->setShortcut(QKeySequence("Ctrl+Shift+O"));
     planetOrbitsAction->setCheckable(true);
     visualAidsMenu->addAction(planetOrbitsAction);
     QAction* plotTrajectoryAction = new QAction("&Plot Trajectory", visualAidsMenu);
@@ -295,7 +313,7 @@ Cosmographia::Cosmographia() :
     infoTextAction->setChecked(true);
     visualAidsMenu->addAction(infoTextAction);
 
-    this->menuBar()->addMenu(visualAidsMenu);
+    menuBar()->addMenu(visualAidsMenu);
 
     connect(eqGridAction,   SIGNAL(triggered(bool)), m_view3d, SLOT(setEquatorialGridVisibility(bool)));
     connect(eclipticAction, SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipticVisibility(bool)));
@@ -387,7 +405,7 @@ Cosmographia::Cosmographia() :
     connect(m_fullScreenAction, SIGNAL(toggled(bool)), this, SLOT(setFullScreen(bool)));
     graphicsMenu->addMenu(stereoModeMenu);
 
-    this->menuBar()->addMenu(graphicsMenu);
+    menuBar()->addMenu(graphicsMenu);
 
     connect(shadowsAction,          SIGNAL(triggered(bool)), m_view3d, SLOT(setShadows(bool)));
     connect(eclipsesAction,         SIGNAL(triggered(bool)), m_view3d, SLOT(setEclipseShadows(bool)));
@@ -409,14 +427,29 @@ Cosmographia::Cosmographia() :
 
     menuBar()->addMenu(helpMenu);
 
-    setCursor(QCursor(Qt::CrossCursor));
-}
-
-
-Cosmographia::~Cosmographia()
-{
-    saveSettings();
-    delete m_catalogWrapper;
+#if NOMENUBAR
+    // Cosmographia may be set up to work without a menu bar in full screen mode.
+    // In that case, we want to add some actions to the main window so that keyboard
+    // shortcuts are still available.
+    setMenuBar(NULL);
+    addAction(quitAction);
+    addAction(loadCatalogAction);
+    addAction(m_unloadLastCatalogAction);
+    addAction(m_fullScreenAction);
+    addAction(pauseAction);
+    addAction(fasterAction);
+    addAction(slowerAction);
+    addAction(faster2Action);
+    addAction(slower2Action);
+    addAction(reverseAction);
+    addAction(findAction);
+    addAction(gotoAction);
+    addAction(centerAction);
+    addAction(inertialAction);
+    addAction(bodyFixedAction);
+    addAction(planetOrbitsAction);
+    addAction(plotTrajectoryAction);
+#endif // NOMENUBAR
 }
 
 

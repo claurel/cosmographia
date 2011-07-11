@@ -76,6 +76,7 @@ private slots:
 private:
     void initializeUniverse();
 
+    void setupMenuBar();
     void loadSettings();
     void saveSettings();
 

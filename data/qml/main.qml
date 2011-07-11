@@ -52,6 +52,11 @@ Item {
             helpPanel.show();
         else
             helpPanel.hide();
+
+        if (name == "timePanel")
+            timePanel.show();
+        else
+            timePanel.hide();
     }
 
     Connections
@@ -114,10 +119,9 @@ Item {
 
     TimePanel {
         id: timePanel
-        anchors {
-            top: parent.top
-            right: parent.right
-        }
+        x: 32; y: panelY
+        opacity: 0
+        textColor: "white"
     }
 
     SettingsPanel {
@@ -179,6 +183,21 @@ Item {
              //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
+         Column {
+             Image {
+                 id: timeButton
+                 width: 32; height: 32
+                 source: "qrc:/icons/clock.png"
+                 smooth: true
+
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: { setActivePanel("timePanel") }
+                 }
+             }
+             //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+         }
+
          /*
          Column {
              Image {
@@ -230,6 +249,13 @@ Item {
                  }
              }
              //Text { width: 32; color: "white"; text: "help"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+         }
+
+         Image {
+             width: 32; height: 8
+             source:  "qrc:/icons/separator.png"
+             opacity: 0.5
+             smooth: true
          }
 
          Column {

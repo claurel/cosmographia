@@ -39,7 +39,7 @@ FocusScope
 
             source: "qrc:/icons/up.png"
             smooth: true
-            opacity: container.focus ? 1 : 0.001
+            opacity: container.focus ? 1 : 0.1
 
             MouseArea {
                 anchors.fill: parent
@@ -71,7 +71,7 @@ FocusScope
 
             source: "qrc:/icons/down.png"
             smooth: true
-            opacity: container.focus ? 1 : 0.001
+            opacity: container.focus ? 1 : 0.1
 
             MouseArea {
                 anchors.fill: parent

@@ -299,6 +299,7 @@ Cosmographia::setupMenuBar()
     QAction* planetOrbitsAction = new QAction("Planet &Orbits", visualAidsMenu);
     planetOrbitsAction->setShortcut(QKeySequence("Ctrl+Shift+O"));
     planetOrbitsAction->setCheckable(true);
+    planetOrbitsAction->setChecked(789);
     visualAidsMenu->addAction(planetOrbitsAction);
     QAction* plotTrajectoryAction = new QAction("&Plot Trajectory", visualAidsMenu);
     plotTrajectoryAction->setShortcut(QKeySequence("Ctrl+P"));
@@ -499,6 +500,13 @@ Cosmographia::initializeUniverse()
             float vmag = 0.0f;
             float bv = 0.0f;
             in >> id >> ra >> dec >> vmag >> bv;
+
+            // Constrain maximum B-V color index; conversion to RGB color is not
+            // valid for large values. TODO: Fix this in VESTA
+            if (bv > 2.5f)
+            {
+                bv = 2.5f;
+            }
 
             if (in.status() == QDataStream::Ok)
             {

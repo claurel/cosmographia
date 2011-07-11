@@ -156,6 +156,11 @@ Item {
         source: "qrc:/icons/up.png"
         smooth: true
         opacity: flickable.atYBeginning ? 0 : 1
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: { flickable.contentY = Math.max(0, flickable.contentY - 100); }
+        }
     }
 
     // More contents below indicator arrow
@@ -167,6 +172,11 @@ Item {
         source: "qrc:/icons/down.png"
         smooth: true
         opacity: flickable.atYEnd ? 0 : 1
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: { flickable.contentY = Math.min(flickable.contentHeight, flickable.contentY + 100); }
+        }
     }
 
     Flickable

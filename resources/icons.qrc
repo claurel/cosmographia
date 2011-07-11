@@ -2,6 +2,7 @@
     <qresource prefix="/icons">
         <file>check.png</file>
         <file>clear.png</file>
+        <file>clock.png</file>
         <file>config.png</file>
         <file>disk.png</file>
         <file>down.png</file>
@@ -16,6 +17,7 @@
         <file>power.png</file>
         <file>reverse.png</file>
         <file>search.png</file>
+        <file>separator.png</file>
         <file>slower.png</file>
         <file>solarsys.png</file>
         <file>up.png</file>

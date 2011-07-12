@@ -95,7 +95,7 @@
            "period" : "7.21h"
          },
          "geometry": {
-           "source": "models/hyperion.cmod",
+           "source": "models/3juno.cmod",
            "type": "Mesh",
            "size": 116.95
          }
@@ -217,16 +217,50 @@
            "argumentOfPeriapsis": 313.069818,
            "meanAnomaly": 304.372995
          },
+         "bodyFrame": "EquatorJ2000",
          "rotationModel" :
          {
            "type" : "Uniform",
            "period" : "27.623h"
          },
-         "bodyFrame": "EquatorJ2000",
          "geometry": {
            "source": "models/10hygiea.cmod",
            "type": "Mesh",
            "size": 203.55
+         }
+        },
+
+        {
+         "name" : "Lutetia",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "3.8018087295y",
+           "semiMajorAxis": "2.43590404au",
+           "eccentricity": 0.16286689,
+           "inclination": 3.063752,
+           "ascendingNode": 80.89965,
+           "argumentOfPeriapsis": 250.192463,
+           "meanAnomaly": 234.049807
+         },
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "8.1655h",
+           "inclination" : 96,
+           "ascendingNode": 142,
+           "epoch": 2444822.351160
+         },
+         "geometry": {
+           "source": "models/21lutetia.cmod",
+           "type": "Mesh",
+           "size": 47.9
          }
         }
     ]

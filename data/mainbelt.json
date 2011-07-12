@@ -64,7 +64,7 @@
            "period" : "7.8132h"
          },
          "geometry": {
-           "source": "models/hyperion.cmod",
+           "source": "models/2pallas.cmod",
            "type": "Mesh",
            "size": 249.05
          }
@@ -162,7 +162,7 @@
            "period" : "16.801h"
          },
          "geometry": {
-           "source": "models/hyperion.cmod",
+           "source": "models/5astraea.cmod",
            "type": "Mesh",
            "size": 59.55
          }

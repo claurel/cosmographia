@@ -14,14 +14,15 @@
           "trajectoryFrame" : "EclipticJ2000",
           "trajectory" :
           {
-              "type" : "Keplerian",
-              "semiMajorAxis" : 413832000,
-              "eccentricity" : 0.079834,
-              "period" : 1680.5,
-              "inclination" : 10.585,
-              "ascendingNode" : 80.399,
-              "argumentOfPeriapsis" : 72.825,
-              "meanAnomaly" : 27.448
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "4.5985912706y",
+           "semiMajorAxis": "2.76534852au",
+           "eccentricity": 0.07913832,
+           "inclination": 10.586819,
+           "ascendingNode": 80.393196,
+           "argumentOfPeriapsis": 72.589793,
+           "meanAnomaly": 113.410437
           },
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
@@ -39,6 +40,68 @@
         },
 
         {
+         "name" : "Pallas",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "4.61557535561y",
+           "semiMajorAxis": "2.77215322au",
+           "eccentricity": 0.23099964,
+           "inclination": 34.840892,
+           "ascendingNode": 173.129482,
+           "argumentOfPeriapsis": 310.150983,
+           "meanAnomaly": 96.148228
+         },
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "7.8132h"
+         },
+         "geometry": {
+           "source": "models/hyperion.cmod",
+           "type": "Mesh",
+           "size": 249.05
+         }
+      },
+
+      {
+         "name" : "Juno",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "4.36303953242y",
+           "semiMajorAxis": "2.67009122au",
+           "eccentricity": 0.25498111,
+           "inclination": 12.982107,
+           "ascendingNode": 169.911422,
+           "argumentOfPeriapsis": 248.108049,
+           "meanAnomaly": 32.096071
+         },
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "7.21h"
+         },
+         "geometry": {
+           "source": "models/hyperion.cmod",
+           "type": "Mesh",
+           "size": 116.95
+         }
+        },
+
+        {
           "name" : "Vesta",
           "class" : "asteroid",
           "label" : { "color" : "#aa8855" },
@@ -48,15 +111,15 @@
           "trajectoryFrame" : "EclipticJ2000",
           "trajectory" :
           {
-              "type" : "Keplerian",
-              "epoch" : 2455400.5,
-              "semiMajorAxis" : "2.361229952618449au",
-              "eccentricity" : 0.08862258545936168,
-              "period" : 1325.849059878629,
-              "inclination" : 7.13406257854299,
-              "ascendingNode" : 103.9096808087324,
-              "argumentOfPeriapsis" : 149.8373992529071,
-              "meanAnomaly" : 307.8010497902699
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "3.6299083512y",
+           "semiMajorAxis": "2.36191233au",
+           "eccentricity": 0.08862254,
+           "inclination": 7.134065,
+           "ascendingNode": 103.909747,
+           "argumentOfPeriapsis": 149.837283,
+           "meanAnomaly": 307.801078
           },
 
           "bodyFrame" : "EquatorJ2000",
@@ -72,6 +135,99 @@
               "type" : "Mesh",
               "source" : "models/4vesta.obj"
           }
+        },
+
+        {
+         "name" : "Astraea",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "4.13711618718y",
+           "semiMajorAxis": "2.57710321au",
+           "eccentricity": 0.19041774,
+           "inclination": 5.368852,
+           "ascendingNode": 141.644317,
+           "argumentOfPeriapsis": 358.353314,
+           "meanAnomaly": 239.045565
+         },
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "16.801h"
+         },
+         "geometry": {
+           "source": "models/hyperion.cmod",
+           "type": "Mesh",
+           "size": 59.55
+         }
+        },
+
+        {
+         "name" : "Flora",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "3.26676552191y",
+           "semiMajorAxis": "2.20163494au",
+           "eccentricity": 0.15684372,
+           "inclination": 5.888194,
+           "ascendingNode": 110.955346,
+           "argumentOfPeriapsis": 285.249704,
+           "meanAnomaly": 309.285867
+         },
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "12.799h"
+         },
+         "geometry": {
+           "source": "models/8flora.cmod",
+           "type": "Mesh",
+           "size": 67.95
+         }
+        },
+
+        {
+         "name" : "Hygiea",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-07-23T00:00:00",
+           "period": "5.56394663075y",
+           "semiMajorAxis": "3.13994449au",
+           "eccentricity": 0.1168205,
+           "inclination": 3.840511,
+           "ascendingNode": 283.440206,
+           "argumentOfPeriapsis": 313.069818,
+           "meanAnomaly": 304.372995
+         },
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "27.623h"
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/10hygiea.cmod",
+           "type": "Mesh",
+           "size": 203.55
+         }
         }
     ]
 }

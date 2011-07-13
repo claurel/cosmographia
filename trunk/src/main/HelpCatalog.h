@@ -21,12 +21,13 @@
 #include <QObject>
 #include <QMap>
 
+class UniverseCatalog;
 
 class HelpCatalog : public QObject
 {
 Q_OBJECT
 public:
-    HelpCatalog(QObject* parent = NULL);
+    HelpCatalog(UniverseCatalog* catalog, QObject* parent = NULL);
     ~HelpCatalog();
 
     int loadHelpFiles(const QString& path);
@@ -35,6 +36,7 @@ public:
 
 private:
     QMap<QString, QString> m_helpResources;
+    UniverseCatalog* m_universeCatalog;
 };
 
 #endif // _HELP_CATALOG_H_

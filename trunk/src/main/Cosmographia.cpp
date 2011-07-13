@@ -86,12 +86,12 @@ Cosmographia::Cosmographia() :
 
     initializeUniverse();
 
-    m_helpCatalog = new HelpCatalog();
-    m_helpCatalog->loadHelpFiles("./help");
-
     m_catalog = new UniverseCatalog();
     m_view3d = new UniverseView(this, m_universe.ptr(), m_catalog);
     m_loader = new UniverseLoader();
+
+    m_helpCatalog = new HelpCatalog(m_catalog);
+    m_helpCatalog->loadHelpFiles("./help");
 
     m_catalogWrapper = new UniverseCatalogObject(m_catalog);
 
@@ -1003,12 +1003,7 @@ Cosmographia::unloadLastCatalog()
         // Remove all objects from the catalog file
         foreach (QString objectName, addOn->objects())
         {
-            Entity* e = m_catalog->find(objectName);
-            m_catalog->removeBody(objectName);
-            if (e)
-            {
-                m_universe->removeEntity(e);
-            }
+            removeBody(objectName);
         }
 
         // Delete the addOn
@@ -1017,6 +1012,31 @@ Cosmographia::unloadLastCatalog()
     }
 
     updateUnloadAction();
+}
+
+
+// Remove the body with the specified name. Takes care of removing
+// all associated visualizers, but does not remove the object from
+// the catalog (since that is indexed by name)
+void
+Cosmographia::removeBody(vesta::Entity* body)
+{
+    m_view3d->clearTrajectory(body);
+    m_universe->removeEntity(body);
+}
+
+
+// Remove the body with the specified name. Takes care of removing
+// all associated visualizers
+void
+Cosmographia::removeBody(const QString& name)
+{
+    Entity* e = m_catalog->find(name);
+    m_catalog->removeBody(name);
+    if (e)
+    {
+        removeBody(e);
+    }
 }
 
 
@@ -1081,12 +1101,7 @@ Cosmographia::unloadAddOn(const QString& source)
             // Remove all objects from the catalog file
             foreach (QString objectName, addOn->objects())
             {
-                Entity* e = m_catalog->find(objectName);
-                m_catalog->removeBody(objectName);
-                if (e)
-                {
-                    m_universe->removeEntity(e);
-                }
+                removeBody(objectName);
             }
 
             // Delete the addOn

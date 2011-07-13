@@ -253,8 +253,9 @@
          {
            "type" : "Uniform",
            "period" : "8.1655h",
-           "inclination" : 96,
-           "ascendingNode": 142,
+           "inclination" : 39,
+           "ascendingNode": 102,
+           "meridianAngle": 285,
            "epoch": 2444822.351160
          },
          "geometry": {

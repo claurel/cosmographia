@@ -25,6 +25,8 @@ Text {
     property string fontFamily: "Century Gothic"
     property int fontSize: 14
     property color textColor: "#72c0ff"
+    property string enabledText: "On"
+    property string disabledText: "Off"
 
     signal toggled(bool enabled)
 
@@ -32,7 +34,7 @@ Text {
     font.pixelSize: fontSize
     font.weight: Font.Bold
     color: textColor
-    text: enabled ? "On" : "Off"
+    text: enabled ? enabledText : disabledText
     horizontalAlignment: Text.AlignRight
 
     ColorAnimation {

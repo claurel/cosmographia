@@ -7,14 +7,14 @@
         {
           "name" : "2011 MD",
           "label" : { "color" : "#ffbb88" },
-	  "trajectoryPlot": {
+          "trajectoryPlot": {
               "fade" : 0.5,
-	      "duration" : "10y"
-	  }, 
+              "duration" : "1y"
+	      }, 
 
-	  "startTime" : "2011-06-23",
-	  "endTime" : "2011-07-02",
-	  "center" : "Sun",
+          "startTime" : "2010-06-01",
+          "endTime" : "2013-01-01",
+          "center" : "Sun",
           "trajectoryFrame" : "EclipticJ2000",
           "trajectory" :
           {
@@ -34,7 +34,7 @@
           {
               "type" : "Mesh",
               "size" : 0.01,
-              "source" : "smallbodies/25143itokawa.cmod"
+              "source" : "../data/models/25143itokawa.cmod"
           }
         }
     ]

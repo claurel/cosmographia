@@ -325,8 +325,9 @@
 
           "geometry" :
           {
-              "type" : "Globe",
-              "radii" : [ 115, 110, 105 ]
+              "type" : "Mesh",
+              "source" : "models/proteus.cmod",
+              "size" : 115
           }
         }
 

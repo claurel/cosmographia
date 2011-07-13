@@ -28,5 +28,17 @@ var InstalledAddons =
     name: "Tvashtar Paterae",
     description: "Active volcanic craters on Jupiter's moon Io.",
     source: "addons/tvashtar.json"
+    },
+
+    {
+    name: "GPS Satellites",
+    description: "Constellation of 32 satellites that comprise the Global Positioning system.",
+    source: "addons/gps.json"
+    },
+
+    {
+    name: "Asteroid 2011 MD",
+    description: "2011 MD is a small asteroid that came within 12,000 of Earth on June 27, 2011.",
+    source: "addons/2011MD.json"
     }
 ];

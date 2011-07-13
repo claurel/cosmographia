@@ -17,6 +17,8 @@
 
 #include "UniverseCatalog.h"
 #include "../Viewpoint.h"
+#include <vesta/Geometry.h>
+#include <vesta/Arc.h>
 #include <QRegExp>
 
 using namespace vesta;
@@ -203,3 +205,142 @@ BodyInfo::parseClassification(const QString& classificationName)
     }
     return BodyInfo::Other;
 }
+
+static BodyInfo::Classification
+guessClassification(const vesta::Entity* body)
+{
+    Geometry* geometry = body->geometry();
+    if (geometry == NULL)
+    {
+        return BodyInfo::ReferencePoint;
+    }
+
+    float radius = geometry->boundingSphereRadius();
+    if (radius < 1.0f)
+    {
+        return BodyInfo::Spacecraft;
+    }
+
+    // Special case for the sun
+    if (body->name() == "Sun")
+    {
+        return BodyInfo::Star;
+    }
+
+    Entity* center = body->chronology()->firstArc()->center();
+    if (center == NULL || center->name() == "Sun")
+    {
+        if (radius > 1500.0f)
+        {
+            return BodyInfo::Planet;
+        }
+        else if (radius > 400.0f)
+        {
+            return BodyInfo::DwarfPlanet;
+        }
+        else
+        {
+            return BodyInfo::Asteroid;
+        }
+    }
+    else
+    {
+        return BodyInfo::Satellite;
+    }
+}
+
+
+static QString
+getDefaultDescription(const vesta::Entity* body, BodyInfo::Classification classification)
+{
+    float radius = 0.0f;
+    Geometry* geometry = body->geometry();
+    if (geometry)
+    {
+        radius = geometry->boundingSphereRadius();
+    }
+
+    QString description;
+
+    switch (classification)
+    {
+    case BodyInfo::Star:
+        description = "Star";
+        break;
+
+    case BodyInfo::ReferencePoint:
+        description = "Reference Point";
+        break;
+
+    case BodyInfo::Planet:
+        if (radius > 10000.0f)
+        {
+            description = "Planet (gas giant)";
+        }
+        else if (radius > 1500.0f)
+        {
+            description = "Planet (terrestrial)";
+        }
+        break;
+
+    case BodyInfo::DwarfPlanet:
+        description = "Dwarf Planet";
+        break;
+
+    case BodyInfo::Asteroid:
+        description = "Asteroid";
+        break;
+
+    case BodyInfo::Spacecraft:
+        description = "Spacecraft";
+        break;
+
+    case BodyInfo::Satellite:
+        {
+            Entity* center = body->chronology()->firstArc()->center();
+            if (center)
+            {
+                description = QString("Moon of %1").arg(QString::fromUtf8(center->name().c_str(), center->name().length()));
+            }
+            else
+            {
+                description = "Moon";
+            }
+        }
+        break;
+
+    default:
+        description = "Unknown object type";
+        break;
+    }
+
+    return description;
+}
+
+
+/** Get a one-line description of the specified object.
+  */
+QString
+UniverseCatalog::getDescription(vesta::Entity* body)
+{
+    BodyInfo* info = findInfo(body);
+    BodyInfo::Classification classification = BodyInfo::Other;
+
+    if (info && !info->description.isEmpty())
+    {
+        return info->description;
+    }
+    else
+    {
+        if (!info || info->classification == BodyInfo::Other)
+        {
+            classification = guessClassification(body);
+        }
+        else
+        {
+            classification = info->classification;
+        }
+        return getDefaultDescription(body, classification);
+    }
+}
+

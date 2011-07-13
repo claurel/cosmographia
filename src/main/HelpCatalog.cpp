@@ -16,12 +16,19 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "HelpCatalog.h"
+#include "catalog/UniverseCatalog.h"
 #include <QDir>
 #include <QDebug>
 
+using namespace vesta;
 
-HelpCatalog::HelpCatalog(QObject* parent) :
-    QObject(parent)
+
+/** Create a new HelpCatalog. The catalog does not take ownership
+  * of the universe catalog pointer.
+  */
+HelpCatalog::HelpCatalog(UniverseCatalog* universeCatalog, QObject* parent) :
+    QObject(parent),
+    m_universeCatalog(universeCatalog)
 {
 }
 
@@ -65,5 +72,21 @@ HelpCatalog::loadHelpFiles(const QString& path)
 QString
 HelpCatalog::getHelpText(const QString& name) const
 {
-    return m_helpResources.value(name.toLower());
+    QString help = m_helpResources.value(name.toLower());
+    if (!help.isEmpty())
+    {
+        return help;
+    }
+
+    // No help available; try and create a default help page if an object with
+    // the specified name is present in the catalog.
+    Entity* body = m_universeCatalog->find(name, Qt::CaseInsensitive);
+    if (body == NULL)
+    {
+        return "";
+    }
+
+    QString description = m_universeCatalog->getDescription(body);
+
+    return QString("<h1>%1</h1>%2").arg(QString::fromUtf8(body->name().c_str()), description);
 }

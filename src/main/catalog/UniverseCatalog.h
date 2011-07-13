@@ -91,6 +91,8 @@ public:
     void removeViewpoint(const QString& name);
     QStringList viewpointNames() const;
 
+    QString getDescription(vesta::Entity* body);
+
 private:
     QMap<QString, vesta::counted_ptr<vesta::Entity> > m_bodies;
     QMap<QString, vesta::counted_ptr<BodyInfo> > m_info;

@@ -83,6 +83,9 @@ private:
     void loadSettings();
     void saveSettings();
 
+    void removeBody(vesta::Entity* body);
+    void removeBody(const QString& name);
+
     void updateUnloadAction();
     void loadCatalogFile(const QString& fileName);
 

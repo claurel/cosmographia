@@ -1,0 +1,10 @@
+{
+    "version": "1.0",
+    "name": "Earth Orbiting Spacecraft",
+
+    "require" :
+    [
+        "iss.json",
+        "hst.json"
+    ]
+}

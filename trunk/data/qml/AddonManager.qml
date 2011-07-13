@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 import QtQuick 1.0
+import Cosmographia 1.0
 import "../addons.js" as AddonCatalog
 
 
@@ -65,7 +66,17 @@ ScrollablePane
             id: row
             spacing: 6
 
-            TextToggle { width: 40; horizontalAlignment: Text.AlignHCenter }
+            TextToggle {
+                width: 40;
+                horizontalAlignment: Text.AlignHCenter;
+                onToggled: {
+                    if (enabled)
+                        cosmoApp.loadAddOn(source);
+                    else
+                        cosmoApp.unloadAddOn(source);
+                }
+            }
+
             PanelText {
                 text: "<b>" + name + "</b><br>" + description
                 width: 230

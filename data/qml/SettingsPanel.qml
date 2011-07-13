@@ -330,6 +330,13 @@ Item {
                 verticalAlignment: Text.AlignBottom
             }
         }
+
+        AddonManager
+        {
+            property string title: " Add-ons"
+            width: 300; height: 500;
+            y: 16
+        }
     }
 
     states: State {

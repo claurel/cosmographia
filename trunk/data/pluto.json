@@ -127,8 +127,8 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "source" : "models/phobos.obj",
-              "radius" : 44.0
+              "source" : "models/5astraea.cmod",
+              "size" : 44.0
           }
         },
 
@@ -165,8 +165,8 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "source" : "models/phobos.obj",
-              "radius" : 36.0
+              "source" : "models/8flora.cmod",
+              "size" : 36.0
           }
         }
 

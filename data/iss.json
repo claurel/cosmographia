@@ -1,0 +1,52 @@
+{
+     "version": "1.0",
+     "name": "ISS",
+
+     "items" :
+     [
+        {
+          "name" : "ISS",
+
+          "label" : { "color" : [ 0.9, 0.9, 0.9 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE",
+              "name" : "ISS (ZARYA)",
+              "line1" : "1 25544U 98067A   11042.40620627  .00065760  00000-0  48638-3 0  8024",
+              "line2" : "2 25544  51.6440  85.8998 0004217 288.1282 194.3117 15.72311137701100",
+              "source" : "http://celestrak.com/NORAD/elements/visual.txt"
+          },
+
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "x",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "ISS",
+                  "target" : "Earth"
+              },
+              "secondaryAxis" : "-y",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "ISS",
+                  "target" : "Earth"
+              }
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.1,
+              "source" : "models/iss.cmod"
+          }
+        }
+
+    ]
+}

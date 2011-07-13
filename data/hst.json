@@ -1,0 +1,57 @@
+{
+     "version": "1.0",
+     "name": "Hubble Space Telescope",
+
+     "items" :
+     [
+        {
+          "name" : "Hubble",
+
+          "label" : { "color" : [ 0.9, 0.9, 0.9 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Earth",
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+              "type" : "TLE",
+              "name" : "Hubble",
+              "line1" : "1 20580U 90037B   11109.15405170  .00001367  00000-0  91050-4 0  7498",
+              "line2" : "2 20580  28.4696  42.0585 0003663 211.8262 148.2086 15.01292820950773",
+              "source" : "http://celestrak.com/NORAD/elements/visual.txt"
+          },
+
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Hubble",
+                  "target" : "Earth"
+              },
+              "secondaryAxis" : "-y",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Hubble",
+                  "target" : "Earth"
+              }
+          },
+          "rotationModel" :
+          {
+              "type" : "Fixed",
+              "quaternion" : [ 0.91355, -0.40674, 0.0, 0.0 ]
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.01,
+              "source" : "models/hst.cmod"
+          }
+        }
+
+    ]
+}

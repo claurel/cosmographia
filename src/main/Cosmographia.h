@@ -42,6 +42,9 @@ public:
 
     void initialize();
 
+    Q_INVOKABLE void loadAddOn(const QString& source);
+    Q_INVOKABLE void unloadAddOn(const QString& source);
+
 public slots:
     void findObject();
     void setTime();

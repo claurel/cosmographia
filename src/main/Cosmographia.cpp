@@ -96,11 +96,13 @@ Cosmographia::Cosmographia() :
     m_catalogWrapper = new UniverseCatalogObject(m_catalog);
 
     // Initialize QML types
+    qmlRegisterUncreatableType<Cosmographia>("Cosmographia", 1, 0, "Cosmographia", "Use global cosmoApp");
     qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "UniverseView", "Use global universeView");
     qmlRegisterUncreatableType<HelpCatalog>("Cosmographia", 1, 0, "HelpCatalog", "Use global helpCatalog");
     qmlRegisterUncreatableType<UniverseCatalogObject>("Cosmographia", 1, 0, "UniverseCatalog", "Use global universeCatalog");
     qmlRegisterType<BodyObject>("Comsmographia", 1, 0, "Body");
     qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
+    m_view3d->rootContext()->setContextProperty("cosmoApp", this);
     m_view3d->rootContext()->setContextProperty("universeView", m_view3d);
     m_view3d->rootContext()->setContextProperty("universeCatalog", m_catalogWrapper);
     m_view3d->rootContext()->setContextProperty("helpCatalog", m_helpCatalog);
@@ -114,6 +116,8 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction->setCheckable(true);
 
     loadSettings();
+
+    m_view3d->setPlanetOrbitsVisibility(true);
 
     // Set up the UI *after* settings are loaded so that the
     // controls are sync'ed
@@ -299,7 +303,7 @@ Cosmographia::setupMenuBar()
     QAction* planetOrbitsAction = new QAction("Planet &Orbits", visualAidsMenu);
     planetOrbitsAction->setShortcut(QKeySequence("Ctrl+Shift+O"));
     planetOrbitsAction->setCheckable(true);
-    planetOrbitsAction->setChecked(789);
+    planetOrbitsAction->setChecked(m_view3d->planetOrbitsVisibility());
     visualAidsMenu->addAction(planetOrbitsAction);
     QAction* plotTrajectoryAction = new QAction("&Plot Trajectory", visualAidsMenu);
     plotTrajectoryAction->setShortcut(QKeySequence("Ctrl+P"));
@@ -677,6 +681,8 @@ Cosmographia::initialize()
         }
         QDir::setCurrent(saveDir);
     }
+
+    m_view3d->setPlanetOrbitsVisibility(true);
 }
 
 
@@ -1048,6 +1054,46 @@ Cosmographia::showCatalogErrorDialog(const QString& errorMessages)
     connect(buttonBox, SIGNAL(accepted()), &errorDialog, SLOT(accept()));
 
     errorDialog.exec();
+}
+
+
+void
+Cosmographia::loadAddOn(const QString& source)
+{
+    // If the add-on is already loaded, this method will unload and reload it
+    unloadAddOn(source);
+    loadCatalogFile(source);
+    qDebug() << "Loaded " << source;
+}
+
+
+void
+Cosmographia::unloadAddOn(const QString& source)
+{
+    QFile catalogFile(source);
+    QFileInfo info = QFileInfo(catalogFile);
+    QString path = info.absoluteFilePath();
+
+    foreach (AddOn* addOn, m_loadedAddOns)
+    {
+        if (addOn->source() == path)
+        {
+            // Remove all objects from the catalog file
+            foreach (QString objectName, addOn->objects())
+            {
+                Entity* e = m_catalog->find(objectName);
+                m_catalog->removeBody(objectName);
+                if (e)
+                {
+                    m_universe->removeEntity(e);
+                }
+            }
+
+            // Delete the addOn
+            m_loadedAddOns.removeLast();
+            delete addOn;
+        }
+    }
 }
 
 

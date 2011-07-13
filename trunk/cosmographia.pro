@@ -445,6 +445,7 @@ RESOURCES = resources/icons.qrc
 INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 
 #CONFIG += ffmpeg
+#CONFIG += nomenu
 
 macx {
     # Always enable QTKit support on Mac
@@ -457,6 +458,10 @@ macx {
         src/video/VideoEncoder.h
     OBJECTIVE_SOURCES += \
         src/video/VideoEncoder.mm
+}
+
+nomenu {
+    DEFINES += NOMENUBAR=1
 }
 
 ffmpeg {
@@ -582,7 +587,13 @@ macx {
         data/models/phobos.dds \
         data/models/deimos.cmod \
         data/models/deimos.dds \
+        data/models/2pallas.cmod \
+        data/models/3juno.cmod \
         data/models/4vesta.obj \
+        data/models/5astraea.cmod \
+        data/models/8flora.cmod \
+        data/models/10hygiea.cmod \
+        data/models/21lutetia.cmod \
         data/models/amalthea.cmod \
         data/models/hyperion.cmod \
         data/models/proteus.cmod \
@@ -628,19 +639,22 @@ macx {
         data/sans-light-24.txf \
         data/de406_1800-2100.dat \
         data/earth.atmscat \
-        data/titan.atmscat
+        data/titan.atmscat \
+        data/addons.js
 
     QMAKE_BUNDLE_DATA += DATA
 
     GUI.path = Contents/Resources/data/qml
     GUI.files = \
         data/qml/main.qml \
+        data/qml/AddonManager.qml \
         data/qml/Button.qml \
         data/qml/ContextMenu.qml \
         data/qml/FindObjectPanel.qml \
         data/qml/HelpBrowser.qml \
         data/qml/InfoText.qml \
         data/qml/PanelText.qml \
+        data/qml/ScrollablePane.qml \
         data/qml/SettingsPanel.qml \
         data/qml/Slider.qml \
         data/qml/SpinBox.qml \
@@ -649,6 +663,7 @@ macx {
         data/qml/TextPanel.qml \
         data/qml/TextToggle.qml \
         data/qml/TimePanel.qml \
+        data/qml/TimeRateControl.qml \
         data/qml/LinkStack.js
 
     QMAKE_BUNDLE_DATA += GUI
@@ -656,9 +671,12 @@ macx {
     HELPFILES.path = Contents/Resources/data/help
     HELPFILES.files = \
         data/help/help.html \
+        data/help/intro.html \
         data/help/solarsysguide.html \
         data/help/mercury.html \
         data/help/venus.html \
+        data/help/earth.html \
+        data/help/moon.html \
         data/help/mars.html \
         data/help/phobos.html \
         data/help/deimos.html \
@@ -689,7 +707,11 @@ macx {
         data/help/proteus.html \
         data/help/nereid.html \
         data/help/ceres.html \
+        data/help/pallas.html \
+        data/help/juno.html \
         data/help/vesta.html \
+        data/help/hygiea.html \
+        data/help/lutetia.html \
         data/help/pluto.html \
         data/help/charon.html \
         data/help/nix.html \
@@ -698,9 +720,25 @@ macx {
         data/help/PIA01971.jpg \
         data/help/hyperion.jpg \
         data/help/iapetus-global.jpg \
-        data/help/miranda.jpg
+        data/help/miranda.jpg \
+        data/help/lutetia.jpg
 
     QMAKE_BUNDLE_DATA += HELPFILES
+
+    ADDONS.path = Contents/Resources/data/addons
+    ADDONS.files = \
+        data/addons/aurora.json \
+        data/addons/gaussian.jpg \
+        data/addons/tvashtar.json \
+        data/addons/asteroids.json \
+        data/addons/astorb_5000.dat \
+        data/addons/allasteroids.json \
+        data/addons/allasteroids.dat \
+        data/addons/hildas.json \
+        data/addons/hildas.dat
+
+    QMAKE_BUNDLE_DATA += ADDONS
+
 
     # CONFIG += x86
     # QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.5.sdk

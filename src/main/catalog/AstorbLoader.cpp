@@ -153,7 +153,7 @@ LoadBinaryAstorbFile(const QString& fileName)
     // floating point values, but not both from the same stream.
     in.setVersion(QDataStream::Qt_4_5);
 
-    while (!in.atEnd() && in.status() == QTextStream::Ok)
+    while (!in.atEnd() && in.status() == QDataStream::Ok)
     {
         float smaAU = 0.0f;
         float eccentricity = 0.0f;

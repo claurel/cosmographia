@@ -33,6 +33,7 @@ APP_SOURCES = \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/MarkerLayer.cpp \
     $$MAIN_PATH/MeshInstanceGeometry.cpp \
+    $$MAIN_PATH/MultiLabelGeometry.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/SkyLabelLayer.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
@@ -81,6 +82,7 @@ APP_HEADERS = \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/MarkerLayer.h \
     $$MAIN_PATH/MeshInstanceGeometry.h \
+    $$MAIN_PATH/MultiLabelGeometry.h \
     $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/SkyLabelLayer.h \
     $$MAIN_PATH/TleTrajectory.h \
@@ -594,6 +596,7 @@ macx {
         data/models/8flora.cmod \
         data/models/10hygiea.cmod \
         data/models/21lutetia.cmod \
+        data/models/25143itokawa.cmod \
         data/models/amalthea.cmod \
         data/models/hyperion.cmod \
         data/models/proteus.cmod \
@@ -601,8 +604,14 @@ macx {
         data/models/jason.mtl \
         data/models/jas_solr.png \
         data/models/jas_brsh.png \
-        data/models/cassini.cmod
-
+        data/models/cassini.cmod \
+        data/models/iss.cmod \
+        data/models/hst.cmod \
+        data/models/hbltel_1.jpg \
+        data/models/hbltel_2.jpg \
+        data/models/hbltel_3.jpg \
+        data/models/hbltel_4.jpg \
+        data/models/hbltel_w.jpg
 
     QMAKE_BUNDLE_DATA += MODELS
 
@@ -630,6 +639,9 @@ macx {
         data/pluto.json \
         data/mainbelt.json \
         data/cassini.json \
+        data/earthorbiting.json \
+        data/iss.json \
+        data/hst.json \
         data/start-viewpoints.json \
         data/sans-12.txf \
         data/sans-24.txf \
@@ -672,6 +684,9 @@ macx {
     HELPFILES.files = \
         data/help/help.html \
         data/help/intro.html \
+        data/help/keyboard.html \
+        data/help/navigation.html \
+        data/help/settings.html \
         data/help/solarsysguide.html \
         data/help/mercury.html \
         data/help/venus.html \
@@ -735,7 +750,14 @@ macx {
         data/addons/allasteroids.json \
         data/addons/allasteroids.dat \
         data/addons/hildas.json \
-        data/addons/hildas.dat
+        data/addons/hildas.dat \
+        data/addons/gps.json \
+        data/addons/2011MD.json \
+        data/addons/2011MD.xyzv \
+        data/addons/sciencesat.json \
+        data/addons/sorce.obj \
+        data/addons/sorce.mtl \
+        data/addons/solar_panel.png
 
     QMAKE_BUNDLE_DATA += ADDONS
 

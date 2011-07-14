@@ -62,7 +62,7 @@ Item {
     Component.onCompleted:
     {
         // Only show the intro panel if Cosmographia has not been run previously
-        if (!universeView.getSetting("previouslyRun"))
+        if (!cosmoApp.getSetting("previouslyRun"))
         {
             intro.show();
         }
@@ -297,7 +297,7 @@ Item {
 
          states: [
              State {
-                 name: "visible"; when: pageArea.mouseX < 32
+                 name: "visible"; when: pageArea.mouseX < 32 || !cosmoApp.autoHideToolBar
                  PropertyChanges { target: toolBar; opacity: 1 }
              }
          ]

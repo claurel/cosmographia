@@ -711,15 +711,6 @@ UniverseView::setMouseMoveEventProcessed(bool accepted)
 }
 
 
-// Necessary because QML doesn't currently allow access to QSettings
-QVariant
-UniverseView::getSetting(const QString &key)
-{
-    QSettings settings;
-    return settings.value(key);
-}
-
-
 // Get the name of a body as a QString
 QString
 UniverseView::bodyName(const Entity* body) const

@@ -922,6 +922,9 @@ Cosmographia::loadSettings()
 
     double ambientLight = settings.value("ambientLight", 0.15).toDouble();
     m_view3d->setAmbientLight(ambientLight);
+    double limitingMagnitude = settings.value("limitingMagnitude", 8.0).toDouble();
+    m_view3d->setLimitingMagnitude(limitingMagnitude);
+
     m_view3d->setEclipseShadows(true);
 
     settings.beginGroup("ui");
@@ -937,6 +940,7 @@ Cosmographia::saveSettings()
     QSettings settings;
 
     settings.setValue("ambientLight", m_view3d->ambientLight());
+    settings.setValue("limitingMagnitude", m_view3d->limitingMagnitude());
     settings.setValue("previouslyRun", true);
 
     settings.beginGroup("ui");

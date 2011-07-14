@@ -150,6 +150,11 @@ Item {
                 enabled: true
             }
 
+            PanelText { text: "Diffraction Spikes" }
+            TextToggle {
+                onToggled: { universeView.diffractionSpikes = enabled }
+                enabled: false
+            }
 
             // Spacer
             Item { height: 20; width: 10 }

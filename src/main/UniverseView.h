@@ -71,6 +71,7 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(bool cloudsVisible READ cloudsVisible WRITE setCloudsVisible);
     Q_PROPERTY(bool atmospheresVisible READ atmospheresVisible WRITE setAtmospheresVisible);
     Q_PROPERTY(bool sunGlare READ sunGlare WRITE setSunGlare);
+    Q_PROPERTY(bool diffractionSpikes READ diffractionSpikes WRITE setDiffractionSpikes);
     Q_PROPERTY(bool milkyWayVisible READ milkyWayVisible WRITE setMilkyWayVisible);
     Q_PROPERTY(bool planetOrbitsVisible READ planetOrbitsVisibility WRITE setPlanetOrbitsVisibility);
 
@@ -193,6 +194,7 @@ public:
     bool cloudsVisible() const;
     bool atmospheresVisible() const;
     bool sunGlare() const;
+    bool diffractionSpikes() const;
     bool milkyWayVisible() const;
 
     double gotoObjectTime() const
@@ -294,6 +296,7 @@ public slots:
     void setStereoMode(StereoMode stereoMode);
     void setAntialiasingSamples(int samples);
     void setSunGlare(bool enable);
+    void setDiffractionSpikes(bool enable);
 
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);

@@ -2620,6 +2620,32 @@ UniverseView::setSunGlare(bool enable)
 }
 
 
+bool
+UniverseView::diffractionSpikes() const
+{
+    StarsLayer* stars = dynamic_cast<StarsLayer*>(m_universe->layer("stars"));
+    if (stars)
+    {
+        return stars->diffractionSpikeBrightness() > 0.0f;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+void
+UniverseView::setDiffractionSpikes(bool enable)
+{
+    StarsLayer* stars = dynamic_cast<StarsLayer*>(m_universe->layer("stars"));
+    if (stars)
+    {
+        stars->setDiffractionSpikeBrightness(enable ? 0.3f : 0.0f);
+    }
+}
+
+
 void
 UniverseView::setStereoMode(StereoMode stereoMode)
 {

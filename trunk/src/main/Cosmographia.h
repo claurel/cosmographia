@@ -23,6 +23,7 @@
 #include <vesta/Universe.h>
 #include <QMainWindow>
 #include <QNetworkAccessManager>
+#include <QVariant>
 
 
 class UniverseView;
@@ -42,8 +43,16 @@ public:
 
     void initialize();
 
+    Q_PROPERTY(bool autoHideToolBar READ autoHideToolBar WRITE setAutoHideToolBar NOTIFY autoHideToolBarChanged);
+
     Q_INVOKABLE void loadAddOn(const QString& source);
     Q_INVOKABLE void unloadAddOn(const QString& source);
+    Q_INVOKABLE QVariant getSetting(const QString& key);
+
+    bool autoHideToolBar() const
+    {
+        return m_autoHideToolBar;
+    }
 
 public slots:
     void findObject();
@@ -67,6 +76,10 @@ public slots:
     void setTimeDisplay(QAction* action);
 
     void processReceivedResource(QNetworkReply* reply);
+    void setAutoHideToolBar(bool enabled);
+
+signals:
+    void autoHideToolBarChanged();
 
 protected:
     bool event(QEvent* event);
@@ -107,6 +120,8 @@ private:
     QAction* m_unloadLastCatalogAction;
 
     UniverseCatalogObject* m_catalogWrapper;
+
+    bool m_autoHideToolBar;
 };
 
 #endif // _COSMOGRAPHIA_H_

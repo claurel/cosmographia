@@ -334,6 +334,17 @@ Item {
                 text: "" + Math.round(gotoTimeSlider.value) + " sec";
                 verticalAlignment: Text.AlignBottom
             }
+
+            // Spacer
+            Item { height: 10; width: 10 }
+            Item { height: 10; width: 10 }
+
+            PanelText { text: "Auto-hide Tool Bar" }
+            TextToggle {
+                onToggled: { cosmoApp.autoHideToolBar = enabled }
+                enabled: false
+                Component.onCompleted: { enabled = cosmoApp.autoHideToolBar }
+            }
         }
 
         AddonManager

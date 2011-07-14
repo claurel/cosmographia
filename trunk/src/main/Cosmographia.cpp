@@ -74,7 +74,8 @@ Cosmographia::Cosmographia() :
     m_helpCatalog(NULL),
     m_fullScreenAction(NULL),
     m_networkManager(NULL),
-    m_catalogWrapper(NULL)
+    m_catalogWrapper(NULL),
+    m_autoHideToolBar(false)
 {
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -935,6 +936,7 @@ Cosmographia::loadSettings()
     m_view3d->setEclipseShadows(true);
 
     settings.beginGroup("ui");
+    setAutoHideToolBar(settings.value("autoHideToolBar", false).toBool());
     m_fullScreenAction->setChecked(settings.value("fullscreen", true).toBool());
     setFullScreen(m_fullScreenAction->isChecked());
     settings.endGroup();
@@ -951,8 +953,18 @@ Cosmographia::saveSettings()
     settings.setValue("previouslyRun", true);
 
     settings.beginGroup("ui");
+    settings.setValue("autoHideToolBar", m_autoHideToolBar);
     settings.setValue("fullscreen", m_fullScreenAction->isChecked());
     settings.endGroup();
+}
+
+
+// Necessary because QML doesn't currently allow access to QSettings
+QVariant
+Cosmographia::getSetting(const QString &key)
+{
+    QSettings settings;
+    return settings.value(key);
 }
 
 
@@ -1285,5 +1297,19 @@ Cosmographia::event(QEvent* event)
     else
     {
         return QMainWindow::event(event);
+    }
+}
+
+
+/** Set whether the tool bar automatically disappears/reappears based on
+  * the mouse position.
+  */
+void
+Cosmographia::setAutoHideToolBar(bool enabled)
+{
+    if (enabled != m_autoHideToolBar)
+    {
+        m_autoHideToolBar = enabled;
+        emit autoHideToolBarChanged();
     }
 }

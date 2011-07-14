@@ -101,7 +101,7 @@ enum DistanceUnit
 
 static const double AU = 149597870.691;
 
-static const double DefaultStartTime = daysToSeconds(-36525.0);      // 12:00:00 1 Jan 1900
+static const double DefaultStartTime = daysToSeconds(-36525.0 * 2);  // 12:00:00 1 Jan 1800
 static const double DefaultEndTime   = daysToSeconds( 36525.0);      // 12:00:00 1 Jan 2100
 
 QString ValueUnitsRegexpString("^\\s*([-+]?[0-9]*\\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\\s*([A-Za-z]+)?\\s*$");

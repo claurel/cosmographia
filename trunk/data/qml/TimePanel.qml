@@ -163,14 +163,14 @@ Item {
 
             function nextYear()
             {
-                year++;
+                year = Math.min(year + 1, 2099);
                 if (day > daysInMonth(year, month))
                     day = daysInMonth(year, month);
             }
 
             function prevYear()
             {
-                year--;
+                year = Math.max(year - 1, 1800);
                 if (day > daysInMonth(year, month))
                     day = daysInMonth(year, month);
             }

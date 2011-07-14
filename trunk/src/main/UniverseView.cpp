@@ -106,7 +106,7 @@ static const double KeyboardRotationAcceleration = 3.5;
 static const unsigned int ShadowMapSize = 2048;
 static const unsigned int ReflectionMapSize = 512;
 
-static double StartOfTime = GregorianDate(1900, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
+static double StartOfTime = GregorianDate(1800, 1, 1, 13, 0, 0, 0, TimeScale_TDB).toTDBSec();
 static double EndOfTime   = GregorianDate(2100, 1, 1, 0, 0, 0, 0, TimeScale_TDB).toTDBSec();
 
 static const double MinimumFOV = toRadians(0.1);
@@ -1962,7 +1962,7 @@ UniverseView::setTimeScale(double timeScale)
 void
 UniverseView::setSimulationTime(double tsec)
 {
-    m_simulationTime = tsec;
+    m_simulationTime = std::max(StartOfTime, std::min(EndOfTime, tsec));
     emit simulationDateTimeChanged();
 }
 

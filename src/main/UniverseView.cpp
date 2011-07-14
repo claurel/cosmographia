@@ -211,6 +211,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_videoRecordingStartTime(0.0),
     m_timeDisplay(TimeDisplay_UTC),
     m_wireframe(false),
+    m_captureNextImage(false),
     m_statusUpdateTime(0.0),
     m_markers(NULL)
 {
@@ -1068,6 +1069,14 @@ void UniverseView::paintGL()
     }
 
     m_renderer->endViewSet();
+
+    // Capture the framebuffer *before* rendering the UI
+    if (m_captureNextImage)
+    {
+        m_captureNextImage = false;
+        QImage screenShot = grabFrameBuffer(false);
+        QApplication::clipboard()->setImage(screenShot);
+    }
 
 #if FFMPEG_SUPPORT || QTKIT_SUPPORT
     if (m_videoEncoder)
@@ -3142,3 +3151,16 @@ UniverseView::setStateFromUrl(const QUrl& url)
         setAtmospheresVisible(atmospheres != 0);
     }
 }
+
+
+/** Save the next rendered frame to the clipboard, optionally with
+  * alpha information. We wait for the next frame in order to capture
+  * the image before the UI overlay is rendered on top of it.
+  */
+void
+UniverseView::copyNextFrameToClipboard(bool /* withAlpha */)
+{
+    m_captureNextImage = true;
+    setStatusMessage(tr("Captured screenshot to clipboard"));
+}
+

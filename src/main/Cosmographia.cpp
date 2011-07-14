@@ -141,12 +141,16 @@ Cosmographia::setupMenuBar()
 {
     /*** File Menu ***/
     QMenu* fileMenu = new QMenu("&File", this);
-    QAction* saveScreenShotAction = fileMenu->addAction("&Save Screen Shot");
-    QAction* recordVideoAction = fileMenu->addAction("&Record Video");
+    QAction* saveScreenShotAction = new QAction("&Save Screenshot", this);
+    QAction* copyScreenShotAction = new QAction("&Copy Screenshot to Clipboard", this);
+    copyScreenShotAction->setShortcut(QKeySequence("Shift+Ctrl+C"));
+    QAction* recordVideoAction = new QAction("&Record Video", this);
     recordVideoAction->setShortcut(QKeySequence("Ctrl+R"));
 #if !FFMPEG_SUPPORT && !QTKIT_SUPPORT
     recordVideoAction->setEnabled(false);
 #endif
+    fileMenu->addAction(saveScreenShotAction);
+    fileMenu->addAction(recordVideoAction);
     fileMenu->addSeparator();
     QAction* loadCatalogAction = fileMenu->addAction("&Open Catalog...");
     loadCatalogAction->setShortcut(QKeySequence("Ctrl+O"));
@@ -158,6 +162,7 @@ Cosmographia::setupMenuBar()
     menuBar()->addMenu(fileMenu);
 
     connect(saveScreenShotAction, SIGNAL(triggered()), this, SLOT(saveScreenShot()));
+    connect(copyScreenShotAction, SIGNAL(triggered()), m_view3d, SLOT(copyNextFrameToClipboard()));
     connect(recordVideoAction, SIGNAL(triggered()), this, SLOT(recordVideo()));
     connect(loadCatalogAction, SIGNAL(triggered()), this, SLOT(loadCatalog()));
     connect(m_unloadLastCatalogAction, SIGNAL(triggered()), this, SLOT(unloadLastCatalog()));
@@ -441,6 +446,8 @@ Cosmographia::setupMenuBar()
     addAction(loadCatalogAction);
     addAction(m_unloadLastCatalogAction);
     addAction(m_fullScreenAction);
+    addAction(copyScreenShotAction);
+    addAction(recordVideoAction);
     addAction(pauseAction);
     addAction(fasterAction);
     addAction(slowerAction);
@@ -972,8 +979,8 @@ Cosmographia::recordVideo()
         if (!saveFileName.isEmpty())
         {
             QVideoEncoder* encoder = new QVideoEncoder();
-            //encoder->createFile(saveFileName, 848, 480, 5000000, 20);
-            encoder->createFile(saveFileName, 1280, 720, 5000000, 20);
+            encoder->createFile(saveFileName, 852, 480, 5000000, 20);
+            //encoder->createFile(saveFileName, 1280, 720, 5000000, 20);
             m_view3d->startVideoRecording(encoder);
         }
     }

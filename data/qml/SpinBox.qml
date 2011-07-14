@@ -31,19 +31,26 @@ FocusScope
     Column
     {
         id: column
-        spacing: 2
+        spacing: 0
 
-        Image {
-            width: 16; height: 8
+        Item {
             anchors.horizontalCenter: textBox.horizontalCenter
+            width: upArrow.width + 8; height: upArrow.height + 8
 
-            source: "qrc:/icons/up.png"
-            smooth: true
-            opacity: container.focus ? 1 : 0.1
+            Image {
+                id: upArrow
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: 16; height: 8
+
+                source: "qrc:/icons/up.png"
+                smooth: true
+                opacity: container.focus ? 1 : 0.1
+            }
 
             MouseArea {
                 anchors.fill: parent
-                onPressed: { container.up() }
+                onPressed: { container.focus = true; container.up() }
             }
         }
 
@@ -55,27 +62,25 @@ FocusScope
                 anchors.fill: parent
                 onPressed: { container.focus = true }
             }
-
-            /*
-            Rectangle {
-                anchors.fill: parent
-                color: "white"
-                opacity: container.focus ? 0.3 : 0
-            }
-            */
         }
 
-        Image {
-            width: 16; height: 8
+        Item {
             anchors.horizontalCenter: textBox.horizontalCenter
+            width: downArrow.width + 8; height: downArrow.height + 8
 
-            source: "qrc:/icons/down.png"
-            smooth: true
-            opacity: container.focus ? 1 : 0.1
+            Image {
+                id:  downArrow
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 16; height: 8
+
+                source: "qrc:/icons/down.png"
+                smooth: true
+                opacity: container.focus ? 1 : 0.1
+            }
 
             MouseArea {
                 anchors.fill: parent
-                onPressed: { container.down() }
+                onPressed: { container.focus = true; container.down() }
             }
         }
     }

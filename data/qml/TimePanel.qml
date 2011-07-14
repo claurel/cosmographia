@@ -476,7 +476,7 @@ Item {
                     id: timeRateControl
                 }
 
-                Item { width: 146; height: 1 }
+                Item { width: 154; height: 1 }
 
                 Button {
                     id: realTimeButton

@@ -313,6 +313,8 @@ public slots:
     void setUpdateInterval(unsigned int msec);
     void findObject();
 
+    void copyNextFrameToClipboard(bool withAlpha = false);
+
     void setStatusMessage(const QString& message);
 
 private slots:
@@ -438,6 +440,7 @@ private:
 
     TimeDisplayMode m_timeDisplay;
     bool m_wireframe;
+    bool m_captureNextImage;
 
     double m_statusUpdateTime;
     QString m_statusMessage;

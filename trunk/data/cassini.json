@@ -64,7 +64,7 @@
               "source" : "models/cassini.cmod"
           },
 
-          "label" : { "color" : "#00ff00" },
+          "label" : { "color" : "#d0d0d0" },
           "trajectoryPlot" :
           {
               "duration" : "1 y",

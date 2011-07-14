@@ -59,7 +59,7 @@
 
         {
           "name" : "Charon",
-	  "description" : "Largest moon of Pluto",
+          "description" : "Largest moon of Pluto",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
@@ -97,7 +97,7 @@
         {
           "name" : "Nix",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
-	  "description" : "Moon of Pluto",
+          "description" : "Moon of Pluto",
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "center" : "Pluto System Barycenter",
@@ -134,7 +134,7 @@
 
         {
           "name" : "Hydra",
-	  "description" : "Moon of Pluto",
+          "description" : "Moon of Pluto",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 

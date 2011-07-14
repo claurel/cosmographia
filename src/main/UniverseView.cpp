@@ -28,6 +28,7 @@
 #include "SkyLabelLayer.h"
 #include "ConstellationInfo.h"
 #include "TwoVectorFrame.h"
+#include "MultiLabelGeometry.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -311,37 +312,81 @@ QSize UniverseView::sizeHint() const
 }
 
 
+// Set up the labels to fade when the labeled object is very close or very distant
+static void
+setLabelFadeRange(LabelGeometry* label, Entity* body, vesta::Arc* arc, double fadeSize)
+{
+    float geometrySize = 1.0f;
+    if (body->geometry())
+    {
+        geometrySize = body->geometry()->boundingSphereRadius();
+    }
 
-static Visualizer* labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, double fadeSize, bool visible)
+    float orbitSize = arc->trajectory()->boundingSphereRadius();
+    if (fadeSize == 0.0)
+    {
+        fadeSize = orbitSize;
+    }
+
+    float minPixels = 20.0f;
+    float maxPixels = 20.0f * fadeSize / geometrySize;
+
+    if (body->name() != "Sun")
+    {
+        label->setFadeSize(fadeSize);
+        label->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
+    }
+}
+
+
+static Visualizer*
+labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, double fadeSize, bool visible)
 {
     if (!planet || !planet->isVisible())
     {
         return NULL;
     }
 
-    LabelVisualizer* vis = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
-    vis->label()->setIcon(icon);
-    vis->label()->setIconColor(color);
-
-    // Set up the labels to fade when the labeled object is very close or very distant
-    float geometrySize = 1.0f;
-    if (planet->geometry())
+    // Use a more complex labeling scheme when an object has a trajectory defined with
+    // respect to multiple center objects. This is helpful for spacecraft that orbit planets
+    // other than Earth; without special handling, their labels end up overlapping those of the
+    // planets.
+    bool multiLabelRequired = false;
+    for (unsigned int i = 1; i < planet->chronology()->arcCount(); ++i)
     {
-        geometrySize = planet->geometry()->boundingSphereRadius();
+        if (planet->chronology()->arc(i)->center() != planet->chronology()->firstArc()->center())
+        {
+            multiLabelRequired = true;
+            break;
+        }
     }
 
-    float orbitSize = planet->chronology()->firstArc()->trajectory()->boundingSphereRadius();
-    if (fadeSize == 0.0)
+    Visualizer* vis = NULL;
+    if (multiLabelRequired)
     {
-        fadeSize = orbitSize;
-    }
-    float minPixels = 20.0f;
-    float maxPixels = 20.0f * fadeSize / geometrySize;
+        MultiLabelGeometry* geometry = new MultiLabelGeometry();
+        double startTime = planet->chronology()->beginning();
+        for (unsigned int i = 0; i < planet->chronology()->arcCount(); ++i)
+        {
+            vesta::Arc* arc = planet->chronology()->arc(i);
 
-    if (planet->name() != "Sun")
+            LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
+            label->setIcon(icon);
+            label->setIconColor(color);
+            setLabelFadeRange(label, planet, arc, fadeSize);
+            geometry->addLabel(startTime, label);
+            startTime += arc->duration();
+        }
+
+        vis = new Visualizer(geometry);
+    }
+    else
     {
-        vis->label()->setFadeSize(fadeSize);
-        vis->label()->setFadeRange(new FadeRange(minPixels, maxPixels, minPixels, maxPixels));
+        LabelVisualizer* labelVis = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
+        labelVis->label()->setIcon(icon);
+        labelVis->label()->setIconColor(color);
+        setLabelFadeRange(labelVis->label(), planet, planet->chronology()->firstArc(), fadeSize);
+        vis = labelVis;
     }
 
     planet->setVisualizer("label", vis);

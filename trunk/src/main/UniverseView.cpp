@@ -275,10 +275,11 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     initNetwork();
 
     grabGesture(Qt::PinchGesture);
-
+#if 0
     // Initialize settings
     setLimitingMagnitude(8.0);
     emit limitingMagnitudeChanged(limitingMagnitude()); // Force a notification
+#endif
 }
 
 

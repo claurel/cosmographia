@@ -7,6 +7,12 @@ var InstalledAddons =
     },
 
     {
+    name: "Science Satellites",
+    description: "The Jason 1 oceanography satellite and the SORCE solar monitoring satellite",
+    source: "addons/sciencesat.json"
+    },
+
+    {
     name: "First Asteroids",
     description: "The first 5,000 asteroids discovered",
     source: "addons/asteroids.json"

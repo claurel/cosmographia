@@ -2456,7 +2456,11 @@ UniverseView::hasTrajectoryPlots(QObject* bodyObj) const
     }
 
     string visName = TrajectoryVisualizerName(body->body());
-    Visualizer* oldVisualizer = arc->center()->visualizer(visName);
+    Visualizer* oldVisualizer = NULL;
+    if (arc->center())
+    {
+        oldVisualizer = arc->center()->visualizer(visName);
+    }
 
     return oldVisualizer != NULL;
 }

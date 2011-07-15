@@ -307,15 +307,14 @@ Cosmographia::setupMenuBar()
     visualAidsMenu->addSeparator();
 
     QAction* planetOrbitsAction = new QAction("Planet &Orbits", visualAidsMenu);
-    planetOrbitsAction->setShortcut(QKeySequence("Ctrl+Shift+O"));
+    planetOrbitsAction->setShortcut(QKeySequence("Ctrl+P"));
     planetOrbitsAction->setCheckable(true);
     planetOrbitsAction->setChecked(m_view3d->planetOrbitsVisibility());
     visualAidsMenu->addAction(planetOrbitsAction);
     QAction* plotTrajectoryAction = new QAction("&Plot Trajectory", visualAidsMenu);
-    plotTrajectoryAction->setShortcut(QKeySequence("Ctrl+P"));
+    plotTrajectoryAction->setShortcut(QKeySequence("Shift+Ctrl+P"));
     visualAidsMenu->addAction(plotTrajectoryAction);
     QAction* plotTrajectoryObserverAction = new QAction("&Plot Trajectory in Observer Frame", visualAidsMenu);
-    plotTrajectoryObserverAction->setShortcut(QKeySequence("Shift+Ctrl+P"));
     visualAidsMenu->addAction(plotTrajectoryObserverAction);
 
     visualAidsMenu->addSeparator();
@@ -462,6 +461,10 @@ Cosmographia::setupMenuBar()
     addAction(bodyFixedAction);
     addAction(planetOrbitsAction);
     addAction(plotTrajectoryAction);
+#else
+    // This should go into the edit menu, but there currently
+    // isn't one.
+    addAction(copyScreenShotAction);
 #endif // NOMENUBAR
 }
 

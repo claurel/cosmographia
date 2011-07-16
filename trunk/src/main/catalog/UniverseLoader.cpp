@@ -2474,6 +2474,8 @@ loadParticleEmitter(const QVariantMap& map)
         emitter->setColor(i, colors[i], opacities[i]);
     }
 
+#define PARTICLE_SYSTEM_PHASE 0
+#if PARTICLE_SYSTEM_PHASE
     if (emissiveVar.type() == QVariant::Bool)
     {
         emitter->setEmissive(emissiveVar.toBool());
@@ -2494,6 +2496,7 @@ loadParticleEmitter(const QVariantMap& map)
             }
         }
     }
+#endif
 
     return emitter;
 }

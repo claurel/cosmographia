@@ -2349,6 +2349,8 @@ loadParticleEmitter(const QVariantMap& map)
     QVariant velocityVariationVar = map.value("velocityVariation");
     QVariant forceVar = map.value("force");
     QVariant traceVar = map.value("trace");
+    QVariant emissiveVar = map.value("emissive");
+    QVariant phaseVar = map.value("phaseAsymmetry");
 
     // Get the required parameters: lifetime and spawn rate
     double lifetime = 0.0;
@@ -2470,6 +2472,27 @@ loadParticleEmitter(const QVariantMap& map)
     {
         qDebug() << "color: " << i << ", " << opacities[i];
         emitter->setColor(i, colors[i], opacities[i]);
+    }
+
+    if (emissiveVar.type() == QVariant::Bool)
+    {
+        emitter->setEmissive(emissiveVar.toBool());
+    }
+
+    if (phaseVar.isValid())
+    {
+        float phase = phaseVar.toFloat(&ok);
+        if (ok)
+        {
+            if (phase <= -1.0f || phase >= 1.0f)
+            {
+                qDebug() << "Value for phaseAsymmetry must be between -1 and 1";
+            }
+            else
+            {
+                emitter->setPhaseAsymmetry(phase);
+            }
+        }
     }
 
     return emitter;

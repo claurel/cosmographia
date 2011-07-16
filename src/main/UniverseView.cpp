@@ -100,6 +100,10 @@ using namespace Eigen;
 using namespace std;
 
 
+// No need to enable this now; it is only useful once there are point
+// light sources in the scene.
+#define OMNI_SHADOW_MAPS 0
+
 static const int MaxAntialiasingSampleCount = 8;
 
 static const double KeyboardRotationAcceleration = 3.5;
@@ -443,10 +447,12 @@ void UniverseView::initializeGL()
         m_renderer->initializeShadowMaps(ShadowMapSize, 1);
     }
 
+#if OMNI_SHADOW_MAPS
     if (m_renderer->omniShadowsSupported())
     {
         m_renderer->initializeOmniShadowMaps(1024, 1);
     }
+#endif
 
     setAmbientLight(false);
 

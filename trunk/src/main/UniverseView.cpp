@@ -3050,7 +3050,7 @@ UniverseView::getStateUrl()
     QUrl url;
 
     url.setScheme("cosmo");
-    url.setPath(QString::fromUtf8(m_observer->center()->name().c_str()));
+    url.setPath(bodyName(m_observer->center()));
 
     double jd = secondsToDays(m_simulationTime) + vesta::J2000;
     Vector3d position = m_observer->position();
@@ -3061,6 +3061,19 @@ UniverseView::getStateUrl()
     if (m_observerFrame == Frame_BodyFixed)
     {
         frame = "bfix";
+    }
+    else if (m_observerFrame == Frame_Locked)
+    {
+        TwoVectorFrame* f = dynamic_cast<TwoVectorFrame*>(m_observer->positionFrame());
+        if (f)
+        {
+            RelativePositionVector* vec = dynamic_cast<RelativePositionVector*>(f->primaryDirection());
+            if (vec)
+            {
+                frame = "track";
+                url.addQueryItem("ftarget", bodyName(vec->target()));
+            }
+        }
     }
 
     url.addQueryItem("frame", frame);
@@ -3146,6 +3159,12 @@ UniverseView::setStateFromUrl(const QUrl& url)
     else if (frame == "bfix")
     {
         newFrame = Frame_BodyFixed;
+    }
+    else if (frame == "track")
+    {
+        newFrame = Frame_Locked;
+        QString targetName = url.queryItemValue("ftarget");
+        setSelectedBody(m_catalog->find(targetName));
     }
 
     // Now actually set the state

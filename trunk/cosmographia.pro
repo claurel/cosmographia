@@ -50,6 +50,7 @@ APP_SOURCES = \
     $$MAIN_PATH/astro/MarsSat.cpp \
     $$MAIN_PATH/astro/TASS17.cpp \
     $$MAIN_PATH/catalog/AstorbLoader.cpp \
+    $$MAIN_PATH/catalog/ChebyshevPolyFileLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
@@ -100,6 +101,7 @@ APP_HEADERS = \
     $$MAIN_PATH/astro/L1.h \
     $$MAIN_PATH/astro/TASS17.h \
     $$MAIN_PATH/catalog/AstorbLoader.h \
+    $$MAIN_PATH/catalog/ChebyshevPolyFileLoader.h \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \

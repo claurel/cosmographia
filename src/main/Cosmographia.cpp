@@ -28,6 +28,7 @@
 #include "../video/VideoEncoder.h"
 #endif
 #include "JPLEphemeris.h"
+#include "catalog/ChebyshevPolyFileLoader.h"
 #include "NetworkTextureLoader.h"
 #include "LinearCombinationTrajectory.h"
 #include "astro/IAULunarRotationModel.h"
@@ -604,34 +605,45 @@ Cosmographia::initialize()
         // position: -2.649903422886233E+07  1.327574176646856E+08  5.755671744790662E+07
         // velocity: -2.979426004836674E+01 -5.018052460415045E+00 -2.175393728607054E+00
         //std::cout << "Earth @ J2000: " << earthTrajectory->position(0.0).transpose().format(16) << std::endl;
-
-        // Martian satellites
-        m_loader->addBuiltinOrbit("Phobos", MarsSatOrbit::Create(MarsSatOrbit::Phobos));
-        m_loader->addBuiltinOrbit("Deimos", MarsSatOrbit::Create(MarsSatOrbit::Deimos));
-
-        // Galilean satellites
-        m_loader->addBuiltinOrbit("Io", L1Orbit::Create(L1Orbit::Io));
-        m_loader->addBuiltinOrbit("Europa", L1Orbit::Create(L1Orbit::Europa));
-        m_loader->addBuiltinOrbit("Ganymede", L1Orbit::Create(L1Orbit::Ganymede));
-        m_loader->addBuiltinOrbit("Callisto", L1Orbit::Create(L1Orbit::Callisto));
-
-        // Saturnian satellites
-        m_loader->addBuiltinOrbit("Mimas",     TASS17Orbit::Create(TASS17Orbit::Mimas));
-        m_loader->addBuiltinOrbit("Enceladus", TASS17Orbit::Create(TASS17Orbit::Enceladus));
-        m_loader->addBuiltinOrbit("Tethys",    TASS17Orbit::Create(TASS17Orbit::Tethys));
-        m_loader->addBuiltinOrbit("Dione",     TASS17Orbit::Create(TASS17Orbit::Dione));
-        m_loader->addBuiltinOrbit("Rhea",      TASS17Orbit::Create(TASS17Orbit::Rhea));
-        m_loader->addBuiltinOrbit("Titan",     TASS17Orbit::Create(TASS17Orbit::Titan));
-        m_loader->addBuiltinOrbit("Hyperion",  TASS17Orbit::Create(TASS17Orbit::Hyperion));
-        m_loader->addBuiltinOrbit("Iapetus",   TASS17Orbit::Create(TASS17Orbit::Iapetus));
-
-        // Uranian satellites
-        m_loader->addBuiltinOrbit("Miranda",   Gust86Orbit::Create(Gust86Orbit::Miranda));
-        m_loader->addBuiltinOrbit("Ariel",     Gust86Orbit::Create(Gust86Orbit::Ariel));
-        m_loader->addBuiltinOrbit("Umbriel",   Gust86Orbit::Create(Gust86Orbit::Umbriel));
-        m_loader->addBuiltinOrbit("Titania",   Gust86Orbit::Create(Gust86Orbit::Titania));
-        m_loader->addBuiltinOrbit("Oberon",    Gust86Orbit::Create(Gust86Orbit::Oberon));
     }
+
+    // Martian satellites
+    m_loader->addBuiltinOrbit("Phobos", MarsSatOrbit::Create(MarsSatOrbit::Phobos));
+    m_loader->addBuiltinOrbit("Deimos", MarsSatOrbit::Create(MarsSatOrbit::Deimos));
+
+    // Galilean satellites
+    m_loader->addBuiltinOrbit("Io", L1Orbit::Create(L1Orbit::Io));
+    m_loader->addBuiltinOrbit("Europa", L1Orbit::Create(L1Orbit::Europa));
+    m_loader->addBuiltinOrbit("Ganymede", L1Orbit::Create(L1Orbit::Ganymede));
+    m_loader->addBuiltinOrbit("Callisto", L1Orbit::Create(L1Orbit::Callisto));
+
+    // Saturnian satellites
+    m_loader->addBuiltinOrbit("Mimas",     TASS17Orbit::Create(TASS17Orbit::Mimas));
+    m_loader->addBuiltinOrbit("Enceladus", TASS17Orbit::Create(TASS17Orbit::Enceladus));
+    m_loader->addBuiltinOrbit("Tethys",    TASS17Orbit::Create(TASS17Orbit::Tethys));
+    m_loader->addBuiltinOrbit("Dione",     TASS17Orbit::Create(TASS17Orbit::Dione));
+    m_loader->addBuiltinOrbit("Rhea",      TASS17Orbit::Create(TASS17Orbit::Rhea));
+    m_loader->addBuiltinOrbit("Titan",     TASS17Orbit::Create(TASS17Orbit::Titan));
+    m_loader->addBuiltinOrbit("Hyperion",  TASS17Orbit::Create(TASS17Orbit::Hyperion));
+    m_loader->addBuiltinOrbit("Iapetus",   TASS17Orbit::Create(TASS17Orbit::Iapetus));
+
+    // Uranian satellites
+    m_loader->addBuiltinOrbit("Miranda",   Gust86Orbit::Create(Gust86Orbit::Miranda));
+    m_loader->addBuiltinOrbit("Ariel",     Gust86Orbit::Create(Gust86Orbit::Ariel));
+    m_loader->addBuiltinOrbit("Umbriel",   Gust86Orbit::Create(Gust86Orbit::Umbriel));
+    m_loader->addBuiltinOrbit("Titania",   Gust86Orbit::Create(Gust86Orbit::Titania));
+    m_loader->addBuiltinOrbit("Oberon",    Gust86Orbit::Create(Gust86Orbit::Oberon));
+
+    // Load data for Enceladus. The TASS17 theory isn't accurate enough for Cassini's
+    // closest approaches. enceladusBaryOrbit is the orbit of Enceladus around the Saturn
+    // system barycenter; saturnBary is the position of Saturn with respect to the
+    // barycenter. Both are required in order to calculate the position of Enceladus
+    // with respect to Saturn.
+    ChebyshevPolyTrajectory* enceladusBaryOrbit = LoadChebyshevPolyFile("enceladus.cheb");
+    ChebyshevPolyTrajectory* saturnBary = LoadChebyshevPolyFile("saturn.cheb");
+    LinearCombinationTrajectory* enceladusOrbit = new LinearCombinationTrajectory(enceladusBaryOrbit, 1.0, saturnBary, -1.0);
+    enceladusOrbit->setPeriod(daysToSeconds(1.370218));
+    m_loader->addBuiltinOrbit("Enceladus-cheby", enceladusOrbit);
 
     // Set up builtin rotation models
     m_loader->addBuiltinRotationModel("IAU Moon", new IAULunarRotationModel());

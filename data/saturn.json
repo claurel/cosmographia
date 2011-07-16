@@ -87,22 +87,73 @@
           "label" : { "color" : [ 0.8, 0.8, 0.9 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-          "center" : "Saturn",
+          "startTime" : "1800-01-01",
 
-          "trajectory" :
-          {
-              "type" : "Builtin",
-              "name" : "Enceladus"
-          },
-          "bodyFrame" : "EquatorJ2000",
-          "rotationModel" :
-          {
-              "type" : "Uniform",
-              "period" : "1.370218083712283d",
-              "inclination" : 6.48,
-              "ascendingNode" : 130.66,
-              "meridianAngle" : 2.82
-          },
+          "arcs" : [
+            {
+              "center" : "Saturn",
+
+              "endTime" : "2000-01-02",
+
+              "trajectoryFrame" : "EquatorJ2000",
+              "trajectory" :
+              {
+                "type" : "Builtin",
+                "name" : "Enceladus"
+              },
+              "bodyFrame" : "EquatorJ2000",
+              "rotationModel" :
+              {
+                "type" : "Uniform",
+                "period" : "1.370218083712283d",
+                "inclination" : 6.48,
+                "ascendingNode" : 130.66,
+                "meridianAngle" : 2.82
+              }
+            },
+            {
+              "center" : "Saturn",
+
+              "endTime" : "2019-12-31",
+
+              "trajectoryFrame" : "EquatorJ2000",
+              "trajectory" :
+              {
+                "type" : "Builtin",
+                "name" : "Enceladus-cheby"
+              },
+              "bodyFrame" : "EquatorJ2000",
+              "rotationModel" :
+              {
+                "type" : "Uniform",
+                "period" : "1.370218083712283d",
+                "inclination" : 6.48,
+                "ascendingNode" : 130.66,
+                "meridianAngle" : 2.82
+              }
+            },
+            {
+              "center" : "Saturn",
+
+              "endTime" : "2099-12-31",
+
+              "trajectoryFrame" : "EquatorJ2000",
+              "trajectory" :
+              {
+                "type" : "Builtin",
+                "name" : "Enceladus"
+              },
+              "bodyFrame" : "EquatorJ2000",
+              "rotationModel" :
+              {
+                "type" : "Uniform",
+                "period" : "1.370218083712283d",
+                "inclination" : 6.48,
+                "ascendingNode" : 130.66,
+                "meridianAngle" : 2.82
+              }
+            }
+          ],
 
           "geometry" :
           {

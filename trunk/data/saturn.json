@@ -198,22 +198,72 @@
           "label" : { "color" : [ 0.6, 0.7, 0.6 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-          "center" : "Saturn",
+          "startTime" : "1800-01-01",
+          "arcs" : [
+            {
+              "center" : "Saturn",
 
-          "trajectory" :
-          {
-              "type" : "Builtin",
-              "name" : "Dione"
-          },
-          "bodyFrame" : "EquatorJ2000",
-          "rotationModel" :
-          {
-              "type" : "Uniform",
-              "period" : "2.736915552552733d",
-              "inclination" : 6.48,
-              "ascendingNode" : 130.66,
-              "meridianAngle" : 357.00
-          },
+              "endTime" : "2000-01-02",
+
+              "trajectoryFrame" : "EquatorJ2000",
+              "trajectory" :
+              {
+                "type" : "Builtin",
+                "name" : "Dione"
+              },
+              "bodyFrame" : "EquatorJ2000",
+              "rotationModel" :
+              {
+                "type" : "Uniform",
+                "period" : "2.736915552552733d",
+                "inclination" : 6.48,
+                "ascendingNode" : 130.66,
+                "meridianAngle" : 357.00
+              }
+            },
+            {
+              "center" : "Saturn",
+
+              "endTime" : "2019-12-31",
+
+              "trajectoryFrame" : "EquatorJ2000",
+              "trajectory" :
+              {
+                "type" : "Builtin",
+                "name" : "Dione-cheby"
+              },
+              "bodyFrame" : "EquatorJ2000",
+              "rotationModel" :
+              {
+                "type" : "Uniform",
+                "period" : "2.736915552552733d",
+                "inclination" : 6.48,
+                "ascendingNode" : 130.66,
+                "meridianAngle" : 357.00
+              }
+            },
+            {
+              "center" : "Saturn",
+
+              "endTime" : "2099-12-31",
+
+              "trajectoryFrame" : "EquatorJ2000",
+              "trajectory" :
+              {
+                "type" : "Builtin",
+                "name" : "Dione"
+              },
+              "bodyFrame" : "EquatorJ2000",
+              "rotationModel" :
+              {
+                "type" : "Uniform",
+                "period" : "2.736915552552733d",
+                "inclination" : 6.48,
+                "ascendingNode" : 130.66,
+                "meridianAngle" : 357.00
+              }
+            }
+          ],
 
           "geometry" :
           {
@@ -349,20 +399,16 @@
           "label" : { "color" : [ 0.5, 0.6, 0.6 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+          "startTime" : "1900-01-02",
+          "endTime" : "2050-01-01",
+
           "center" : "Saturn",
 
-          "trajectoryFrame" : "EclipticJ2000",
+          "trajectoryFrame" : "EquatorJ2000",
           "trajectory" :
           {
-              "type" : "Keplerian",
-              "semiMajorAxis" : 1.291706619152029e+07,
-              "eccentricity" : 0.1529205834767106,
-              "period" : "550.31d",
-              "inclination" : 173.2125147283394,
-              "ascendingNode" : 263.5588224738930,
-              "argumentOfPeriapsis" : 2.526767601517598,
-              "meanAnomaly" : 31.16726590242600,
-              "epoch" : "2004-06-11 00:00:00"
+              "type" : "Builtin",
+              "name" : "Phoebe-cheby"
           },
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
@@ -381,6 +427,5 @@
               "size" : 115
           }
         }
-
     ]
 }

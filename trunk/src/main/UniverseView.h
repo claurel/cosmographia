@@ -300,7 +300,8 @@ public slots:
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
     void plotTrajectoryObserver(const BodyInfo* info);
-    void clearTrajectory(vesta::Entity* body);
+    void clearTrajectoryPlots(vesta::Entity* body);
+    bool hasTrajectoryPlots(vesta::Entity* body) const;
     void setSelectedBody(const QString& name);
     void gotoSelectedObject();
     void centerSelectedObject();

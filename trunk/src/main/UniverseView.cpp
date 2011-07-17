@@ -1647,7 +1647,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
             }
             else
             {
-                clearTrajectory(body);
+                clearTrajectoryPlots(body);
             }
         }
     }
@@ -2112,7 +2112,7 @@ UniverseView::setPlanetOrbitsVisibility(bool enabled)
         }
         else
         {
-            clearTrajectory(planet);
+            clearTrajectoryPlots(planet);
         }
     }
 
@@ -2394,8 +2394,10 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
 }
 
 
+/** Clear all trajectory plots for a body.
+  */
 void
-UniverseView::clearTrajectory(Entity* body)
+UniverseView::clearTrajectoryPlots(Entity* body)
 {
     if (!body)
     {
@@ -2414,8 +2416,37 @@ UniverseView::clearTrajectory(Entity* body)
 }
 
 
+/** Return true if there are trajectory plots for the specified body.
+  */
+bool
+UniverseView::hasTrajectoryPlots(Entity* body) const
+{
+    if (!body)
+    {
+        return false;
+    }
+
+    vesta::Arc* arc = body->chronology()->activeArc(m_simulationTime);
+    if (!arc)
+    {
+        return false;
+    }
+
+    string visName = TrajectoryVisualizerName(body);
+    Visualizer* vis = NULL;
+    if (arc->center())
+    {
+        vis = arc->center()->visualizer(visName);
+    }
+
+    return vis != NULL;
+}
+
+
 /** Plot a trajectory for a body using the default plotting
   * parameters.
+  *
+  * This method is used by the script interface to UniverseView.
   */
 void
 UniverseView::plotTrajectory(QObject *bodyObj)
@@ -2432,6 +2463,8 @@ UniverseView::plotTrajectory(QObject *bodyObj)
 
 
 /** Clear all trajectory plots for a body.
+  *
+  * This method is used by the script interface to UniverseView.
   */
 void
 UniverseView::clearTrajectoryPlots(QObject* bodyObj)
@@ -2439,12 +2472,14 @@ UniverseView::clearTrajectoryPlots(QObject* bodyObj)
     BodyObject* body = qobject_cast<BodyObject*>(bodyObj);
     if (body && body->body())
     {
-        clearTrajectory(body->body());
+        clearTrajectoryPlots(body->body());
     }
 }
 
 
 /** Return true if there are any trajectory plots visible for a body.
+  *
+  * This method is used by the script interface to UniverseView.
   */
 bool
 UniverseView::hasTrajectoryPlots(QObject* bodyObj) const
@@ -2454,21 +2489,10 @@ UniverseView::hasTrajectoryPlots(QObject* bodyObj) const
     {
         return false;
     }
-
-    vesta::Arc* arc = body->body()->chronology()->activeArc(m_simulationTime);
-    if (!arc)
+    else
     {
-        return false;
+        return hasTrajectoryPlots(body->body());
     }
-
-    string visName = TrajectoryVisualizerName(body->body());
-    Visualizer* oldVisualizer = NULL;
-    if (arc->center())
-    {
-        oldVisualizer = arc->center()->visualizer(visName);
-    }
-
-    return oldVisualizer != NULL;
 }
 
 

@@ -880,7 +880,14 @@ Cosmographia::plotTrajectory()
         QString name = QString::fromUtf8(body->name().c_str());
         BodyInfo* info = m_catalog->findInfo(name);
 
-        m_view3d->plotTrajectory(body, info);
+        if (m_view3d->hasTrajectoryPlots(body))
+        {
+            m_view3d->clearTrajectoryPlots(body);
+        }
+        else
+        {
+            m_view3d->plotTrajectory(body, info);
+        }
     }
 }
 
@@ -1059,7 +1066,7 @@ Cosmographia::unloadLastCatalog()
 void
 Cosmographia::removeBody(vesta::Entity* body)
 {
-    m_view3d->clearTrajectory(body);
+    m_view3d->clearTrajectoryPlots(body);
     m_universe->removeEntity(body);
 }
 

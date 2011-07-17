@@ -639,11 +639,34 @@ Cosmographia::initialize()
     // system barycenter; saturnBary is the position of Saturn with respect to the
     // barycenter. Both are required in order to calculate the position of Enceladus
     // with respect to Saturn.
-    ChebyshevPolyTrajectory* enceladusBaryOrbit = LoadChebyshevPolyFile("enceladus.cheb");
     ChebyshevPolyTrajectory* saturnBary = LoadChebyshevPolyFile("saturn.cheb");
-    LinearCombinationTrajectory* enceladusOrbit = new LinearCombinationTrajectory(enceladusBaryOrbit, 1.0, saturnBary, -1.0);
-    enceladusOrbit->setPeriod(daysToSeconds(1.370218));
-    m_loader->addBuiltinOrbit("Enceladus-cheby", enceladusOrbit);
+
+    if (saturnBary)
+    {
+        ChebyshevPolyTrajectory* enceladusBaryOrbit = LoadChebyshevPolyFile("enceladus.cheb");
+        if (enceladusBaryOrbit)
+        {
+            LinearCombinationTrajectory* enceladusOrbit = new LinearCombinationTrajectory(enceladusBaryOrbit, 1.0, saturnBary, -1.0);
+            enceladusOrbit->setPeriod(daysToSeconds(1.370218));
+            m_loader->addBuiltinOrbit("Enceladus-cheby", enceladusOrbit);
+        }
+
+        ChebyshevPolyTrajectory* dioneBaryOrbit = LoadChebyshevPolyFile("dione.cheb");
+        if (dioneBaryOrbit)
+        {
+            LinearCombinationTrajectory* dioneOrbit = new LinearCombinationTrajectory(dioneBaryOrbit, 1.0, saturnBary, -1.0);
+            dioneOrbit->setPeriod(daysToSeconds(2.736915));
+            m_loader->addBuiltinOrbit("Dione-cheby", dioneOrbit);
+        }
+
+        ChebyshevPolyTrajectory* phoebeBaryOrbit = LoadChebyshevPolyFile("phoebe.cheb");
+        if (phoebeBaryOrbit)
+        {
+            LinearCombinationTrajectory* phoebeOrbit = new LinearCombinationTrajectory(phoebeBaryOrbit, 1.0, saturnBary, -1.0);
+            phoebeOrbit->setPeriod(daysToSeconds(550.564));
+            m_loader->addBuiltinOrbit("Phoebe-cheby", phoebeOrbit);
+        }
+    }
 
     // Set up builtin rotation models
     m_loader->addBuiltinRotationModel("IAU Moon", new IAULunarRotationModel());

@@ -21,10 +21,42 @@
            "argumentOfPeriapsis": 151.212095,
            "meanAnomaly": 200.3785
          },
-         "bodyFrame": "EquatorJ2000",
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "25.9h"
+         },
          "geometry": {
            "type": "Globe",
            "radius": 750
+         }
+      },
+
+      {
+         "name" : "Dysnomia",
+         "class" : "satellite",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Eris",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "15.774d",
+           "semiMajorAxis": 37350,
+           "eccentricity": 0.013
+         },
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "15.774d"
+         },
+         "geometry" :
+         {
+             "type" : "Mesh",
+             "source" : "models/10hygiea.cmod",
+             "size" : 100.0
          }
       }
     ]

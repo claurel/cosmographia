@@ -207,6 +207,15 @@ Item {
                  {
                      universeView.setStateFromUrl(link)
                  }
+                 else if (link.substr(0, 5) == "goto:")
+                 {
+                     var body = universeCatalog.lookupBody(link.substr(5));
+                     if (body)
+                     {
+                        universeView.setSelectedBody(body);
+                        universeView.gotoSelectedObject();
+                     }
+                 }
                  else if (link.substr(0, 5) == "help:")
                  {
                      container.navigateTo(link);

@@ -138,6 +138,70 @@ static string TrajectoryVisualizerName(Entity* entity)
 }
 
 
+struct PlanetographicCoordinate
+{
+    double latitude;
+    double longitude;
+    char latitudeHemiId;
+    char longitudeHemiId;
+};
+
+
+// Convert cartesian position in body-fixed coordinate to planetographic
+// coordinates using the conventions appropriate to the specified body. At the
+// moment, we just use the name of the body to determine which coordinate convention
+// to use. A more robust solution would be to specify the coordinate convention
+// in the catalog files.
+//
+// This function uses rotational north convention rather than ecliptic north
+//
+static PlanetographicCoordinate getPlanetographicCoordinate(const Vector3d& position, const Entity* body)
+{
+    PlanetographicCoordinate coord;
+
+    coord.latitude = toDegrees(asin(position.z()));
+    coord.longitude = toDegrees(atan2(position.y(), position.x()));
+    coord.longitudeHemiId = 'E';
+    coord.latitudeHemiId = 'N';
+
+    if (body->name() == "Earth" || body->name() == "Moon")
+    {
+        if (coord.longitude < 0.0)
+        {
+            coord.longitudeHemiId = 'W';
+            coord.longitude = -coord.longitude;
+        }
+    }
+    else if (body->name() == "Mars")
+    {
+        if (coord.longitude < 0.0)
+        {
+            coord.longitude = 360.0 + coord.longitude;
+        }
+    }
+    else
+    {
+        if (coord.longitude < 0.0)
+        {
+            coord.longitude = -coord.longitude;
+        }
+        else
+        {
+            coord.longitude = 360.0 - coord.longitude;
+        }
+        coord.longitudeHemiId = 'W';
+    }
+
+    if (coord.latitude < 0.0)
+    {
+        coord.latitudeHemiId = 'S';
+        coord.latitude = -coord.latitude;
+    }
+
+    return coord;
+}
+
+
 class UniverseGLWidget : public QGLWidget
 {
     //Q_OBJECT
@@ -836,18 +900,44 @@ UniverseView::drawInfoOverlay()
                 }
 
                 QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
-                m_textFont->render(distanceString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - titleFontHeight));
+                string distanceStdString = string(distanceString.toLatin1().constData());
+                m_textFont->render(distanceStdString, Vector2f(10.0f, viewportHeight - 20.0f - titleFontHeight));
 
                 // Display the subpoint for ellipsoidal bodies that are sufficiently close
                 // to the observer.
                 if (isEllipsoidal && distance < m_selectedBody->geometry()->ellipsoid().semiMajorAxisLength() * 100)
                 {
+                    float dx = m_textFont->textWidth(distanceStdString);
                     Vector3d q = m_selectedBody->orientation(m_simulationTime).conjugate() * r;
                     q = q.normalized();
-                    double latitude = toDegrees(asin(q.z()));
-                    double longitude = toDegrees(atan2(q.y(), q.x()));
-                    QString coordString = QString("Subpoint: %1, %2").arg(latitude, 0, 'f', 3).arg(longitude, 0, 'f', 3);
-                    m_textFont->render(coordString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
+
+                    PlanetographicCoordinate coord = getPlanetographicCoordinate(q, m_selectedBody.ptr());
+                    QString coordString = QString(" (%1\260%2, %3\260%4)").
+                            arg(coord.latitude, 0, 'f', 3).
+                            arg(coord.latitudeHemiId).
+                            arg(coord.longitude, 0, 'f', 3).
+                            arg(coord.longitudeHemiId);
+
+                    m_textFont->render(coordString.toLatin1().data(), Vector2f(10.0f + dx, viewportHeight - 20.0f - (titleFontHeight)));
+                }
+
+                // Show the size of the selected object
+                if (m_selectedBody->geometry())
+                {
+                    Geometry* geom = m_selectedBody->geometry();
+                    double radius = geom->boundingSphereRadius();
+                    if (dynamic_cast<WorldGeometry*>(geom))
+                    {
+                        radius = dynamic_cast<WorldGeometry*>(geom)->meanRadius();
+                    }
+
+                    // For now, only show the size of objects larger than spacecraft.
+                    // TODO: Use the object class field to determine when something is spacecraft or now
+                    if (radius > 0.01)
+                    {
+                        QString sizeString = QString("Radius: %1 km").arg(readableNumber(radius, 4));
+                        m_textFont->render(sizeString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
+                    }
                 }
             }
 

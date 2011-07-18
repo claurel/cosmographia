@@ -44,6 +44,7 @@ public:
     void initialize();
 
     Q_PROPERTY(bool autoHideToolBar READ autoHideToolBar WRITE setAutoHideToolBar NOTIFY autoHideToolBarChanged);
+    Q_PROPERTY(QString videoSize READ videoSize WRITE setVideoSize NOTIFY videoSizeChanged);
 
     Q_INVOKABLE void loadAddOn(const QString& source);
     Q_INVOKABLE void unloadAddOn(const QString& source);
@@ -52,6 +53,11 @@ public:
     bool autoHideToolBar() const
     {
         return m_autoHideToolBar;
+    }
+
+    QString videoSize() const
+    {
+        return m_videoSize;
     }
 
 public slots:
@@ -77,9 +83,11 @@ public slots:
 
     void processReceivedResource(QNetworkReply* reply);
     void setAutoHideToolBar(bool enabled);
+    void setVideoSize(const QString& videoSize);
 
 signals:
     void autoHideToolBarChanged();
+    void videoSizeChanged(const QString&);
 
 protected:
     bool event(QEvent* event);
@@ -122,6 +130,7 @@ private:
     UniverseCatalogObject* m_catalogWrapper;
 
     bool m_autoHideToolBar;
+    QString m_videoSize;
 };
 
 #endif // _COSMOGRAPHIA_H_

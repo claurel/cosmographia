@@ -345,6 +345,34 @@ Item {
                 enabled: false
                 Component.onCompleted: { enabled = cosmoApp.autoHideToolBar }
             }
+
+            // Spacer
+            Item { height: 10; width: 10 }
+            Item { height: 10; width: 10 }
+
+            PanelText { text: "Recorded Video Resolution" }
+            Item { height: 10; width: 10 }
+
+            CheckBox {
+                text: "640 x 480 (VGA)"
+                checked: cosmoApp.videoSize == "vga"
+                onClicked: { cosmoApp.setVideoSize("vga") }
+            }
+            Item { height: 1; width: 1 }
+
+            CheckBox {
+                text: "854 x 480 (WVGA)"
+                checked: cosmoApp.videoSize == "wvga"
+                onClicked: { cosmoApp.setVideoSize("wvga") }
+            }            
+            Item { height: 1; width: 1 }
+
+            CheckBox {
+                text: "1280 x 720 (720p)"
+                checked: cosmoApp.videoSize == "720p"
+                onClicked: { cosmoApp.setVideoSize("720p") }
+            }            
+            Item { height: 1; width: 1 }
         }
 
         AddonManager

@@ -76,7 +76,8 @@ Cosmographia::Cosmographia() :
     m_fullScreenAction(NULL),
     m_networkManager(NULL),
     m_catalogWrapper(NULL),
-    m_autoHideToolBar(false)
+    m_autoHideToolBar(false),
+    m_videoSize("wvga")
 {
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -980,6 +981,8 @@ Cosmographia::loadSettings()
 
     m_view3d->setEclipseShadows(true);
 
+    setVideoSize(settings.value("videoSize", "wvga").toString());
+
     settings.beginGroup("ui");
     setAutoHideToolBar(settings.value("autoHideToolBar", false).toBool());
     m_fullScreenAction->setChecked(settings.value("fullscreen", true).toBool());
@@ -997,6 +1000,8 @@ Cosmographia::saveSettings()
     settings.setValue("limitingMagnitude", m_view3d->limitingMagnitude());
     settings.setValue("previouslyRun", true);
 
+    settings.setValue("videoSize", videoSize());
+
     settings.beginGroup("ui");
     settings.setValue("autoHideToolBar", m_autoHideToolBar);
     settings.setValue("fullscreen", m_fullScreenAction->isChecked());
@@ -1010,6 +1015,17 @@ Cosmographia::getSetting(const QString &key)
 {
     QSettings settings;
     return settings.value(key);
+}
+
+
+void
+Cosmographia::setVideoSize(const QString& videoSize)
+{
+    if (videoSize != m_videoSize)
+    {
+        m_videoSize = videoSize;
+        emit videoSizeChanged(videoSize);
+    }
 }
 
 
@@ -1033,11 +1049,25 @@ Cosmographia::recordVideo()
 #endif
         QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/cosmo." + defaultExtension;
         QString saveFileName = QFileDialog::getSaveFileName(this, "Save Video As...", defaultFileName, extensions);
+
+        QSize videoDimensions(640, 480);
+        if (m_videoSize == "wvga")
+        {
+            videoDimensions = QSize(854, 480);
+        }
+        else if (m_videoSize == "vga")
+        {
+            videoDimensions = QSize(640, 480);
+        }
+        else if (m_videoSize == "720p")
+        {
+            videoDimensions = QSize(1280, 720);
+        }
+
         if (!saveFileName.isEmpty())
         {
             QVideoEncoder* encoder = new QVideoEncoder();
-            encoder->createFile(saveFileName, 852, 480, 5000000, 20);
-            //encoder->createFile(saveFileName, 1280, 720, 5000000, 20);
+            encoder->createFile(saveFileName, (unsigned int) videoDimensions.width(), (unsigned int) videoDimensions.height(), 5000000, 20);
             m_view3d->startVideoRecording(encoder);
         }
     }

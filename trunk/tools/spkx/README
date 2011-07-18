@@ -1,0 +1,38 @@
+spkx is a tool extract Chebyshev polynomial coefficients from a SPICE SPK file.
+It handles SPK type 2 (Chebyshev polynomials for position) and type 3
+(Chebyshev polynomials for position and velocity) data. spkx was written to
+generate files for Cosmographia, which always calculates velocities as the
+derivatives of the position polynomials; thus, the coefficients for the
+velocity polynomials are not written out. Eliminating the velocity coefficients
+reduces the amount of data required by 50% for satellite ephemerides, which
+are nearly all stored as type 3 data.
+
+The command line is:
+
+spkx <input spk> <output file> <start date> <end date> <body name>
+
+A typical usage is:
+
+spkx sat317.bsp out.cheb "1900-Jan-02 TDB" "2050-Jan-01 TDB" "phoebe"
+
+The start and end dates must be valid SPICE date strings. Body name is
+the NAIF name of an object in the input SPK file (and is case insensitive).
+
+
+The binary output file has the following format:
+
+ * 8 bytes - header "CHEBPOLY"
+ * 4 bytes - int32 - record count
+ * 4 bytes - int32 - polynomial degree
+ * 8 bytes - double - start time (seconds since J2000.0 TDB)
+ * 8 bytes - double - interval covered by each polynomial (in seconds)
+ * data - 3 * sizeof(double) * (degree + 1) * record count bytes
+ 
+Polynomial coefficients for each interval are stored as:
+   x0 x1 x2 ... xn y0 y1 y2 ... yn z0 z1 z2 ... zn
+
+Byte order is little endian (Intel x86). Actually, the current version of
+spkx does not swap byte order on big-endian systems, so it will only generate
+correct output files when compiled on little-endian machines.
+
+

@@ -1225,7 +1225,7 @@ void UniverseView::paintGL()
         else
         {
             int w = int(image.height() * videoAspectRatio + 0.5f);
-            image = image.copy((image.width() - w) / 2, 0, 2, image.height());
+            image = image.copy((image.width() - w) / 2, 0, w, image.height());
         }
         image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 #if QTKIT_SUPPORT

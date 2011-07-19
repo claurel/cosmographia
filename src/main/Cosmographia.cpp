@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
 //
 // Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -103,8 +103,8 @@ Cosmographia::Cosmographia() :
     qmlRegisterUncreatableType<UniverseView>("Cosmographia", 1, 0, "UniverseView", "Use global universeView");
     qmlRegisterUncreatableType<HelpCatalog>("Cosmographia", 1, 0, "HelpCatalog", "Use global helpCatalog");
     qmlRegisterUncreatableType<UniverseCatalogObject>("Cosmographia", 1, 0, "UniverseCatalog", "Use global universeCatalog");
-    qmlRegisterType<BodyObject>("Comsmographia", 1, 0, "Body");
-    qmlRegisterType<VisualizerObject>("Comsmographia", 1, 0, "Visualizer");
+    qmlRegisterType<BodyObject>("Cosmographia", 1, 0, "Body");
+    qmlRegisterType<VisualizerObject>("Cosmographia", 1, 0, "Visualizer");
     m_view3d->rootContext()->setContextProperty("cosmoApp", this);
     m_view3d->rootContext()->setContextProperty("universeView", m_view3d);
     m_view3d->rootContext()->setContextProperty("universeCatalog", m_catalogWrapper);
@@ -409,7 +409,7 @@ Cosmographia::setupMenuBar()
     QAction* milkyWayAction = new QAction("&Milky Way", graphicsMenu);
     milkyWayAction->setCheckable(true);
     milkyWayAction->setChecked(m_view3d->milkyWayVisible());
-    milkyWayAction->setShortcut(QKeySequence("Ctrl+M"));
+    //milkyWayAction->setShortcut(QKeySequence("Ctrl+M"));
     graphicsMenu->addAction(milkyWayAction);
     graphicsMenu->addMenu(starStyleMenu);
     graphicsMenu->addSeparator();
@@ -438,6 +438,13 @@ Cosmographia::setupMenuBar()
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
     menuBar()->addMenu(helpMenu);
+
+#ifdef Q_OS_MAC
+    QAction* minimizeAction = new QAction("Minimize", this);
+    minimizeAction->setShortcut(QKeySequence("Ctrl+M"));
+    connect(minimizeAction, SIGNAL(triggered()), this, SLOT(minimize()));
+    addAction(minimizeAction);
+#endif
 
 #if NOMENUBAR
     // Cosmographia may be set up to work without a menu bar in full screen mode.
@@ -1386,5 +1393,15 @@ Cosmographia::setAutoHideToolBar(bool enabled)
     {
         m_autoHideToolBar = enabled;
         emit autoHideToolBarChanged();
+    }
+}
+
+
+void
+Cosmographia::minimize()
+{
+    if (!isFullScreen())
+    {
+        showMinimized();
     }
 }

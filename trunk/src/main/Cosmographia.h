@@ -85,6 +85,8 @@ public slots:
     void setAutoHideToolBar(bool enabled);
     void setVideoSize(const QString& videoSize);
 
+    void minimize();
+
 signals:
     void autoHideToolBarChanged();
     void videoSizeChanged(const QString&);

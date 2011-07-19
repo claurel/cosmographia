@@ -62,8 +62,9 @@
          },
          "geometry" :
          {
-            "type" : "Globe",
-            "radius" : 170
+             "type" : "Mesh",
+             "source" : "models/8flora.cmod",
+             "size" : 170
          }
       },
 
@@ -92,8 +93,9 @@
          },
          "geometry" :
          {
-            "type" : "Globe",
-            "radius" : 85
+             "type" : "Mesh",
+             "source" : "models/5astraea.cmod",
+             "size" : 85
          }
       },
 

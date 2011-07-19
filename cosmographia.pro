@@ -450,6 +450,7 @@ INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 
 #CONFIG += ffmpeg
 #CONFIG += nomenu
+#CONFIG += storedeploy
 
 macx {
     # Always enable QTKit support on Mac
@@ -462,6 +463,11 @@ macx {
         src/video/VideoEncoder.h
     OBJECTIVE_SOURCES += \
         src/video/VideoEncoder.mm
+}
+
+storedeploy {
+    QMAKE_CXXFLAGS += -gdwarf-2
+    QMAKE_INFO_PLIST = resources/Info.plist
 }
 
 nomenu {
@@ -546,6 +552,7 @@ macx {
     # Media files for the Mac bundle
     TEXTURES.path = Contents/Resources/data/textures
     TEXTURES.files = \
+        data/textures/README.html \
         data/textures/flare.png \
         data/textures/milkyway.jpg \
         data/textures/moon.dds \
@@ -640,6 +647,8 @@ macx {
         data/neptune.json \
         data/pluto.json \
         data/mainbelt.json \
+        data/kuiperbelt.json \
+        data/scattereddisc.json \
         data/cassini.json \
         data/earthorbiting.json \
         data/iss.json \
@@ -652,6 +661,10 @@ macx {
         data/csans-28.txf \
         data/sans-light-24.txf \
         data/de406_1800-2100.dat \
+        data/enceladus.cheb \
+        data/dione.cheb \
+        data/phoebe.cheb \
+        data/saturn.cheb \
         data/earth.atmscat \
         data/titan.atmscat \
         data/addons.js
@@ -663,6 +676,7 @@ macx {
         data/qml/main.qml \
         data/qml/AddonManager.qml \
         data/qml/Button.qml \
+        data/qml/CheckBox.qml \
         data/qml/ContextMenu.qml \
         data/qml/FindObjectPanel.qml \
         data/qml/HelpBrowser.qml \
@@ -690,6 +704,10 @@ macx {
         data/help/navigation.html \
         data/help/settings.html \
         data/help/solarsysguide.html \
+        data/help/how.html \
+        data/help/code.html \
+        data/help/datasources.html \
+        data/help/sun.html \
         data/help/mercury.html \
         data/help/venus.html \
         data/help/earth.html \
@@ -733,11 +751,15 @@ macx {
         data/help/charon.html \
         data/help/nix.html \
         data/help/hydra.html \
+        data/help/eris.html \
+        data/help/haumea.html \
+        data/help/cassini.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \
         data/help/hyperion.jpg \
         data/help/iapetus-global.jpg \
         data/help/miranda.jpg \
+        data/help/vesta_dawn_20110714.jpg \
         data/help/lutetia.jpg
 
     QMAKE_BUNDLE_DATA += HELPFILES

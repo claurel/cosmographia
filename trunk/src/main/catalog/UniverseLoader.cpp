@@ -2470,12 +2470,9 @@ loadParticleEmitter(const QVariantMap& map)
     emitter->setColorCount(colorCount);
     for (unsigned int i = 0; i < colorCount; ++i)
     {
-        qDebug() << "color: " << i << ", " << opacities[i];
         emitter->setColor(i, colors[i], opacities[i]);
     }
 
-#define PARTICLE_SYSTEM_PHASE 0
-#if PARTICLE_SYSTEM_PHASE
     if (emissiveVar.type() == QVariant::Bool)
     {
         emitter->setEmissive(emissiveVar.toBool());
@@ -2496,7 +2493,6 @@ loadParticleEmitter(const QVariantMap& map)
             }
         }
     }
-#endif
 
     return emitter;
 }

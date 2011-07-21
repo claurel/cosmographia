@@ -624,6 +624,7 @@ void UniverseView::paintEvent(QPaintEvent* /* event */)
     glPushMatrix();
 
     // Render the universe using VESTA
+    // glEnable(GL_LINE_SMOOTH);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_CULL_FACE);
     paintGL();
@@ -905,7 +906,7 @@ UniverseView::drawInfoOverlay()
 
                 // Display the subpoint for ellipsoidal bodies that are sufficiently close
                 // to the observer.
-                if (isEllipsoidal && distance < m_selectedBody->geometry()->ellipsoid().semiMajorAxisLength() * 100)
+                if (isEllipsoidal && distance < m_selectedBody->geometry()->ellipsoid().semiMajorAxisLength() * 5)
                 {
                     float dx = m_textFont->textWidth(distanceStdString);
                     Vector3d q = m_selectedBody->orientation(m_simulationTime).conjugate() * r;
@@ -2441,7 +2442,8 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
     plot->setWindowLead(lead);
     plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
     plot->setFadeFraction(fade);
-    plot->setColor(color);
+    plot->setColor(color * 0.5f);
+    //plot->setLineWidth(1.5f);
     arc->center()->setVisualizer(visName, visualizer);
 
     TrajectoryPlotEntry plotEntry;

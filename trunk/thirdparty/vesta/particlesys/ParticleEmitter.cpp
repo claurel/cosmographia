@@ -41,7 +41,9 @@ ParticleEmitter::ParticleEmitter() :
     m_blockingPlaneEnabled(false),
     m_colorCount(1),
     m_velocityVariation(0.0f),
-    m_traceLength(0.0f)
+    m_traceLength(0.0f),
+    m_emissive(true),
+    m_phaseAsymmetry(0.0f)
 {
     m_colorKeys[0] = Vector4f::Ones();
     m_generator = new PointGenerator();
@@ -120,7 +122,7 @@ ParticleEmitter::generateParticles(double simulationTime,
     // Scale factor used in color interpolation; subtract
     // a small value to avoid having to do an extra range
     // check for particles right at the end of their lifetimes.
-    float colorKeyScale = (float) m_colorCount - 0.00001f;
+    float colorKeyScale = float(m_colorCount) - 1.00001f;
 
     while (age < maxAge)
     {
@@ -164,6 +166,7 @@ ParticleEmitter::generateParticles(double simulationTime,
             int colorIndex = (unsigned int) s;
             float t = s - colorIndex;
             Vector4f interpolatedColor = (1 - t) * m_colorKeys[colorIndex] + t * m_colorKeys[colorIndex + 1];
+
             particle.color = interpolatedColor.start<3>();
             particle.opacity = interpolatedColor.w();
         }

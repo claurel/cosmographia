@@ -307,6 +307,44 @@ public:
 
     float boundingRadius() const;
 
+    /** Return true if this emitter produces self-luminous particles.
+      */
+    bool isEmissive() const
+    {
+        return m_emissive;
+    }
+
+    /** Set whether the particles produced by this emitter are self-luminous.
+      * By default, it is true; it should be set to false for particle systems
+      * meant to simulate smoke and dust.
+      */
+    void setEmissive(bool emissive)
+    {
+        m_emissive = emissive;
+    }
+
+    /** Get the phase asymmetry parameter. The value of phase asymmetry controls
+      * the way light is scattered by non-emissive particles. The default value of
+      * 0 indicates isotropic scattering.
+      *
+      * \see Material::setPhaseAsymmetry
+      */
+    float phaseAsymmetry() const
+    {
+        return m_phaseAsymmetry;
+    }
+
+    /** Set the phase asymmetry parameter. The value of phase asymmetry controls
+      * the way light is scattered by non-emissive particles. The default value of
+      * 0 indicates isotropic scattering.
+      *
+      * \see Material::setPhaseAsymmetry
+      */
+    void setPhaseAsymmetry(float phaseAsymmetry)
+    {
+        m_phaseAsymmetry = phaseAsymmetry;
+    }
+
 private:
     counted_ptr<InitialStateGenerator> m_generator;
 
@@ -330,6 +368,9 @@ private:
 
     float m_velocityVariation;
     float m_traceLength;
+
+    bool m_emissive;
+    float m_phaseAsymmetry;
 };
 
 }

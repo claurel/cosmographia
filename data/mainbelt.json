@@ -133,7 +133,7 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "source" : "models/4vesta.obj"
+              "source" : "models/4vesta.cmod"
           }
         },
 

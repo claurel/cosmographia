@@ -463,6 +463,10 @@ Cosmographia::setupMenuBar()
     addAction(faster2Action);
     addAction(slower2Action);
     addAction(reverseAction);
+    addAction(forwardDayAction);
+    addAction(backDayAction);
+    addAction(forwardYearAction);
+    addAction(backYearAction);
     addAction(findAction);
     addAction(gotoAction);
     addAction(centerAction);

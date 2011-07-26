@@ -1,0 +1,147 @@
+{
+     "version": "1.0",
+     "name": "2008 TC3",
+
+     "items" :
+     [
+        {
+          "name" : "2008 TC3",
+          "class" : "asteroid",
+          "label" : { "color" : "#ffbb88" },
+          "trajectoryPlot": {
+              "fade" : 0.5,
+              "duration" : "1y"
+	      }, 
+
+          "startTime" : "2006-10-05 00:00:00",
+          "endTime" : "2008-10-07 02:48:00",
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "2008TC3.xyzv"
+          },
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "0.0269409h"
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.0035,
+              "source" : "../models/8flora.cmod"
+          }
+        },
+
+        {
+          "name" : "_2008 TC3 Trail",
+          
+          "startTime" : "2008-10-07 02:40:27",
+          "endTime" : "2008-10-07 02:48:00",
+          "center" : "2008 TC3",
+
+          "bodyFrame": {
+             "type": "TwoVector", 
+             "primaryAxis": "-z", 
+             "primary": {
+                "type": "RelativeVelocity", 
+                "target": "Earth", 
+                "observer": "2008 TC3"
+             }, 
+             "secondaryAxis": "-x", 
+             "secondary": {
+                "type": "RelativePosition", 
+                "target": "Earth", 
+                "observer": "2008 TC3"
+             }
+          }, 
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Box",
+                    "center" : [ 0, 0, 0.005 ],
+                    "sides" : [ 0.002, 0.002, 0.002 ],
+                    "velocity" : [ 0, 0, -3 ]
+                },
+                "force" : [ 0.01, 0, 0 ],
+                "velocityVariation" : 0.05,
+                "spawnRate" : 1000,
+                "lifetime" : 2,
+                "trace" : 0.03,
+                "startSize" : 0.003,
+                "endSize" : 0.06,
+                "colors" : [
+                   "#ffffff", 0.1,
+                   "#ffff88", 0.05,
+                   "#ffff88", 0.0
+                ],
+
+                "startTime" : "2008-10-07 02:46:32",
+                "endTime" : "2008-10-07 02:46:51"
+              } ]
+           }
+        },
+
+        {
+          "name" : "_2008 TC3 Flash",
+          
+          "startTime" : "2008-10-07 02:46:32",
+          "endTime" : "2008-10-07 02:47:05",
+          "center" : "2008 TC3",
+
+          "bodyFrame": {
+             "type": "TwoVector", 
+             "primaryAxis": "-z", 
+             "primary": {
+                "type": "RelativeVelocity", 
+                "target": "Earth", 
+                "observer": "2008 TC3"
+             }, 
+             "secondaryAxis": "-x", 
+             "secondary": {
+                "type": "RelativePosition", 
+                "target": "Earth", 
+                "observer": "2008 TC3"
+             }
+          }, 
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Point",
+                    "position" : [ 0, 0, 0 ],
+                    "velocity" : [ 0, 0, -3 ]
+                },
+                "force" : [ 0.01, 0, 0 ],
+                "velocityVariation" : 2,
+                "spawnRate" : 100,
+                "lifetime" : 10,
+                "startSize" : 0.1,
+                "endSize" : 1,
+                "colors" : [
+                   "#ffffff", 0.3,
+                   "#ffff88", 0.05,
+                   "#ffff88", 0.0
+                ],
+
+                "startTime" : "2008-10-07 02:46:50",
+                "endTime" : "2008-10-07 02:46:51"
+              } ]
+           }
+        }
+    ]
+}

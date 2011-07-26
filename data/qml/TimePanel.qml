@@ -220,7 +220,7 @@ Item {
                 }
             }
 
-            function prevDay(d)
+            function prevDay()
             {
                 if (day == 1)
                 {
@@ -364,8 +364,8 @@ Item {
                 }
 
                 onDown: {
-                    universeView.simulationDateTime = timeEdit.currentDate()
                     timeEdit.prevDay()
+                    universeView.simulationDateTime = timeEdit.currentDate()
                 }
 
                 Keys.onLeftPressed: { monthText.focus = true; }

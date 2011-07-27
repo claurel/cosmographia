@@ -281,6 +281,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_timeDisplay(TimeDisplay_UTC),
     m_wireframe(false),
     m_captureNextImage(false),
+    m_reticleUpdateTime(-1.0e10),
     m_statusUpdateTime(0.0),
     m_markers(NULL)
 {
@@ -797,6 +798,21 @@ UniverseView::bodyName(const Entity* body) const
 }
 
 
+static void drawArc(float fromAngle, float toAngle, float radius, const Vector2f& center, unsigned int segmentCount)
+{
+    float phi = toAngle - fromAngle;
+
+    glBegin(GL_LINE_STRIP);
+    for (unsigned int i = 0; i <= segmentCount; ++i)
+    {
+        float theta = fromAngle + phi * float(i) / float(segmentCount);
+        Vector2f v = center + Vector2f(cos(theta), sin(theta)) * radius;
+        glVertex2fv(v.data());
+    }
+    glEnd();
+}
+
+
 // Draw informational text over the 3D view
 void
 UniverseView::drawInfoOverlay()
@@ -817,13 +833,19 @@ UniverseView::drawInfoOverlay()
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);
+    float reticleBrightness = float(1.0 - (m_realTime - m_reticleUpdateTime));
+    if (reticleBrightness > 0)
+    {
+        drawFovReticle(reticleBrightness * 0.5f);
+    }
 
     const double textFadeDuration = 1.0;
     float alpha = max(0.0f, min(1.0f, float((m_realTime - 3.0) / textFadeDuration)));
     Vector4f textColor(0.3f, 0.5f, 1.0f, alpha);
     Vector4f titleColor(0.45f, 0.75f, 1.0f, alpha);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_TEXTURE_2D);
 
     glColor4fv(textColor.data());
 
@@ -1044,6 +1066,74 @@ UniverseView::drawInfoOverlay()
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
+}
+
+
+void
+UniverseView::drawFovReticle(float brightness)
+{
+    int viewportWidth = size().width();
+    int viewportHeight = size().height();
+
+    // Angular extent of reticle rings
+    static const float reticleRingRadii[] = { 90.0f, 30.0f, 10.0f, 3.0f, 1.0f,
+                                              20.0f / 60.0f, 5.0f / 60.0f, 1.0f / 60.0f };
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(1.5f);
+    for (unsigned int rindex = 0; rindex < sizeof(reticleRingRadii) / sizeof(reticleRingRadii[0]); ++rindex)
+    {
+        const unsigned int subdivisions = 100;
+
+        double fovX = atan(tan(m_fovY / 2.0) * double(width()) / double(height())) * 2.0;
+        float radiusDeg = reticleRingRadii[rindex];
+
+        float viewFraction = toRadians(radiusDeg) / float(max(m_fovY, fovX));
+        float fade = 1.0f;
+        if (viewFraction < 0.1f)
+        {
+            fade = max(0.0f, (viewFraction - 0.05f) / 0.05f);
+        }
+        else if (viewFraction > 1.0f)
+        {
+            fade = max(0.0f, (1.1f - viewFraction) * 10.0f);
+        }
+
+        fade *= brightness;
+
+        if (fade > 0)
+        {
+            float radius = 0.5f * viewportHeight * toRadians(radiusDeg) / float(m_fovY);
+            glColor4f(0.3f, 0.5f, 1.0f, fade);
+            Vector2f center(viewportWidth * 0.5f, viewportHeight * 0.5f);
+            const float gapPixels = 12.0f;
+            float gap = 2.0f * asin(gapPixels / radius);
+            drawArc(float(PI) * 0.5f + gap, float(PI) * 2.5f - gap, radius, center, subdivisions);
+
+            glEnable(GL_TEXTURE_2D);
+            QString label;
+            if (radiusDeg >= 1.0)
+            {
+                label = QString("%1\260").arg(radiusDeg);
+            }
+            else
+            {
+                label = QString("%1'").arg(radiusDeg * 60.0f);
+            }
+            if (m_labelFont.isValid())
+            {
+                std::string labelStr = label.toLatin1().data();
+                float labelWidth = m_labelFont->textWidth(labelStr);
+                m_labelFont->bind();
+                m_labelFont->render(labelStr, center + Vector2f(-labelWidth / 2.0f, radius - 8.0f));
+            }
+            glDisable(GL_TEXTURE_2D);
+        }
+
+    }
+    glLineWidth(1.0f);
+    glDisable(GL_LINE_SMOOTH);
 }
 
 
@@ -1274,6 +1364,7 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
             // events that occur too close to the last double click.
             if (secondsFromBaseTime() - m_lastDoubleClickTime > 0.2)
             {
+                m_controller->stop();
                 m_selectedBody = pickObject(event->pos());
                 if (m_selectedBody.isValid())
                 {
@@ -1354,6 +1445,7 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
     {
         double zoomFactor = exp(dy / 1000.0);
         setFOV(m_fovY * zoomFactor);
+        m_reticleUpdateTime = m_realTime;
     }
     else if (rightButton || (leftButton && alt))
     {
@@ -1534,6 +1626,7 @@ UniverseView::gestureEvent(QGestureEvent* event)
         if (abs(fovScale - 1.0f) > 1.0e-4f)
         {
             setFOV(m_fovY * fovScale);
+            m_reticleUpdateTime = m_realTime;
         }
 
         float rotationAngle = float(toRadians(pinch->rotationAngle() - pinch->lastRotationAngle()));

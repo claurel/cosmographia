@@ -337,6 +337,7 @@ protected:
 private:
     QString bodyName(const vesta::Entity* body) const;
     void drawInfoOverlay();
+    void drawFovReticle(float brightness);
     bool skyLayerVisible(const std::string& layerName) const;
     void setSkyLayerVisible(const std::string& layerName, bool enable);
 
@@ -442,6 +443,7 @@ private:
     bool m_wireframe;
     bool m_captureNextImage;
 
+    double m_reticleUpdateTime;
     double m_statusUpdateTime;
     QString m_statusMessage;
 

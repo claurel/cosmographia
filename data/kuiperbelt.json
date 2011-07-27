@@ -164,10 +164,42 @@
            "argumentOfPeriapsis": 73.031202,
            "meanAnomaly": 166.378973
          },
-         "bodyFrame": "EquatorJ2000",
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "10.08h"
+         },
          "geometry": {
            "type": "Globe",
            "radius": 473
+         }
+      },
+
+      {
+         "name" : "Vanth",
+         "class" : "satellite",
+         "label" : { "color" : "#aaaacc" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Orcus",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "period": "9.5393d",
+           "semiMajorAxis": 8980,
+           "inclination": 73
+         },
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "9.5393d",
+            "inclination" : 73
+         },
+         "geometry": {
+           "type" : "Mesh",
+           "source" : "models/8flora.cmod",
+           "size": 140
          }
       },
 

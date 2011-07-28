@@ -20,7 +20,7 @@
 
 #include "Cosmographia.h"
 
-#define MAS_DEPLOY 1
+#define MAS_DEPLOY 0
 
 
 int main(int argc, char *argv[])

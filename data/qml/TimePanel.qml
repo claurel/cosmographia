@@ -35,7 +35,8 @@ Item {
 
     function hide()
     {
-        state = ""
+        state = "";
+        unfocus();
     }
 
     function unfocus()

@@ -332,6 +332,8 @@ protected:
     void keyReleaseEvent(QKeyEvent* event);
     void contextMenuEvent(QContextMenuEvent* event);
     void paintEvent(QPaintEvent* event);
+    void focusOutEvent(QFocusEvent* event);
+    void focusInEvent(QFocusEvent* event);
     bool event(QEvent* event);
 
 private:
@@ -371,6 +373,7 @@ private:
     double m_lastDoubleClickTime;
     bool m_mouseClickEventProcessed;
     bool m_mouseMoveEventProcessed;
+    bool m_sceneHadFocus;
 
     vesta::counted_ptr<vesta::Universe> m_universe;
     UniverseCatalog* m_catalog;

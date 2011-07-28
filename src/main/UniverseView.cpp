@@ -246,6 +246,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_lastDoubleClickTime(0.0),
     m_mouseClickEventProcessed(false),
     m_mouseMoveEventProcessed(false),
+    m_sceneHadFocus(false),
     m_catalog(catalog),
     m_controller(new ObserverController()),
     m_renderer(NULL),
@@ -1518,7 +1519,7 @@ void UniverseView::wheelEvent(QWheelEvent* event)
 void
 UniverseView::keyPressEvent(QKeyEvent* event)
 {
-    if (scene()->focusItem())
+    if (scene()->focusItem() && scene()->focusItem()->hasFocus())
     {
         QDeclarativeView::keyPressEvent(event);
         return;
@@ -1548,7 +1549,7 @@ UniverseView::keyPressEvent(QKeyEvent* event)
 void
 UniverseView::keyReleaseEvent(QKeyEvent* event)
 {
-    if (scene()->focusItem())
+    if (scene()->focusItem() && scene()->focusItem()->hasFocus())
     {
         QDeclarativeView::keyReleaseEvent(event);
         return;
@@ -1608,6 +1609,13 @@ UniverseView::event(QEvent* e)
     }
     else
     {
+        if (e->type() == QEvent::Leave)
+        {
+            // Save the focus state for when the next focus in event arrives. We need
+            // to do some special handling to prevent Qt from always setting the focus
+            // back to an item in the declarative view.
+            m_sceneHadFocus = scene()->hasFocus() && scene()->focusItem() != NULL;
+        }
         return QDeclarativeView::event(e);
     }
 }
@@ -1838,7 +1846,32 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
 }
 
 
-// Find the in the view underneat the specified point that is closest to the
+void
+UniverseView::focusOutEvent(QFocusEvent* event)
+{
+    QDeclarativeView::focusOutEvent(event);
+}
+
+
+void
+UniverseView::focusInEvent(QFocusEvent* event)
+{
+    // Special handling for FocusIn events. By default, Qt is giving focus
+    // back to the last active widget even if focus had been cleared. This
+    // would be OK, except that some keyboard processing is handled by
+    // UniverseView.
+    if (m_sceneHadFocus)
+    {
+        QDeclarativeView::focusInEvent(event);
+    }
+    else
+    {
+        QAbstractScrollArea::focusInEvent(event);
+    }
+}
+
+
+// Find the in the view underneath the specified point that is closest to the
 // camera.
 Entity*
 UniverseView::pickObject(const QPoint& point)
@@ -2528,7 +2561,7 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
 
     if (duration <= 0.0)
     {
-        duration = arc->trajectory()->period();
+        duration = arc->trajectory()->period() * 0.99;
     }
 
     plot->setWindowDuration(duration);

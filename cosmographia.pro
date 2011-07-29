@@ -32,8 +32,6 @@ APP_SOURCES = \
     $$MAIN_PATH/KeplerianSwarm.cpp \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/MarkerLayer.cpp \
-    $$MAIN_PATH/MeshInstanceGeometry.cpp \
-    $$MAIN_PATH/MultiLabelGeometry.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/SkyLabelLayer.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
@@ -53,6 +51,9 @@ APP_SOURCES = \
     $$MAIN_PATH/catalog/ChebyshevPolyFileLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
+    $$MAIN_PATH/geometry/MeshInstanceGeometry.cpp \
+    $$MAIN_PATH/geometry/MultiLabelGeometry.cpp \
+    $$MAIN_PATH/geometry/TimeSwitchedGeometry.cpp \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
     $$MAIN_PATH/vext/SimpleRotationModel.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
@@ -82,8 +83,6 @@ APP_HEADERS = \
     $$MAIN_PATH/KeplerianSwarm.h \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/MarkerLayer.h \
-    $$MAIN_PATH/MeshInstanceGeometry.h \
-    $$MAIN_PATH/MultiLabelGeometry.h \
     $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/SkyLabelLayer.h \
     $$MAIN_PATH/TleTrajectory.h \
@@ -104,6 +103,9 @@ APP_HEADERS = \
     $$MAIN_PATH/catalog/ChebyshevPolyFileLoader.h \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
+    $$MAIN_PATH/geometry/MeshInstanceGeometry.h \
+    $$MAIN_PATH/geometry/MultiLabelGeometry.h \
+    $$MAIN_PATH/geometry/TimeSwitchedGeometry.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
     $$MAIN_PATH/vext/LocalTiledMap.h \
     $$MAIN_PATH/vext/SimpleRotationModel.h \
@@ -467,7 +469,11 @@ macx {
 
 storedeploy {
     QMAKE_CXXFLAGS += -gdwarf-2
+    QMAKE_CXXFLAGS += -mmacosx-version-min=10.6
+    QMAKE_CFLAGS += -gdwarf-2
+    QMAKE_CFLAGS += -mmacosx-version-min=10.6
     QMAKE_INFO_PLIST = resources/Info.plist
+    QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
 }
 
 nomenu {
@@ -600,7 +606,8 @@ macx {
         data/models/deimos.dds \
         data/models/2pallas.cmod \
         data/models/3juno.cmod \
-        data/models/4vesta.obj \
+        data/models/4vesta.cmod \
+        data/models/vesta.dds \
         data/models/5astraea.cmod \
         data/models/8flora.cmod \
         data/models/10hygiea.cmod \
@@ -753,6 +760,7 @@ macx {
         data/help/hydra.html \
         data/help/eris.html \
         data/help/haumea.html \
+        data/help/orcus.html \
         data/help/cassini.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \
@@ -778,16 +786,14 @@ macx {
         data/addons/gps.json \
         data/addons/2011MD.json \
         data/addons/2011MD.xyzv \
+        data/addons/2008TC3.json \
+        data/addons/2008TC3.xyzv \
         data/addons/sciencesat.json \
         data/addons/sorce.obj \
         data/addons/sorce.mtl \
         data/addons/solar_panel.png
 
     QMAKE_BUNDLE_DATA += ADDONS
-
-
-    # CONFIG += x86
-    # QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.5.sdk
 
     QMAKE_LFLAGS += -framework CoreFoundation
 }

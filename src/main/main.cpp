@@ -25,9 +25,6 @@
 
 int main(int argc, char *argv[])
 {
-    extern void qt_force_trolltech_settings_to_app_area(bool bVal);
-    qt_force_trolltech_settings_to_app_area(true);
-
     QApplication app(argc, argv);
 
 #if MAS_DEPLOY

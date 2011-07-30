@@ -14,26 +14,53 @@
 	      }, 
 
           "startTime" : "2006-10-05 00:00:00",
-          "endTime" : "2008-10-07 02:48:00",
-          "center" : "Sun",
-          "trajectoryFrame" : "EclipticJ2000",
-          "trajectory" :
+
+          "arcs" : [
           {
-              "type" : "InterpolatedStates",
-              "source" : "2008TC3.xyzv"
+              "endTime" : "2008-10-07 02:46:59",
+              "center" : "Sun",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" :
+              {
+                  "type" : "InterpolatedStates",
+                  "source" : "2008TC3.xyzv"
+              },
+              "rotationModel" :
+              {
+                  "type" : "Uniform",
+                  "period" : "0.0269409h"
+              }
           },
-          "rotationModel" :
           {
-              "type" : "Uniform",
-              "period" : "0.0269409h"
-          },
+              "endTime" : "2008-10-09 12:00:00",
+              "center" : "Earth",
+              "trajectoryFrame" : { "type" : "BodyFixed", "body" : "Earth" },
+              "trajectory" : {
+                  "type" : "FixedPoint",
+                  "position" : [ 5013.5730, 3267.2722, 2218.0255 ]
+              }
+          }
+          ],
 
           "geometry" :
           {
-              "type" : "Mesh",
-              "size" : 0.0035,
-              "source" : "../data/models/8flora.cmod"
-          }
+              "type" : "TimeSwitched",
+              "sequence" : [
+              {
+                  "startTime" : "1800-01-01",
+                  "geometry" :
+                  {
+                      "type" : "Mesh",
+                      "size" : 0.0035,
+                      "source" : "../data/models/8flora.cmod"
+                  }
+              },
+
+              {
+                  "startTime" : "2008-10-07 02:46:50.8"
+              }
+              ]
+           }
         },
 
         {

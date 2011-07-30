@@ -110,5 +110,17 @@ TimeSwitchedGeometry::addGeometry(double startTime, Geometry* geometry)
     if (geometry)
     {
         m_boundingRadius = std::max(m_boundingRadius, geometry->boundingSphereRadius());
+
+        // Set the shadow caster and receiver properties to true if *any* geometry
+        // in sequence has them set to true.
+        if (geometry->isShadowCaster())
+        {
+            setShadowCaster(true);
+        }
+
+        if (geometry->isShadowReceiver())
+        {
+            setShadowReceiver(true);
+        }
     }
 }

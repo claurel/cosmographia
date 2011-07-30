@@ -99,6 +99,8 @@ private:
                                         const UniverseCatalog* catalog);
     vesta::Geometry* loadSwarmGeometry(const QVariantMap& map);
     vesta::Geometry* loadParticleSystemGeometry(const QVariantMap& map);
+    vesta::Geometry* loadTimeSwitchedGeometry(const QVariantMap& map,
+                                              const UniverseCatalog* catalog);
 
     QList<vesta::counted_ptr<vesta::Arc> > loadChronology(const QVariantList& list,
                                                           const UniverseCatalog* catalog,

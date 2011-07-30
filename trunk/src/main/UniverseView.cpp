@@ -28,7 +28,7 @@
 #include "SkyLabelLayer.h"
 #include "ConstellationInfo.h"
 #include "TwoVectorFrame.h"
-#include "MultiLabelGeometry.h"
+#include "geometry/MultiLabelGeometry.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"

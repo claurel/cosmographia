@@ -23,7 +23,8 @@
 #include "../TwoVectorFrame.h"
 #include "../WMSTiledMap.h"
 #include "../MultiWMSTiledMap.h"
-#include "../MeshInstanceGeometry.h"
+#include "../geometry/MeshInstanceGeometry.h"
+#include "../geometry/TimeSwitchedGeometry.h"
 #include "../NetworkTextureLoader.h"
 #include "../compatibility/Scanner.h"
 #include "../compatibility/CmodLoader.h"
@@ -2551,6 +2552,75 @@ UniverseLoader::loadParticleSystemGeometry(const QVariantMap& map)
 
 
 Geometry*
+UniverseLoader::loadTimeSwitchedGeometry(const QVariantMap& map, const UniverseCatalog* catalog)
+{
+    QVariant sequenceVar = map.value("sequence");
+    if (!sequenceVar.isValid())
+    {
+        errorMessage("Sequence is missing from time switched geometry");
+        return NULL;
+    }
+
+    if (sequenceVar.type() != QVariant::List)
+    {
+        errorMessage("Sequence in time switched geometry must be an array");
+        return NULL;
+    }
+
+    QVariantList sequence = sequenceVar.toList();
+
+    TimeSwitchedGeometry* timeSwitched = new TimeSwitchedGeometry();
+    foreach (QVariant stepVar, sequence)
+    {
+        if (stepVar.type() == QVariant::Map)
+        {
+            QVariantMap stepMap = stepVar.toMap();
+            QVariant geometryVar = stepMap.value("geometry");
+            QVariant startTimeVar = stepMap.value("startTime");
+            double startTime = 0.0;
+
+            if (!startTimeVar.isValid())
+            {
+                errorMessage("Step in time switched geometry is missing startTime");
+                delete timeSwitched;
+                return NULL;
+            }
+            else
+            {
+                bool ok = false;
+                startTime = dateValue(startTimeVar, &ok);
+                if (!ok)
+                {
+                    errorMessage("Invalid startTime specified in time switched geometry");
+                    delete timeSwitched;
+                    return NULL;
+                }
+            }
+
+            Geometry* geometry = NULL;
+            if (geometryVar.type() == QVariant::Map)
+            {
+                geometry = loadGeometry(geometryVar.toMap(), catalog);
+                if (geometry == NULL)
+                {
+                    delete timeSwitched;
+                    return NULL;
+                }
+            }
+
+            timeSwitched->addGeometry(startTime, geometry);
+        }
+        else
+        {
+            errorMessage("Bad emitter in particle system");
+        }
+    }
+
+    return timeSwitched;
+}
+
+
+Geometry*
 UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* catalog)
 {
     Geometry* geometry = NULL;
@@ -2591,6 +2661,10 @@ UniverseLoader::loadGeometry(const QVariantMap& map, const UniverseCatalog* cata
     else if (type == "Rings")
     {
         geometry = loadRingSystemGeometry(map);
+    }
+    else if (type == "TimeSwitched")
+    {
+        geometry = loadTimeSwitchedGeometry(map, catalog);
     }
     else
     {

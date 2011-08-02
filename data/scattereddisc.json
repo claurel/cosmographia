@@ -7,7 +7,7 @@
       {
          "name" : "Eris",
          "class" : "dwarf planet",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -36,7 +36,7 @@
       {
          "name" : "Dysnomia",
          "class" : "satellite",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Eris",
          "trajectoryFrame": "EclipticJ2000",

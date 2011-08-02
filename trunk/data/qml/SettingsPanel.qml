@@ -285,12 +285,21 @@ Item {
             PanelText { text: "Constellation Figures" }
             TextToggle {
                 onToggled: { universeView.constellationFiguresVisible = enabled }
+                Component.onCompleted: { value = universeView.constellationFiguresVisible }
                 enabled: false
             }
 
             PanelText { text: "Constellation Names" }
             TextToggle {
                 onToggled: { universeView.constellationNamesVisible = enabled }
+                Component.onCompleted: { value = universeView.constellationNamesVisible }
+                enabled: false
+            }
+
+            PanelText { text: "Star Names" }
+            TextToggle {
+                onToggled: { universeView.starNamesVisible = enabled }
+                Component.onCompleted: { value = universeView.starNamesVisible }
                 enabled: false
             }
 

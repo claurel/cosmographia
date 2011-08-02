@@ -7,7 +7,7 @@
       {
          "name" : "Haumea",
          "class" : "dwarf planet",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -39,7 +39,7 @@
       {
          "name" : "Hi'iaka",
          "class" : "satellite",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Haumea",
          "trajectoryFrame": "EclipticJ2000",
@@ -102,7 +102,7 @@
       {
          "name" : "Makemake",
          "class" : "dwarf planet",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -126,7 +126,7 @@
       {
          "name" : "Varuna",
          "class" : "asteroid",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -150,7 +150,7 @@
       {
          "name" : "Orcus",
          "class" : "asteroid",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -179,7 +179,7 @@
       {
          "name" : "Vanth",
          "class" : "satellite",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Orcus",
          "trajectoryFrame": "EclipticJ2000",
@@ -206,7 +206,7 @@
       {
          "name" : "Ixion",
          "class" : "asteroid",
-         "label" : { "color" : "#aaaacc" },
+         "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",

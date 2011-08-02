@@ -35,7 +35,7 @@ public:
       */
     virtual void render(vesta::RenderContext& rc);
 
-    void addLabel(const std::string& labelText, double latitude, double longitude, const vesta::Spectrum& color);
+    void addLabel(const std::string& labelText, double latitude, double longitude, const vesta::Spectrum& color, float minimumFov = 3.141592f);
 
     vesta::TextureFont* font() const
     {
@@ -57,18 +57,34 @@ public:
         m_opacity = opacity;
     }
 
+    /** Set to true to omit labels attached to points that lie outside the
+      * view.
+      */
+    void setLabelCulling(bool enable)
+    {
+        m_labelCulling = enable;
+    }
+
+    bool labelCulling() const
+    {
+        return m_labelCulling;
+    }
+
 private:
     struct SkyLabel
     {
         Eigen::Vector3f position;
         std::string text;
         float color[3];
+        Eigen::Vector2f offset;
+        float minimumFov;
     };
 
 private:
     std::vector<SkyLabel> m_labels;
     vesta::counted_ptr<vesta::TextureFont> m_font;
     float m_opacity;
+    bool m_labelCulling;
 };
 
 #endif // _SKY_LABEL_LAYER_H_

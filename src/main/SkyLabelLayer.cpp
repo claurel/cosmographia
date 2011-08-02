@@ -24,7 +24,8 @@ using namespace std;
 
 
 SkyLabelLayer::SkyLabelLayer() :
-    m_opacity(1.0f)
+    m_opacity(1.0f),
+    m_labelCulling(true)
 {
 }
 
@@ -49,29 +50,29 @@ SkyLabelLayer::render(vesta::RenderContext& rc)
     rc.pushModelView();
     rc.rotateModelView(orientation.cast<float>());
 
-#if 0
-    glPointSize(10.0f);
-    glBegin(GL_POINTS);
-    glVertex3f(1.0f, 0.0f, 0.0f);
-    glVertex3f(-1.0f, 0.0f, 0.0f);
-    glVertex3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(0.0f, -1.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 1.0f);
-    glVertex3f(0.0f, 0.0f, -1.0f);
-    glEnd();
-    glPointSize(1.0f);
-#endif
+    Transform3f mvp = rc.projection() * rc.modelview();
+
+    float fov = rc.pixelSize() * rc.viewportHeight();
 
     for (vector<SkyLabel>::const_iterator iter = m_labels.begin(); iter != m_labels.end(); ++iter)
     {
         const SkyLabel& label = *iter;
 
-        Spectrum color(label.color[0], label.color[1], label.color[2]);
+        if (fov < label.minimumFov)
+        {
+            Vector3f v = mvp * label.position;
+            bool cull = v.x() < -1.0f || v.x() > 1.0f || v.y() < -1.0f || v.y() > 1.0f;
 
-        rc.pushModelView();
-        rc.translateModelView(label.position);
-        rc.drawText(Vector3f::Zero(), label.text, m_font.ptr(), color, m_opacity);
-        rc.popModelView();
+            if (!m_labelCulling || !cull)
+            {
+                Spectrum color(label.color[0], label.color[1], label.color[2]);
+
+                rc.pushModelView();
+                rc.translateModelView(label.position);
+                rc.drawText(Vector3f::Zero(), label.text, m_font.ptr(), color, m_opacity);
+                rc.popModelView();
+            }
+        }
     }
 
     rc.popModelView();
@@ -85,14 +86,15 @@ SkyLabelLayer::render(vesta::RenderContext& rc)
   * \param longitude the celestial longitude (in radians) of the labeled point
   */
 void
-SkyLabelLayer::addLabel(const std::string& labelText, double latitude, double longitude, const Spectrum& color)
+SkyLabelLayer::addLabel(const std::string& labelText, double latitude, double longitude, const Spectrum& color, float minimumFov)
 {
     SkyLabel label;
-    label.position = Vector3d(cos(latitude) * cos(longitude), cos(latitude) * sin(longitude), sin(latitude)).cast<float>();
+    label.position = Vector3d(cos(latitude) * cos(longitude), cos(latitude) * sin(longitude), sin(latitude)).cast<float>() * 0.99f;
     label.text = labelText;
     label.color[0] = color.red();
     label.color[1] = color.green();
     label.color[2] = color.blue();
+    label.minimumFov = minimumFov;
 
     m_labels.push_back(label);
 }

@@ -62,6 +62,7 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(bool centerIndicatorVisible READ centerIndicatorVisibility WRITE setCenterIndicatorVisibility NOTIFY centerIndicatorVisibilityChanged);
     Q_PROPERTY(bool constellationFiguresVisible READ constellationFigureVisibility WRITE setConstellationFigureVisibility);
     Q_PROPERTY(bool constellationNamesVisible READ constellationNameVisibility WRITE setConstellationNameVisibility);
+    Q_PROPERTY(bool starNamesVisible READ starNameVisibility WRITE setStarNameVisibility);
     Q_PROPERTY(bool equatorialGridVisible READ equatorialGridVisibility WRITE setEquatorialGridVisibility NOTIFY equatorialGridVisibilityChanged);
     Q_PROPERTY(bool eclipticVisible READ eclipticVisibility WRITE setEclipticVisibility);
 
@@ -183,6 +184,7 @@ public:
 
     bool constellationFigureVisibility() const;
     bool constellationNameVisibility() const;
+    bool starNameVisibility() const;
     bool equatorialGridVisibility() const;
     bool eclipticVisibility() const;
     bool planetOrbitsVisibility() const;
@@ -250,6 +252,10 @@ public:
 
     QUrl getStateUrl();
 
+    enum FontRole { LabelFont, TitleFont, TextFont };
+    vesta::TextureFont* font(FontRole role) const;
+
+
 signals:
     void timeChanged();
     void simulationDateTimeChanged();
@@ -283,6 +289,7 @@ public slots:
     void setPlanetographicGridVisibility(bool checked);
     void setConstellationFigureVisibility(bool checked);
     void setConstellationNameVisibility(bool checked);
+    void setStarNameVisibility(bool checked);
     void setLabelVisibility(bool enable);
     void setCenterIndicatorVisibility(bool enable);
     void setShadows(bool enable);

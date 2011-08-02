@@ -362,6 +362,22 @@ UniverseView::~UniverseView()
 }
 
 
+TextureFont*
+UniverseView::font(FontRole role) const
+{
+    switch (role)
+    {
+    case LabelFont:
+        return m_labelFont.ptr();
+    case TitleFont:
+        return m_titleFont.ptr();
+    case TextFont:
+    default:
+        return m_textFont.ptr();
+    }
+}
+
+
 void
 UniverseView::initializeDeclarativeUi(const QString& qmlFileName)
 {
@@ -2019,6 +2035,7 @@ UniverseView::initializeSkyLayers()
     m_universe->setLayer("constellation figures", constellations);
 
     SkyLabelLayer* constellationNamesLayer = new SkyLabelLayer();
+    constellationNamesLayer->setLabelCulling(false);
     constellationNamesLayer->setVisibility(false);
 
     constellationNamesLayer->setFont(m_textFont.ptr());
@@ -2465,6 +2482,13 @@ UniverseView::constellationNameVisibility() const
 }
 
 
+bool
+UniverseView::starNameVisibility() const
+{
+    return skyLayerVisible("star names");
+}
+
+
 bool UniverseView::equatorialGridVisibility() const
 {
     return skyLayerVisible("equatorial grid");
@@ -2505,6 +2529,13 @@ void
 UniverseView::setConstellationNameVisibility(bool checked)
 {
     setSkyLayerVisible("constellation names", checked);
+}
+
+
+void
+UniverseView::setStarNameVisibility(bool checked)
+{
+    setSkyLayerVisible("star names", checked);
 }
 
 

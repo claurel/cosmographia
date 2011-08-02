@@ -37,6 +37,7 @@
 #include "astro/TASS17.h"
 #include "astro/Gust86.h"
 #include "DateUtility.h"
+#include "SkyLabelLayer.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
 #include <vesta/Arc.h>
@@ -92,6 +93,8 @@ Cosmographia::Cosmographia() :
     m_catalog = new UniverseCatalog();
     m_view3d = new UniverseView(this, m_universe.ptr(), m_catalog);
     m_loader = new UniverseLoader();
+
+    loadStarNamesFile("starnames.json", m_universe->starCatalog());
 
     m_helpCatalog = new HelpCatalog(m_catalog);
     m_helpCatalog->loadHelpFiles("./help");
@@ -511,10 +514,11 @@ Cosmographia::initializeUniverse()
 
     m_universe->addEntity(sun);
 
+    StarCatalog* stars = NULL;
     QFile starFile("tycho2.stars");
     if (starFile.open(QFile::ReadOnly))
     {
-        StarCatalog* stars = new StarCatalog();
+        stars = new StarCatalog();
         QDataStream in(&starFile);
         in.setVersion(QDataStream::Qt_4_4);
         in.setByteOrder(QDataStream::BigEndian);
@@ -1121,6 +1125,80 @@ Cosmographia::unloadLastCatalog()
     }
 
     updateUnloadAction();
+}
+
+
+void
+Cosmographia::loadStarNamesFile(const QString &fileName, StarCatalog* starCatalog)
+{
+    QFile namesFile(fileName);
+    if (!namesFile.open(QFile::ReadOnly))
+    {
+        qDebug() << "Error opening star names file " << fileName;
+        return;
+    }
+
+    QJson::Parser parser;
+    bool parseOk = false;
+    QVariant nameListVar = parser.parse(&namesFile, &parseOk);
+    if (!parseOk)
+    {
+        qDebug() << "Error parsing star names list: " << parser.errorString() << " (line: " << parser.errorLine() << ")";
+        return;
+    }
+
+    if (!nameListVar.type() == QVariant::List)
+    {
+        qDebug() << "Star names file must contain a single JSON list.";
+        return;
+    }
+
+    SkyLabelLayer* starNamesLayer = new SkyLabelLayer();
+
+    QVariantList nameList = nameListVar.toList();
+    foreach (QVariant recordVar, nameList)
+    {
+        if (recordVar.type() != QVariant::Map)
+        {
+            qDebug() << "Bad record in star names list.";
+        }
+
+        QVariantMap record = recordVar.toMap();
+        QVariant tychoIdVar = record.value("tychoId");
+        QVariant nameVar = record.value("name");
+
+        if (!tychoIdVar.canConvert(QVariant::Int))
+        {
+            qDebug() << "Bad or missing Tycho ID in star names list";
+        }
+
+        if (!nameVar.type() == QVariant::String)
+        {
+            qDebug() << "Bad or missing name in star names list";
+        }
+
+        int tychoId = tychoIdVar.toInt();
+        QString name = nameVar.toString();
+
+        const StarCatalog::StarRecord* star = starCatalog->findStarIdentifier(tychoId);
+        if (star)
+        {
+            // Set the minimum FOV so that names of fainter stars pop into view only
+            // at higher zoom levels.
+            float baseMagnitude = 2.0f;
+            float relativeLuminosity = pow(2.512f, baseMagnitude - star->apparentMagnitude);
+            float minFov = float(PI) / 2.0f * pow(relativeLuminosity, 1.5f);
+
+            // Add a space to offset the label from the star. It would be better if a pixel offset
+            // could be specified for labels.
+            QString spaceName = QString(" ") + name;
+            starNamesLayer->addLabel(spaceName.toLatin1().data(), star->declination, star->RA, Spectrum(0.5f, 0.5f, 0.7f), minFov);
+        }
+    }
+
+    starNamesLayer->setFont(m_view3d->font(UniverseView::LabelFont));
+
+    m_universe->setLayer("star names", starNamesLayer);
 }
 
 

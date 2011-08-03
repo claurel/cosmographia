@@ -76,6 +76,8 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(bool milkyWayVisible READ milkyWayVisible WRITE setMilkyWayVisible);
     Q_PROPERTY(bool planetOrbitsVisible READ planetOrbitsVisibility WRITE setPlanetOrbitsVisibility);
 
+    Q_PROPERTY(int earthMapMonth READ earthMapMonth WRITE setEarthMapMonth);
+
     Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
     Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
     Q_PROPERTY(double timeScale READ timeScale WRITE setTimeScale NOTIFY timeScaleChanged);
@@ -255,6 +257,10 @@ public:
     enum FontRole { LabelFont, TitleFont, TextFont };
     vesta::TextureFont* font(FontRole role) const;
 
+    int earthMapMonth() const
+    {
+        return m_earthMapMonth;
+    }
 
 signals:
     void timeChanged();
@@ -303,6 +309,7 @@ public slots:
     void setAntialiasingSamples(int samples);
     void setSunGlare(bool enable);
     void setDiffractionSpikes(bool enable);
+    void setEarthMapMonth(int month);
 
     void setInfoText(bool enable);
     void plotTrajectory(vesta::Entity* body, const BodyInfo* info);
@@ -458,6 +465,8 @@ private:
     QString m_statusMessage;
 
     MarkerLayer* m_markers;
+
+    int m_earthMapMonth;
 };
 
 #endif // _UNIVERSE_VIEW_H_

@@ -157,8 +157,26 @@ Item {
             }
 
             // Spacer
-            Item { height: 20; width: 10 }
-            Item { height: 20; width: 10 }
+            Item { height: 5; width: 10 }
+            Item { height: 5; width: 10 }
+
+            Row {
+                spacing: 25
+                PanelText { text: "Earth Map:" }
+                ChoiceBox {
+                    maxIndex: 11
+                    choiceTextWidth: 75
+                    wrap: true
+                    text: Qt.formatDate(new Date(2000, currentIndex, 3), "MMMM")
+                    onCurrentIndexChanged: { universeView.earthMapMonth = currentIndex }
+                    Component.onCompleted: { currentIndex = universeView.earthMapMonth }
+                }
+            }
+            Item { height: 5; width: 5 }
+
+            // Spacer
+            Item { height: 15; width: 10 }
+            Item { height: 15; width: 10 }
 
             Column {
                 width: magnitudeSlider.width
@@ -180,9 +198,8 @@ Item {
             }
             Item { width: 1; height: 1 }
 
-            // Spacer
-            Item { height: 10; width: 10 }
-            Item { height: 10; width: 10 }
+            Item { height: 5; width: 10 }
+            Item { height: 5; width: 10 }
 
             Column {
                 width: ambientLightSlider.width
@@ -205,8 +222,8 @@ Item {
             Item { width: 1; height: 1 }
 
             // Spacer
-            Item { height: 10; width: 10 }
-            Item { height: 10; width: 10 }
+            Item { height: 5; width: 10 }
+            Item { height: 5; width: 10 }
 
             PanelText {
                 text: "Anaglyph Stereo"
@@ -285,21 +302,21 @@ Item {
             PanelText { text: "Constellation Figures" }
             TextToggle {
                 onToggled: { universeView.constellationFiguresVisible = enabled }
-                Component.onCompleted: { value = universeView.constellationFiguresVisible }
+                Component.onCompleted: { enabled = universeView.constellationFiguresVisible }
                 enabled: false
             }
 
             PanelText { text: "Constellation Names" }
             TextToggle {
                 onToggled: { universeView.constellationNamesVisible = enabled }
-                Component.onCompleted: { value = universeView.constellationNamesVisible }
+                Component.onCompleted: { enabled = universeView.constellationNamesVisible }
                 enabled: false
             }
 
             PanelText { text: "Star Names" }
             TextToggle {
                 onToggled: { universeView.starNamesVisible = enabled }
-                Component.onCompleted: { value = universeView.starNamesVisible }
+                Component.onCompleted: { enabled = universeView.starNamesVisible }
                 enabled: false
             }
 

@@ -28,6 +28,7 @@
 #include "SkyLabelLayer.h"
 #include "ConstellationInfo.h"
 #include "TwoVectorFrame.h"
+#include "MultiWMSTiledMap.h"
 #include "geometry/MultiLabelGeometry.h"
 
 #if FFMPEG_SUPPORT
@@ -284,7 +285,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_captureNextImage(false),
     m_reticleUpdateTime(-1.0e10),
     m_statusUpdateTime(0.0),
-    m_markers(NULL)
+    m_markers(NULL),
+    m_earthMapMonth(1)
 {
     setAutoFillBackground(false);
 
@@ -623,6 +625,49 @@ UniverseView::initNetwork()
                               "http://onmars.jpl.nasa.gov/wms.cgi?request=GetMap&layers=mars,moc_na&srs=IAU2000:49900&format=image/jpeg&styles=",
                               WMSRequester::LatLongBoundingBox(-180.0, -166.0, 76.0, 90.0),
                               512, 512);
+}
+
+
+/** Set the month to use for the map of Earth.
+  *
+  * TODO: This definitely needs to be replaced with a more general mechanism for
+  * changing the texture maps on planets.
+  */
+void
+UniverseView::setEarthMapMonth(int month)
+{
+    m_earthMapMonth = month;
+
+    static const char* bmngLayerNames[] =
+    {
+        "bmng-jan-nb", "bmng-feb-nb", "bmng-mar-nb",
+        "bmng-apr-nb", "bmng-may-nb", "bmng-jun-nb",
+        "bmng-jul-nb", "bmng-aug-nb", "bmng-sep-nb",
+        "bmng-oct-nb", "bmng-nov-nb", "bmng-dec-nb"
+    };
+
+    month = min(11, max(0, month));
+
+    Entity* earth = m_catalog->find("Earth");
+    if (!earth)
+    {
+        return;
+    }
+
+    WorldGeometry* world = dynamic_cast<WorldGeometry*>(earth->geometry());
+    if (!world)
+    {
+        return;
+    }
+
+    MultiWMSTiledMap* map = dynamic_cast<MultiWMSTiledMap*>(world->tiledMap());
+    if (!map)
+    {
+        return;
+    }
+
+    MultiWMSTiledMap* newMap = new MultiWMSTiledMap(m_textureLoader.ptr(), bmngLayerNames[month], 7, "earth-global-mosaic", 13, 480);
+    world->setBaseMap(newMap);
 }
 
 

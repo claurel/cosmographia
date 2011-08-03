@@ -1,0 +1,50 @@
+{
+     "version": "1.0",
+     "name": "Dawn Mission",
+
+     "items" :
+     [
+        {
+          "name" : "Dawn",
+
+          "startTime" : "2007-09-17 12:40:50",
+
+          "arcs" : [
+            {
+              "center" : "Sun",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" :
+              {
+                "type" : "InterpolatedStates",
+                "source" : "trajectories/dawn-cruise1.xyzv"
+              },
+              "endTime" : "2011-07-01 00:00:00"
+            },
+            {
+              "center" : "Vesta",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" :
+              {
+                "type" : "InterpolatedStates",
+                "source" : "trajectories/dawn-vesta-orbit.xyzv"
+              },
+              "endTime" : "2012-07-31 00:00:00"
+            }
+          ],
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/dawn/dawn.cmod"
+          },
+
+          "label" : { "color" : "#d0d0d0" },
+          "trajectoryPlot" :
+          {
+              "duration" : "1 y",
+              "fade" : 0.5
+          }
+        }
+    ]
+}

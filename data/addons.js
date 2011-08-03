@@ -46,5 +46,11 @@ var InstalledAddons =
     name: "Asteroid 2011 MD",
     description: "2011 MD is a small asteroid that came within 12,000 of Earth on June 27, 2011.",
     source: "addons/2011MD.json"
+    },
+
+    {
+    name: "Asteroid 2008 TC3",
+    description: "2008 TC3 was a small asteroid that burned up in Earth's atmosphere on October 7, 2008.",
+    source: "addons/2008TC3.json"
     }
 ];

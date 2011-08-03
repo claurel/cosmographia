@@ -167,7 +167,44 @@
               "source" : "models/8flora.cmod",
               "size" : 36.0
           }
-        }
+        },
 
+        {
+          "name" : "P4",
+          "description" : "Moon of Pluto",
+          "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "center" : "Pluto System Barycenter",
+          "trajectory" :
+          {
+              "type" : "Keplerian",
+              "semiMajorAxis" : 56247,
+              "eccentricity" : 0.00870,
+              "period" : "30.963956d",
+              "inclination" : 96.170,
+              "ascendingNode" : 223.06,
+              "argumentOfPeriapsis" : 282.97,
+              "meanAnomaly" : 180.0,
+              "epoch" : "2011-08-03 00:00:00"
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              // Assuming synchronous
+              "type" : "Uniform",
+              "period" : "30.963956d",
+              "inclination" : 96.170,
+              "ascendingNode" : 223.06
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/8flora.cmod",
+              "size" : 12.0
+          }
+        }
     ]
 }

@@ -2968,7 +2968,7 @@ loadLabelInfo(BodyInfo* info, const QVariantMap& map)
 /** Load additional information about a body.
   */
 BodyInfo*
-loadBodyInfo(const QVariantMap& item)
+UniverseLoader::loadBodyInfo(const QVariantMap& item)
 {
     BodyInfo* info = new BodyInfo();
 
@@ -2982,6 +2982,16 @@ loadBodyInfo(const QVariantMap& item)
     if (descVar.type() == QVariant::String)
     {
         info->description = descVar.toString();
+    }
+
+    QVariant infoSourceVar = item.value("infoSource");
+    if (infoSourceVar.type() == QVariant::String)
+    {
+        info->infoSource = infoSourceVar.toString();
+        if (!info->infoSource.startsWith("help:"))
+        {
+            info->infoSource = dataFileName(info->infoSource);
+        }
     }
 
     QVariant labelVar = item.value("label");
@@ -3332,6 +3342,23 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                     {
                         arcs = loadChronology(arcsVar.toList(), catalog, startTime);
                     }
+
+#if 0
+                    // Debugging code to output positions for one arc in the frame of the previous one.
+                    // Useful for 'stitching' arcs together.
+                    double t = startTime;
+                    for (unsigned int i = 1; i < arcs.size(); ++i)
+                    {
+                        vesta::Arc* prevArc = arcs.at(i - 1).ptr();
+                        vesta::Arc* arc = arcs.at(i).ptr();
+
+                        t += prevArc->duration();
+                        Vector3d upos = prevArc->center()->position(t) + prevArc->trajectoryFrame()->orientation(t) * prevArc->trajectory()->position(t);
+                        Vector3d pos = arc->trajectoryFrame()->orientation(t).conjugate() * (upos - arc->center()->position(t));
+                        qDebug() << bodyName
+                                 << QString(": %1, %2, %3").arg(pos.x(), 0, 'g', 16).arg(pos.y(), 0, 'g', 16).arg(pos.z(), 0, 'g', 16);
+                    }
+#endif
                 }
                 else
                 {

@@ -993,6 +993,8 @@ Cosmographia::loadSettings()
     m_view3d->setAmbientLight(ambientLight);
     double limitingMagnitude = settings.value("limitingMagnitude", 8.0).toDouble();
     m_view3d->setLimitingMagnitude(limitingMagnitude);
+    bool diffractionSpikes = settings.value("diffractionSpikes", false).toBool();
+    m_view3d->setDiffractionSpikes(diffractionSpikes);
 
     m_view3d->setEclipseShadows(true);
 
@@ -1013,6 +1015,8 @@ Cosmographia::saveSettings()
 
     settings.setValue("ambientLight", m_view3d->ambientLight());
     settings.setValue("limitingMagnitude", m_view3d->limitingMagnitude());
+    settings.setValue("diffractionSpikes", m_view3d->diffractionSpikes());
+
     settings.setValue("previouslyRun", true);
 
     settings.setValue("videoSize", videoSize());
@@ -1409,6 +1413,7 @@ Cosmographia::setStarStyle(QAction *action)
     if (stars)
     {
         int mode = action->data().toInt();
+
         switch (mode)
         {
         case 0:

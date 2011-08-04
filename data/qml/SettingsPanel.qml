@@ -153,6 +153,7 @@ Item {
             PanelText { text: "Diffraction Spikes" }
             TextToggle {
                 onToggled: { universeView.diffractionSpikes = enabled }
+                Component.onCompleted: { enabled = universeView.diffractionSpikes }
                 enabled: false
             }
 

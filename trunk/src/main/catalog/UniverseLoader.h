@@ -134,6 +134,8 @@ private:
     Viewpoint* loadViewpoint(const QVariantMap& info,
                              UniverseCatalog* catalog);
 
+    BodyInfo* loadBodyInfo(const QVariantMap& item);
+
     QStringList loadCatalogItems(const QVariantMap& contents,
                                  UniverseCatalog* catalog,
                                  unsigned int requireDepth);

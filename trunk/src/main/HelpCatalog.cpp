@@ -73,20 +73,41 @@ QString
 HelpCatalog::getHelpText(const QString& name) const
 {
     QString help = m_helpResources.value(name.toLower());
-    if (!help.isEmpty())
+    if (help.isEmpty())
     {
-        return help;
+        // No help available; see if the named object has a custom info resource and use
+        // that. If not, create a default info page.
+        Entity* body = m_universeCatalog->find(name, Qt::CaseInsensitive);
+        if (body != NULL)
+        {
+            BodyInfo* info = m_universeCatalog->findInfo(body);
+            if (info)
+            {
+                if (info->infoSource.startsWith("help:"))
+                {
+                    help = m_helpResources.value(info->infoSource.mid(5));
+                }
+                else if (!info->infoSource.isEmpty())
+                {
+                    QFile infoFile(info->infoSource);
+                    qDebug() << info->infoSource;
+                    if (infoFile.open(QFile::ReadOnly))
+                    {
+                        help = QString::fromLatin1(infoFile.readAll());
+                        qDebug() << "help: " << help;
+                    }
+                }
+            }
+        }
+
+        // Nothing worked. Create a default help page if an object with
+        // the specified name is present in the catalog.
+        if (help.isEmpty())
+        {
+            QString description = m_universeCatalog->getDescription(body);
+            help = QString("<h1>%1</h1>%2").arg(QString::fromUtf8(body->name().c_str()), description);
+        }
     }
 
-    // No help available; try and create a default help page if an object with
-    // the specified name is present in the catalog.
-    Entity* body = m_universeCatalog->find(name, Qt::CaseInsensitive);
-    if (body == NULL)
-    {
-        return "";
-    }
-
-    QString description = m_universeCatalog->getDescription(body);
-
-    return QString("<h1>%1</h1>%2").arg(QString::fromUtf8(body->name().c_str()), description);
+    return help;
 }

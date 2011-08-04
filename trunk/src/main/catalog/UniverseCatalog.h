@@ -66,6 +66,7 @@ public:
     double trajectoryPlotLead;
     double trajectoryPlotFade;
     QString description;
+    QString infoSource;
 };
 
 

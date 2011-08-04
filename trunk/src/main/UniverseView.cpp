@@ -117,6 +117,7 @@ static double EndOfTime   = GregorianDate(2100, 1, 1, 0, 0, 0, 0, TimeScale_TDB)
 
 static const double MinimumFOV = toRadians(0.1);
 static const double MaximumFOV = toRadians(90.0);
+static const double ReticleFOVThreshold = toRadians(20.0);
 static const double MaximumDistanceFromSun = 5.0e11;
 
 static const double StatusMessageDuration = 2.5;
@@ -431,6 +432,13 @@ static Visualizer*
 labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, double fadeSize, bool visible)
 {
     if (!planet || !planet->isVisible())
+    {
+        return NULL;
+    }
+
+    // By convention, objects with names beginning with an underscore are not visible
+    // to the user.
+    if (!planet->name().empty() && planet->name()[0] == '_')
     {
         return NULL;
     }
@@ -1262,6 +1270,12 @@ void UniverseView::paintGL()
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+    // Enable multisampling when we have a multisample render target
+    if (qobject_cast<QGLWidget*>(viewport())->format().samples() > 1 && GLEW_ARB_multisample)
+    {
+        glEnable(GL_MULTISAMPLE_ARB);
+    }
+
     Viewport mainViewport(size().width(), size().height());
     LightingEnvironment lighting;
     if (m_reflectionsEnabled && m_reflectionMap.isValid())
@@ -1507,7 +1521,10 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
     {
         double zoomFactor = exp(dy / 1000.0);
         setFOV(m_fovY * zoomFactor);
-        m_reticleUpdateTime = m_realTime;
+        if (m_fovY < ReticleFOVThreshold)
+        {
+            m_reticleUpdateTime = m_realTime;
+        }
     }
     else if (rightButton || (leftButton && alt))
     {
@@ -1695,7 +1712,10 @@ UniverseView::gestureEvent(QGestureEvent* event)
         if (abs(fovScale - 1.0f) > 1.0e-4f)
         {
             setFOV(m_fovY * fovScale);
-            m_reticleUpdateTime = m_realTime;
+            if (m_fovY < ReticleFOVThreshold)
+            {
+                m_reticleUpdateTime = m_realTime;
+            }
         }
 
         float rotationAngle = float(toRadians(pinch->rotationAngle() - pinch->lastRotationAngle()));
@@ -2064,6 +2084,17 @@ UniverseView::initializeSkyLayers()
     starsLayer->setLimitingMagnitude(8.0f);
     starsLayer->setVisibility(true);
     m_universe->setLayer("stars", starsLayer);
+
+#ifdef Q_OS_MAC
+    // The ATI Radeon X1600 seems to have troubles rendering points with fragment shaders enabled.
+    // In order to prevent them from appearing like white squares, we'll fall back to point stars
+    // when the renderer string contains X1600. This problem has only been observed on the Mac (so far)
+    QString glRenderer = QString::fromAscii(reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
+    if (glRenderer.contains("X1600"))
+    {
+        starsLayer->setStyle(StarsLayer::PointStars);
+    }
+#endif
 
     SkyImageLayer* milkyWayLayer = new SkyImageLayer();
     milkyWayLayer->setOpacity(0.3f);

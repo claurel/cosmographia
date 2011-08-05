@@ -560,6 +560,7 @@ macx {
     TEXTURES.files = \
         data/textures/README.html \
         data/textures/flare.png \
+        data/textures/gaussian.jpg \
         data/textures/milkyway.jpg \
         data/textures/moon.dds \
         data/textures/moon-normal.dds \
@@ -600,6 +601,7 @@ macx {
 
     MODELS.path = Contents/Resources/data/models
     MODELS.files = \
+        data/models/README.html \
         data/models/phobos.cmod \
         data/models/phobos.dds \
         data/models/deimos.cmod \
@@ -631,17 +633,39 @@ macx {
 
     QMAKE_BUNDLE_DATA += MODELS
 
+    DAWNFILES.path = Contents/Resources/data/models/dawn
+    DAWNFILES.files = \
+        data/models/dawn/dawn.cmod \
+        data/models/dawn/awsup.jpg \
+        data/models/dawn/dawn_ant.jpg \
+        data/models/dawn/dawn_foil.jpg \
+        data/models/dawn/dawn_louvre.jpg \
+        data/models/dawn/pb1.jpg \
+        data/models/dawn/cv2.jpg \
+        data/models/dawn/dawn_arm.jpg \
+        data/models/dawn/dawn_gold.jpg \
+        data/models/dawn/dawn_silver.jpg \
+        data/models/dawn/dawn_eng.jpg \
+        data/models/dawn/dawn_grid.jpg \
+        data/models/dawn/dawn_sp.jpg
+
+    QMAKE_BUNDLE_DATA += DAWNFILES
+
     TRAJECTORIES.path = Contents/Resources/data/trajectories
     TRAJECTORIES.files = \
         data/trajectories/cassini-cruise.xyzv \
         data/trajectories/cassini-orbit.xyzv \
-        data/trajectories/cassini-solstice.xyzv
+        data/trajectories/cassini-solstice.xyzv \
+        data/trajectories/dawn-cruise1.xyzv \
+        data/trajectories/dawn-vesta-orbit.xyzv \
+        data/trajectories/dawn-cruise2.xyzv
 
     QMAKE_BUNDLE_DATA += TRAJECTORIES
 
     DATA.path = Contents/Resources/data
     DATA.files = \
         data/tycho2.stars \
+        data/starnames.json \
         data/solarsys.json \
         data/sun.json \
         data/mercury.json \
@@ -657,6 +681,7 @@ macx {
         data/kuiperbelt.json \
         data/scattereddisc.json \
         data/cassini.json \
+        data/dawn.json \
         data/earthorbiting.json \
         data/iss.json \
         data/hst.json \
@@ -684,6 +709,7 @@ macx {
         data/qml/AddonManager.qml \
         data/qml/Button.qml \
         data/qml/CheckBox.qml \
+        data/qml/ChoiceBox.qml \
         data/qml/ContextMenu.qml \
         data/qml/FindObjectPanel.qml \
         data/qml/HelpBrowser.qml \
@@ -758,10 +784,12 @@ macx {
         data/help/charon.html \
         data/help/nix.html \
         data/help/hydra.html \
+        data/help/p4.html \
         data/help/eris.html \
         data/help/haumea.html \
         data/help/orcus.html \
         data/help/cassini.html \
+        data/help/dawn.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \
         data/help/hyperion.jpg \
@@ -788,6 +816,7 @@ macx {
         data/addons/2011MD.xyzv \
         data/addons/2008TC3.json \
         data/addons/2008TC3.xyzv \
+        data/addons/2008tc3.html \
         data/addons/sciencesat.json \
         data/addons/sorce.obj \
         data/addons/sorce.mtl \

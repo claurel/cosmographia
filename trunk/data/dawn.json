@@ -12,23 +12,69 @@
           "arcs" : [
             {
               "center" : "Sun",
+              "endTime" : "2011-07-01 00:00:00",
               "trajectoryFrame" : "EclipticJ2000",
               "trajectory" :
               {
                 "type" : "InterpolatedStates",
                 "source" : "trajectories/dawn-cruise1.xyzv"
               },
-              "endTime" : "2011-07-01 00:00:00"
+              "bodyFrame" :
+              {
+                "type" : "TwoVector",              
+                "primaryAxis" : "-z",
+                "primary" :
+                {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Dawn",
+                  "target" : "Sun"
+                },
+                "secondaryAxis" : "x",
+                "secondary" :
+                {
+                  "type" : "RelativePosition",
+                  "observer" : "Dawn",
+                  "target" : "Sun"
+                }
+              }
             },
             {
               "center" : "Vesta",
+              "endTime" : "2012-07-31 12:00:00",
+              "trajectoryFrame" : "EclipticJ2000",
+              "trajectory" : 
+             {
+                "type" : "InterpolatedStates",
+                "source" : "trajectories/dawn-vesta-orbit.xyzv"
+              }
+            },
+            {
+              "center" : "Sun",
+              "endTime" : "2015-01-31 00:00:00",
               "trajectoryFrame" : "EclipticJ2000",
               "trajectory" :
               {
                 "type" : "InterpolatedStates",
-                "source" : "trajectories/dawn-vesta-orbit.xyzv"
+                "source" : "trajectories/dawn-cruise2.xyzv"
               },
-              "endTime" : "2012-07-31 00:00:00"
+              "bodyFrame" :
+              {
+                "type" : "TwoVector",              
+                "primaryAxis" : "-z",
+                "primary" :
+                {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Dawn",
+                  "target" : "Sun"
+                },
+                "secondaryAxis" : "x",
+                "secondary" :
+                {
+                  "type" : "RelativePosition",
+                  "observer" : "Dawn",
+                  "target" : "Sun"
+                }
+              }
             }
           ],
 
@@ -42,8 +88,59 @@
           "label" : { "color" : "#d0d0d0" },
           "trajectoryPlot" :
           {
-              "duration" : "1 y",
+              "duration" : "20 d",
               "fade" : 0.5
+          }
+        },
+
+        {
+          "name" : "_Dawn Engine 1",
+          "center" : "Dawn",
+
+          "trajectoryFrame": {
+            "type" : "BodyFixed",
+            "body" : "Dawn"
+          }, 
+
+          "trajectory": {
+            "type" : "FixedPoint",
+            "position" : [ 0, 0, -0.0002 ]
+          },
+
+          "bodyFrame": {
+            "type" : "BodyFixed",
+            "body" : "Dawn"
+          }, 
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [ {
+                "texture" : "textures/gaussian.jpg",
+                "generator" :
+                { 
+                    "type" : "Box",
+                    "center" : [ 0, 0, 0 ],
+                    "sides" : [ 0.00001, 0.00001, 0.00001 ],
+                    "velocity" : [ 0, 0, -0.05 ]
+                },
+                "velocityVariation" : 0.001,
+                "spawnRate" : 2000,
+                "lifetime" : 0.1,
+                "trace": 0.01,
+                "startSize" : 0.0001,
+                "endSize" : 0.0005,
+                "colors" : [
+                   "#5566aa", 0.15,
+                   "#5566aa", 0.05,
+                   "#5566aa", 0.0
+                ],
+
+                "emissive" : true,
+                "startTime" : "2007-09-28",
+                "endTime" : "2011-07-02"
+              } ]
           }
         }
     ]

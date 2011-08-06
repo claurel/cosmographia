@@ -1053,7 +1053,7 @@ UniverseView::drawInfoOverlay()
 #if 0
             {
                 double fovX = atan(tan(m_fovY / 2.0) * double(width()) / double(height())) * 2.0;
-                QString fovInfo = QString("%1\260 x %2\260 FOV").arg(toDegrees(fovX), 0, 'f', 1).arg(toDegrees(m_fovY), 0, 'f', 1);
+                QString fovInfo = QString("%1\260 x %2\260 field of view").arg(toDegrees(fovX), 0, 'f', 1).arg(toDegrees(m_fovY), 0, 'f', 1);
                 m_textFont->render(fovInfo.toLatin1().data(), Vector2f(float(viewportWidth / 2), 10.0f));
             }
 #endif
@@ -1373,7 +1373,7 @@ void UniverseView::paintGL()
     if (m_captureNextImage)
     {
         m_captureNextImage = false;
-        QImage screenShot = grabFrameBuffer(false);
+        QImage screenShot = grabFrameBuffer(true);
         QApplication::clipboard()->setImage(screenShot);
     }
 
@@ -3155,7 +3155,7 @@ UniverseView::setFOV(double fovY)
     m_fovY = max(MinimumFOV, min(MaximumFOV, fovY));
 
     double fovX = atan(tan(m_fovY / 2.0) * double(width()) / double(height())) * 2.0;
-    setStatusMessage(QString("%1\260 x %2\260 FOV").arg(toDegrees(fovX), 0, 'f', 1).arg(toDegrees(m_fovY), 0, 'f', 1));
+    setStatusMessage(QString("%1\260 x %2\260 field of view").arg(toDegrees(fovX), 0, 'f', 1).arg(toDegrees(m_fovY), 0, 'f', 1));
 }
 
 

@@ -744,6 +744,10 @@ Cosmographia::initialize()
         QDir::setCurrent(saveDir);
     }
 
+    // Reapply the earth map month setting, because it requires the Solar System
+    // catalog to be loaded
+    m_view3d->setEarthMapMonth(m_view3d->earthMapMonth());
+
     m_view3d->setPlanetOrbitsVisibility(true);
 }
 
@@ -995,6 +999,8 @@ Cosmographia::loadSettings()
     m_view3d->setLimitingMagnitude(limitingMagnitude);
     bool diffractionSpikes = settings.value("diffractionSpikes", false).toBool();
     m_view3d->setDiffractionSpikes(diffractionSpikes);
+    int earthMapMonth = settings.value("earthMapMonth", 1).toInt();
+    m_view3d->setEarthMapMonth(std::max(0, std::min(11, earthMapMonth)));
 
     m_view3d->setEclipseShadows(true);
 
@@ -1016,6 +1022,7 @@ Cosmographia::saveSettings()
     settings.setValue("ambientLight", m_view3d->ambientLight());
     settings.setValue("limitingMagnitude", m_view3d->limitingMagnitude());
     settings.setValue("diffractionSpikes", m_view3d->diffractionSpikes());
+    settings.setValue("earthMapMonth", m_view3d->earthMapMonth());
 
     settings.setValue("previouslyRun", true);
 

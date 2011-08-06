@@ -1373,7 +1373,7 @@ void UniverseView::paintGL()
     if (m_captureNextImage)
     {
         m_captureNextImage = false;
-        QImage screenShot = grabFrameBuffer(true);
+        QImage screenShot = grabFrameBuffer(false);
         QApplication::clipboard()->setImage(screenShot);
     }
 

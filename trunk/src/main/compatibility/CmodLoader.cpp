@@ -182,6 +182,21 @@ CmodLoader::loadMaterial()
         {
             quint16 blendMode = 0;
             *m_inputStream >> blendMode;
+            switch (blendMode)
+            {
+            case 0:
+                material->setBlendMode(Material::AlphaBlend);
+                break;
+            case 1:
+                material->setBlendMode(Material::AdditiveBlend);
+                break;
+            case 2:
+                material->setBlendMode(Material::PremultipliedAlphaBlend);
+                break;
+            default:
+                setError("Unknown blend mode");
+                break;
+            }
         }
         break;
 

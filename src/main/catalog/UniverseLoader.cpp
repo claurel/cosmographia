@@ -1066,6 +1066,72 @@ UniverseLoader::loadFixedRotationModel(const QVariantMap& map)
 
 
 vesta::RotationModel*
+UniverseLoader::loadFixedEulerRotationModel(const QVariantMap& map)
+{
+    QVariant sequenceVar = map.value("sequence");
+    QVariant anglesVar = map.value("angles");
+
+    if (sequenceVar.type() != QVariant::String)
+    {
+        errorMessage("Bad or missing sequence for FixedEuler rotation model");
+        return NULL;
+    }
+
+    if (anglesVar.type() != QVariant::List)
+    {
+        errorMessage("Bad or missing angles list for FixedEuler rotation model");
+        return NULL;
+    }
+
+    QString sequence = sequenceVar.toString();
+    QVariantList angles = anglesVar.toList();
+
+    if (sequence.length() != angles.length())
+    {
+        errorMessage("Count of angles doesn't match sequence length for FixedEuler rotation model");
+        return NULL;
+    }
+
+    Quaterniond q = Quaterniond::Identity();
+    for (int i = 0; i < sequence.length(); ++i)
+    {
+        bool ok = false;
+        double thetaDeg = angles.at(i).toDouble(&ok);
+        if (!ok)
+        {
+            errorMessage("Bad angle in FixedEuler rotation model");
+            return NULL;
+        }
+
+        double theta = toRadians(thetaDeg);
+        Quaterniond r = Quaterniond::Identity();
+        QChar axisId = sequence.at(i);
+        if (axisId == '1' || axisId == 'x' || axisId == 'X')
+        {
+            r = AngleAxisd(theta, Vector3d::UnitX());
+        }
+        else if (axisId == '2' || axisId == 'y' || axisId == 'Y')
+        {
+            r = AngleAxisd(theta, Vector3d::UnitY());
+        }
+        else if (axisId == '3' || axisId == 'z' || axisId == 'Z')
+        {
+            r = AngleAxisd(theta, Vector3d::UnitZ());
+        }
+        else
+        {
+            errorMessage(QString("Bad axis identifier '%1' in FixedEuler sequence").arg(axisId));
+            return NULL;
+        }
+
+        q = q * r;
+    }
+
+    return new FixedRotationModel(q);
+}
+
+
+vesta::RotationModel*
 loadUniformRotationModel(const QVariantMap& map)
 {
     bool ok = false;
@@ -1147,6 +1213,10 @@ UniverseLoader::loadRotationModel(const QVariantMap& map)
     if (type == "Fixed")
     {
         return loadFixedRotationModel(map);
+    }
+    if (type == "FixedEuler")
+    {
+        return loadFixedEulerRotationModel(map);
     }
     else if (type == "Uniform")
     {

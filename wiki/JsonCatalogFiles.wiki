@@ -281,7 +281,7 @@ Defines a rotation that doesn't change over time (within the object's body frame
 A fixed rotation built from a sequence of rotations about the principal axes.
 
  * sequence - string with a list of principal axes identifiers. Axes may be given as x, y, z or 1, 2, and 3. For example "zxz" and "313" represent the same sequence.
-* angles - array of angles (in degrees). The length of this array must match the length of the sequence string.
+ * angles - array of angles (in degrees). The length of this array must match the length of the sequence string.
 
 The example below rotates an object in the Earth-fixed frame so that it is aligned with Earth's magnetic
 axis:

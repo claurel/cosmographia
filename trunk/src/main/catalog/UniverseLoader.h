@@ -128,6 +128,7 @@ private:
     vesta::RotationModel* loadBuiltinRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadFixedRotationModel(const QVariantMap& map);
+    vesta::RotationModel* loadFixedEulerRotationModel(const QVariantMap& map);
 
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
                                       const UniverseCatalog* catalog);

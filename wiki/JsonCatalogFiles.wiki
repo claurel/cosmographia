@@ -266,6 +266,35 @@ Note that FixedSpherical has no notion of the IAU defined planetographic coordin
 
 == Fixed ==
 
+Defines a rotation that doesn't change over time (within the object's body frame). The orientation is specified as a quaternion. For hand-edited catalog files, it is generally easier to use the FixedEuler rotation model.
+
+{{{
+"rotationModel" :
+{
+    "type" : "Fixed",
+    "quaternion" : [ 0.73305, -0.68017, 0.0, 0.0 ]
+}
+}}}
+
+== FixedEuler ==
+
+A fixed rotation built from a sequence of rotations about the principal axes.
+
+ * sequence - string with a list of principal axes identifiers. Axes may be given as x, y, z or 1, 2, and 3. For example "zxz" and "313" represent the same sequence.
+* angles - array of angles (in degrees). The length of this array must match the length of the sequence string.
+
+The example below rotates an object in the Earth-fixed frame so that it is aligned with Earth's magnetic
+axis:
+
+{{{
+"rotationModel" :
+{
+    "type": "FixedEuler",
+    "sequence": "zy",
+    "angles" : [ 287.781, 9.985 ]
+}
+}}}
+
 == Builtin ==
 
 {{{

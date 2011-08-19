@@ -1,5 +1,5 @@
 /*
- * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 620 $ $Date: 2011-08-19 15:21:14 -0700 (Fri, 19 Aug 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -52,7 +52,7 @@ public:
 
     virtual bool isOpaque() const
     {
-        return m_opacity >= 1.0f;
+        return false;//m_opacity >= 1.0f;
     }
 
     double scale() const

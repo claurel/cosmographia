@@ -1,5 +1,5 @@
 /*
- * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 620 $ $Date: 2011-08-19 15:21:14 -0700 (Fri, 19 Aug 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -170,33 +170,72 @@ ArrowGeometry::render(RenderContext& rc,
     rc.pushModelView();
     rc.scaleModelView(Vector3f::Constant((float) m_scale));
 
-    if (visibleArrows() & XAxis)
+    // Arrows are drawn in the opaque pass if they're completely opaque and the translucent pass
+    // otherwise. The anti-aliased fonts used for labels need to be blended with the background
+    // for the best appearance, so they're always drawn in the translucent pass.
+    bool opaqueArrows = opacity() >= 1.0f;
+
+    // Draw arrows
+    if (rc.pass() == RenderContext::TranslucentPass ^ opaqueArrows)
     {
-        rc.pushModelView();
-        rc.rotateModelView(Quaternionf(AngleAxisf((float) PI / 2.0f, Vector3f::UnitY())));
-        rc.bindMaterial(&materials[0]);
-        drawArrow(rc);
-        drawLabel(rc, 0);
-        rc.popModelView();
+        if (visibleArrows() & XAxis)
+        {
+            rc.pushModelView();
+            rc.rotateModelView(Quaternionf(AngleAxisf((float) PI / 2.0f, Vector3f::UnitY())));
+            rc.bindMaterial(&materials[0]);
+            drawArrow(rc);
+            drawLabel(rc, 0);
+            rc.popModelView();
+        }
+
+        if (visibleArrows() & YAxis)
+        {
+            rc.pushModelView();
+            rc.rotateModelView(Quaternionf(AngleAxisf(-(float) PI / 2.0f, Vector3f::UnitX())));
+            rc.bindMaterial(&materials[1]);
+            drawArrow(rc);
+            drawLabel(rc, 1);
+            rc.popModelView();
+        }
+
+        if (visibleArrows() & ZAxis)
+        {
+            rc.pushModelView();
+            rc.bindMaterial(&materials[2]);
+            drawArrow(rc);
+            drawLabel(rc, 2);
+            rc.popModelView();
+        }
     }
 
-    if (visibleArrows() & YAxis)
+    // Draw labels in the translucent pass
+    if (rc.pass() == RenderContext::TranslucentPass)
     {
-        rc.pushModelView();
-        rc.rotateModelView(Quaternionf(AngleAxisf(-(float) PI / 2.0f, Vector3f::UnitX())));
-        rc.bindMaterial(&materials[1]);
-        drawArrow(rc);
-        drawLabel(rc, 1);
-        rc.popModelView();
-    }
+        if (visibleArrows() & XAxis)
+        {
+            rc.pushModelView();
+            rc.rotateModelView(Quaternionf(AngleAxisf((float) PI / 2.0f, Vector3f::UnitY())));
+            rc.bindMaterial(&materials[0]);
+            drawLabel(rc, 0);
+            rc.popModelView();
+        }
 
-    if (visibleArrows() & ZAxis)
-    {
-        rc.pushModelView();
-        rc.bindMaterial(&materials[2]);
-        drawArrow(rc);
-        drawLabel(rc, 2);
-        rc.popModelView();
+        if (visibleArrows() & YAxis)
+        {
+            rc.pushModelView();
+            rc.rotateModelView(Quaternionf(AngleAxisf(-(float) PI / 2.0f, Vector3f::UnitX())));
+            rc.bindMaterial(&materials[1]);
+            drawLabel(rc, 1);
+            rc.popModelView();
+        }
+
+        if (visibleArrows() & ZAxis)
+        {
+            rc.pushModelView();
+            rc.bindMaterial(&materials[2]);
+            drawLabel(rc, 2);
+            rc.popModelView();
+        }
     }
 
     rc.unbindVertexArray();
@@ -343,16 +382,17 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
 
 
     // move the label to the left, otherwise the label will be drawn on top of the arrow
+    Vector3f labelOffset = Vector3f::Zero();
     if(labelPositionScreenSpace.x() < 0)
     {
-        labelPositionScreenSpace.x() -= font->textWidth(m_labels[which]);
+        labelOffset.x() -= font->textWidth(m_labels[which]);
     }
 
     // move the label downwards, otherwise the label will be drawn on top of the arrow
     // two times the textWidth of the uppercase character A is sufficent
     if(labelPositionScreenSpace.y() < 0)
     {
-        labelPositionScreenSpace.y() -= 2.0 * font->textWidth("A");
+        labelOffset.y() -= 2.0 * font->textWidth("A");
     }
 
     cameraDistance = rc.modelview().translation().norm();
@@ -360,6 +400,9 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
 
     if (pixelSize >= 10.0)
     {
-        rc.drawText(labelPositionScreenSpace, m_labels[which], font.ptr(), m_arrowColors[which], m_opacity);
+        rc.pushModelView();
+        rc.translateModelView(Vector3f::UnitZ());
+        rc.drawText(labelOffset, m_labels[which], font.ptr(), m_arrowColors[which], m_opacity);
+        rc.popModelView();
     }
 }

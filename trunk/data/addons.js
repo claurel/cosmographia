@@ -44,7 +44,7 @@ var InstalledAddons =
 
     {
     name: "Asteroid 2011 MD",
-    description: "2011 MD is a small asteroid that came within 12,000 of Earth on June 27, 2011.",
+    description: "2011 MD is a small asteroid that came within 12,000 kilometers of Earth on June 27, 2011.",
     source: "addons/2011MD.json"
     },
 

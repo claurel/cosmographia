@@ -20,13 +20,33 @@
 
 #include <vesta/HierarchicalTiledMap.h>
 #include <QString>
+#include <QList>
 #include <string>
 
 
+/** A MultiWMSTiledMap is a HierarchicalTiledMap that supplies texture tiles
+  * from one or more sources based on the hiearchy level. Constructors for two
+  * configurations are available:
+  *
+  * Base layer + detail layer
+  * Top layer + base layer + detail layer
+  *
+  * The top layer is a source for the top level of the map (2 x 1 tiles). If possible,
+  * the top layer should be on the local filesystem so that some surface texture is visible
+  * even when a network connection isn't available or a server is down.
+  */
 class MultiWMSTiledMap : public vesta::HierarchicalTiledMap
 {
 public:
     MultiWMSTiledMap(vesta::TextureMapLoader* loader,
+                     const QString& baseLayerName,
+                     unsigned int baseLayerLevelCount,
+                     const QString& detailLayerName,
+                     unsigned int detailLayerLevelCount,
+                     unsigned int tileSize);
+
+    MultiWMSTiledMap(vesta::TextureMapLoader* loader,
+                     const QString& topLayerName,
                      const QString& baseLayerName,
                      unsigned int baseLayerLevelCount,
                      const QString& detailLayerName,
@@ -38,10 +58,20 @@ public:
     virtual bool tileResourceExists(const std::string& resourceId);
 
 private:
-    QString m_baseTileNamePattern;
-    QString m_detailTileNamePattern;
-    unsigned int m_baseLayerLevelCount;
-    unsigned int m_detailLayerLevelCount;
+    void setupLevelRanges(const QString& topLayerName,
+                          const QString& baseLayerName,
+                          unsigned int baseLayerMaxLevel,
+                          const QString& detailLayerName,
+                          unsigned int detailLayerMaxLevel);
+
+private:
+    struct TileLevelRange
+    {
+        QString tileNamePattern;
+        unsigned int levelCount;
+    };
+
+    QList<TileLevelRange> m_tileLevelRanges;
 };
 
 #endif // _MULTI_WMS_TILED_MAP_H_

@@ -674,7 +674,8 @@ UniverseView::setEarthMapMonth(int month)
         return;
     }
 
-    MultiWMSTiledMap* newMap = new MultiWMSTiledMap(m_textureLoader.ptr(), bmngLayerNames[month], 7, "earth-global-mosaic", 13, 480);
+    QString topLevelPattern = QString("textures/earth/%1").arg(bmngLayerNames[month]) + ("_%1_%2_%3.jpg");
+    MultiWMSTiledMap* newMap = new MultiWMSTiledMap(m_textureLoader.ptr(), topLevelPattern, bmngLayerNames[month], 7, "earth-global-mosaic", 13, 480);
     world->setBaseMap(newMap);
 }
 

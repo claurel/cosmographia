@@ -37,6 +37,12 @@ public:
 
     float boundingSphereRadius() const;
 
+    /** \reimp */
+    bool isOpaque() const
+    {
+        return m_mesh.isNull() || m_mesh->isOpaque();
+    }
+
     /** Set the scale factor that will be applied to the mesh. The scale
       * factor is multiplied by the scale factor of the mesh geometry.
       */

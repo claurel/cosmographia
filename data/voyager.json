@@ -1,0 +1,94 @@
+{
+     "version": "1.0",
+     "name": "Voyager's Grand Tour",
+
+     "items" :
+     [
+        {
+          "name" : "Voyager 1",
+
+          "label" : { "color" : "#d0d0d0" },
+          "trajectoryPlot" :
+          {
+              "duration" : "5 y",
+              "fade" : 0.5
+          },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "trajectories/voyager1.xyzv"
+          },
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "-z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Voyager 1",
+                  "target" : "Sun"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Voyager 1",
+                  "target" : "Sun"
+              }
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/voyager.cmod"
+          }
+        },
+
+        {
+          "name" : "Voyager 2",
+
+          "label" : { "color" : "#d0d0d0" },
+          "trajectoryPlot" :
+          {
+              "duration" : "5 y",
+              "fade" : 0.5
+          },
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "trajectories/voyager2.xyzv"
+          },
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "-z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Voyager 2",
+                  "target" : "Earth"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                  "type" : "ConstantVector",
+                  "frame" : "EclipticJ2000",
+                  "direction" : [ 0, 0, 1 ]
+              }
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/voyager.cmod"
+          }
+        }
+
+    ]
+}

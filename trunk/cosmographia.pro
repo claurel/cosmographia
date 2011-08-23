@@ -562,9 +562,8 @@ macx {
         data/textures/flare.png \
         data/textures/gaussian.jpg \
         data/textures/milkyway.jpg \
-        data/textures/moon.dds \
-        data/textures/moon-normal.dds \
-        data/textures/earth-normal.dds \
+        data/textures/moon-clementine_0_0_0.jpg \
+        data/textures/moon-clementine_0_1_0.jpg \
         data/textures/mercury.jpg \
         data/textures/venus.dds \
         data/textures/venus-clouds.jpg \
@@ -596,8 +595,36 @@ macx {
         data/textures/pluto.png \
         data/textures/earth-clouds.dds
 
-
     QMAKE_BUNDLE_DATA += TEXTURES
+
+    EARTHTEXTURES.path = Contents/Resources/data/textures/earth
+    EARTHTEXTURES.files = \
+        data/textures/earth/bmng-jan-nb_0_0_0.jpg \
+        data/textures/earth/bmng-jan-nb_0_1_0.jpg \
+        data/textures/earth/bmng-feb-nb_0_0_0.jpg \
+        data/textures/earth/bmng-feb-nb_0_1_0.jpg \
+        data/textures/earth/bmng-mar-nb_0_0_0.jpg \
+        data/textures/earth/bmng-mar-nb_0_1_0.jpg \
+        data/textures/earth/bmng-apr-nb_0_0_0.jpg \
+        data/textures/earth/bmng-apr-nb_0_1_0.jpg \
+        data/textures/earth/bmng-may-nb_0_0_0.jpg \
+        data/textures/earth/bmng-may-nb_0_1_0.jpg \
+        data/textures/earth/bmng-jun-nb_0_0_0.jpg \
+        data/textures/earth/bmng-jun-nb_0_1_0.jpg \
+        data/textures/earth/bmng-jul-nb_0_0_0.jpg \
+        data/textures/earth/bmng-jul-nb_0_1_0.jpg \
+        data/textures/earth/bmng-aug-nb_0_0_0.jpg \
+        data/textures/earth/bmng-aug-nb_0_1_0.jpg \
+        data/textures/earth/bmng-sep-nb_0_0_0.jpg \
+        data/textures/earth/bmng-sep-nb_0_1_0.jpg \
+        data/textures/earth/bmng-oct-nb_0_0_0.jpg \
+        data/textures/earth/bmng-oct-nb_0_1_0.jpg \
+        data/textures/earth/bmng-nov-nb_0_0_0.jpg \
+        data/textures/earth/bmng-nov-nb_0_1_0.jpg \
+        data/textures/earth/bmng-dec-nb_0_0_0.jpg \
+        data/textures/earth/bmng-dec-nb_0_1_0.jpg
+
+    QMAKE_BUNDLE_DATA += EARTHTEXTURES
 
     MODELS.path = Contents/Resources/data/models
     MODELS.files = \
@@ -778,6 +805,8 @@ macx {
         data/help/pallas.html \
         data/help/juno.html \
         data/help/vesta.html \
+        data/help/astraea.html \
+        data/help/flora.html \
         data/help/hygiea.html \
         data/help/lutetia.html \
         data/help/pluto.html \

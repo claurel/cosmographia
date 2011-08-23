@@ -14,6 +14,11 @@
               "fade" : 0.5
           },
 
+          "infoSource" : "help:voyager1",
+
+          "startTime" : "1977-09-05 14:00:00",
+          "endTime" : "2021-01-01 00:00:00",
+
           "center" : "Sun",
           "trajectoryFrame" : "EclipticJ2000",
           "trajectory" :
@@ -56,6 +61,11 @@
               "duration" : "5 y",
               "fade" : 0.5
           },
+
+          "infoSource" : "help:voyager2",
+
+          "startTime" : "1977-08-20 15:33:00",
+          "endTime" : "2021-01-01 00:00:00",
 
           "center" : "Sun",
           "trajectoryFrame" : "EclipticJ2000",

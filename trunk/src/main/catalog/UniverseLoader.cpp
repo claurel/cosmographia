@@ -1781,11 +1781,21 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
         QVariant detailLayerVar = map.value("detailLayer");
         QVariant detailLevelCountVar = map.value("detailLevelCount");
         QVariant tileSizeVar = map.value("tileSize");
+        QVariant topLayerVar = map.value("topLayer");
+
+        QString baseLayer;
+        QString detailLayer;
+        int baseLevelCount = 0;
+        int detailLevelCount = 0;
 
         if (baseLayerVar.type() != QVariant::String)
         {
             qDebug() << "Bad or missing base layer name for MultiWMS tiled texture";
             return NULL;
+        }
+        else
+        {
+            baseLayer = baseLayerVar.toString();
         }
 
         if (!baseLevelCountVar.canConvert(QVariant::Int))
@@ -1793,17 +1803,32 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
             qDebug() << "Bad or missing base level count for MultiWMS tiled texture";
             return NULL;
         }
-
-        if (detailLayerVar.type() != QVariant::String)
+        else
         {
-            qDebug() << "Bad or missing detail layer name for MultiWMS tiled texture";
-            return NULL;
+            baseLevelCount = baseLevelCountVar.toInt();
         }
 
-        if (!detailLevelCountVar.canConvert(QVariant::Int))
+        if (detailLayerVar.isValid())
         {
-            qDebug() << "Bad or missing detail level count for MultiWMS tiled texture";
-            return NULL;
+            if (detailLayerVar.type() != QVariant::String)
+            {
+                qDebug() << "Bad detail layer name for MultiWMS tiled texture";
+                return NULL;
+            }
+        }
+
+        // Detail level count is only required when the detail layer name is present
+        if (!detailLayer.isEmpty())
+        {
+            if (!detailLevelCountVar.canConvert(QVariant::Int))
+            {
+                qDebug() << "Bad or missing detail level count for MultiWMS tiled texture";
+                return NULL;
+            }
+            else
+            {
+                detailLevelCount = detailLevelCountVar.toInt();
+            }
         }
 
         if (!tileSizeVar.canConvert(QVariant::Int))
@@ -1812,18 +1837,20 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
             return NULL;
         }
 
-        QString baseLayer = baseLayerVar.toString();
-        QString detailLayer = detailLayerVar.toString();
-        int baseLevelCount = baseLevelCountVar.toInt();
-        int detailLevelCount = detailLevelCountVar.toInt();
+        QString topLayer;
+        if (topLayerVar.type() == QVariant::String)
+        {
+            topLayer = topLayerVar.toString();
+        }
+
         int tileSize = tileSizeVar.toInt();
 
         // Enforce some limits on tile size and level count
         baseLevelCount = std::max(1, std::min(16, baseLevelCount));
-        detailLevelCount = std::max(baseLevelCount + 1, std::min(16, detailLevelCount));
+        detailLevelCount = std::max(baseLevelCount, std::min(16, detailLevelCount));
         tileSize = std::max(128, std::min(8192, tileSize));
 
-        return new MultiWMSTiledMap(textureLoader, baseLayer, baseLevelCount, detailLayer, detailLevelCount, tileSize);
+        return new MultiWMSTiledMap(textureLoader, topLayer, baseLayer, baseLevelCount, detailLayer, detailLevelCount, tileSize);
     }
     else
     {

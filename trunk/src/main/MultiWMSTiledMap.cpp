@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "MultiWMSTiledMap.h"
+#include <algorithm>
 
 using namespace vesta;
 using namespace std;
@@ -23,16 +24,72 @@ using namespace std;
 
 MultiWMSTiledMap::MultiWMSTiledMap(TextureMapLoader* loader,
                                    const QString& baseLayerName,
-                                   unsigned int baseLayerLevelCount,
+                                   unsigned int baseLayerMaxLevel,
                                    const QString& detailLayerName,
-                                   unsigned int detailLayerLevelCount,
+                                   unsigned int detailLayerMaxLevel,
                                    unsigned int tileSize) :
-    HierarchicalTiledMap(loader, tileSize),
-    m_baseLayerLevelCount(baseLayerLevelCount),
-    m_detailLayerLevelCount(detailLayerLevelCount)
+    HierarchicalTiledMap(loader, tileSize)
 {
-    m_baseTileNamePattern = QString("wms:") + baseLayerName + ",%1,%2,%3";
-    m_detailTileNamePattern = QString("wms:") + detailLayerName + ",%1,%2,%3";
+    QString baseNamePattern = QString("wms:") + baseLayerName + ",%1,%2,%3";
+    QString tileNamePattern = QString("wms:") + detailLayerName + ",%1,%2,%3";
+
+    setupLevelRanges("", baseNamePattern, baseLayerMaxLevel, tileNamePattern, detailLayerMaxLevel);
+}
+
+
+MultiWMSTiledMap::MultiWMSTiledMap(TextureMapLoader* loader,
+                                   const QString& topLayerName,
+                                   const QString& baseLayerName,
+                                   unsigned int baseLayerMaxLevel,
+                                   const QString& detailLayerName,
+                                   unsigned int detailLayerMaxLevel,
+                                   unsigned int tileSize) :
+    HierarchicalTiledMap(loader, tileSize)
+{
+    QString baseNamePattern = QString("wms:") + baseLayerName + ",%1,%2,%3";
+    QString tileNamePattern = QString("wms:") + detailLayerName + ",%1,%2,%3";
+
+    setupLevelRanges(topLayerName, baseNamePattern, baseLayerMaxLevel, tileNamePattern, detailLayerMaxLevel);
+}
+
+
+void
+MultiWMSTiledMap::setupLevelRanges(const QString& topLayerPattern,
+                                   const QString& baseLayerPattern,
+                                   unsigned int baseLayerMaxLevel,
+                                   const QString& detailLayerPattern,
+                                   unsigned int detailLayerMaxLevel)
+{
+    bool hasTopLayer = !topLayerPattern.isEmpty();
+
+    unsigned int baseLayerLevelCount = baseLayerMaxLevel;
+    unsigned int detailLayerLevelCount = detailLayerMaxLevel > baseLayerMaxLevel ? detailLayerMaxLevel - baseLayerMaxLevel : 0;
+
+    if (hasTopLayer)
+    {
+        TileLevelRange top;
+        top.levelCount = 1;
+        top.tileNamePattern = topLayerPattern;
+        m_tileLevelRanges << top;
+
+        baseLayerLevelCount = std::max(1u, baseLayerLevelCount) - 1;
+    }
+
+    if (baseLayerLevelCount > 0)
+    {
+        TileLevelRange base;
+        base.levelCount = baseLayerLevelCount;
+        base.tileNamePattern = baseLayerPattern;
+        m_tileLevelRanges << base;
+    }
+
+    if (detailLayerLevelCount > 0)
+    {
+        TileLevelRange detail;
+        detail.levelCount = detailLayerLevelCount;
+        detail.tileNamePattern = detailLayerPattern;
+        m_tileLevelRanges << detail;
+    }
 }
 
 
@@ -40,14 +97,18 @@ string
 MultiWMSTiledMap::tileResourceIdentifier(unsigned int level, unsigned int column, unsigned int row)
 {
     QString s;
-    if (level < m_baseLayerLevelCount)
+
+    unsigned int count = 0;
+    foreach (TileLevelRange range, m_tileLevelRanges)
     {
-        s = m_baseTileNamePattern.arg(level).arg(column).arg(row);
+        count += range.levelCount;
+        if (level < count)
+        {
+            s = range.tileNamePattern.arg(level).arg(column).arg(row);
+            break;
+        }
     }
-    else
-    {
-        s = m_detailTileNamePattern.arg(level).arg(column).arg(row);
-    }
+
     return string(s.toUtf8().data());
 }
 
@@ -55,7 +116,13 @@ MultiWMSTiledMap::tileResourceIdentifier(unsigned int level, unsigned int column
 bool
 MultiWMSTiledMap::isValidTileAddress(unsigned int level, unsigned int column, unsigned int row)
 {
-    return level < max(m_baseLayerLevelCount, m_detailLayerLevelCount) && column < (1u << (level + 1)) && row < (1u << level);
+    unsigned int count = 0;
+    foreach (TileLevelRange range, m_tileLevelRanges)
+    {
+        count += range.levelCount;
+    }
+
+    return level < count && column < (1u << (level + 1)) && row < (1u << level);
 }
 
 

@@ -32,6 +32,7 @@
               "baseMap" :
               {
                   "type" : "MultiWMS",
+                  "topLayer" : "textures/earth/bmng-feb-nb_%1_%2_%3.jpg",
                   "baseLayer" : "bmng-feb-nb",
                   "baseLevelCount" : 7,
                   "detailLayer" : "earth-global-mosaic",
@@ -66,9 +67,10 @@
               "radius" : 1737.1,
               "baseMap" :
               {
-                  "type" : "WMS",
-                  "layer" : "moon-clementine",
-                  "levelCount" : 6,
+                  "type" : "MultiWMS",
+                  "topLayer" : "textures/moon-clementine_%1_%2_%3.jpg",
+                  "baseLayer" : "moon-clementine",
+                  "baseLevelCount" : 6,
                   "tileSize" : 512
               }
           }

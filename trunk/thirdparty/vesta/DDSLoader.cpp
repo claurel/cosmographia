@@ -251,7 +251,7 @@ DDSLoader::loadCompressedTexture(TextureMap* tex, const DataChunk* data, const D
         return false;
     }
 
-    tex->generateCompressed(data->data() + sizeof(DDSFileHeader), imageDataSize, dds->dwWidth, dds->dwHeight, format, mipLevelCount);
+    tex->generateCompressedFit(data->data() + sizeof(DDSFileHeader), imageDataSize, dds->dwWidth, dds->dwHeight, format, mipLevelCount);
 
     return true;
 }

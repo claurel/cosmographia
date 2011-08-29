@@ -1,5 +1,5 @@
 /*
- * $Revision: 593 $ $Date: 2011-03-30 16:32:13 -0700 (Wed, 30 Mar 2011) $
+ * $Revision: 621 $ $Date: 2011-08-29 13:17:00 -0700 (Mon, 29 Aug 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -13,6 +13,7 @@
 #include "Debug.h"
 #include <GL/glew.h>
 #include <cassert>
+#include <algorithm>
 
 using namespace vesta;
 using namespace std;
@@ -446,6 +447,69 @@ TextureMap::generateCompressed(const char compressedImageData[],
     m_memoryUsage = mipLevelOffset;
 
     return true;
+}
+
+
+/** Realize this texture on the GPU using the specified compressed image data.
+  *
+  * This method is identical to TextureMap::generateCompressed except that it
+  * will automatically only part of the mipmap chain (if available) when the
+  * base mipmap level is too large for the GPU. For example, a 8192x4096 texture
+  * will is too large by for a GPU with a maximum texture size of 2048.
+  * generateCompressedFit() will discard the top two mipmap levels (8192x4096 and
+  * 4096x2048) and load the third mipmap level (2048x1024) as the base.
+  *
+  * This strategy is only available when mipmap levels are provided; texture loading
+  * will fail when the texture is too large for the GPU and no mipmaps are provided.
+  *
+  * \returns true if the texture data was successfully loaded on the GPU
+  *
+  * \see TextureMap::generateCompressed
+  */
+bool
+TextureMap::generateCompressedFit(const char compressedImageData[],
+                                  unsigned int imageDataSize,
+                                  unsigned int width,
+                                  unsigned int height,
+                                  ImageFormat format,
+                                  unsigned int mipLevelCount)
+{
+    GLint maxTextureSize = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+
+    // If the size of the compressed texture exceeds the maximum texture size permitted
+    // by the GPU, try using a lower mip level that's small enough for the GPU to handle.
+    if (width > (unsigned int) maxTextureSize || height > (unsigned int) maxTextureSize)
+    {
+        unsigned int maxDimension = max(width, height);
+        unsigned int mipLevel = 0;
+        while (maxDimension > (unsigned int) maxTextureSize)
+        {
+            maxDimension >>= 1;
+            mipLevel++;
+        }
+
+        if (mipLevel < mipLevelCount)
+        {
+            unsigned int dataOffset = MipmapChainSize(format, width, height, mipLevel);
+            return generateCompressed(compressedImageData + dataOffset, imageDataSize - dataOffset,
+                                      width >> mipLevel, height >> mipLevel,
+                                      format,
+                                      mipLevelCount - mipLevel);
+        }
+        else
+        {
+            // Not enough mip levels available; fail texture generation
+            return false;
+        }
+    }
+    else
+    {
+        return generateCompressed(compressedImageData, imageDataSize,
+                                  width, height,
+                                  format,
+                                  mipLevelCount);
+    }
 }
 
 

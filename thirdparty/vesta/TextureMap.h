@@ -1,5 +1,5 @@
 /*
- * $Revision: 593 $ $Date: 2011-03-30 16:32:13 -0700 (Wed, 30 Mar 2011) $
+ * $Revision: 621 $ $Date: 2011-08-29 13:17:00 -0700 (Mon, 29 Aug 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -174,6 +174,13 @@ public:
                             unsigned int height,
                             ImageFormat format,
                             unsigned int mipLevelCount);
+
+    bool generateCompressedFit(const char imageData[],
+                               unsigned int imageDataSize,
+                               unsigned int width,
+                               unsigned int height,
+                               ImageFormat format,
+                               unsigned int mipLevelCount);
 
     bool generate(unsigned int width, unsigned int height, ImageFormat format);
 

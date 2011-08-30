@@ -1,12 +1,19 @@
-/*
- * $Revision: 224 $ $Date: 2010-03-30 05:50:58 -0700 (Tue, 30 Mar 2010) $
- *
- * Copyright by Astos Solutions GmbH, Germany
- *
- * This file is published under the Astos Solutions Free Public License.
- * For details on copyright and terms of use see 
- * http://www.astos.de/Astos_Solutions_Free_Public_License.html
- */
+// This file is part of Cosmographia.
+//
+// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
+//
+// Cosmographia is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// Cosmographia is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QApplication>
 #include <QDir>
@@ -19,6 +26,7 @@
 #endif
 
 #include "Cosmographia.h"
+#include "FileOpenEventFilter.h"
 
 #define MAS_DEPLOY 0
 
@@ -26,6 +34,9 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    FileOpenEventFilter* appEventFilter = new FileOpenEventFilter();
+    app.installEventFilter(appEventFilter);
 
 #if MAS_DEPLOY
 #else
@@ -101,6 +112,15 @@ int main(int argc, char *argv[])
     Cosmographia mainWindow;
     mainWindow.initialize();
     mainWindow.show();
+
+    // Special handling for file open events that arrive before the main window is
+    // ready.
+    if (!appEventFilter->lastUrl().isEmpty())
+    {
+        mainWindow.activateCosmoUrl(appEventFilter->lastUrl());
+    }
+
+    QObject::connect(appEventFilter, SIGNAL(urlOpened(QString)), &mainWindow, SLOT(activateCosmoUrl(QString)));
 
     return app.exec();
 }

@@ -162,7 +162,7 @@ Cosmographia::setupMenuBar()
     loadCatalogAction->setShortcut(QKeySequence("Ctrl+O"));
     m_unloadLastCatalogAction = fileMenu->addAction("&Unload Last Catalog");
     m_unloadLastCatalogAction->setDisabled(true);
-    m_unloadLastCatalogAction->setShortcut(QKeySequence("Ctrl+U"));
+    m_unloadLastCatalogAction->setShortcut(QKeySequence("Ctrl+W"));
     fileMenu->addSeparator();
     QAction* quitAction = fileMenu->addAction("&Quit");
     menuBar()->addMenu(fileMenu);
@@ -173,6 +173,10 @@ Cosmographia::setupMenuBar()
     connect(loadCatalogAction, SIGNAL(triggered()), this, SLOT(loadCatalog()));
     connect(m_unloadLastCatalogAction, SIGNAL(triggered()), this, SLOT(unloadLastCatalog()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+    QAction* copyStateUrlAction = new QAction("Copy Viewpoint &URL", this);
+    copyStateUrlAction->setShortcut(QKeySequence("Ctrl+U"));
+    connect(copyStateUrlAction, SIGNAL(triggered()), this, SLOT(copyStateUrlToClipboard()));
 
     /*** Time Menu ***/
     QMenu* timeMenu = new QMenu("&Time", this);
@@ -459,6 +463,7 @@ Cosmographia::setupMenuBar()
     addAction(m_unloadLastCatalogAction);
     addAction(m_fullScreenAction);
     addAction(copyScreenShotAction);
+    addAction(copyStateUrlAction);
     addAction(recordVideoAction);
     addAction(pauseAction);
     addAction(fasterAction);
@@ -478,9 +483,10 @@ Cosmographia::setupMenuBar()
     addAction(planetOrbitsAction);
     addAction(plotTrajectoryAction);
 #else
-    // This should go into the edit menu, but there currently
+    // These should go into the edit menu, but there currently
     // isn't one.
     addAction(copyScreenShotAction);
+    addAction(copyStateUrlAction);
 #endif // NOMENUBAR
 }
 
@@ -1153,6 +1159,18 @@ Cosmographia::unloadLastCatalog()
     }
 
     updateUnloadAction();
+}
+
+
+void
+Cosmographia::copyStateUrlToClipboard()
+{
+    if (m_view3d)
+    {
+        QByteArray url = m_view3d->getStateUrl().toEncoded();
+        QApplication::clipboard()->setText(QString::fromAscii(url.data()));
+        m_view3d->setStatusMessage(tr("Copied viewpoint URL to clipboard"));
+    }
 }
 
 

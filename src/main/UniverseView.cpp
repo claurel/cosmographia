@@ -3444,8 +3444,6 @@ UniverseView::getStateUrl()
     url.addQueryItem("ts", QString::number(ts));
     url.addQueryItem("fov", QString::number(toDegrees(m_fovY)));
 
-    qDebug() << "URL: " << url.toString();
-
     return url;
 }
 
@@ -3526,6 +3524,7 @@ UniverseView::setStateFromUrl(const QUrl& url)
     // Now actually set the state
     setSimulationTime(tdbSec);
     setCenterAndFrame(centerBody, newFrame);
+    setSelectedBody(centerBody);
     m_observer->setPosition(position);
     m_observer->setOrientation(orientation);
 

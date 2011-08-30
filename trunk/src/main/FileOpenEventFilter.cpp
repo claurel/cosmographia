@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2011 Chris Laurel <claurel@gmail.com>
 //
 // Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -15,31 +15,31 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
-#include <QObject>
+#include "FileOpenEventFilter.h"
+#include <QFileOpenEvent>
+#include <QUrl>
 
-class MacUrlHandler : public QObject
+bool
+FileOpenEventFilter::eventFilter(QObject* obj, QEvent* event)
 {
-    Q_OBJECT
-
-private:
-    MacUrlHandler();
-
-public:
-    ~MacUrlHandler();
-    static MacUrlHandler* Create();
-    void handleUrl(const QString& url);
-
-    QString lastUrl() const
+    if (event->type() == QEvent::FileOpen)
     {
-        return m_lastUrl;
+        QFileOpenEvent* fileEvent = static_cast<QFileOpenEvent*>(event);
+        if (!fileEvent->url().isEmpty())
+        {
+            m_lastUrl = fileEvent->url().toString();
+            emit urlOpened(m_lastUrl);
+        }
+        else if (!fileEvent->file().isEmpty())
+        {
+            emit fileOpened(fileEvent->file());
+        }
+
+        return false;
     }
-
-signals:
-    void urlRequested(const QString& url);
-
-private:
-    class Private;
-
-    Private* m_privateData;
-    QString m_lastUrl;
-};
+    else
+    {
+        // standard event processing
+        return QObject::eventFilter(obj, event);
+    }
+}

@@ -1056,6 +1056,23 @@ Cosmographia::setVideoSize(const QString& videoSize)
 
 
 void
+Cosmographia::activateCosmoUrl(const QString& url)
+{
+    if (m_view3d)
+    {
+        activateWindow();
+        raise();
+        m_view3d->setStateFromUrl(QUrl(url));
+    }
+    else
+    {
+        // Not ready to accept urls. Url requests should be saved and
+        // delivered only when the main application window is initialized.
+    }
+}
+
+
+void
 Cosmographia::recordVideo()
 {
 #if FFMPEG_SUPPORT || QTKIT_SUPPORT

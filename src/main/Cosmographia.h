@@ -85,6 +85,8 @@ public slots:
     void setAutoHideToolBar(bool enabled);
     void setVideoSize(const QString& videoSize);
 
+    void activateCosmoUrl(const QString& url);
+
     void minimize();
 
 signals:

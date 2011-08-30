@@ -100,6 +100,7 @@ private slots:
     void setFullScreen(bool enabled);
     void loadCatalog();
     void unloadLastCatalog();
+    void copyStateUrlToClipboard();
 
 private:
     void initializeUniverse();

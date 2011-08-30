@@ -1,22 +1,24 @@
 #include "MacUrlHandler.h"
 #include "Cosmographia.h"
+#include <QDebug>
 
 #import <Foundation/NSAppleEventManager.h>
 #import <Foundation/NSNotification.h>
 #import <AppKit/NSApplication.h>
 
 @interface EventHandler : NSObject
+
 {
 @private
 MacUrlHandler* m_handler;
 }
 
--(void) setUrlHandler: (MacUrlHandler*) handler;
 @end
+
 
 @implementation EventHandler
 
-- (id)init
+- (id) initWithHandler: (MacUrlHandler*) handler
 {
     self = [super init];
 
@@ -26,20 +28,33 @@ MacUrlHandler* m_handler;
 
         NSNotificationCenter* defaultCenter = [NSNotificationCenter defaultCenter];
         [defaultCenter addObserver:self
-                       selector:@selector(applicationDidFinishLaunching:)
-                       name:NSApplicationDidFinishLaunchingNotification
+                       selector:@selector(applicationWillFinishLaunching:)
+                       name:nil//NSApplicationDidFinishLaunchingNotification
                        object:nil];
-        m_handler = 0;
+        m_handler = handler;
     }
 
     return self;
 }
 
 
-- (void) applicationDidFinishLaunching:(NSNotification *) notification
+- (void) applicationWillFinishLaunching:(NSNotification *) notification
 {
-    NSAppleEventManager *appleEventManager = [NSAppleEventManager sharedAppleEventManager];
-    [appleEventManager setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
+    //NSLog(@"Setting up event handler: %@", [notification name]);
+    if ([[notification name] isEqualToString: NSApplicationDidFinishLaunchingNotification])
+    {
+        qDebug() << "Setting up event handler";
+        NSAppleEventManager *appleEventManager = [NSAppleEventManager sharedAppleEventManager];
+        NSLog(@"Event manager: %@", appleEventManager);
+        [appleEventManager setEventHandler:self andSelector:@selector(handleGetURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
+    }
+
+    if ([[notification name] isEqualToString: NSApplicationWillFinishLaunchingNotification] ||
+        [[notification name] isEqualToString: NSApplicationDidFinishLaunchingNotification])
+    {
+        NSAppleEventManager *appleEventManager = [NSAppleEventManager sharedAppleEventManager];
+        NSLog(@"Checking apple event manager: %@", appleEventManager);
+    }
 }
 
 
@@ -54,28 +69,30 @@ MacUrlHandler* m_handler;
     }
 }
 
-- (void) setUrlHandler: (MacUrlHandler*) handler
-{
-    m_handler = handler;
-}
-
 @end
+
+
+class MacUrlHandler::Private
+{
+public:
+    EventHandler* m_handler;
+};
 
 
 MacUrlHandler::MacUrlHandler() :
     m_privateData(NULL)
 {
-    EventHandler* eventHandler = [[EventHandler alloc] init];
+    EventHandler* eventHandler = [[EventHandler alloc] initWithHandler:this];
     NSLog(@"Initialized event handler: %@", eventHandler);
 
-    m_privateData = eventHandler;
-    [eventHandler setUrlHandler:this];
+    m_privateData = new Private();
+    m_privateData->m_handler = eventHandler;
 }
 
 
 MacUrlHandler::~MacUrlHandler()
 {
-    [(EventHandler*) m_privateData dealloc];
+    [m_privateData->m_handler release];
 }
 
 
@@ -89,5 +106,6 @@ MacUrlHandler::Create()
 void
 MacUrlHandler::handleUrl(const QString& url)
 {
+    m_lastUrl = url;
     emit urlRequested(url);
 }

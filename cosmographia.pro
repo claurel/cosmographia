@@ -18,6 +18,7 @@ APP_SOURCES = \
     $$MAIN_PATH/Addon.cpp \
     $$MAIN_PATH/ConstellationInfo.cpp \
     $$MAIN_PATH/Cosmographia.cpp \
+    $$MAIN_PATH/FileOpenEventFilter.cpp \
     $$MAIN_PATH/HelpCatalog.cpp \
     $$MAIN_PATH/UniverseView.cpp \
     $$MAIN_PATH/Viewpoint.cpp \
@@ -69,6 +70,7 @@ APP_HEADERS = \
     $$MAIN_PATH/Addon.h \
     $$MAIN_PATH/ConstellationInfo.h \
     $$MAIN_PATH/Cosmographia.h \
+    $$MAIN_PATH/FileOpenEventFilter.h \
     $$MAIN_PATH/HelpCatalog.h \
     $$MAIN_PATH/UniverseView.h \
     $$MAIN_PATH/Viewpoint.h \
@@ -117,7 +119,6 @@ APP_HEADERS = \
     $$MAIN_PATH/qtwrapper/BodyObject.h \
     $$MAIN_PATH/qtwrapper/UniverseCatalogObject.h \
     $$MAIN_PATH/qtwrapper/VisualizerObject.h
-
 
 VESTA_PATH = thirdparty/vesta
 LIB3DS_PATH = thirdparty/lib3ds
@@ -463,6 +464,7 @@ macx {
 
     HEADERS += \
         src/video/VideoEncoder.h
+
     OBJECTIVE_SOURCES += \
         src/video/VideoEncoder.mm
 }
@@ -650,6 +652,7 @@ macx {
         data/models/jas_solr.png \
         data/models/jas_brsh.png \
         data/models/cassini.cmod \
+        data/models/voyager.cmod \
         data/models/iss.cmod \
         data/models/hst.cmod \
         data/models/hbltel_1.jpg \
@@ -685,7 +688,9 @@ macx {
         data/trajectories/cassini-solstice.xyzv \
         data/trajectories/dawn-cruise1.xyzv \
         data/trajectories/dawn-vesta-orbit.xyzv \
-        data/trajectories/dawn-cruise2.xyzv
+        data/trajectories/dawn-cruise2.xyzv \
+        data/trajectories/voyager1.xyzv \
+        data/trajectories/voyager2.xyzv
 
     QMAKE_BUNDLE_DATA += TRAJECTORIES
 
@@ -708,6 +713,7 @@ macx {
         data/kuiperbelt.json \
         data/scattereddisc.json \
         data/cassini.json \
+        data/voyager.json \
         data/dawn.json \
         data/earthorbiting.json \
         data/iss.json \
@@ -818,6 +824,8 @@ macx {
         data/help/haumea.html \
         data/help/orcus.html \
         data/help/cassini.html \
+        data/help/voyager1.html \
+        data/help/voyager2.html \
         data/help/dawn.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \

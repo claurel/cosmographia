@@ -39,8 +39,8 @@ LocalImageLoader::loadTexture(TextureMap* texture)
 {
     if (texture)
     {
-        QString textureName(texture->name().c_str());
-        QFileInfo info(texture->name().c_str());
+        QString textureName = QString::fromUtf8(texture->name().c_str());
+        QFileInfo info(textureName);
 
         qDebug() << "loadTexture: " << textureName;
 

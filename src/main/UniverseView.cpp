@@ -1452,7 +1452,7 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
                         markerColor = info->labelColor;
                     }
 
-                    m_markers->addMarker(m_selectedBody.ptr(), markerColor, 20.0f, Marker::Pulse, m_realTime, 0.5);
+                    m_markers->addMarker(m_selectedBody.ptr(), markerColor, 20.0f, Marker::Pulse, m_realTime, 0.5);                    
                 }
             }
         }
@@ -1977,6 +1977,18 @@ UniverseView::pickObject(const QPoint& point)
     PickResult pickResult;
     if (m_universe->pickObject(m_simulationTime, pickOrigin, pickDirection, pixelAngle, &pickResult))
     {
+#if 0
+        // Debugging code to show pick coordinates in the local coordinate system of the
+        // clicked object.
+        Entity* hit = pickResult.hitObject();
+        if (hit->geometry() && hit->geometry()->isEllipsoidal())
+        {
+            Vector3d p = pickResult.intersectionPoint() - hit->position(m_simulationTime);
+            p = hit->orientation(m_simulationTime).conjugate() * p;
+            qDebug() << "hit: " << p.x() << ", " << p.y() << ", " << p.z();
+        }
+#endif
+
         return pickResult.hitObject();
     }
     else

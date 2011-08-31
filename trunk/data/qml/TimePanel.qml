@@ -131,14 +131,7 @@ Item {
 
             function currentDate()
             {
-                var d = new Date();
-                d.setFullYear(year);
-                d.setMonth(month - 1);
-                d.setDate(day);
-                d.setHours(hour);
-                d.setMinutes(minute);
-                d.setSeconds(second);
-                return d;
+                return new Date(year, month - 1, day, hour, minute, second, 0);
             }
 
             function isLeapYear(y)

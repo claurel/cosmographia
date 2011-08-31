@@ -149,7 +149,7 @@ NetworkTextureLoader::resolveResourceName(const std::string& resourceName)
 bool
 NetworkTextureLoader::handleMakeResident(TextureMap* texture)
 {
-    QString textureName = texture->name().c_str();
+    QString textureName = QString::fromUtf8(texture->name().c_str());
 
     texture->setStatus(TextureMap::Loading);
 

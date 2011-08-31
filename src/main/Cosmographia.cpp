@@ -1458,6 +1458,11 @@ Cosmographia::loadCatalogFile(const QString& fileName)
             qDebug() << resource << " -> " << reply->url().toString();
         }
     }
+
+    if (textureLoader)
+    {
+        textureLoader->setLocalSearchPath(".");
+    }
 }
 
 

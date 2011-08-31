@@ -123,8 +123,6 @@ Cosmographia::Cosmographia() :
 
     loadSettings();
 
-    m_view3d->setPlanetOrbitsVisibility(true);
-
     // Set up the UI *after* settings are loaded so that the
     // controls are sync'ed
     m_view3d->initializeDeclarativeUi("qml/main.qml");
@@ -754,7 +752,8 @@ Cosmographia::initialize()
     // catalog to be loaded
     m_view3d->setEarthMapMonth(m_view3d->earthMapMonth());
 
-    m_view3d->setPlanetOrbitsVisibility(true);
+    // Required because it must be set after the Solar System catalog is loaded
+    m_view3d->setPlanetOrbitsVisibility(m_view3d->planetOrbitsVisibility());
 }
 
 
@@ -1007,6 +1006,22 @@ Cosmographia::loadSettings()
     m_view3d->setDiffractionSpikes(diffractionSpikes);
     int earthMapMonth = settings.value("earthMapMonth", 1).toInt();
     m_view3d->setEarthMapMonth(std::max(0, std::min(11, earthMapMonth)));
+    bool planetOrbits = settings.value("planetOrbits", true).toBool();
+    m_view3d->setPlanetOrbitsVisibility(planetOrbits);
+
+    m_view3d->setMilkyWayVisible(settings.value("milkyWay", false).toBool());
+    m_view3d->setSunGlare(settings.value("sunGlare", true).toBool());
+    m_view3d->setShadows(settings.value("generalShadows", false).toBool());
+    m_view3d->setCloudsVisible(settings.value("clouds", true).toBool());
+    m_view3d->setAtmospheresVisible(settings.value("atmospheres", true).toBool());
+
+    // Guide settings
+    m_view3d->setEclipticVisibility(settings.value("ecliptic", false).toBool());
+    m_view3d->setEquatorialGridVisibility(settings.value("equatorialGrid", false).toBool());
+    m_view3d->setLabelVisibility(settings.value("labels", true).toBool());
+    m_view3d->setConstellationFigureVisibility(settings.value("constellationFigures", false).toBool());
+    m_view3d->setConstellationNameVisibility(settings.value("constellationNames", false).toBool());
+    m_view3d->setStarNameVisibility(settings.value("starNames", false).toBool());
 
     m_view3d->setEclipseShadows(true);
 
@@ -1029,6 +1044,21 @@ Cosmographia::saveSettings()
     settings.setValue("limitingMagnitude", m_view3d->limitingMagnitude());
     settings.setValue("diffractionSpikes", m_view3d->diffractionSpikes());
     settings.setValue("earthMapMonth", m_view3d->earthMapMonth());
+    settings.setValue("planetOrbits", m_view3d->planetOrbitsVisibility());
+
+    settings.setValue("milkyWay", m_view3d->milkyWayVisible());
+    settings.setValue("sunGlare", m_view3d->sunGlare());
+    settings.setValue("generalShadows", m_view3d->shadows());
+    settings.setValue("clouds", m_view3d->cloudsVisible());
+    settings.setValue("atmospheres", m_view3d->atmospheresVisible());
+
+    // Guide settings
+    settings.setValue("ecliptic", m_view3d->eclipticVisibility());
+    settings.setValue("equatorialGrid", m_view3d->equatorialGridVisibility());
+    settings.setValue("labels", m_view3d->labelVisibility());
+    settings.setValue("constellationFigures", m_view3d->constellationFigureVisibility());
+    settings.setValue("constellationNames", m_view3d->constellationFigureVisibility());
+    settings.setValue("starNames", m_view3d->starNameVisibility());
 
     settings.setValue("previouslyRun", true);
 

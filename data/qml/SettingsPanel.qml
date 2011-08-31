@@ -109,6 +109,7 @@ Item {
 
             PanelText { text: "Milky Way" }
             TextToggle {
+                Component.onCompleted: { enabled = universeView.milkyWayVisible }
                 onToggled: { universeView.milkyWayVisible = enabled }
                 enabled: false
             }
@@ -116,12 +117,14 @@ Item {
             PanelText { text: "Clouds" }
             TextToggle {
                 onToggled: { universeView.cloudsVisible = enabled }
+                Component.onCompleted: { enabled = universeView.cloudsVisible }
                 enabled: true
             }
 
             PanelText { text: "Atmospheres" }
             TextToggle {
                 onToggled: { universeView.atmospheresVisible = enabled }
+                Component.onCompleted: { enabled = universeView.atmospheresVisible }
                 enabled: true
             }
 
@@ -135,6 +138,7 @@ Item {
             PanelText { text: "Other Shadows" }
             TextToggle {
                 onToggled: { universeView.shadows = enabled }
+                Component.onCompleted: { enabled = universeView.shadows }
                 enabled: false
             }
 
@@ -147,6 +151,7 @@ Item {
             PanelText { text: "Sun Glare" }
             TextToggle {
                 onToggled: { universeView.sunGlare = enabled }
+                Component.onCompleted: { enabled = universeView.sunGlare }
                 enabled: true
             }
 
@@ -272,12 +277,14 @@ Item {
             PanelText { text: "Labels" }
             TextToggle {
                 enabled: true
+                Component.onCompleted: { enabled = universeView.labelsVisible }
                 onToggled: { universeView.labelsVisible = enabled }
             }
 
             PanelText { text: "Planet Orbits" }
             TextToggle {
                 enabled: true
+                Component.onCompleted: { enabled = universeView.planetOrbitsVisible }
                 onToggled: { universeView.planetOrbitsVisible = enabled }
             }
 
@@ -291,11 +298,13 @@ Item {
             PanelText { text: "Equatorial Grid" }
             TextToggle {
                 id: equatorialGridToggle
+                Component.onCompleted: { enabled = universeView.equatorialGridVisible }
                 onToggled: { universeView.equatorialGridVisible = enabled }
             }
 
             PanelText { text: "Ecliptic" }
             TextToggle {
+                Component.onCompleted: { enabled = universeView.eclipticVisible }
                 onToggled: { universeView.eclipticVisible = enabled }
                 enabled: false
             }

@@ -37,6 +37,12 @@ var InstalledAddons =
     },
 
     {
+    name: "Enceladus' Geysers",
+    description: "Active geysers in the south polar region of Enceladus (as observed by the Cassini spacecraft).",
+    source: "addons/enceladus-jets.json"
+    },
+
+    {
     name: "GPS Satellites",
     description: "Constellation of 32 satellites that comprise the Global Positioning system.",
     source: "addons/gps.json"

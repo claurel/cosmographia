@@ -90,11 +90,9 @@ HelpCatalog::getHelpText(const QString& name) const
                 else if (!info->infoSource.isEmpty())
                 {
                     QFile infoFile(info->infoSource);
-                    qDebug() << info->infoSource;
                     if (infoFile.open(QFile::ReadOnly))
                     {
                         help = QString::fromLatin1(infoFile.readAll());
-                        qDebug() << "help: " << help;
                     }
                 }
             }

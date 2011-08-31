@@ -55,7 +55,7 @@ ScrollablePane
         id: addonView
         model: addonModel
         width: 300
-        height: 700
+        height: 800
 
         spacing: 10
 

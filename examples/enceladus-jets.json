@@ -1,0 +1,705 @@
+{
+     "version": "1.0",
+     "name": "Enceladus Geysers",
+
+     "items" :
+     [
+        {
+          "name" : "Alexandria Sulcus Plume",
+          "center" : "Enceladus",
+
+          "trajectory" :
+          {
+              "type" : "FixedPoint",
+              "position" : [ 0.0, 0.0, 0.0 ]
+          },
+
+          "bodyFrame" : { "type" : "BodyFixed", "body" : "Enceladus" },
+
+          "geometry" :
+          {
+              "type" : "ParticleSystem",
+              "emitters" :
+              [
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 0.32865723, 3.0471606, -242.13519 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.000419297982772, 0.00388754050158, -0.308913930556 ]
+         },
+         "velocityVariation": 0.0994259871153,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -5.03157579326e-06, -4.66504860189e-05, 0.00370696716667 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451510.46853,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -8.673786, 10.72368, -241.77978 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.0074026599136, 0.00915214602508, -0.206347434134 ]
+         },
+         "velocityVariation": 0.0854867932335,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 8.88319189632e-05, -0.000109825752301, 0.00247616920961 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451460.18766,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -11.51865, 13.058892, -241.55901 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.0103839155033, 0.0117724239468, -0.217762354868 ]
+         },
+         "velocityVariation": 0.0603707107536,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.00012460698604, -0.000141269087361, 0.00261314825842 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451420.33134,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -15.713874, 15.578343, -241.19766 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.01974418419, 0.0195738920629, -0.303060278149 ]
+         },
+         "velocityVariation": 0.0824856219834,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.00023693021028, -0.000234886704755, 0.00363672333778 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451534.63456,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -16.181649, 17.404002, -241.04718 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.0178829375665, 0.0192338049832, -0.266390135549 ]
+         },
+         "velocityVariation": 0.079246696275,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.000214595250797, -0.000230805659798, 0.00319668162658 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451513.58541,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 35.074611, 24.858009, -238.56525 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0334043312111, 0.0236742516085, -0.227204590422 ]
+         },
+         "velocityVariation": 0.0519537216233,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000400851974534, -0.000284091019302, 0.00272645508506 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451478.48637,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 37.226673, 24.591897, -238.29597 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0288719813431, 0.0190727973831, -0.184815785176 ]
+         },
+         "velocityVariation": 0.0817171160897,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000346463776117, -0.000228873568597, 0.00221778942211 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451529.16939,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 36.866907, 21.762972, -238.61574 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0437287961458, 0.0258136264622, -0.283028328133 ]
+         },
+         "velocityVariation": 0.0557503565882,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.00052474555375, -0.000309763517547, 0.0033963399376 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451537.68004,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 30.80781, 23.836329, -239.2038 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0387215239377, 0.0299592533179, -0.300648948033 ]
+         },
+         "velocityVariation": 0.0801696250843,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000464658287253, -0.000359511039815, 0.00360778737639 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451346.97487,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 28.777221, 26.738019, -239.13351 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0270102121756, 0.0250962233756, -0.224449985751 ]
+         },
+         "velocityVariation": 0.0456269384146,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000324122546107, -0.000301154680507, 0.00269339982901 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451464.97486,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 34.171731, 22.738023, -238.89195 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0342375397755, 0.0227818124543, -0.239352014101 ]
+         },
+         "velocityVariation": 0.0440886898793,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000410850477306, -0.000273381749451, 0.00287222416922 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451367.66228,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 23.758515, 28.241829, -239.46615 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0295825817283, 0.0351649172749, -0.298167918051 ]
+         },
+         "velocityVariation": 0.0820309645214,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.00035499098074, -0.000421979007299, 0.00357801501661 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451508.43924,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 21.87999, 28.927404, -239.54931 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0233335796466, 0.0308491861836, -0.255463686418 ]
+         },
+         "velocityVariation": 0.0984437071488,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.00028000295576, -0.000370190234203, 0.00306556423701 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451495.51283,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 16.799508, 30.257865, -239.76216 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0196390961428, 0.0353722930345, -0.280288691291 ]
+         },
+         "velocityVariation": 0.0753311467467,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000235669153714, -0.000424467516414, 0.00336346429549 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451432.1033,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 28.801971, -16.935237, -240.00471 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0266335393325, -0.0156602234182, -0.221935328098 ]
+         },
+         "velocityVariation": 0.0829280668569,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.00031960247199, 0.000187922681018, 0.00266322393718 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451526.8677,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 29.423988, -18.779706, -239.80176 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0378647188235, -0.0241669581729, -0.308592642703 ]
+         },
+         "velocityVariation": 0.0722732843669,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000454376625882, 0.000290003498075, 0.00370311171243 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451411.41787,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 31.133817, -19.019583, -239.58693 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.030481573334, -0.0186211287231, -0.234567659233 ]
+         },
+         "velocityVariation": 0.0986710097069,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000365778880008, 0.000223453544677, 0.00281481191079 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451463.98272,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 33.327162, -22.192632, -239.05035 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0359399518454, -0.0239324946241, -0.257791469541 ]
+         },
+         "velocityVariation": 0.0935393112865,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000431279422144, 0.000287189935489, 0.00309349763449 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451543.88602,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 36.602181, -25.536753, -238.28607 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0396116894475, -0.027636438641, -0.257878452776 ]
+         },
+         "velocityVariation": 0.0585442805846,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.00047534027337, 0.000331637263692, 0.00309454143331 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451459.62834,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 39.558816, -26.409537, -237.76236 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.046485142908, -0.0310335653518, -0.279392014228 ]
+         },
+         "velocityVariation": 0.0461135118916,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000557821714895, 0.000372402784222, 0.00335270417074 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451448.35179,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 7.0584822, -43.257951, -238.24944 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.00750088867677, -0.0459692417778, -0.253182267251 ]
+         },
+         "velocityVariation": 0.0870622853217,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -9.00106641213e-05, 0.000551630901334, 0.00303818720701 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451494.08163,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 13.629924, -46.677708, -237.35646 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0143551673825, -0.0491614121525, -0.249986112367 ]
+         },
+         "velocityVariation": 0.04789939093,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.00017226200859, 0.00058993694583, 0.0029998333484 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451379.76504,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ 30.018681, -46.308339, -236.05065 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ 0.0368507416997, -0.0568478221621, -0.289774275265 ]
+         },
+         "velocityVariation": 0.0880131672374,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ -0.000442208900396, 0.000682173865946, 0.00347729130318 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451419.54534,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -62.13933, -33.391908, -232.44606 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.0441866233438, -0.02374463422, -0.165289946013 ]
+         },
+         "velocityVariation": 0.044107723378,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.000530239480125, 0.00028493561064, 0.00198347935215 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451391.28213,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -65.003895, -34.579413, -231.561 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.080566886722, -0.0428582879546, -0.28700047676 ]
+         },
+         "velocityVariation": 0.0766553060939,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.000966802640664, 0.000514299455456, 0.00344400572111 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451348.86474,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -67.600566, -35.564067, -230.73633 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.062791448704, -0.0330340324182, -0.214321703007 ]
+         },
+         "velocityVariation": 0.0988679832384,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.000753497384448, 0.000396408389019, 0.00257186043608 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451457.4726,
+         "endTime": 3451545.0
+      },
+      {
+         "texture" : "gaussian.jpg",
+         "generator" : {
+             "type" : "Box",
+             "center": [ -69.445035, -35.404578, -230.26014 ],
+             "sides": [ 0.1, 0.1, 0.1 ],
+             "velocity": [ -0.0719696400747, -0.0366916761674, -0.238631018032 ]
+         },
+         "velocityVariation": 0.0508053299716,
+         "trace": 30,
+         "spawnRate": 1.0,
+         "lifetime": 120,
+         "startSize": 1.0,
+         "endSize": 1.5,
+         "colors": [
+             "#555577", 0.1,
+             "#555577", 0.05,
+             "#555577", 0.0
+         ],
+         "force": [ 0.000863635680896, 0.000440300114009, 0.00286357221639 ],
+         "emissive" : false,
+         "phaseAsymmetry" : 0.2,
+         "startTime": 2451466.79972,
+         "endTime": 3451545.0
+      }
+
+              ]
+          }
+
+        }
+    ]
+}

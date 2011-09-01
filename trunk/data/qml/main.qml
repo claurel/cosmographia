@@ -70,6 +70,15 @@ Item {
 
     Connections
     {
+        target: cosmoApp;
+        onAnnouncementReceived: {
+            infoPanel.show();
+            infoPanel.navigateTo("help:announcement");
+        }
+    }
+
+    Connections
+    {
         target: universeView;
         onContextMenuTriggered: {
             var cx = x

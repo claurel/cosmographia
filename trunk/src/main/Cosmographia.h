@@ -92,6 +92,7 @@ public slots:
 signals:
     void autoHideToolBarChanged();
     void videoSizeChanged(const QString&);
+    void announcementReceived(const QString& text);
 
 protected:
     bool event(QEvent* event);
@@ -117,6 +118,7 @@ private:
     void loadStarNamesFile(const QString& fileName, vesta::StarCatalog* starCatalog);
 
     void showCatalogErrorDialog(const QString& errorMessages);
+    void showAnnouncement(const QString& text, const QDateTime& modifiedTime);
 
 private:
     vesta::counted_ptr<vesta::Universe> m_universe;

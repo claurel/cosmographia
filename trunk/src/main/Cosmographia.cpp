@@ -710,6 +710,13 @@ Cosmographia::initialize()
     loadCatalogFile("solarsys.json");
     loadCatalogFile("start-viewpoints.json");
 
+    {
+        QNetworkRequest request(QUrl("http://www.cosmographia.info/announcements/current.html"));
+        request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
+        request.setOriginatingObject(this);
+        m_networkManager->get(request);
+    }
+
     // Clear the list of loaded add-ons so that the basic catalogs can't be unloaded
     foreach (AddOn* addOn, m_loadedAddOns)
     {
@@ -1471,14 +1478,45 @@ Cosmographia::processReceivedResource(QNetworkReply* reply)
 {
     qDebug() << "Resource received: " << reply->url().toString();
 
-    QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
-    qDebug() << "Cached?" << fromCache.toBool();
+    //QVariant fromCache = reply->attribute(QNetworkRequest::SourceIsFromCacheAttribute);
+    //qDebug() << "Was cached: " << fromCache.toBool();
 
     if (reply->open(QIODevice::ReadOnly))
     {
-        QTextStream stream(reply);
-        m_loader->processTleSet(reply->url().toString(), stream);
-        m_loader->processUpdates();
+        // If the originating object is the main window, it indicates that the
+        // requested resource was the announcement.
+        if (reply->request().originatingObject() == this && reply->error() == QNetworkReply::NoError)
+        {
+            QString text = reply->readAll();
+            m_helpCatalog->setHelpText("announcement", text);
+
+            QDateTime modifiedTime = reply->header(QNetworkRequest::LastModifiedHeader).toDateTime();
+            if (modifiedTime.isValid())
+            {
+                showAnnouncement(text, modifiedTime);
+            }
+        }
+        else
+        {
+            QTextStream stream(reply);
+            m_loader->processTleSet(reply->url().toString(), stream);
+            m_loader->processUpdates();
+        }
+    }
+}
+
+
+void
+Cosmographia::showAnnouncement(const QString& text, const QDateTime& modifiedTime)
+{
+    QSettings settings;
+
+    // Only show the announcement if it has changed
+    QDateTime lastAnnouncementTime = settings.value("lastAnnouncementTime", QDateTime(QDate(2000, 1, 1))).toDateTime();
+    if (modifiedTime > lastAnnouncementTime)
+    {
+        settings.setValue("lastAnnouncementTime", modifiedTime);
+        emit announcementReceived(text);
     }
 }
 

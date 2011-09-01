@@ -109,3 +109,12 @@ HelpCatalog::getHelpText(const QString& name) const
 
     return help;
 }
+
+
+/** Add (or replace) a help resource in the catalog.
+  */
+void
+HelpCatalog::setHelpText(const QString& name, const QString& text)
+{
+    m_helpResources.insert(name, text);
+}

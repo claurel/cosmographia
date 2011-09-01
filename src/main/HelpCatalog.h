@@ -32,6 +32,7 @@ public:
 
     int loadHelpFiles(const QString& path);
 
+    void setHelpText(const QString& name, const QString& text);
     Q_INVOKABLE QString getHelpText(const QString& name) const;
 
 private:

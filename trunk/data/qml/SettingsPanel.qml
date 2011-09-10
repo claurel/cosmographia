@@ -409,6 +409,13 @@ Item {
                 onClicked: { cosmoApp.setVideoSize("720p") }
             }            
             Item { height: 1; width: 1 }
+
+            CheckBox {
+                text: "1920 x 1080 (1080p)"
+                checked: cosmoApp.videoSize == "1080p"
+                onClicked: { cosmoApp.setVideoSize("1080p") }
+            }            
+            Item { height: 1; width: 1 }
         }
 
         AddonManager

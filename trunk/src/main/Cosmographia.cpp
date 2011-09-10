@@ -1149,6 +1149,10 @@ Cosmographia::recordVideo()
         {
             videoDimensions = QSize(1280, 720);
         }
+        else if (m_videoSize == "1080p")
+        {
+            videoDimensions = QSize(1920, 1080);
+        }
 
         if (!saveFileName.isEmpty())
         {

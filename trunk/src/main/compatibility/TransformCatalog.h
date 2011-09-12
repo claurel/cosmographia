@@ -25,6 +25,7 @@ enum TransformSscStatus
     SscOk,
     SscBadType,
     SscMissingTrajectory,
+    SscInvalidTrajectory,
     SscBadFrame,
 };
 

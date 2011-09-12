@@ -1497,7 +1497,11 @@ Cosmographia::processReceivedResource(QNetworkReply* reply)
             QDateTime modifiedTime = reply->header(QNetworkRequest::LastModifiedHeader).toDateTime();
             if (modifiedTime.isValid())
             {
+                // Only show the announcement popup on the App Store version (for now). The announcements
+                // are still available in the 'News' section of help.
+#ifdef MAS_DEPLOY
                 showAnnouncement(text, modifiedTime);
+#endif
             }
         }
         else

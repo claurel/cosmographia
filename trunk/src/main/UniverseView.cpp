@@ -3445,6 +3445,11 @@ UniverseView::getStateUrl()
         }
     }
 
+    if (selectedBody())
+    {
+        url.addQueryItem("select", bodyName(selectedBody()));
+    }
+
     url.addQueryItem("frame", frame);
     url.addQueryItem("jd", QString::number(jd, 'f'));
     url.addQueryItem("x", QString::number(position.x(), 'f'));
@@ -3540,6 +3545,17 @@ UniverseView::setStateFromUrl(const QUrl& url)
     setSelectedBody(centerBody);
     m_observer->setPosition(position);
     m_observer->setOrientation(orientation);
+
+    // Use the selection stored in the URL, if present
+    QString selectionName = url.queryItemValue("select");
+    if (!selectionName.isEmpty())
+    {
+        Entity* selection = m_catalog->find(selectionName);
+        if (selection)
+        {
+            setSelectedBody(selection);
+        }
+    }
 
     bool ok = false;
     double fov = toRadians(url.queryItemValue("fov").toDouble(&ok));

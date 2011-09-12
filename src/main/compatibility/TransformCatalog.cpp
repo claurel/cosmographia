@@ -21,6 +21,11 @@
 #include "TransformCatalog.h"
 #include <QDebug>
 
+enum SscUnitsType
+{
+    HeliocentricUnits,     // Distances in AU, periods in years
+    PlanetocentricUnits    // Distances in km, periods in days
+};
 
 TransformSscStatus
 TransformSscFrame(QVariantMap* obj, const QString& oldName, const QString& newName);
@@ -167,7 +172,7 @@ TransformSscGeometry(QVariantMap* obj)
 
 
 TransformSscStatus
-TransformSscTrajectory(QVariantMap* obj)
+TransformSscTrajectory(QVariantMap* obj, SscUnitsType units)
 {
     QVariantMap trajectory;
     if (obj->contains("CustomOrbit"))
@@ -213,7 +218,49 @@ TransformSscTrajectory(QVariantMap* obj)
     }
     else if (obj->contains("EllipticalOrbit"))
     {
+        QVariant value = obj->value("EllipticalOrbit");
+        QVariantMap properties = value.toMap();
         trajectory["type"] = "Keplerian";
+
+        // SemiMajorAxis and Period properties require some special handling. Both
+        // properties are required to present in an SSC EllipticalOrbit. And the
+        // values of both are interpreted differently depending on whether the
+        // body is orbiting the Sun or a planet (or moon etc.):
+        //    Period has units of years for heliocentric objects, days otherwise
+        //    SemiMajorAxis has units of AU for heliocentric objects, kilometers otherwise
+        QVariant sma = properties.value("SemiMajorAxis");
+        QVariant period = properties.value("Period");
+        if (!sma.canConvert(QVariant::Double))
+        {
+            qDebug() << "Bad or missing SemiMajorAxis for EllipticalOrbit in SSC file";
+            return SscInvalidTrajectory;
+        }
+
+        if (!period.canConvert(QVariant::Double))
+        {
+            qDebug() << "Bad or missing Period for EllipticalOrbit in SSC file";
+            return SscInvalidTrajectory;
+        }
+
+        if (units == HeliocentricUnits)
+        {
+            sma = QString("%1au").arg(sma.toString());
+            period = QString("%1y").arg(period.toString());
+        }
+        else if (units == PlanetocentricUnits)
+        {
+            sma = QString("%1km").arg(sma.toString());
+            period = QString("%1d").arg(period.toString());
+        }
+
+        trajectory.insert("semiMajorAxis", sma);
+        trajectory.insert("period", period);
+
+        MoveProperty(&properties, "Eccentricity", &trajectory, "eccentricity");
+        MoveProperty(&properties, "Inclination", &trajectory, "inclination");
+        MoveProperty(&properties, "AscendingNode", &trajectory, "ascendingNode");
+        MoveProperty(&properties, "ArgOfPericenter", &trajectory, "argumentOfPeriapsis");
+        MoveProperty(&properties, "MeanAnomaly", &trajectory, "meanAnomaly");
     }
     else if (obj->contains("FixedPosition"))
     {
@@ -484,9 +531,10 @@ TransformSscArc(QVariantMap* obj)
     TransformSscStatus status = SscOk;
 
     // TODO: handle overrides in trajectory frame
-    obj->insert("center", TransformSolarSystemName(obj->value("_parent").toString()));
+    QString centerName = TransformSolarSystemName(obj->value("_parent").toString());
+    obj->insert("center", centerName);
 
-    status = TransformSscTrajectory(obj);
+    status = TransformSscTrajectory(obj, centerName == "Sun" ? HeliocentricUnits : PlanetocentricUnits);
     if (status != SscOk)
     {
         return status;

@@ -2359,7 +2359,8 @@ void
 UniverseView::setSimulationDateTime(QDateTime dateTime)
 {
     GregorianDate startDate(dateTime.date().year(), dateTime.date().month(), dateTime.date().day(),
-                            dateTime.time().hour(), dateTime.time().minute(), dateTime.time().second());
+                            dateTime.time().hour(), dateTime.time().minute(), dateTime.time().second(),
+                            dateTime.time().msec() * 1000);
     setSimulationTime(startDate.toTDBSec());
 }
 

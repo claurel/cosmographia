@@ -476,6 +476,7 @@ storedeploy {
     QMAKE_CFLAGS += -mmacosx-version-min=10.6
     QMAKE_INFO_PLIST = resources/Info.plist
     QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
+    DEFINES += MAS_DEPLOY
 }
 
 nomenu {
@@ -773,6 +774,7 @@ macx {
         data/help/how.html \
         data/help/code.html \
         data/help/datasources.html \
+        data/help/announcement.html \
         data/help/sun.html \
         data/help/mercury.html \
         data/help/venus.html \
@@ -823,6 +825,9 @@ macx {
         data/help/eris.html \
         data/help/haumea.html \
         data/help/orcus.html \
+        data/help/varuna.html \
+        data/help/ixion.html \
+        data/help/makemake.html \
         data/help/cassini.html \
         data/help/voyager1.html \
         data/help/voyager2.html \
@@ -842,6 +847,7 @@ macx {
         data/addons/aurora.json \
         data/addons/gaussian.jpg \
         data/addons/tvashtar.json \
+        data/addons/enceladus-jets.json \
         data/addons/asteroids.json \
         data/addons/astorb_5000.dat \
         data/addons/allasteroids.json \

@@ -121,11 +121,24 @@ TransformSscGeometry(QVariantMap* obj)
         QVariantMap sensor = obj->value("Sensor").toMap();
 
         geometry["type"] = "Sensor";
+
+        // Special handling for horizontal and vertical FOV:
+        //   In Celestia, the sensor FOV specifies the half-angle, while VESTA's
+        //   SensorFrustumGeometry gives the full apex angle.
+        QVariant horizontalFov = sensor.value("HorizontalFOV");
+        QVariant verticalFov = sensor.value("VerticalFOV");
+        if (horizontalFov.canConvert(QVariant::Double))
+        {
+            geometry.insert("horizontalFov", horizontalFov.toDouble() * 2.0);
+        }
+        if (verticalFov.canConvert(QVariant::Double))
+        {
+            geometry.insert("verticalFov", verticalFov.toDouble() * 2.0);
+        }
+
         MoveProperty(&sensor, "Target", &geometry, "target");
         MoveProperty(&sensor, "Range", &geometry, "range");
         MoveProperty(&sensor, "Shape", &geometry, "shape");
-        MoveProperty(&sensor, "HorizontalFOV", &geometry, "horizontalFov");
-        MoveProperty(&sensor, "VerticalFOV", &geometry, "verticalFov");
         MoveProperty(&sensor, "FrustumColor", &geometry, "frustumColor");
         MoveProperty(&sensor, "FrustumBaseColor", &geometry, "frustumBaseColor");
         MoveProperty(&sensor, "FrustumOpacity", &geometry, "frustumOpacity");

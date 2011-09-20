@@ -1912,6 +1912,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             meshGeometry->mergeSubmeshes();
             meshGeometry->uniquifyVertices();
             meshGeometry->mergeMaterials();
+            meshGeometry->compressIndices();
             m_geometryCache.insert(fileName, vesta::counted_ptr<Geometry>(meshGeometry));
             geometry = meshGeometry;
         }

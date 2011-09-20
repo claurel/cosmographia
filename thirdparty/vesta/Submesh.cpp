@@ -491,7 +491,7 @@ Submesh::uniquifyVertices(float positionTolerance, float normalTolerance, float 
     // Remap all vertex indices
     for (vector<PrimitiveBatch*>::iterator iter = m_primitiveBatches.begin(); iter != m_primitiveBatches.end(); ++iter)
     {
-        // Vertex remapping might require us to promote a 16-bit indices to 32-bit,
+        // Vertex remapping might require us to promote 16-bit indices to 32-bit,
         // even though the total number of vertices has been reduced.
         if (uniqueVertexCount > PrimitiveBatch::MaxIndex16 && (*iter)->indexSize() == PrimitiveBatch::Index16)
         {
@@ -519,6 +519,23 @@ Submesh::uniquifyVertices(float positionTolerance, float normalTolerance, float 
     //VESTA_LOG("%d of %d vertices unique.", uniqueVertexCount, vertexIndices.size());
 
     return true;
+}
+
+
+/** Compress indices to 16-bit where possible. This can improve rendering performance
+  * on some hardware, and some mobile GPUs can only use 16-bit vertex indices.
+  */
+void
+Submesh::compressIndices()
+{
+    for (vector<PrimitiveBatch*>::iterator iter = m_primitiveBatches.begin(); iter != m_primitiveBatches.end(); ++iter)
+    {
+        PrimitiveBatch* batch = *iter;
+        if (batch->indexSize() == PrimitiveBatch::Index32)
+        {
+            batch->compressTo16Bit();
+        }
+    }
 }
 
 

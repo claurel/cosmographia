@@ -96,6 +96,7 @@ public:
 
     bool offsetIndices(unsigned int offset);
     bool promoteTo32Bit();
+    bool compressTo16Bit();
     bool remapIndices(const std::vector<v_uint32>& indexMap);
 
     static const v_uint16 MaxIndex16 = 0xffff;

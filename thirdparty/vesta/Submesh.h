@@ -70,7 +70,7 @@ public:
 
     static Submesh* mergeSubmeshes(const std::vector<Submesh*>& submeshes);
     bool uniquifyVertices(float positionTolerance = 0.0f, float normalTolerance = 0.0f, float texCoordTolerance = 0.0f);
-
+    void compressIndices();
 
     bool mergeMaterials();
 

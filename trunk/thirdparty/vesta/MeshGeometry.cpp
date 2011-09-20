@@ -368,6 +368,21 @@ MeshGeometry::uniquifyVertices(float positionTolerance, float normalTolerance, f
 }
 
 
+/** Compress indices to 16-bit where possible. This can improve rendering performance
+  * on some hardware, and some mobile GPUs can only use 16-bit vertex indices.
+  */
+void
+MeshGeometry::compressIndices()
+{
+    for (vector<counted_ptr<Submesh> >::const_iterator iter = m_submeshes.begin(); iter != m_submeshes.end(); ++iter)
+    {
+        iter->ptr()->compressIndices();
+    }
+
+    setMeshChanged();
+}
+
+
 #define TEST_PROPERTY(p0, p1) if ((p0) < (p1)) return true; else if ((p0) > (p1)) return false;
 
 static bool CompareSpectra(const Spectrum& s0, const Spectrum& s1)
@@ -550,7 +565,9 @@ MeshGeometry::realize() const
             if (!vertexBuffer->isValid())
             {
                 delete vertexBuffer;
+                vertexBuffer = NULL;
                 ok = false;
+                VESTA_WARNING("Failed to create vertex buffer");
             }
         }
 

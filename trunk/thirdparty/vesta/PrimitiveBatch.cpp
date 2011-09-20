@@ -9,6 +9,7 @@
  */
 
 #include "PrimitiveBatch.h"
+#include "Debug.h"
 #include <algorithm>
 #include <exception>
 #include <cassert>
@@ -274,6 +275,56 @@ PrimitiveBatch::promoteTo32Bit()
     {
         m_indexSize = Index32;
     }
+
+    return true;
+}
+
+
+/** Compress 32-bit indices to 16-bit indices. Return true if
+  * the promotion was successful, or false if compression was
+  * not possible. If the batch already uses 16-bit indices, this
+  * method has no effect and returns true.
+  */
+bool
+PrimitiveBatch::compressTo16Bit()
+{
+    if (m_indexSize == Index16)
+    {
+        // Already 16-bit, nothing to do
+        return true;
+    }
+
+    if (maxVertexIndex() > MaxIndex16)
+    {
+        // Can't compress index buffers that have index values > 65535
+        return false;
+    }
+
+    // Skip unindexed batches (reporting success as long as the vertex
+    // count is less or equal to MaxIndex16)
+    if (!isIndexed())
+    {
+        return true;
+    }
+
+    unsigned int count = indexCount();
+    v_uint16* index16 = new v_uint16[count];
+    if (!index16)
+    {
+        VESTA_WARNING("Out of memory while compressing 32-bit indices to 16-bit. Indices will remain 32-bit.");
+        return false;
+    }
+
+    v_uint32* index32 = static_cast<v_uint32*>(m_indexData);
+    for (unsigned int i = 0; i < count; ++i)
+    {
+        index16[i] = v_uint16(index32[i]);
+    }
+
+    // Replace the old 32-bit indices with 16-bit indices
+    delete[] index32;
+    m_indexData = index16;
+    m_indexSize = Index16;
 
     return true;
 }

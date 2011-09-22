@@ -347,10 +347,15 @@ TransformSscRotationModel(QVariantMap* obj)
         if (value.type() == QVariant::Map)
         {
             QVariantMap properties = value.toMap();
+
+            double meridianAngle = properties.value("MeridianAngle").toDouble();
+
             rotationModel["type"] = "Fixed";
             MoveProperty(&properties, "Inclination", &rotationModel, "inclination");
             MoveProperty(&properties, "AscendingNode", &rotationModel, "ascendingNode");
-            MoveProperty(&properties, "MeridianAngle", &rotationModel, "meridianAngle");
+
+            // Celestia has an extra 180 degree rotation here
+            rotationModel.insert("meridianAngle", meridianAngle + 180.0);
         }
     }
     else if (obj->contains("FixedAttitude"))
@@ -463,6 +468,7 @@ TransformSscFrame(QVariantMap* obj, const QString& oldName, const QString& newNa
             QVariantMap sscFrame = frameValue.toMap();
             QVariantMap frame;
             frame["type"] = "BodyFixed";
+            frame["compatibility"] = "celestia";
             MoveProperty(&sscFrame, "Center", &frame, "body");
 
             obj->insert(newName, frame);

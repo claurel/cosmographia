@@ -58,6 +58,7 @@ APP_SOURCES = \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
     $$MAIN_PATH/vext/SimpleRotationModel.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
+    $$MAIN_PATH/compatibility/CelBodyFixedFrame.cpp \
     $$MAIN_PATH/compatibility/CmodLoader.cpp \
     $$MAIN_PATH/compatibility/Scanner.cpp \
     $$MAIN_PATH/compatibility/TransformCatalog.cpp \
@@ -113,6 +114,7 @@ APP_HEADERS = \
     $$MAIN_PATH/vext/SimpleRotationModel.h \
     $$MAIN_PATH/vext/StripParticleGenerator.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
+    $$MAIN_PATH/compatibility/CelBodyFixedFrame.h \
     $$MAIN_PATH/compatibility/CmodLoader.h \
     $$MAIN_PATH/compatibility/Scanner.h \
     $$MAIN_PATH/compatibility/TransformCatalog.h \

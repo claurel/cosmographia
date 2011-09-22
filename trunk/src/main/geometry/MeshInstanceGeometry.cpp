@@ -23,7 +23,9 @@ using namespace Eigen;
 
 
 MeshInstanceGeometry::MeshInstanceGeometry(vesta::MeshGeometry* mesh) :
-    m_mesh(mesh)
+    m_mesh(mesh),
+    m_scale(1.0f),
+    m_meshRotation(Quaternionf::Identity())
 {
     setShadowReceiver(true);
     setShadowCaster(true);
@@ -41,6 +43,7 @@ MeshInstanceGeometry::render(RenderContext& rc,
 {
     rc.pushModelView();
     rc.scaleModelView(Vector3f::Constant(m_scale));
+    rc.rotateModelView(m_meshRotation);
     m_mesh->render(rc, animationClock);
     rc.popModelView();
 }
@@ -52,6 +55,7 @@ MeshInstanceGeometry::renderShadow(RenderContext& rc,
 {
     rc.pushModelView();
     rc.scaleModelView(Vector3f::Constant(m_scale));
+    rc.rotateModelView(m_meshRotation);
     m_mesh->renderShadow(rc, animationClock);
     rc.popModelView();
 }
@@ -70,9 +74,10 @@ MeshInstanceGeometry::handleRayPick(const Vector3d& pickOrigin,
                                     double clock,
                                     double* distance) const
 {
+    Quaterniond q = m_meshRotation.cast<double>().conjugate();
     double invScale = 1.0 / m_scale;
-    Vector3d origin = invScale * pickOrigin;
-    Vector3d direction = (invScale * pickDirection).normalized();
+    Vector3d origin = q * (invScale * pickOrigin);
+    Vector3d direction = q * (invScale * pickDirection).normalized();
 
     bool hit = m_mesh->rayPick(origin, direction, clock, distance);
     if (distance)

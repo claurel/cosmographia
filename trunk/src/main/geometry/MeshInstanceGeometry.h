@@ -27,6 +27,8 @@
 class MeshInstanceGeometry : public vesta::Geometry
 {
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     MeshInstanceGeometry(vesta::MeshGeometry* mesh);
     virtual ~MeshInstanceGeometry();
 
@@ -58,6 +60,23 @@ public:
         return m_scale;
     }
 
+    /** Set the mesh rotation. This is an extra rotation applied before
+      * the rotation model and frame rotations. The default mesh orientation
+      * is the identity.
+      */
+    void setMeshRotation(const Eigen::Quaternionf& q)
+    {
+        m_meshRotation = q;
+    }
+
+    /** Get the mesh rotation. This is an extra rotation applied before
+      * the rotation model and frame rotations.
+      */
+    Eigen::Quaternionf meshRotation() const
+    {
+        return m_meshRotation;
+    }
+
     vesta::MeshGeometry* mesh() const
     {
         return m_mesh.ptr();
@@ -72,6 +91,7 @@ protected:
 private:
     vesta::counted_ptr<vesta::MeshGeometry> m_mesh;
     float m_scale;
+    Eigen::Quaternionf m_meshRotation;
 };
 
 #endif // _MESH_INSTANCE_GEOMETRY_H_

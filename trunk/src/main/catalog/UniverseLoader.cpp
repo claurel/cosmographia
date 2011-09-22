@@ -30,6 +30,7 @@
 #include "../compatibility/CmodLoader.h"
 #include "../compatibility/CatalogParser.h"
 #include "../compatibility/TransformCatalog.h"
+#include "../compatibility/CelBodyFixedFrame.h"
 #include "../vext/SimpleRotationModel.h"
 #include "../vext/StripParticleGenerator.h"
 #include "../vext/ArcStripParticleGenerator.h"
@@ -1281,7 +1282,16 @@ UniverseLoader::loadBodyFixedFrame(const QVariantMap& map,
     Entity* body = catalog->find(bodyName);
     if (body)
     {
-        BodyFixedFrame* frame = new BodyFixedFrame(body);
+        vesta::Frame* frame = NULL;
+        if (map.value("compatibility").toString() == "celestia")
+        {
+            frame = new CelBodyFixedFrame(body);
+        }
+        else
+        {
+            frame = new BodyFixedFrame(body);
+        }
+
         return frame;
     }
     else

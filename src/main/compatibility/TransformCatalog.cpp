@@ -19,7 +19,13 @@
 // Celestia format. All transformations are performed on variant maps.
 
 #include "TransformCatalog.h"
+#include <vesta/Units.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <QDebug>
+
+using namespace Eigen;
+
 
 enum SscUnitsType
 {
@@ -111,10 +117,74 @@ TransformSolarSystemName(const QString& name)
 }
 
 
+static QVariant
+quaternionToVariant(const Quaterniond& q)
+{
+    QVariantList qlist;
+    qlist << q.w() << q.x() << q.y() << q.z();
+    return qlist;
+}
+
+
+// Load an angle-axis rotation from a variant. The components are
+// expected to be stored in a list in the order angle, axisX, axisY, axisZ, with
+// angle in degrees.
+static AngleAxisd
+angleAxisValue(QVariant v, bool* ok)
+{
+    AngleAxisd result = AngleAxisd(0.0, Vector3d::UnitZ());
+    bool loadOk = false;
+
+    if (v.type() == QVariant::List)
+    {
+        QVariantList list = v.toList();
+        if (list.length() == 4)
+        {
+            if (list.at(0).canConvert(QVariant::Double) &&
+                list.at(1).canConvert(QVariant::Double) &&
+                list.at(2).canConvert(QVariant::Double) &&
+                list.at(3).canConvert(QVariant::Double))
+            {
+                double angle = vesta::toRadians(list.at(0).toDouble());
+                Vector3d axis = Vector3d(list.at(1).toDouble(),
+                                         list.at(2).toDouble(),
+                                         list.at(3).toDouble());
+                result = AngleAxisd(angle, axis);
+                loadOk = true;
+            }
+        }
+    }
+
+    if (ok)
+    {
+        *ok = loadOk;
+    }
+
+    return result;
+}
+
+
+
 TransformSscStatus
 TransformSscGeometry(QVariantMap* obj)
 {
     QVariantMap geometry;
+
+    // Parse the Orientation property and convert it to a meshOrientation for
+    // Cosmographia. In Cosmographia, the SSC Orientation property only affects
+    // meshes right now.
+    Quaterniond meshRotation(Quaterniond::Identity());
+    QVariant orientationVar = obj->value("Orientation");
+    if (orientationVar.isValid())
+    {
+        bool ok = false;
+        AngleAxisd orientation = angleAxisValue(orientationVar, &ok);
+        meshRotation = orientation;
+    }
+
+    // To match the orientation of meshes in Celestia, an extra 90 degree rotation about
+    // the x-axis is required
+    meshRotation = (meshRotation * AngleAxisd(vesta::toRadians(-90), Vector3d::UnitX())).conjugate();
 
     if (obj->value("Sensor").type() == QVariant::Map)
     {
@@ -156,6 +226,7 @@ TransformSscGeometry(QVariantMap* obj)
         MoveProperty(obj, "NormalizeMesh", &geometry, "normalize");
         MoveProperty(obj, "MeshScale", &geometry, "scale");
         MoveProperty(obj, "MeshCenter", &geometry, "center");
+        geometry["meshRotation"] = quaternionToVariant(meshRotation);
     }
     else
     {

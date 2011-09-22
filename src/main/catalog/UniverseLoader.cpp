@@ -353,7 +353,7 @@ LoadInterpolatedRotation(const QString& fileName, RotationConvention mode)
             // Normal mode
             if (mode == Celestia_Rotation)
             {
-                record.orientation = q.conjugate() * xRotation(toRadians(90.0)) * yRotation(toRadians(180.0));
+                record.orientation = (xRotation(toRadians(90.0)) * q).conjugate();
             }
             else
             {
@@ -462,6 +462,8 @@ static Spectrum colorValue(QVariant v, const Spectrum& defaultValue)
 }
 
 
+// Load a quaternion from a variant. The quaternion components are
+// expected to be stored in a list in the order w, x, y, z
 static Quaterniond quaternionValue(QVariant v, bool* ok)
 {
     Quaterniond result = Quaterniond::Identity();
@@ -2125,6 +2127,19 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
     // scale of 1.0 is used.
     double radius = distanceValue(map.value("size"), Unit_Kilometer, 0.0);
     double scale = doubleValue(map.value("scale"), 1.0);
+    Quaternionf meshRotation(Quaternionf::Identity());
+
+    QVariant meshRotationVar = map.value("meshRotation");
+    if (meshRotationVar.isValid())
+    {
+        bool ok = false;
+        meshRotation = quaternionValue(meshRotationVar, &ok).cast<float>();
+        if (!ok)
+        {
+            errorMessage("Invalid quaternion given for meshRotation");
+            return NULL;
+        }
+    }
 
     MeshInstanceGeometry* meshInstance = NULL;
     if (map.contains("source"))
@@ -2143,6 +2158,7 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
             {
                 meshInstance->setScale(float(scale));
             }
+            meshInstance->setMeshRotation(meshRotation);
         }
     }
 

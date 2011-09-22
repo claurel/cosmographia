@@ -29,7 +29,7 @@
           {
               "type" : "Globe",
               "radius" : 2439,
-              "baseMap" : "textures/mercury.jpg"
+              "baseMap" : "textures/mercury.dds"
           }
         }
     ]

@@ -567,7 +567,7 @@ macx {
         data/textures/milkyway.jpg \
         data/textures/moon-clementine_0_0_0.jpg \
         data/textures/moon-clementine_0_1_0.jpg \
-        data/textures/mercury.jpg \
+        data/textures/mercury.dds \
         data/textures/venus.dds \
         data/textures/venus-clouds.jpg \
         data/textures/mars.dds \

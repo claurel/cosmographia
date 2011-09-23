@@ -350,13 +350,16 @@ LoadInterpolatedRotation(const QString& fileName, RotationConvention mode)
             InterpolatedRotation::TimeOrientation record;
             record.tsec = tdbSec;
 
-            // Normal mode
+            // All files *should* contain only unit quaternions, but not all of them do
+            q.normalize();
+
             if (mode == Celestia_Rotation)
             {
                 record.orientation = (xRotation(toRadians(90.0)) * q).conjugate();
             }
             else
             {
+                // Normal mode
                 record.orientation = q;
             }
 
@@ -2128,6 +2131,7 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
     double radius = distanceValue(map.value("size"), Unit_Kilometer, 0.0);
     double scale = doubleValue(map.value("scale"), 1.0);
     Quaternionf meshRotation(Quaternionf::Identity());
+    Vector3f meshOffset(Vector3f::Zero());
 
     QVariant meshRotationVar = map.value("meshRotation");
     if (meshRotationVar.isValid())
@@ -2137,6 +2141,18 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
         if (!ok)
         {
             errorMessage("Invalid quaternion given for meshRotation");
+            return NULL;
+        }
+    }
+
+    QVariant meshOffsetVar = map.value("meshOffset");
+    if (meshOffsetVar.isValid())
+    {
+        bool ok = false;
+        meshOffset = vec3Value(meshOffsetVar, &ok).cast<float>();
+        if (!ok)
+        {
+            errorMessage("Invalid vector given for meshOffset");
             return NULL;
         }
     }
@@ -2159,6 +2175,7 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
                 meshInstance->setScale(float(scale));
             }
             meshInstance->setMeshRotation(meshRotation);
+            meshInstance->setMeshOffset(meshOffset);
         }
     }
 

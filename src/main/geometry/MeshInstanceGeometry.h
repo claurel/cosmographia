@@ -60,6 +60,22 @@ public:
         return m_scale;
     }
 
+    /** Set the translation that will be applied after scaling and before
+      * the rotation.
+      */
+    void setMeshOffset(const Eigen::Vector3f& v)
+    {
+        m_meshOffset = v;
+    }
+
+    /** Get the translation that is applied after scaling and before the
+      * rotation.
+      */
+    Eigen::Vector3f meshOffset() const
+    {
+        return m_meshOffset;
+    }
+
     /** Set the mesh rotation. This is an extra rotation applied before
       * the rotation model and frame rotations. The default mesh orientation
       * is the identity.
@@ -91,6 +107,7 @@ protected:
 private:
     vesta::counted_ptr<vesta::MeshGeometry> m_mesh;
     float m_scale;
+    Eigen::Vector3f m_meshOffset;
     Eigen::Quaternionf m_meshRotation;
 };
 

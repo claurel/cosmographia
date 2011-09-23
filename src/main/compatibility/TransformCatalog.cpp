@@ -126,6 +126,45 @@ quaternionToVariant(const Quaterniond& q)
 }
 
 
+static QVariant
+vec3ToVariant(const Vector3d& v)
+{
+    QVariantList vlist;
+    vlist << v.x() << v.y() << v.z();
+    return vlist;
+}
+
+
+static Vector3d
+vec3Value(QVariant v, bool* ok)
+{
+    Vector3d result = Vector3d::Zero();
+    bool loadOk = false;
+
+    if (v.type() == QVariant::List)
+    {
+        QVariantList list = v.toList();
+        if (list.length() == 3)
+        {
+            if (list.at(0).canConvert(QVariant::Double) &&
+                list.at(1).canConvert(QVariant::Double) &&
+                list.at(2).canConvert(QVariant::Double))
+            {
+                result = Vector3d(list.at(0).toDouble(), list.at(1).toDouble(), list.at(2).toDouble());
+                loadOk = true;
+            }
+        }
+    }
+
+    if (ok)
+    {
+        *ok = loadOk;
+    }
+
+    return result;
+}
+
+
 // Load an angle-axis rotation from a variant. The components are
 // expected to be stored in a list in the order angle, axisX, axisY, axisZ, with
 // angle in degrees.
@@ -170,6 +209,15 @@ TransformSscGeometry(QVariantMap* obj)
 {
     QVariantMap geometry;
 
+    // Parse the MeshScale property. At the moment, it is assumed that the
+    // NormalizeMesh property is always false.
+    double meshScale = 1.0;
+    QVariant meshScaleVar = obj->value("MeshScale");
+    if (meshScaleVar.canConvert(QVariant::Double))
+    {
+        meshScale = meshScaleVar.toDouble();
+    }
+
     // Parse the Orientation property and convert it to a meshOrientation for
     // Cosmographia. In Cosmographia, the SSC Orientation property only affects
     // meshes right now.
@@ -180,6 +228,19 @@ TransformSscGeometry(QVariantMap* obj)
         bool ok = false;
         AngleAxisd orientation = angleAxisValue(orientationVar, &ok);
         meshRotation = orientation;
+    }
+
+    // Parse the MeshCenter property and convert it to meshOffset for
+    // Cosmographia.
+    Vector3d meshOffset(Vector3d::Zero());
+    QVariant meshCenterVar = obj->value("MeshCenter");
+    if (meshCenterVar.isValid())
+    {
+        bool ok = false;
+        Vector3d meshCenter = vec3Value(meshCenterVar, &ok);
+
+        // Convert mesh offset vector to Celestia's coordinate system
+        meshOffset = Vector3d(meshCenter.x(), -meshCenter.z(), meshCenter.y());
     }
 
     // To match the orientation of meshes in Celestia, an extra 90 degree rotation about
@@ -224,8 +285,8 @@ TransformSscGeometry(QVariantMap* obj)
         geometry["type"] = "Mesh";
         geometry["source"] = obj->value("Mesh");
         MoveProperty(obj, "NormalizeMesh", &geometry, "normalize");
-        MoveProperty(obj, "MeshScale", &geometry, "scale");
-        MoveProperty(obj, "MeshCenter", &geometry, "center");
+        geometry["scale"] = meshScale;
+        geometry["meshOffset"] = vec3ToVariant(meshOffset);
         geometry["meshRotation"] = quaternionToVariant(meshRotation);
     }
     else

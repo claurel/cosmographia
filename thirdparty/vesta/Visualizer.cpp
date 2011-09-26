@@ -1,5 +1,5 @@
 /*
- * $Revision: 530 $ $Date: 2010-10-12 11:26:43 -0700 (Tue, 12 Oct 2010) $
+ * $Revision: 624 $ $Date: 2011-09-26 14:20:33 -0700 (Mon, 26 Sep 2011) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -54,16 +54,6 @@ Visualizer::orientation(const Entity* /* parent */, double /* t */) const
   * \param pickDirection normalized ray direction
   * \param pixelAngle angle in radians subtended by a pixel
   */
-
-/*
-bool
-Visualizer::rayPick(const Eigen::Vector3d& pickOrigin,
-                    const Eigen::Vector3d& pickDirection,
-                    double pixelAngle) const
-{
-    return handleRayPick(pickOrigin, pickDirection, pixelAngle);
-}
-*/
 bool
 Visualizer::rayPick(const PickContext* pc, const Vector3d& pickOrigin, double t) const
 {

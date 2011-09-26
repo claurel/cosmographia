@@ -1958,24 +1958,17 @@ UniverseView::focusInEvent(QFocusEvent* event)
 Entity*
 UniverseView::pickObject(const QPoint& point)
 {
-    // Get the click point in normalized device coordinaes
-    Vector2d ndc = Vector2d(double(point.x()) / double(size().width()),
-                            double(point.y()) / double(size().height())) * 2.0 - Vector2d::Ones();
-    ndc.y() = -ndc.y();
-
-    double pixelAngle = m_fovY / size().height();
-
-    // Convert to a direction in view coordinates
-    double aspectRatio = double(size().width()) / double(size().height());
-    double h = tan(m_fovY / 2.0f);
-    Vector3d pickDirection = Vector3d(h * aspectRatio * ndc.x(), h * ndc.y(), -1.0).normalized();
-
     // Convert to world coordinates
-    pickDirection = m_observer->absoluteOrientation(m_simulationTime) * pickDirection;
+    Quaterniond cameraOrientation = m_observer->absoluteOrientation(m_simulationTime);
+    //Vector3d pickDirection = cameraOrientation * pickDirection;
     Vector3d pickOrigin = m_observer->absolutePosition(m_simulationTime);
+    Vector2d pickPoint(point.x(), size().height() - point.y());
+    Viewport viewport(size().width(), size().height());
+    PlanarProjection projection = PlanarProjection::CreatePerspective(m_fovY, viewport.aspectRatio(), 1.0f, 100.0f);
 
     PickResult pickResult;
-    if (m_universe->pickObject(m_simulationTime, pickOrigin, pickDirection, pixelAngle, &pickResult))
+    //if (m_universe->pickObject(m_simulationTime, pickOrigin, pickDirection, pixelAngle, &pickResult))
+    if (m_universe->pickViewportObject(m_simulationTime, pickPoint, pickOrigin, cameraOrientation, projection, viewport, &pickResult))
     {
 #if 0
         // Debugging code to show pick coordinates in the local coordinate system of the

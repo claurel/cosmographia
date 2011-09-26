@@ -85,5 +85,4 @@ LabelVisualizer::handleRayPick(const PickContext* pc, const Eigen::Vector3d& pic
     }
 
     return false;
-
 }

@@ -29,9 +29,9 @@ public:
     }
 
 protected:
-    virtual bool handleRayPick(const Eigen::Vector3d& pickOrigin,
-                               const Eigen::Vector3d& pickDirection,
-                               double pixelAngle) const;
+    virtual bool handleRayPick(const PickContext* pc,
+                               const Eigen::Vector3d& pickOrigin,
+                               double t) const;
 
 private:
     counted_ptr<LabelGeometry> m_label;

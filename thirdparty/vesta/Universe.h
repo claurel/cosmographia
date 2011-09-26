@@ -21,6 +21,9 @@ namespace vesta
 {
 
 class SkyLayer;
+class PlanarProjection;
+class Viewport;
+class PickContext;
 
 class Universe : public Object
 {
@@ -40,6 +43,16 @@ public:
                     const Eigen::Vector3d& pickOrigin,
                     const Eigen::Vector3d& pickDirection,
                     double pixelAngle,
+                    PickResult* result) const;
+    bool pickViewportObject(double t,
+                            const Eigen::Vector2d& pickPoint,
+                            const Eigen::Vector3d& cameraPosition,
+                            const Eigen::Quaterniond& cameraOrientation,
+                            const PlanarProjection& projection,
+                            const Viewport& viewport,
+                            PickResult* result) const;
+    bool pickObject(PickContext* pc,
+                    double t,
                     PickResult* result) const;
 
     typedef std::map<std::string, counted_ptr<SkyLayer> > SkyLayerTable;

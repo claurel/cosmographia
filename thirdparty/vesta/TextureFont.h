@@ -44,6 +44,9 @@ public:
     Eigen::Vector2f render(const std::string& text,
                            const Eigen::Vector2f& startPosition) const;
     float textWidth(const std::string& text) const;
+    float textAscent(const std::string& text) const;
+    float maxAscent() const;
+    float maxDescent() const;
     const Glyph* lookupGlyph(wchar_t ch) const;
 
     void addGlyph(const Glyph& glyph);
@@ -70,6 +73,9 @@ private:
     unsigned int m_maxCharacterId;
 
     static counted_ptr<TextureFont> ms_defaultFont;
+
+    float m_maxAscent;
+    float m_maxDescent;
 };
 
 }

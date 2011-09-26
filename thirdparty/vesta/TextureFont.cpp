@@ -31,7 +31,9 @@ counted_ptr<TextureFont> TextureFont::ms_defaultFont;
  *  glyph texture.
  */
 TextureFont::TextureFont() :
-    m_maxCharacterId(0)
+    m_maxCharacterId(0),
+    m_maxAscent(0.0f),
+    m_maxDescent(0.0f)
 {
 }
 
@@ -117,6 +119,26 @@ TextureFont::textWidth(const string& text) const
 }
 
 
+/** Get the maximum height above the baseline of any glyph in the font.
+  * The returned value is in units of pixels.
+  */
+float
+TextureFont::maxAscent() const
+{
+    return m_maxAscent;
+}
+
+
+/** Get the maximum distance that any glyph extends below the baseline.
+  * The returned value is in units of pixels.
+  */
+float
+TextureFont::maxDescent() const
+{
+    return m_maxDescent;
+}
+
+
 /** Bind the font texture. */
 void
 TextureFont::bind() const
@@ -183,6 +205,8 @@ TextureFont::addGlyph(const Glyph& glyph)
 {
     m_glyphs.push_back(glyph);
     m_maxCharacterId = max(m_maxCharacterId, glyph.characterId);
+    m_maxAscent = max(m_maxAscent, glyph.size.y() + glyph.offset.y());
+    m_maxDescent = max(m_maxDescent, -glyph.offset.y());
 }
 
 

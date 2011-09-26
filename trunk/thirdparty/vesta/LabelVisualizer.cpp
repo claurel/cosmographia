@@ -9,6 +9,7 @@
  */
 
 #include "LabelVisualizer.h"
+#include "PickContext.h"
 
 using namespace vesta;
 using namespace Eigen;
@@ -29,7 +30,7 @@ LabelVisualizer::~LabelVisualizer()
 
 
 bool
-LabelVisualizer::handleRayPick(const Eigen::Vector3d& pickOrigin, const Eigen::Vector3d& pickDirection, double pixelAngle) const
+LabelVisualizer::handleRayPick(const PickContext* pc, const Eigen::Vector3d& pickOrigin, double /* t */) const
 {
     if (m_label.isNull())
     {
@@ -40,7 +41,7 @@ LabelVisualizer::handleRayPick(const Eigen::Vector3d& pickOrigin, const Eigen::V
     if (m_label->fadeRange())
     {
         double cameraDistance = pickOrigin.norm();
-        float pixelSize = m_label->fadeSize() / float(pixelAngle * cameraDistance);
+        float pixelSize = m_label->fadeSize() / float(pc->pixelAngle() * cameraDistance);
 
         if (m_label->fadeRange()->opacity(pixelSize) < 0.1f)
         {
@@ -48,12 +49,38 @@ LabelVisualizer::handleRayPick(const Eigen::Vector3d& pickOrigin, const Eigen::V
         }
     }
 
-    double cosAngle = pickDirection.dot(-pickOrigin.normalized());
+    double cosAngle = pc->pickDirection().dot(-pickOrigin.normalized());
     if (cosAngle > 0.0)
     {
-        if (cosAngle >= 1.0 || acos(cosAngle) < m_label->apparentSize() / 2.0 * pixelAngle)
+        // Return true if the label marker was clicked
+        if (cosAngle >= 1.0 || acos(cosAngle) < m_label->apparentSize() / 2.0 * pc->pixelAngle())
         {
             return true;
+        }
+
+        // The marker wasn't clicked; check whether the label text was clicked
+
+        // Compute the intersection between the pick ray and the plane perpendicular to
+        // camera plane that posses through the labeled object's center. Transform the
+        // problem so that the origin is the object center and the camera plane is z=0
+        Matrix3d cameraMatrix = pc->cameraOrientation().conjugate().toRotationMatrix();
+        Vector3d rayOrigin = cameraMatrix * pickOrigin;
+        Vector3d rayDirection = cameraMatrix * pc->pickDirection();
+        double distanceToPlane = -rayOrigin.z() / rayDirection.z();
+
+        Vector3d p = rayOrigin + rayDirection * distanceToPlane;
+        float x = (atan(p.x() / rayOrigin.z())) / pc->pixelAngle();
+        float y = (atan(p.y() / rayOrigin.z())) / pc->pixelAngle();
+
+        if (m_label->font())
+        {
+            if (y > 0.0f && y < m_label->font()->maxAscent())
+            {
+                if (x > 0.0f && x < m_label->font()->textWidth(m_label->text()))
+                {
+                    return true;
+                }
+            }
         }
     }
 

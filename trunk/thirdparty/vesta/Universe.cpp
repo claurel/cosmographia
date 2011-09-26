@@ -13,6 +13,8 @@
 #include "Intersect.h"
 #include "Visualizer.h"
 #include "SkyLayer.h"
+#include "PickContext.h"
+#include "Viewport.h"
 #include <algorithm>
 #include <limits>
 
@@ -111,6 +113,88 @@ Universe::pickObject(double t,
                      double pixelAngle,
                      PickResult* result) const
 {
+    PickContext pc;
+
+    pc.setPickOrigin(pickOrigin);
+    pc.setPickDirection(pickDirection);
+    pc.setPixelAngle(pixelAngle);
+
+    return pickObject(&pc, t, result);
+}
+
+
+/** Determine the closest object intersected by a ray through the specifed point in the
+  * viewport. The ray originates at the cameraPosition and passes through the view plane
+  * at the pickPoint. The pickObject() method may be used instead of pickViewportObject()
+  * when then pick ray doesn't need to be calculated using a camera projection and
+  * viewport.
+  *
+  * This method returns true if any object was intersected. If the value of result
+  * is not null, it will be updated with information about which object was hit by the pick ray.
+  *
+  * @param t The time given as the number of seconds since 1 Jan 2000 12:00:00 UTC.
+  * @param pickPoint viewport coordinates through which the pick ray passes
+  * @param pickOrigin origin of the pick ray (generally the camera position)
+  * @param cameraOrientation orientation of the camera
+  * @param projection the camera projection
+  * @param viewport the viewport
+  * @param result pointer to a PickResult object that will be filled in if the pick ray
+  *    hits something.
+  */
+bool
+Universe::pickViewportObject(double t,
+                             const Eigen::Vector2d& pickPoint,
+                             const Eigen::Vector3d& cameraPosition,
+                             const Eigen::Quaterniond& cameraOrientation,
+                             const PlanarProjection& projection,
+                             const Viewport& viewport,
+                             PickResult* result) const
+{
+    PickContext pc;
+
+    pc.setCameraOrientation(cameraOrientation);
+    pc.setProjection(projection);
+    pc.setPickOrigin(cameraPosition);
+
+    double fovY = projection.fovY();
+    double pixelAngle = fovY / viewport.height();
+    pc.setPixelAngle(pixelAngle);
+
+    // Get the click point in normalized device coordinaes
+    Vector2d ndc = Vector2d((pickPoint.x() - viewport.x()) / viewport.width(),
+                            (pickPoint.y() - viewport.y()) / viewport.height()) * 2.0 - Vector2d::Ones();
+
+    // Convert to a direction in view coordinates
+    double h = tan(fovY / 2.0);
+    Vector3d pickDirection = Vector3d(h * viewport.aspectRatio() * ndc.x(), h * ndc.y(), -1.0).normalized();
+
+    // Convert to world coordinates
+    pc.setPickDirection(cameraOrientation * pickDirection);
+
+    return pickObject(&pc, t, result);
+}
+
+
+/** Determine the closest object intersected by a the geometry given in the specified
+  * pickContext (in the present implementation, this is always a ray.)
+  * This method returns true if any object was intersected. If the value of result is not
+  * null, it will be updated with information about which object was hit by the pick ray.
+  *
+  * @param t The time given as the number of seconds since 1 Jan 2000 12:00:00 UTC.
+  * @param pickContext Information about the geometry to use for intersection testing
+  * @param result pointer to a PickResult object that will be filled in if the pick ray
+  *    hits something.
+  */
+bool
+Universe::pickObject(PickContext* pc,
+                     double t,
+                     PickResult* result) const
+{
+    if (!pc)
+    {
+        return false;
+    }
+
     double closest = numeric_limits<double>::infinity();
     PickResult closestResult;
 
@@ -128,8 +212,8 @@ Universe::pickObject(double t,
                 {
                     Geometry* geometry = entity->geometry();
                     double intersectionDistance;
-                    if (TestRaySphereIntersection(pickOrigin,
-                                                  pickDirection,
+                    if (TestRaySphereIntersection(pc->pickOrigin(),
+                                                  pc->pickDirection(),
                                                   position,
                                                   geometry->boundingSphereRadius(),
                                                   &intersectionDistance))
@@ -138,8 +222,8 @@ Universe::pickObject(double t,
                         {
                             // Transform the pick ray into the local coordinate system of body
                             Matrix3d invRotation = entity->orientation(t).conjugate().toRotationMatrix();
-                            Vector3d relativePickOrigin = invRotation * (pickOrigin - position);
-                            Vector3d relativePickDirection = invRotation * pickDirection;
+                            Vector3d relativePickOrigin = invRotation * (pc->pickOrigin() - position);
+                            Vector3d relativePickDirection = invRotation * pc->pickDirection();
 
                             double distance = intersectionDistance;
                             if (geometry->rayPick(relativePickOrigin, relativePickDirection, t, &distance))
@@ -147,7 +231,7 @@ Universe::pickObject(double t,
                                 if (distance < closest)
                                 {
                                     closest = distance;
-                                    closestResult.setHit(entity, distance, pickOrigin + pickDirection * distance);
+                                    closestResult.setHit(entity, distance, pc->pickOrigin() + pc->pickDirection() * distance);
                                 }
                             }
                         }
@@ -157,11 +241,11 @@ Universe::pickObject(double t,
                 // Visualizers may act as 'pick proxies'
                 if (entity->hasVisualizers())
                 {
-                    Vector3d relativePickOrigin = pickOrigin - position;
+                    Vector3d relativePickOrigin = pc->pickOrigin() - position;
 
                     // Calculate the distance to the plane containing the center of the visualizer
                     // and perpendicular to the pick direction.
-                    double distanceToPlane = -pickDirection.dot(relativePickOrigin);
+                    double distanceToPlane = -pc->pickDirection().dot(relativePickOrigin);
 
                     if (distanceToPlane > 0.0 && distanceToPlane < closest)
                     {
@@ -170,10 +254,11 @@ Universe::pickObject(double t,
                         {
                             const Visualizer* visualizer = iter->second.ptr();
                             if (visualizer->isVisible() &&
-                                visualizer->rayPick(relativePickOrigin, pickDirection, pixelAngle))
+                                visualizer->rayPick(pc, relativePickOrigin, t))
+                                //visualizer->rayPick(relativePickOrigin, pc->pickDirection(), pc->pixelAngle()))
                             {
                                 closest = distanceToPlane;
-                                closestResult.setHit(entity, distanceToPlane, pickOrigin + pickDirection * distanceToPlane);
+                                closestResult.setHit(entity, distanceToPlane, pc->pickOrigin() + pc->pickDirection() * distanceToPlane);
                                 break;
                             }
                         }

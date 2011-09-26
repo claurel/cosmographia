@@ -21,6 +21,7 @@ namespace vesta
 {
 
 class Entity;
+class PickContext;
 
 /** A visualizer is extra geometry that represents something other than
   * the solid body of an object. Visualizers are attached to entities for
@@ -77,9 +78,7 @@ public:
         m_depthAdjustment = adjustment;
     }
 
-    bool rayPick(const Eigen::Vector3d& pickOrigin,
-                 const Eigen::Vector3d& pickDirection,
-                 double pixelAngle) const;
+    bool rayPick(const PickContext* pc, const Eigen::Vector3d& pickOrigin, double t) const;
 
 protected:
     void setGeometry(Geometry* geometry)
@@ -87,6 +86,7 @@ protected:
         m_geometry = geometry;
     }
 
+    virtual bool handleRayPick(const PickContext* pc, const Eigen::Vector3d& pickOrigin, double t) const;
     virtual bool handleRayPick(const Eigen::Vector3d& pickOrigin,
                                const Eigen::Vector3d& pickDirection,
                                double pixelAngle) const;

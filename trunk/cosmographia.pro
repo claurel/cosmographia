@@ -168,6 +168,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/Observer.cpp \
     $$VESTA_PATH/OrbitalElements.cpp \
     $$VESTA_PATH/ParticleSystemGeometry.cpp \
+    $$VESTA_PATH/PickContext.cpp \
     $$VESTA_PATH/PlanarProjection.cpp \
     $$VESTA_PATH/PlaneGeometry.cpp \
     $$VESTA_PATH/PlanetaryRings.cpp \
@@ -257,6 +258,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/OGLHeaders.h \
     $$VESTA_PATH/OrbitalElements.h \
     $$VESTA_PATH/ParticleSystemGeometry.h \
+    $$VESTA_PATH/PickContext.h \
     $$VESTA_PATH/PickResult.h \
     $$VESTA_PATH/PlanarProjection.h \
     $$VESTA_PATH/PlaneGeometry.h \

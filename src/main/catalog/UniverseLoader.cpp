@@ -56,6 +56,8 @@
 #include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
 #include <vesta/BodyDirectionVisualizer.h>
+#include <vesta/PlaneVisualizer.h>
+#include <vesta/PlaneGeometry.h>
 #include <vesta/ParticleSystemGeometry.h>
 #include <vesta/Units.h>
 #include <vesta/GregorianDate.h>
@@ -2889,6 +2891,77 @@ loadBodyDirectionVisualizer(const QVariantMap& map,
 
 
 Visualizer*
+UniverseLoader::loadPlaneVisualizer(const QVariantMap& style,
+                                    const UniverseCatalog* catalog)
+{
+    bool ok = false;
+    double size = style.value("size", 1.0).toDouble(&ok);
+    if (!ok)
+    {
+        errorMessage("Bad size given for Plane visualizer");
+        return NULL;
+    }
+
+    QVariant colorVar = style.value("color");
+    QVariant gridSubdivisionVar = style.value("gridSubdivision");
+    QVariant frameVar = style.value("frame");
+    QVariant opacityVar = style.value("opacity");
+
+    vesta::Frame* frame = InertialFrame::equatorJ2000();
+    if (frameVar.isValid())
+    {
+        if (frameVar.type() == QVariant::String)
+        {
+            // Inertial frame name
+            frame = loadInertialFrame(frameVar.toString());
+        }
+        else if (frameVar.type() == QVariant::Map)
+        {
+            frame = loadFrame(frameVar.toMap(), catalog);
+        }
+        else
+        {
+            frame = NULL;
+            errorMessage("Invalid frame given for ConstantVector");
+        }
+
+        if (!frame)
+        {
+            return NULL;
+        }
+    }
+
+    unsigned int gridSubdivision = 10;
+    if (gridSubdivisionVar.isValid())
+    {
+        gridSubdivision = gridSubdivisionVar.toUInt(&ok);
+        if (!ok)
+        {
+            errorMessage("gridSubdivision for plane visualizer must be a non-negative integer");
+            return NULL;
+        }
+    }
+
+    double gridSpacing = 0.0;
+    if (gridSubdivision > 0)
+    {
+        gridSpacing = (size * 2.0) / gridSubdivision;
+    }
+
+    Spectrum color = colorValue(colorVar, Spectrum::White());
+    float opacity = float(doubleValue(opacityVar, 0.2));
+
+    PlaneVisualizer* visualizer = new PlaneVisualizer(size);
+    visualizer->plane()->setGridLineSpacing(gridSpacing);
+    visualizer->plane()->setColor(color);
+    visualizer->plane()->setOpacity(opacity);
+    visualizer->setFrame(frame);
+
+    return visualizer;
+}
+
+
+Visualizer*
 UniverseLoader::loadVisualizer(const QVariantMap& map,
                                const UniverseCatalog* catalog)
 {
@@ -2919,6 +2992,10 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
     else if (type == "BodyDirection")
     {
         return loadBodyDirectionVisualizer(style, catalog);
+    }
+    else if (type == "Plane")
+    {
+        return loadPlaneVisualizer(style, catalog);
     }
     else
     {

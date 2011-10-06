@@ -132,6 +132,9 @@ private:
 
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
                                       const UniverseCatalog* catalog);
+    vesta::Visualizer* loadPlaneVisualizer(const QVariantMap& info,
+                                           const UniverseCatalog* catalog);
+
     Viewpoint* loadViewpoint(const QVariantMap& info,
                              UniverseCatalog* catalog);
 

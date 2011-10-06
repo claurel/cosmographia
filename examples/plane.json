@@ -1,0 +1,37 @@
+{
+     "version": "1.0",
+     "name": "Plane Visualizer Test",
+
+     "items" :
+     [
+        {
+          "type" : "Visualizer",
+          "tag" : "equatorial plane",
+          "body" : "Earth",
+          "style" :
+          {
+            "type" : "Plane",
+            "size" : 20000,
+	    "color" : "#99ffff",
+	    "frame" : "EclipticJ2000",
+	    "gridSubdivision" : 20
+          }
+        },
+
+        {
+          "type" : "Visualizer",
+          "tag" : "ecliptic plane",
+          "body" : "Earth",
+          "style" :
+          {
+            "type" : "Plane",
+            "size" : 20000,
+	    "color" : "#99ff99",
+	    "frame" : "EquatorJ2000",
+	    "opacity" : 0.2,
+	    "gridSubdivision" : 20
+          }
+        }
+
+    ]
+}

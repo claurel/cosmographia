@@ -1,0 +1,17 @@
+#summary Visualizers in JSON catalog files
+
+= Introduction =
+
+A visualizer is some bit of geometry that can be attached to body. A visualizer is distinct from an ordinary object in that it represents something other than the true shape of an object, such coordinate axes or a label.
+
+= Visualizer Types =
+
+== BodyAxes ==
+
+== FrameAxes ==
+
+== BodyDirection ==
+
+BodyDirection is an arrow that points to some other object.
+
+== Plane ==

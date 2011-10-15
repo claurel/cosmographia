@@ -43,6 +43,8 @@ public:
 
     Eigen::Vector2f render(const std::string& text,
                            const Eigen::Vector2f& startPosition) const;
+    Eigen::Vector2f renderUtf8(const std::string& text,
+                               const Eigen::Vector2f& startPosition) const;
     float textWidth(const std::string& text) const;
     float textAscent(const std::string& text) const;
     float maxAscent() const;

@@ -99,6 +99,124 @@ TextureFont::render(const string& text, const Vector2f& startPosition) const
 }
 
 
+static inline unsigned int lower6bits(char c)
+{
+    return (unsigned int) c & 0x3f;
+}
+
+
+/** Render a string of UTF-8 encoded text at the specified starting position.
+  */
+Vector2f
+TextureFont::renderUtf8(const string& text, const Vector2f& startPosition) const
+{
+    Vector2f currentPosition = startPosition;
+
+    glBegin(GL_QUADS);
+    unsigned int i = 0;
+
+    while (i < text.length())
+    {
+        unsigned char byte0 = text[i];
+        unsigned int decodeBytes = 0;
+
+        if (byte0 < 0x80)
+        {
+            decodeBytes = 1;
+        }
+        else if ((byte0 & 0xe0) == 0xc0)
+        {
+            decodeBytes = 2;
+        }
+        else if ((byte0 & 0xf0) == 0xe0)
+        {
+            decodeBytes = 3;
+        }
+        else if ((byte0 & 0xf8) == 0xf0)
+        {
+            decodeBytes = 4;
+        }
+        else if ((byte0 & 0xfc) == 0xf8)
+        {
+            decodeBytes = 5;
+        }
+        else if ((byte0 & 0xfe) == 0xfc)
+        {
+            decodeBytes = 6;
+        }
+
+        if (decodeBytes == 0 || i + decodeBytes >= text.length())
+        {
+            // Invalid UTF-8 encoding
+            break;
+        }
+
+        unsigned int glyphId = 0;
+        switch (decodeBytes)
+        {
+        case 1:
+            glyphId = byte0;
+            break;
+        case 2:
+            glyphId = ((byte0 & 0x1f) << 6) |
+                      lower6bits(text[i + 1]);
+            break;
+        case 3:
+            glyphId = ((byte0 & 0x0f) << 12) |
+                      (lower6bits(text[i + 1]) << 6) |
+                      lower6bits(text[i + 2]);
+            break;
+        case 4:
+            glyphId = ((byte0 & 0x07) << 18) |
+                      (lower6bits(text[i + 1]) << 12) |
+                      (lower6bits(text[i + 2]) << 6)  |
+                      lower6bits(text[i + 3]);
+            break;
+        case 5:
+            glyphId = ((byte0 & 0x03) << 24) |
+                      (lower6bits(text[i + 1]) << 18) |
+                      (lower6bits(text[i + 2]) << 12) |
+                      (lower6bits(text[i + 3]) << 6)  |
+                      lower6bits(text[i + 4]);
+            break;
+        case 6:
+            glyphId = ((byte0 & 0x01) << 30)    |
+                      (lower6bits(text[i + 1]) << 24) |
+                      (lower6bits(text[i + 2]) << 18) |
+                      (lower6bits(text[i + 3]) << 12) |
+                      (lower6bits(text[i + 4]) << 6)  |
+                      lower6bits(text[i + 5]);
+            break;
+        default:
+            break;
+        }
+
+        const Glyph* glyph = lookupGlyph(glyphId);
+
+        if (glyph)
+        {
+            Vector2f p = currentPosition + glyph->offset;
+
+            glTexCoord2fv(glyph->textureCoords[0].data());
+            glVertex2f(p.x(), p.y());
+            glTexCoord2fv(glyph->textureCoords[1].data());
+            glVertex2f(p.x() + glyph->size.x(), p.y());
+            glTexCoord2fv(glyph->textureCoords[2].data());
+            glVertex2f(p.x() + glyph->size.x(), p.y() + glyph->size.y());
+            glTexCoord2fv(glyph->textureCoords[3].data());
+            glVertex2f(p.x(), p.y() + glyph->size.y());
+
+            currentPosition.x() += glyph->advance;
+        }
+
+        i += decodeBytes;
+    }
+    glEnd();
+
+    return currentPosition;
+}
+
+
 /** Compute the width of a string of text in pixels.
  */
 float
@@ -278,8 +396,8 @@ TextureFont::loadTxf(const DataChunk* data)
     v_uint32 format = in.readUint32();
     v_uint32 glyphTextureWidth = in.readUint32();
     v_uint32 glyphTextureHeight = in.readUint32();
-    v_uint32 maxAscent = in.readUint32();
-    v_uint32 maxDescent = in.readUint32();
+    /* v_uint32 maxAscent = */ in.readUint32();
+    /* v_uint32 maxDescent = */ in.readUint32();
     v_uint32 glyphCount = in.readUint32();
 
     if (in.status() != InputDataStream::Good)
@@ -312,7 +430,7 @@ TextureFont::loadTxf(const DataChunk* data)
         v_int8 xoffset = in.readByte();
         v_int8 yoffset = in.readByte();
         v_int8 advance = in.readByte();
-        v_int8 unused = in.readByte();
+        /* v_int8 unused = */ in.readByte();
         v_uint16 x = in.readUint16();
         v_uint16 y = in.readUint16();
 

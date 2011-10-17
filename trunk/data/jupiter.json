@@ -9,6 +9,8 @@
           "label" : { "color" : [ 1, 1, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "317.83 Mearth",
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -37,6 +39,8 @@
           "name" : "Io",
           "label" : { "color" : [ 1.0, 1.0, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "0.015 Mearth",
 
           "center" : "Jupiter",
 
@@ -69,6 +73,8 @@
           "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "0.008 Mearth",
+
           "center" : "Jupiter",
 
           "trajectory" :
@@ -99,6 +105,8 @@
           "label" : { "color" : [ 0.9, 0.8, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "0.025 Mearth",
+
           "center" : "Jupiter",
 
           "trajectory" :
@@ -128,6 +136,8 @@
           "name" : "Callisto",
           "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "2.08e18 kg",
 
           "center" : "Jupiter",
 

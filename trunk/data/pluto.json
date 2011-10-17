@@ -24,6 +24,8 @@
           "label" : { "color" : [ 0.5, 0.5, 0.5 ], "fadeSize" : 6.0e9 },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "0.00218 Mearth",
+
           "center" : "Pluto System Barycenter",
           "trajectory" :
           {
@@ -62,6 +64,8 @@
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "1.52e21 kg",
+
           "center" : "Pluto System Barycenter",
           "trajectory" :
           {
@@ -98,6 +102,8 @@
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
           "description" : "Moon of Pluto",
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "1e18 kg",
 
           "center" : "Pluto System Barycenter",
           "trajectory" :
@@ -136,6 +142,8 @@
           "description" : "Moon of Pluto",
           "label" : { "color" : [ 0.5, 0.5, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "5e17 kg",
 
           "center" : "Pluto System Barycenter",
           "trajectory" :

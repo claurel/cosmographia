@@ -23,6 +23,7 @@
 #include "../TwoVectorFrame.h"
 #include "../WMSTiledMap.h"
 #include "../MultiWMSTiledMap.h"
+#include "../UnitConversion.h"
 #include "../geometry/MeshInstanceGeometry.h"
 #include "../geometry/TimeSwitchedGeometry.h"
 #include "../NetworkTextureLoader.h"
@@ -81,29 +82,6 @@
 using namespace vesta;
 using namespace Eigen;
 
-
-enum TimeUnit
-{
-    Unit_Millisecond,
-    Unit_Second,
-    Unit_Minute,
-    Unit_Hour,
-    Unit_Day,
-    Unit_Year,
-    InvalidTimeUnit,
-};
-
-enum DistanceUnit
-{
-    Unit_Millimeter,
-    Unit_Centimeter,
-    Unit_Meter,
-    Unit_Kilometer,
-    Unit_AU,
-    InvalidDistanceUnit,
-};
-
-static const double AU = 149597870.691;
 
 static const double DefaultStartTime = daysToSeconds(-36525.0 * 2);  // 12:00:00 1 Jan 1800
 static const double DefaultEndTime   = daysToSeconds( 36525.0);      // 12:00:00 1 Jan 2100
@@ -522,7 +500,7 @@ static double angleValue(QVariant v, double defaultValue = 0.0, bool* ok = NULL)
 }
 
 
-static DistanceUnit parseDistanceUnit(const QString unitString)
+static DistanceUnit parseDistanceUnit(const QString& unitString)
 {
     if (unitString == "mm")
     {
@@ -551,7 +529,7 @@ static DistanceUnit parseDistanceUnit(const QString unitString)
 }
 
 
-static TimeUnit parseTimeUnit(const QString unitString)
+static TimeUnit parseTimeUnit(const QString& unitString)
 {
     if (unitString == "ms")
     {
@@ -584,62 +562,28 @@ static TimeUnit parseTimeUnit(const QString unitString)
 }
 
 
-static double timeUnitConversion(TimeUnit unit)
+static MassUnit parseMassUnit(const QString& unitString)
 {
-    switch (unit)
+    if (unitString == "g")
     {
-    case Unit_Millisecond:
-        return 0.001;
-    case Unit_Second:
-        return 1.0;
-    case Unit_Minute:
-        return 60.0;
-    case Unit_Hour:
-        return 3600.0;
-    case Unit_Day:
-        return 86400.0;
-    case Unit_Year:
-        return 365.25 * 86400.0;
-    default:
-        return 0.0;
+        return Unit_Gram;
     }
-}
-
-
-static double distanceUnitConversion(DistanceUnit unit)
-{
-    switch (unit)
+    else if (unitString == "kg")
     {
-    case Unit_Millimeter:
-        return 1.0e-6;
-    case Unit_Centimeter:
-        return 1.0e-5;
-    case Unit_Meter:
-        return 1.0e-3;
-    case Unit_Kilometer:
-        return 1.0;
-    case Unit_AU:
-        return AU;
-    default:
-        return 0.0;
+        return Unit_Kilogram;
     }
-}
-
-
-static double convertTime(double value, TimeUnit fromUnit, TimeUnit toUnit)
-{
-    return value * timeUnitConversion(fromUnit) / timeUnitConversion(toUnit);
-}
-
-
-static double convertDistance(double value, DistanceUnit fromUnit, DistanceUnit toUnit)
-{
-    return value * distanceUnitConversion(fromUnit) / distanceUnitConversion(toUnit);
+    else if (unitString == "Mearth")
+    {
+        return Unit_EarthMass;
+    }
+    else
+    {
+        return InvalidMassUnit;
+    }
 }
 
 
 // Return distance in kilometers.
-// Load a duration value from a variant and convert it to seconds
 static double distanceValue(QVariant v, DistanceUnit defaultUnit, double defaultValue, bool* ok = NULL)
 {
     DistanceUnit unit = defaultUnit;
@@ -688,7 +632,7 @@ static double distanceValue(QVariant v, DistanceUnit defaultUnit, double default
     }
     else
     {
-        return convertDistance(value, unit, Unit_Kilometer);
+        return ConvertDistance(value, unit, Unit_Kilometer);
     }
 }
 
@@ -740,7 +684,7 @@ static double durationValue(QVariant v, TimeUnit defaultUnit, double defaultValu
     }
     else
     {
-        return convertTime(value, unit, Unit_Second);
+        return ConvertTime(value, unit, Unit_Second);
     }
 }
 
@@ -780,6 +724,59 @@ static double dateValue(QVariant v, bool* ok)
     }
 
     return tsec;
+}
+
+
+// Return mass in kilograms.
+static double massValue(QVariant v, MassUnit defaultUnit, double defaultValue, bool* ok = NULL)
+{
+    MassUnit unit = defaultUnit;
+    double value = defaultValue;
+
+    if (v.type() == QVariant::String)
+    {
+        QRegExp re(ValueUnitsRegexpString);
+        if (re.indexIn(v.toString()) != -1)
+        {
+            QStringList parts = re.capturedTexts();
+            value = parts[1].toDouble();
+
+            QString unitString = parts[2];
+
+            if (!unitString.isEmpty())
+            {
+                unit = parseMassUnit(unitString);
+            }
+        }
+        else
+        {
+            // Error
+            unit = InvalidMassUnit;
+        }
+    }
+    else
+    {
+        bool convertOk = false;
+        value = v.toDouble(&convertOk);
+        if (!convertOk)
+        {
+            unit = InvalidMassUnit;
+        }
+    }
+
+    if (ok)
+    {
+        *ok = (unit != InvalidMassUnit);
+    }
+
+    if (unit == InvalidMassUnit)
+    {
+        return 0.0;
+    }
+    else
+    {
+        return ConvertMass(value, unit, Unit_Kilogram);
+    }
 }
 
 
@@ -3209,6 +3206,17 @@ UniverseLoader::loadBodyInfo(const QVariantMap& item)
         if (!info->infoSource.startsWith("help:"))
         {
             info->infoSource = dataFileName(info->infoSource);
+        }
+    }
+
+    QVariant massVar = item.value("mass");
+    if (massVar.isValid())
+    {
+        bool ok = false;
+        info->massKg = massValue(massVar, Unit_Kilogram, 0.0, &ok);
+        if (!ok)
+        {
+            errorMessage("Bad value given for mass");
         }
     }
 

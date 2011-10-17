@@ -939,7 +939,7 @@ UniverseView::drawInfoOverlay()
 
             if (m_timeDisplay == TimeDisplay_UTC)
             {
-                m_textFont->render(formatDate(date).toUtf8().data(), Vector2f(dateX, dateY));
+                m_textFont->renderUtf8(formatDate(date).toUtf8().data(), Vector2f(dateX, dateY));
                 dateY -= textFontHeight;
             }
             else if (m_timeDisplay == TimeDisplay_Local)

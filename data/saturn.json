@@ -9,6 +9,8 @@
           "label" : { "color" : [ 0.8, 1.0, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "95.152 Mearth",
+
           "center" : "Sun",
           "trajectory" :
           {
@@ -57,6 +59,8 @@
           "label" : { "color" : [ 0.6, 0.5, 0.4 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "3.7493e19 kg",
+
           "center" : "Saturn",
 
           "trajectory" :
@@ -88,6 +92,8 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "startTime" : "1800-01-01",
+
+	  "mass" : "1.08022e20 kg",
 
           "arcs" : [
             {
@@ -168,6 +174,8 @@
           "label" : { "color" : [ 0.4, 0.4, 0.4 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "6.17449e20 kg",
+
           "center" : "Saturn",
 
           "trajectory" :
@@ -197,6 +205,8 @@
           "name" : "Dione",
           "label" : { "color" : [ 0.6, 0.7, 0.6 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "1.095452e21 kg",
 
           "startTime" : "1800-01-01",
           "arcs" : [
@@ -278,6 +288,8 @@
           "label" : { "color" : [ 0.4, 0.6, 0.2 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "2.306518e21 kg",
+
           "center" : "Saturn",
 
           "trajectory" :
@@ -307,6 +319,8 @@
           "name" : "Titan",
           "label" : { "color" : [ 0.8, 0.6, 0.4 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "1.3452e23 kg",
 
           "center" : "Saturn",
 
@@ -339,6 +353,8 @@
           "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "5.6199e18 kg",
+
           "center" : "Saturn",
 
           "trajectory" :
@@ -367,6 +383,8 @@
           "name" : "Iapetus",
           "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
+
+	  "mass" : "1.805635e21 kg",
 
           "center" : "Saturn",
 
@@ -399,6 +417,7 @@
           "label" : { "color" : [ 0.5, 0.6, 0.6 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+	  "mass" : "8.292e19 kg",
           "startTime" : "1900-01-02",
           "endTime" : "2050-01-01",
 

@@ -37,6 +37,7 @@ APP_SOURCES = \
     $$MAIN_PATH/SkyLabelLayer.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
     $$MAIN_PATH/TwoVectorFrame.cpp \
+    $$MAIN_PATH/UnitConversion.cpp \
     $$MAIN_PATH/WMSRequester.cpp \
     $$MAIN_PATH/WMSTiledMap.cpp \
     $$MAIN_PATH/MultiWMSTiledMap.cpp \
@@ -90,6 +91,7 @@ APP_HEADERS = \
     $$MAIN_PATH/SkyLabelLayer.h \
     $$MAIN_PATH/TleTrajectory.h \
     $$MAIN_PATH/TwoVectorFrame.h \
+    $$MAIN_PATH/UnitConversion.h \
     $$MAIN_PATH/WMSRequester.h \
     $$MAIN_PATH/WMSTiledMap.h \
     $$MAIN_PATH/MultiWMSTiledMap.h \

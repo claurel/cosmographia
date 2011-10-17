@@ -39,7 +39,8 @@ public:
         trajectoryPlotSamples(100),
         trajectoryPlotColor(vesta::Spectrum::White()),
         trajectoryPlotLead(0.0),
-        trajectoryPlotFade(0.0)
+        trajectoryPlotFade(0.0),
+        massKg(0.0)
     {
     }
 
@@ -67,6 +68,7 @@ public:
     double trajectoryPlotFade;
     QString description;
     QString infoSource;
+    double massKg;
 };
 
 

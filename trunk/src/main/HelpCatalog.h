@@ -35,6 +35,8 @@ public:
     void setHelpText(const QString& name, const QString& text);
     Q_INVOKABLE QString getHelpText(const QString& name) const;
 
+    QString getObjectDataText(const QString& name) const;
+
 private:
     QMap<QString, QString> m_helpResources;
     UniverseCatalog* m_universeCatalog;

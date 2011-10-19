@@ -23,8 +23,8 @@ using namespace Eigen;
 using namespace std;
 
 
-Quaterniond
-IAULunarRotationModel::orientation(double t) const
+static void
+calcEulerAngles(double t, double* phi, double* theta, double* psi)
 {
     double d = secondsToDays(t); // time in Julian days
     double T = d / 36525.0; // time in Julian centuries
@@ -81,16 +81,88 @@ IAULunarRotationModel::orientation(double t) const
                 + 0.0019 * sin(E12)
                 - 0.0044 * sin(E13);
 
-    return Quaterniond(AngleAxisd(toRadians(a0),        Vector3d::UnitZ())) *
-           Quaterniond(AngleAxisd(toRadians(90.0 - d0), Vector3d::UnitX())) *
-           Quaterniond(AngleAxisd(toRadians(90.0 + W),  Vector3d::UnitZ()));
+    *phi = a0;
+    *theta = 90.0 - d0;
+    *psi = 90.0 + W;
 }
 
 
-Vector3d
-IAULunarRotationModel::angularVelocity(double /* t */) const
+static void
+calcEulerAngleDerivatives(double /* t */, double* dphi, double* dtheta, double* dpsi)
 {
-    // TODO
-    return Vector3d::UnitZ();
+    double secPerDay = daysToSeconds(1.0);
+    double secPerCentury = secPerDay * 36525.0;
+
+    // These derivatives are only approximate; only the linear terms are accounted for
+    *dphi = 0.0013 / secPerCentury;
+    *dtheta = -0.0130 / secPerCentury;
+    *dpsi = 13.17635815 / secPerDay;
+}
+
+
+Quaterniond
+IAULunarRotationModel::orientation(double t) const
+{
+    double phi = 0.0;
+    double theta = 0.0;
+    double psi = 0.0;
+
+    calcEulerAngles(t, &phi, &theta, &psi);
+    return Quaterniond(AngleAxisd(toRadians(phi),   Vector3d::UnitZ())) *
+           Quaterniond(AngleAxisd(toRadians(theta), Vector3d::UnitX())) *
+           Quaterniond(AngleAxisd(toRadians(psi),   Vector3d::UnitZ()));
+}
+
+
+// Eigen is meant to deal with unit quaternions only and thus doesn't overload
+// the + operator.
+static Quaterniond sum(const Quaterniond& q1, const Quaterniond& q2)
+{
+    Quaterniond s;
+    s.coeffs() = q1.coeffs() + q2.coeffs();
+    return s;
+}
+
+
+// Eigen is meant to deal with unit quaternions only and thus doesn't overload
+// the * for scalar multiplication
+static Quaterniond scalarMul(double s, const Quaterniond& q)
+{
+    Quaterniond p;
+    p.coeffs() = q.coeffs() * s;
+    return p;
+}
+
+Vector3d
+IAULunarRotationModel::angularVelocity(double t) const
+{
+    double phi = 0.0;
+    double theta = 0.0;
+    double psi = 0.0;
+    calcEulerAngles(t, &phi, &theta, &psi);
+
+    double dphi = 0.0;
+    double dtheta = 0.0;
+    double dpsi = 0.0;
+    calcEulerAngleDerivatives(t, &dphi, &dtheta, &dpsi);
+
+    Quaterniond q1(AngleAxisd(toRadians(phi),   Vector3d::UnitZ()));
+    Quaterniond q2(AngleAxisd(toRadians(theta), Vector3d::UnitX()));
+    Quaterniond q3(AngleAxisd(toRadians(psi),   Vector3d::UnitZ()));
+    Quaterniond w1(0.0, 0.0, 0.0, toRadians(dphi));
+    Quaterniond w2(0.0, toRadians(dtheta), 0.0, 0.0);
+    Quaterniond w3(0.0, 0.0, 0.0, toRadians(dpsi));
+
+    // Calculate the orientation
+    Quaterniond q = q1 * q2 * q3;
+
+    // Calculate the derivative of the orientation with respect to time (uses the chain rule to
+    // compute the derivative of the product q1*q2*q3.)
+    Quaterniond dq = scalarMul(0.5, sum((sum(w1 * q1 * q2, w2 * q2 * q1)) * q3, w3 * q3 * q1 * q2));
+
+    // Compute the angular momentum vector
+    Vector3d w = (dq * q.conjugate()).vec() * 2.0;
+
+    return w;
 }
 

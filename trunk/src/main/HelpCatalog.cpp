@@ -20,13 +20,17 @@
 #include "catalog/UniverseCatalog.h"
 #include <vesta/Geometry.h>
 #include <vesta/Arc.h>
+#include <vesta/Trajectory.h>
 #include <vesta/RotationModel.h>
 #include <vesta/Units.h>
 #include <QDir>
 #include <QDebug>
+#include <algorithm>
+#include <cmath>
 
 using namespace vesta;
 using namespace Eigen;
+using namespace std;
 
 
 /** Create a new HelpCatalog. The catalog does not take ownership
@@ -64,7 +68,12 @@ HelpCatalog::loadHelpFiles(const QString& path)
         if (htmlFile.open(QIODevice::ReadOnly))
         {
             QString resourceName = fileInfo.baseName();
-            m_helpResources[resourceName] = QString::fromUtf8(htmlFile.readAll());
+            QString contents = QString::fromUtf8(htmlFile.readAll());
+
+            QString dataPageLink = QString("<a href=\"help:%1?data\">Data</a><br>").arg(resourceName);
+            contents.replace("<!-- DATA -->", dataPageLink);
+
+            m_helpResources[resourceName] = contents;
         }
     }
 
@@ -132,9 +141,16 @@ HelpCatalog::getHelpText(const QString& name) const
 static
 QString formatDuration(double seconds)
 {
-    if (seconds >= daysToSeconds(2.0))
+    double days = secondsToDays(seconds);
+    double years = days / 365.25;
+
+    if (days > 100.0)
     {
-        return QObject::tr("%1 days").arg(secondsToDays(seconds));
+        return QObject::tr("%1 years").arg(years);
+    }
+    else if (days > 2.0)
+    {
+        return QObject::tr("%1 days").arg(days);
     }
     else
     {
@@ -155,10 +171,46 @@ QString formatDuration(double seconds)
 
 
 static
-QString formatScientific(double v)
+double roundToSigDigits(double value, int significantDigits)
 {
-    int minExp = 4;
+    if (value == 0.0)
+    {
+        return 0.0;
+    }
+    else
+    {
+        double n = log10(abs(value));
+        double m = pow(10.0, floor(n) - significantDigits + 1);
+        return floor(value / m + 0.5) * m;
+    }
+}
 
+
+static
+QString readableNumber(double value, int significantDigits)
+{
+    double roundValue = value;
+    int useDigits = 1;
+
+    if (value != 0.0)
+    {
+        double n = log10(abs(value));
+        useDigits = max(0, significantDigits - (int) n - 1);
+        double m = pow(10.0, floor(n) - significantDigits + 1);
+        roundValue = floor(value / m + 0.5) * m;
+    }
+    else
+    {
+        useDigits = significantDigits;
+    }
+
+    return QLocale::system().toString(roundValue, 'f', useDigits);
+}
+
+
+static
+QString formatScientific(double v, int minExp = 4, int sigDigits = 4)
+{
     if (v != 0.0)
     {
         int e = int(log10(fabs(v)));
@@ -169,12 +221,28 @@ QString formatScientific(double v)
         }
         else
         {
-            return QString("%1").arg(v);
+            //return QString("%1").arg(v, 0, 'f');
+            return readableNumber(v, sigDigits);
         }
     }
     else
     {
         return QString("0");
+    }
+}
+
+
+static
+QString formatDistance(double km)
+{
+    double au = ConvertDistance(km, Unit_Kilometer, Unit_AU);
+    if (au > 0.1)
+    {
+        return QObject::tr("%1 AU (%2 km)").arg(au, 0, 'g', 4).arg(formatScientific(km, 7));
+    }
+    else
+    {
+        return QObject::tr("%1 km").arg(formatScientific(km, 7));
     }
 }
 
@@ -257,6 +325,51 @@ HelpCatalog::getObjectDataText(const QString &name) const
             {
                 double period = 360.0 / toDegrees(radPerSec);
                 out << QString("Rotation period: %1<br>").arg(formatDuration(period));
+            }
+        }
+
+        double sampleTime = body->chronology()->beginning() + body->chronology()->duration() / 2.0;
+
+        // Compute Keplerian elements for objects with periodic orbits
+        vesta::Arc* arc0 = body->chronology()->activeArc(sampleTime);
+
+        if (arc0->trajectory()->isPeriodic() && arc0->center() != NULL)
+        {
+            BodyInfo* centerInfo = m_universeCatalog->findInfo(arc0->center());
+            if (centerInfo && centerInfo->massKg > 0.0)
+            {
+                StateVector v = arc0->trajectory()->state(sampleTime);
+                double M = info->massKg + centerInfo->massKg;
+                double GM = 6.67384e-20 * M;
+
+                double a = 1.0 / (2.0 / v.position().norm() - v.velocity().squaredNorm() / GM);
+
+                //Vector3d L = v.position().cross(v.velocity());
+                //double p = L.squaredNorm();
+                double q = v.position().dot(v.velocity());
+                Vector2d e(1.0 - v.position().norm() / a, q / sqrt(a * GM));
+
+                double ecc = e.norm();
+
+                QString apoapsisLabel = QObject::tr("Apoapsis");
+                QString periapsisLabel = QObject::tr("Periapsis");
+                if (arc0->center()->name() == "Sun")
+                {
+                    periapsisLabel = QObject::tr("Perihelion");
+                    apoapsisLabel = QObject::tr("Aphelion");
+                }
+                else if (arc0->center()->name() == "Earth")
+                {
+                    periapsisLabel = QObject::tr("Perigee");
+                    apoapsisLabel = QObject::tr("Apogee");
+                }
+
+                out << QObject::tr("<br><b>Orbit</b><br>");
+                out << QString("Period: %1<br>").arg(formatDuration(arc0->trajectory()->period()));
+                out << QString("%1: %2<br>").arg(periapsisLabel).arg(formatDistance(a * (1.0 - ecc)));
+                out << QString("%1: %2<br>").arg(apoapsisLabel).arg(formatDistance(a * (1.0 + ecc)));
+                out << QObject::tr("Semi-major axis: %1<br>").arg(formatDistance(a));
+                out << QObject::tr("Eccentricity: %1<br>").arg(ecc, 0, 'g', 2);
             }
         }
     }

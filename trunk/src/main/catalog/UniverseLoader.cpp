@@ -2167,7 +2167,8 @@ UniverseLoader::loadMeshGeometry(const QVariantMap& map)
             meshInstance = new MeshInstanceGeometry(mesh);
             if (radius > 0.0)
             {
-                meshInstance->setScale(radius / mesh->boundingSphereRadius());
+                float maxExtent = mesh->meshBoundingBox().extents().maxCoeff();
+                meshInstance->setScale(radius * 2.0f / maxExtent);
             }
             else
             {

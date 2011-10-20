@@ -98,6 +98,8 @@ public:
         return m_mesh.ptr();
     }
 
+    vesta::BoundingBox boundingBox() const;
+
 protected:
     virtual bool handleRayPick(const Eigen::Vector3d& pickOrigin,
                                const Eigen::Vector3d& pickDirection,

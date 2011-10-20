@@ -9,7 +9,7 @@
           "label" : { "color" : [ 0.7, 0.8, 1 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "1 Mearth",
+          "mass" : "1 Mearth",
 
           "center" : "Sun",
           "trajectory" :

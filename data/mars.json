@@ -9,7 +9,7 @@
           "label" : { "color" : [ 0.8, 0.4, 0.3 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "0.107 Mearth",
+          "mass" : "0.107 Mearth",
 
           "center" : "Sun",
           "trajectory" :
@@ -40,7 +40,7 @@
           "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "1.072e16 kg",
+          "mass" : "1.072e16 kg",
 
           "center" : "Mars",
 
@@ -71,7 +71,7 @@
           "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "1.48e15 kg",
+          "mass" : "1.48e15 kg",
 
           "center" : "Mars",
 

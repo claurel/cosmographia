@@ -9,7 +9,7 @@
           "label" : { "color" : [ 1, 1, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "317.83 Mearth",
+          "mass" : "317.83 Mearth",
 
           "center" : "Sun",
           "trajectory" :
@@ -40,7 +40,7 @@
           "label" : { "color" : [ 1.0, 1.0, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "0.015 Mearth",
+          "mass" : "8.9319e22 kg",
 
           "center" : "Jupiter",
 
@@ -73,7 +73,7 @@
           "label" : { "color" : [ 0.9, 0.8, 0.7 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "0.008 Mearth",
+          "mass" : "4.80e22 kg",
 
           "center" : "Jupiter",
 
@@ -105,7 +105,7 @@
           "label" : { "color" : [ 0.9, 0.8, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "0.025 Mearth",
+          "mass" : "1.4819e23 kg",
 
           "center" : "Jupiter",
 
@@ -137,7 +137,7 @@
           "label" : { "color" : [ 0.6, 0.4, 0.2 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "2.08e18 kg",
+          "mass" : "1.075938e23 kg",
 
           "center" : "Jupiter",
 

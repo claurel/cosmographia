@@ -22,9 +22,7 @@
 using namespace vesta;
 
 
-MultiLabelGeometry::MultiLabelGeometry() :
-    m_lastRenderedTime(0.0),
-    m_lastRenderedOpacity(0.0f)
+MultiLabelGeometry::MultiLabelGeometry()
 {
     setFixedApparentSize(true);
 }
@@ -44,28 +42,7 @@ MultiLabelGeometry::render(RenderContext& rc, double clock) const
     if (label)
     {
         label->render(rc, clock);
-
-        // Save the last computed opacity. This is part of the workaround to prevent
-        // picking of faded out labels. A better solution would require the handleRayPick
-        // method of Visualizer to accept a time parameter.
-        m_lastRenderedOpacity = 1.0;
-        if (label->fadeRange())
-        {
-            float cameraDistance = rc.modelview().translation().norm();
-            float pixelSize = label->fadeSize() / (rc.pixelSize() * cameraDistance);
-            m_lastRenderedOpacity = label->fadeRange()->opacity(pixelSize);
-        }
     }
-    else
-    {
-        m_lastRenderedOpacity = 0.0;
-    }
-
-    // This is a workaround for the fact that the current time is not available
-    // in Visualizer::handleRayPick. We cache the rendered time and will use that the next time
-    // ray pick is called. It's not completely reliable, but effective enough for
-    // the usage pattern in Cosmographia.
-    m_lastRenderedTime = clock;
 }
 
 

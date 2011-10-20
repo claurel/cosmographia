@@ -33,6 +33,7 @@ APP_SOURCES = \
     $$MAIN_PATH/KeplerianSwarm.cpp \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/MarkerLayer.cpp \
+    $$MAIN_PATH/MultiLabelVisualizer.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/SkyLabelLayer.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
@@ -87,6 +88,7 @@ APP_HEADERS = \
     $$MAIN_PATH/KeplerianSwarm.h \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/MarkerLayer.h \
+    $$MAIN_PATH/MultiLabelVisualizer.h \
     $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/SkyLabelLayer.h \
     $$MAIN_PATH/TleTrajectory.h \

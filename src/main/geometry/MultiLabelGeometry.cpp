@@ -87,15 +87,7 @@ MultiLabelGeometry::apparentSize() const
         s = std::max(s, m_labels[i]->apparentSize());
     }
 
-    // Workaround to prevent selecting invisible labels
-    if (m_lastRenderedOpacity < 0.01f)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        return s;
-    }
+    return s;
 }
 
 

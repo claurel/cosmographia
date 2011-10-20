@@ -71,6 +71,23 @@ MeshInstanceGeometry::boundingSphereRadius() const
 }
 
 
+/** Get an axis-aligned box large enough to contain the geometry.
+  */
+vesta::BoundingBox
+MeshInstanceGeometry::boundingBox() const
+{
+    if (m_mesh.isValid())
+    {
+        BoundingBox meshBox = m_mesh->meshBoundingBox();
+        return BoundingBox(meshBox.minPoint() * m_scale + m_meshOffset, meshBox.maxPoint() * m_scale + m_meshOffset);
+    }
+    else
+    {
+        return BoundingBox();
+    }
+}
+
+
 bool
 MeshInstanceGeometry::handleRayPick(const Vector3d& pickOrigin,
                                     const Vector3d& pickDirection,

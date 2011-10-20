@@ -251,7 +251,7 @@ QString formatDistance(double km)
 static QString
 tableRow(const QString& s1, const QString& s2)
 {
-    return QString("<tr><td align=\"right\">%1</td><td>&nbsp;&nbsp;&nbsp;</td><td align=\"left\">%2</td></tr>\n").arg(s1).arg(s2);
+    return QString("<tr><td align=\"right\">%1</td><td>&nbsp;&nbsp;&nbsp;</td><td align=\"left\"><font color=\"#ccccff\">%2</font></td></tr>\n").arg(s1).arg(s2);
 }
 
 

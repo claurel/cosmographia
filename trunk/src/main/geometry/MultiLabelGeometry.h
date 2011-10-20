@@ -49,8 +49,6 @@ public:
 private:
     std::vector<double> m_times;
     std::vector<vesta::counted_ptr<vesta::LabelGeometry> > m_labels;
-    mutable double m_lastRenderedTime;
-    mutable float m_lastRenderedOpacity;
 };
 
 #endif // _MULTI_LABEL_GEOMETRY_H_

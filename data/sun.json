@@ -8,12 +8,23 @@
           "name" : "Sun",
           "center" : "SSB",
 
+          "mass" : "1.9891e30 kg",
+
           "label" : { "color" : [ 1, 1, 0 ] },
 
           "trajectory" :
           {
               "type" : "FixedPoint",
               "position" : [ 0, 0, 0 ]
+          },
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "25.379994924",
+              "inclination" : 26.13,
+              "ascendingNode" : 16.13,
+              "meridianAngle" : 84.10
           },
 
           "geometry" :

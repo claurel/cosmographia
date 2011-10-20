@@ -29,7 +29,7 @@
 #include "ConstellationInfo.h"
 #include "TwoVectorFrame.h"
 #include "MultiWMSTiledMap.h"
-#include "geometry/MultiLabelGeometry.h"
+#include "MultiLabelVisualizer.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -460,21 +460,21 @@ labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMa
     Visualizer* vis = NULL;
     if (multiLabelRequired)
     {
-        MultiLabelGeometry* geometry = new MultiLabelGeometry();
+        MultiLabelVisualizer* multiLabel = new MultiLabelVisualizer();
         double startTime = planet->chronology()->beginning();
         for (unsigned int i = 0; i < planet->chronology()->arcCount(); ++i)
         {
             vesta::Arc* arc = planet->chronology()->arc(i);
 
-            LabelGeometry* label = new LabelGeometry(labelText.toUtf8().data(), font, color, 6.0f);
-            label->setIcon(icon);
-            label->setIconColor(color);
-            setLabelFadeRange(label, planet, arc, fadeSize);
-            geometry->addLabel(startTime, label);
+            LabelVisualizer* label = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
+            label->label()->setIcon(icon);
+            label->label()->setIconColor(color);
+            setLabelFadeRange(label->label(), planet, arc, fadeSize);
+            multiLabel->addLabel(startTime, label);
             startTime += arc->duration();
         }
 
-        vis = new Visualizer(geometry);
+        vis = multiLabel;
     }
     else
     {

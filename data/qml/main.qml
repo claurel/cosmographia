@@ -105,6 +105,14 @@ Item {
             }
             setActivePanel("infoPanel")
         }
+        onShowProperties: {
+            var body = universeView.getSelectedBody()
+            if (body !== null)
+            {
+                infoPanel.navigateTo("help:" + body.name + "?data");
+            }
+            setActivePanel("infoPanel")
+        }
     }
 
     Connections

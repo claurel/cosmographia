@@ -27,6 +27,7 @@ Item
     property variant selection: null
 
     signal showInfo()
+    signal showProperties()
 
     function show(x, y, body)
     {
@@ -45,7 +46,8 @@ Item
         menuModel.append({ action: "center",      labelText: "Set As Center", checked: false, type: "camera" });
         menuModel.append({ action: "fixcenter",   labelText: "Set As Fixed Center", checked: false, type: "camera" });
         menuModel.append({ action: "track",       labelText: "Track", checked: false, type: "camera" });
-        menuModel.append({ action: "info",        labelText: "Show Information", checked: false, type: "camera" });
+        menuModel.append({ action: "description",        labelText: "Show Description", checked: false, type: "camera" });
+        menuModel.append({ action: "properties",        labelText: "Show Properties", checked: false, type: "camera" });
         menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body), type: "camera" });
         menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
         menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes, type: "vectors" });
@@ -88,10 +90,15 @@ Item
             universeView.setSelectedBody(selection);
             universeView.gotoSelectedObject();
         }
-        else if (item.action == "info")
+        else if (item.action == "description")
         {
             universeView.setSelectedBody(selection);
             showInfo()
+        }
+        else if (item.action == "properties")
+        {
+            universeView.setSelectedBody(selection);
+            showProperties()
         }
         else if (item.action == "plot")
         {

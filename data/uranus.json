@@ -9,7 +9,7 @@
           "label" : { "color" : [ 0.5, 1.0, 1.0 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "14.536 Mearth",
+          "mass" : "14.536 Mearth",
 
           "center" : "Sun",
           "trajectory" :
@@ -59,7 +59,7 @@
           "label" : { "color" : [ 0.6, 0.6, 0.6 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "6.59e19 kg",
+          "mass" : "6.59e19 kg",
 
           "center" : "Uranus",
 
@@ -93,7 +93,7 @@
           "label" : { "color" : [ 0.5, 0.7, 0.7 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "1.353e21 kg",
+          "mass" : "1.353e21 kg",
 
           "center" : "Uranus",
 
@@ -127,7 +127,7 @@
           "label" : { "color" : [ 0.6, 0.5, 0.3 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "1.172e21 kg",
+          "mass" : "1.172e21 kg",
 
           "center" : "Uranus",
 
@@ -161,7 +161,7 @@
           "label" : { "color" : [ 0.3, 0.7, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "3.527e21 kg",
+          "mass" : "3.527e21 kg",
 
           "center" : "Uranus",
 
@@ -194,7 +194,7 @@
           "label" : { "color" : [ 0.6, 0.6, 0.8 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "3.014e21 kg",
+          "mass" : "3.014e21 kg",
 
           "center" : "Uranus",
 

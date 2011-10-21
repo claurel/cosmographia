@@ -9,6 +9,9 @@
          "class" : "dwarf planet",
          "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
+
+         "mass": "1.67e22 kg",
+
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
          "trajectory": {
@@ -38,6 +41,7 @@
          "class" : "satellite",
          "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
+
          "center": "Eris",
          "trajectoryFrame": "EclipticJ2000",
          "trajectory": {

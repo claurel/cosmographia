@@ -9,7 +9,7 @@
           "label" : { "color" : [ 0.5, 0.5, 1.0 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "17.147 Mearth",
+          "mass" : "1.0243e26 kg",
 
           "center" : "Sun",
           "trajectory" :
@@ -40,7 +40,7 @@
           "label" : { "color" : [ 0.4, 0.4, 0.7 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "2.14e22 kg",
+          "mass" : "2.14e22 kg",
 
           "center" : "Neptune",
 
@@ -81,7 +81,7 @@
           "label" : { "color" : [ 0.4, 0.6, 0.5 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "4.4e19 kg",
+          "mass" : "4.4e19 kg",
 
           "center" : "Neptune",
 
@@ -118,7 +118,7 @@
           "label" : { "color" : [ 0.2, 0.2, 0.4 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-	  "mass" : "3.1e19 kg",
+          "mass" : "3.1e19 kg",
 
           "center" : "Neptune",
 

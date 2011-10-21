@@ -34,6 +34,9 @@ using namespace Eigen;
 using namespace std;
 
 
+static const double G = 6.67384e-20;
+static const double EarthG = 9.80665;
+
 /** Create a new HelpCatalog. The catalog does not take ownership
   * of the universe catalog pointer.
   */
@@ -71,7 +74,7 @@ HelpCatalog::loadHelpFiles(const QString& path)
             QString resourceName = fileInfo.baseName();
             QString contents = QString::fromUtf8(htmlFile.readAll());
 
-            QString dataPageLink = QString("<a href=\"help:%1?data\">Data</a><br>").arg(resourceName);
+            QString dataPageLink = QString("<a href=\"help:%1?data\">Properties</a><br>").arg(resourceName);
             contents.replace("<!-- DATA -->", dataPageLink);
 
             m_helpResources[resourceName] = contents;
@@ -280,10 +283,14 @@ HelpCatalog::getObjectDataText(const QString &name) const
         // Osculating elements will be calculated at this time
         double sampleTime = body->chronology()->beginning() + body->chronology()->duration() / 2.0;
 
+        // Earth needs a bit of special handling, such as eliding the 'percent of Earth' comparisons
+        bool isEarth = body->name() == "Earth";
+
         out << QString("<h1>%1</h1>").arg(QString::fromUtf8(body->name().c_str()));
 
         out << "<br>";
         out << "<table>\n";
+
         out << tableRow(QObject::tr("<b>Physical</b>"), "");
         out << tableRow("", "");
 
@@ -292,8 +299,17 @@ HelpCatalog::getObjectDataText(const QString &name) const
             if (body->geometry()->isEllipsoidal())
             {
                 Vector3d semiAxes = body->geometry()->ellipsoid().semiAxes();
-                //out << QString("Mean radius: %1 km<br>").arg(semiAxes.sum() / 3.0f);
-                out << tableRow(QObject::tr("Mean radius"), QObject::tr("%1 km").arg(semiAxes.sum() / 3.0f));
+                bool isSpherical = semiAxes.x() == semiAxes.y() && semiAxes.y() == semiAxes.z();
+                if (isSpherical)
+                {
+                    out << tableRow(QObject::tr("Radius"), QObject::tr("%1 km").arg(readableNumber(semiAxes.x(), 4)));
+                }
+                else
+                {
+                    //out << tableRow(QObject::tr("Mean radius"), QObject::tr("%1 km").arg(readableNumber(semiAxes.sum() / 3.0f, 4)));
+                    out << tableRow(QObject::tr("Equatorial radius"), QObject::tr("%1 km").arg(readableNumber((semiAxes.x() + semiAxes.y()) / 2.0f, 4)));
+                    out << tableRow(QObject::tr("Polar radius"), QObject::tr("%1 km").arg(readableNumber(semiAxes.z(), 4)));
+                }
             }
             else if (dynamic_cast<MeshInstanceGeometry*>(body->geometry()))
             {
@@ -324,11 +340,7 @@ HelpCatalog::getObjectDataText(const QString &name) const
                     earthMassString = QObject::tr("%1&times; Earth").arg(earthMass);
                 }
 
-                // Table form
-                //out << QString("<table><tr><td>Mass</td><td>%1</td></tr> <tr><td></td><td>%2</td></tr></table>").arg(earthMassString).arg(kgMassString);
-
                 // Single line form
-                //out << QObject::tr("Mass: %1 (%2)<br>").arg(earthMassString).arg(kgMassString);
                 out << tableRow(QObject::tr("Mass"), QString("%1 (%2)").arg(earthMassString).arg(kgMassString));
             }
             else
@@ -344,8 +356,23 @@ HelpCatalog::getObjectDataText(const QString &name) const
 
             // Compute density in grams per cubic centimeter
             double rho = (info->massKg * 1000.0) / (volumeKm3 * 1.0e15);
-            //out << QObject::tr("Density: %1 g/cm<sup>3</sup><br>").arg(rho, 0, 'g', 3);
             out << tableRow(QObject::tr("Density"), QObject::tr("%1 g/cm<sup>3</sup>").arg(rho, 0, 'g', 3));
+
+            double equatorialRadius = (semiAxes.x() + semiAxes.y()) / 2.0;
+            double surfaceGravity = (G * info->massKg) / pow(equatorialRadius, 2.0) * 1000;
+
+            if (isEarth)
+            {
+                surfaceGravity = EarthG;
+                out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1 m/s<sup>2</sup>").
+                                arg(roundToSigDigits(surfaceGravity, 3)));
+            }
+            else
+            {
+                out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1% Earth (%2 m/s<sup>2</sup>)").
+                                arg(roundToSigDigits(surfaceGravity / EarthG * 100, 3)).
+                                arg(roundToSigDigits(surfaceGravity, 3)));
+            }
         }
 
         vesta::Arc* arc = body->chronology()->activeArc(sampleTime);
@@ -372,12 +399,14 @@ HelpCatalog::getObjectDataText(const QString &name) const
                     syncNotice = QObject::tr(" (synchronous)");
                 }
 
-                //out << QString("Rotation period: %1 %2<br>").arg(formatDuration(period)).arg(syncNotice);
+                //out << tableRow(QObject::tr("<b>Rotation</b><font size=\"-3\"><br>&nbsp;</font>"), "");
+                out << tableRow("", "");
                 out << tableRow(QObject::tr("Rotation period"), QString("%1 %2").arg(formatDuration(period)).arg(syncNotice));
             }
         }
 
-        out << "</table>\n";
+        out << tableRow("", "");
+        out << tableRow("", "");
 
         // Compute Keplerian elements for objects with periodic orbits
         if (arc->trajectory()->isPeriodic() && arc->center() != NULL)
@@ -411,16 +440,6 @@ HelpCatalog::getObjectDataText(const QString &name) const
                     apoapsisLabel = QObject::tr("Apogee");
                 }
 
-                /*
-                out << QObject::tr("<br><b>Orbit</b><br>");
-                out << QString("Period: %1<br>").arg(formatDuration(orbitalPeriod));
-                out << QString("%1: %2<br>").arg(periapsisLabel).arg(formatDistance(a * (1.0 - ecc)));
-                out << QString("%1: %2<br>").arg(apoapsisLabel).arg(formatDistance(a * (1.0 + ecc)));
-                out << QObject::tr("Semi-major axis: %1<br>").arg(formatDistance(a));
-                out << QObject::tr("Eccentricity: %1<br>").arg(ecc, 0, 'g', 2);
-                */
-                out << "<br><br>";
-                out << "<table>\n";
                 out << tableRow(QObject::tr("<b>Orbit</b>"), "");
                 out << tableRow("", "");
                 out << tableRow("Period", formatDuration(orbitalPeriod));
@@ -428,9 +447,10 @@ HelpCatalog::getObjectDataText(const QString &name) const
                 out << tableRow(apoapsisLabel, formatDistance(a * (1.0 + ecc)));
                 out << tableRow(QObject::tr("Semi-major axis"), formatDistance(a));
                 out << tableRow(QObject::tr("Eccentricity"), QString::number(ecc, 'g', 2));
-                out << "</table>\n";
             }
         }
+
+        out << "</table>\n";
     }
 
     return text;

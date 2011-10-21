@@ -9,6 +9,9 @@
          "class" : "dwarf planet",
          "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
+
+         "mass": "4.006e21 kg",
+
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
          "trajectory": {
@@ -152,6 +155,9 @@
          "class" : "asteroid",
          "label" : { "color" : "#6a7f99" },
          "trajectoryPlot": { "fade": 0.3 },
+
+         "mass": "6.32e20 kg",
+
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
          "trajectory": {

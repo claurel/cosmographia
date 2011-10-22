@@ -32,7 +32,7 @@
          },
          "geometry": {
            "type": "Globe",
-           "radius": 750
+           "radius": 1163
          }
       },
 

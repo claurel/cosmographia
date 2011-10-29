@@ -281,6 +281,46 @@
            "source": "models/21lutetia.cmod",
            "type": "Mesh"
          }
-        }
+        },
+
+        {
+         "name" : "Davida",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+
+         "mass" : "3.84e19 kg",
+
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "5.63295338397y",
+           "semiMajorAxis": "3.16585319au",
+           "eccentricity": 0.18649155,
+           "inclination": 15.938495,
+           "ascendingNode": 107.642443,
+           "argumentOfPeriapsis": 338.179887,
+           "meanAnomaly": 150.351498
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "5.129364h",
+           "inclination" : 85,
+           "ascendingNode" : 17,
+           "meridianAngle" : 268.1
+         },
+
+         "geometry": {
+           "source": "models/511davida.cmod",
+           "type": "Mesh",
+           "size": 180
+         }
+      }
+
     ]
 }

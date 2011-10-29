@@ -37,7 +37,8 @@
           "geometry" :
           {
               "type" : "Globe",
-              "radii" : [ 500, 500, 480 ]
+              "radii" : [ 500, 500, 480 ],
+              "baseMap" : "textures/ceres.png"
           }
         },
 

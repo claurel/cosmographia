@@ -210,3 +210,91 @@ LoadBinaryAstorbFile(const QString& fileName)
 
     return swarm;
 }
+
+
+/** Load a binary file containing a list of Keplerian orbita elements planet data. This is more
+  * general than the binary astorb format, as the mean motion can be specified independently of
+  * the semi-major axis. Each record contains the following:
+  *
+  * semi-major axis      (32-bit float, km)
+  * eccentricity         (32-bit float)
+  * inclination          (32-bit float, degrees)
+  * ascending node       (32-bit float, degrees)
+  * arg. of periapsis    (32-bit float, degrees)
+  * mean anomaly         (32-bit float, degrees)
+  * mean motion          (32-bit float, Julian date TT)
+  * epoch                (64-bit double, Julian date TT)
+  */
+KeplerianSwarm*
+LoadBinaryKeplerianOrbitFile(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Unable to open binary Keplerian orbit file " << fileName;
+        return NULL;
+    }
+
+    KeplerianSwarm* swarm = new KeplerianSwarm();
+
+    unsigned int objectCount = 0;
+
+    QDataStream in(&file);
+
+    // Set the stream version to 4.5; more recent versions can read single or double precision
+    // floating point values, but not both from the same stream.
+    in.setVersion(QDataStream::Qt_4_5);
+
+    while (!in.atEnd() && in.status() == QDataStream::Ok)
+    {
+        float sma = 0.0f;
+        float eccentricity = 0.0f;
+        float inclination = 0.0f;
+        float ascendingNode = 0.0f;
+        float argOfPeriapsis = 0.0f;
+        float meanAnomaly = 0.0f;
+        float meanMotion = 0.0f;
+        double epoch = 2451545.0;
+
+        // Read orbital elements
+        in >> sma >> eccentricity >> inclination >> ascendingNode >> argOfPeriapsis >> meanAnomaly >> meanMotion;
+
+        // Read epoch
+        in >> epoch;
+
+        if (in.status() == QDataStream::Ok)
+        {
+            OrbitalElements el;
+            el.eccentricity = eccentricity;
+            el.periapsisDistance = (1.0 - eccentricity) * sma;
+            el.inclination = toRadians(inclination);
+            el.longitudeOfAscendingNode = toRadians(ascendingNode);
+            el.argumentOfPeriapsis = toRadians(argOfPeriapsis);
+            el.meanAnomalyAtEpoch = toRadians(meanAnomaly);
+            el.meanMotion = toRadians(meanMotion / 86400.0);
+            el.epoch = daysToSeconds(epoch - J2000);
+
+            // Automatically set epoch for the swarm geometry to that of the first record in the file
+            if (objectCount == 0)
+            {
+                swarm->setEpoch(el.epoch);
+            }
+
+            swarm->addObject(el, 0.0f);
+            objectCount++;
+        }
+    }
+
+    if (objectCount == 0)
+    {
+        qDebug() << "Binary Keplerian orbit file " << fileName << " contains no records";
+        delete swarm;
+        swarm = NULL;
+    }
+    else
+    {
+        qDebug() << "Binary Keplerian orbit file contains " << objectCount << " objects";
+    }
+
+    return swarm;
+}

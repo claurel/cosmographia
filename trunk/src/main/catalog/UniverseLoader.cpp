@@ -2301,6 +2301,10 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
     {
         swarm = LoadBinaryAstorbFile(dataFileName(source));
     }
+    else if (format == "kepbin")
+    {
+        swarm = LoadBinaryKeplerianOrbitFile(dataFileName(source));
+    }
     else
     {
         errorMessage("Unknown format for Keplerian swarm geometry.");

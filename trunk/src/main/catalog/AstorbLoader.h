@@ -23,5 +23,6 @@
 
 vesta::KeplerianSwarm* LoadAstorbFile(const QString& fileName);
 vesta::KeplerianSwarm* LoadBinaryAstorbFile(const QString& fileName);
+vesta::KeplerianSwarm* LoadBinaryKeplerianOrbitFile(const QString& fileName);
 
 #endif // _ASTORB_LOADER_H_

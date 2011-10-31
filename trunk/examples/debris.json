@@ -1,0 +1,37 @@
+{
+     "version": "1.0",
+     "name": "Space Debris",
+
+     "items" :
+     [
+        {
+          "name" : "Cosmos 2251 Debris",
+          "center" : "Earth",
+          "bodyFrame" : "EquatorJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "kepbin",
+              "source" : "cosmos2251.kep",
+              "particleSize" : 4.0,
+              "color" : "#8899ff",
+              "opacity" : 1.0
+          }
+        },
+
+        {
+          "name" : "Iridium 33 Debris",
+          "center" : "Earth",
+          "bodyFrame" : "EquatorJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "kepbin",
+              "source" : "iridium33.kep",
+              "particleSize" : 4.0,
+              "color" : "#ffcc44",
+              "opacity" : 1.0
+          }
+        }
+    ]
+}

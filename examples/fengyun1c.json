@@ -1,0 +1,23 @@
+{
+     "version": "1.0",
+     "name": "Fengyun 1C Debris",
+
+     "items" :
+     [
+        {
+          "name" : "Fengyun 1C Debris",
+          "center" : "Earth",
+          "bodyFrame" : "EquatorJ2000",
+          "geometry" :
+          {
+              "type" : "KeplerianSwarm",
+              "format" : "kepbin",
+              "source" : "fengyun.kep",
+              "particleSize" : 4.0,
+              "color" : "#ff8888",
+              "opacity" : 1.0
+          }
+        }
+     ]
+}
+

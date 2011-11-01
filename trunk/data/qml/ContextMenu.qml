@@ -21,7 +21,7 @@ import Cosmographia 1.0
 Item
 {
     id: container
-    width: 200; height: 320
+    width: 200; height: 340
 
     property string selectionName: ""
     property variant selection: null

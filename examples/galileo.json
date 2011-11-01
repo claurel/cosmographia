@@ -1,0 +1,165 @@
+{
+"version": "1.0",
+"name": "Galileo Constellation",
+
+"items" :
+[
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "GIOVE A", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/galileo.txt", 
+        "type": "TLE", 
+        "name": "GIOVE-A", 
+        "line1": "1 28922U 05051A   11302.31347816  .00000055  00000-0  10000-3 0  8863",
+        "line2": "2 28922  56.1818 134.6390 0007952  15.1320 344.9502  1.69488204 36216"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "GIOVE A"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "GIOVE A"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "#bb4411"
+    }
+},
+
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "GIOVE B", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/galileo.txt", 
+        "type": "TLE", 
+        "name": "GIOVE-B", 
+        "line1": "1 32781U 08020A   11303.10109100  .00000031  00000-0  10000-3 0  5221",
+        "line2": "2 32781  55.9129 169.0448 0019231 222.2378 137.7128  1.70956642 21910"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "GIOVE B"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "GIOVE B"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "#bb4411"
+    }
+},
+
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "Galileo PFM", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/tle-new.txt", 
+        "type": "TLE", 
+        "name": "GALILEO-PFM", 
+        "line1": "1 37846U 11060A   11302.43414335  .00000050  00000-0  00000+0 0   108",
+        "line2": "2 37846  54.6864 129.5148 0011082 212.6924 147.2972  1.70049193   131"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "Galileo PFM"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "Galileo PFM"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "#bb4411"
+    }
+},
+
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "Galileo FM2", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.01
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/tle-new.txt", 
+        "type": "TLE", 
+        "name": "GALILEO-FM2", 
+        "line1": "1 37847U 11060B   11301.83806280  .00000054  00000-0  10000-3 0    93",
+        "line2": "2 37847  54.6864 129.5343 0006398 172.3342 187.7159  1.70239647   129"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "Galileo FM2"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "Galileo FM2"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "#bb4411"
+    }
+}
+
+]
+}
+

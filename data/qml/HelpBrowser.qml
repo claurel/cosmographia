@@ -75,10 +75,8 @@ Item {
     height: 600
     opacity: 0
 
-    Rectangle {
+    PanelRectangle {
         anchors.fill: parent
-        color: "#404040"
-        opacity: 0.5
     }
 
     // Back button

@@ -32,6 +32,7 @@
               "type" : "Globe",
               "radius" : 3389,
               "baseMap" : "textures/mars.dds",
+              "normalMap" : "textures/mars-normal.dds",
               "atmosphere" : "mars.atmscat"
           }
         },

@@ -44,10 +44,8 @@ Item {
     height: 300
     opacity: 0
 
-    Rectangle {
+    PanelRectangle {
         anchors.fill: parent
-        color: "#404040"
-        opacity: 0.5
     }
 
     Item {
@@ -92,6 +90,7 @@ Item {
             font.pixelSize: fontSize
             onAccepted: {
                 universeView.setSelectedBody(text);
+                universeView.centerSelectedObject();
                 container.hide();
             }
 

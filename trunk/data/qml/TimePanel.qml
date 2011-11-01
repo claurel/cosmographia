@@ -44,10 +44,8 @@ Item {
         timeEdit.unfocus()
     }
 
-    Rectangle {
+    PanelRectangle {
         anchors.fill: parent
-        color: "#404040"
-        opacity: 0.5
     }
 
     Item {

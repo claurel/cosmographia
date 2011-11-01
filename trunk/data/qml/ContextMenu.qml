@@ -21,7 +21,7 @@ import Cosmographia 1.0
 Item
 {
     id: container
-    width: 200; height: 340
+    width: 200; height: 348
 
     property string selectionName: ""
     property variant selection: null
@@ -154,12 +154,8 @@ Item
         onClicked: { parent.hide(); }
     }
 
-    Rectangle {
+    PanelRectangle {
         anchors.fill: parent
-        opacity: 0.7
-        color: "#303030"
-        border.width: 1
-        border.color: "#606060"
     }
 
     ListModel {
@@ -208,7 +204,13 @@ Item
         header: Column {
             Row {
                 Item { width: 16; height: 16 }
-                InfoText { text: "<b>" + selectionName + "</b>"; color: "white" }
+                InfoText {
+                    width: 180;
+                    text: selectionName
+                    font.pixelSize: 24
+                    elide: Text.ElideRight
+                    color: "white"
+                }
             }
             Item { width: 1; height: 5 }
         }

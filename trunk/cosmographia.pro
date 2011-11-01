@@ -579,6 +579,7 @@ macx {
         data/textures/venus.dds \
         data/textures/venus-clouds.jpg \
         data/textures/mars.dds \
+        data/textures/mars-normal.dds \
         data/textures/jupiter.dds \
         data/textures/saturn.jpg \
         data/textures/uranus.jpg \
@@ -604,6 +605,7 @@ macx {
         data/textures/oberon.dds \
         data/textures/triton.dds \
         data/textures/pluto.png \
+        data/textures/ceres.png \
         data/textures/earth-clouds.dds
 
     QMAKE_BUNDLE_DATA += TEXTURES
@@ -652,6 +654,7 @@ macx {
         data/models/8flora.cmod \
         data/models/10hygiea.cmod \
         data/models/21lutetia.cmod \
+        data/models/511davida.cmod \
         data/models/25143itokawa.cmod \
         data/models/amalthea.cmod \
         data/models/hyperion.cmod \
@@ -740,6 +743,7 @@ macx {
         data/phoebe.cheb \
         data/saturn.cheb \
         data/earth.atmscat \
+        data/mars.atmscat \
         data/titan.atmscat \
         data/addons.js
 
@@ -756,6 +760,7 @@ macx {
         data/qml/FindObjectPanel.qml \
         data/qml/HelpBrowser.qml \
         data/qml/InfoText.qml \
+        data/qml/PanelRectangle.qml \
         data/qml/PanelText.qml \
         data/qml/ScrollablePane.qml \
         data/qml/SettingsPanel.qml \
@@ -825,6 +830,7 @@ macx {
         data/help/flora.html \
         data/help/hygiea.html \
         data/help/lutetia.html \
+        data/help/davida.html \
         data/help/pluto.html \
         data/help/charon.html \
         data/help/nix.html \
@@ -846,7 +852,8 @@ macx {
         data/help/iapetus-global.jpg \
         data/help/miranda.jpg \
         data/help/vesta_dawn_20110714.jpg \
-        data/help/lutetia.jpg
+        data/help/lutetia.jpg \
+        data/help/vestademo.html
 
     QMAKE_BUNDLE_DATA += HELPFILES
 

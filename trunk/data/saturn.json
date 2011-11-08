@@ -93,7 +93,7 @@
 
           "startTime" : "1800-01-01",
 
-	  "mass" : "1.08022e20 kg",
+          "mass" : "1.08022e20 kg",
 
           "arcs" : [
             {
@@ -123,10 +123,22 @@
               "endTime" : "2019-12-31",
 
               "trajectoryFrame" : "EquatorJ2000",
+
               "trajectory" :
               {
-                "type" : "Builtin",
-                "name" : "Enceladus-cheby"
+                "type" : "LinearCombination",
+                "period" : "1.370218083712283d",
+                "weights" : [ 1.0, -1.0 ],
+                "trajectories" : [
+                {
+                  "type": "ChebyshevPoly",
+                  "source": "enceladus.cheb"
+                },
+                {
+                  "type": "ChebyshevPoly",
+                  "source": "saturn.cheb"
+                }
+                ]
               },
               "bodyFrame" : "EquatorJ2000",
               "rotationModel" :
@@ -239,8 +251,19 @@
               "trajectoryFrame" : "EquatorJ2000",
               "trajectory" :
               {
-                "type" : "Builtin",
-                "name" : "Dione-cheby"
+                "type" : "LinearCombination",
+                "period" : "2.736915552552733d",
+                "weights" : [ 1.0, -1.0 ],
+                "trajectories" : [
+                {
+                  "type": "ChebyshevPoly",
+                  "source": "dione.cheb"
+                },
+                {
+                  "type": "ChebyshevPoly",
+                  "source": "saturn.cheb"
+                }
+                ]
               },
               "bodyFrame" : "EquatorJ2000",
               "rotationModel" :
@@ -426,9 +449,21 @@
           "trajectoryFrame" : "EquatorJ2000",
           "trajectory" :
           {
-              "type" : "Builtin",
-              "name" : "Phoebe-cheby"
+            "type" : "LinearCombination",
+            "period" : "550.31d",
+            "weights" : [ 1.0, -1.0 ],
+            "trajectories" : [
+            {
+              "type": "ChebyshevPoly",
+              "source": "phoebe.cheb"
+            },
+            {
+              "type": "ChebyshevPoly",
+              "source": "saturn.cheb"
+            }
+            ]
           },
+
           "bodyFrame" : "EquatorJ2000",
           "rotationModel" :
           {

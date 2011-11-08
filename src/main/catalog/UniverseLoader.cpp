@@ -17,9 +17,11 @@
 
 #include "UniverseLoader.h"
 #include "AstorbLoader.h"
+#include "ChebyshevPolyFileLoader.h"
 #include "../TleTrajectory.h"
 #include "../InterpolatedStateTrajectory.h"
 #include "../InterpolatedRotation.h"
+#include "../LinearCombinationTrajectory.h"
 #include "../TwoVectorFrame.h"
 #include "../WMSTiledMap.h"
 #include "../MultiWMSTiledMap.h"
@@ -894,6 +896,41 @@ UniverseLoader::loadBuiltinTrajectory(const QVariantMap& info)
 
 
 vesta::Trajectory*
+UniverseLoader::loadChebyshevPolynomialsTrajectory(const QVariantMap& info)
+{
+    if (info.contains("source"))
+    {
+        QString name = info.value("source").toString();
+
+        QString fileName = dataFileName(name);
+        counted_ptr<Trajectory> trajectory = m_trajectoryCache.value(fileName);
+        if (trajectory.isValid())
+        {
+            qDebug() << "Using cached trajectory: " << fileName;
+            return trajectory.ptr();
+        }
+
+        trajectory = LoadChebyshevPolyFile(fileName);
+        if (!trajectory.isValid())
+        {
+            errorMessage(QString("Chebyshev polynomial trajectory file %1 not found or invalid").arg(fileName));
+            return NULL;
+        }
+
+        // Save the loaded trajectory in the cache
+        m_trajectoryCache[fileName] = trajectory;
+
+        return trajectory.ptr();
+    }
+    else
+    {
+        errorMessage("No source file specified for Chebyshev polynomials trajectory.");
+        return NULL;
+    }
+}
+
+
+vesta::Trajectory*
 UniverseLoader::loadInterpolatedStatesTrajectory(const QVariantMap& info)
 {
     if (info.contains("source"))
@@ -993,6 +1030,88 @@ UniverseLoader::loadTleTrajectory(const QVariantMap& info)
 
 
 vesta::Trajectory*
+UniverseLoader::loadLinearCombinationTrajectory(const QVariantMap& map)
+{
+    QVariant trajectoriesVar = map.value("trajectories");
+    QVariant weightsVar = map.value("weights");
+
+    if (!trajectoriesVar.isValid())
+    {
+        errorMessage("Trajectories list missing from LinearCombination trajectory");
+        return NULL;
+    }
+
+    if (!weightsVar.isValid())
+    {
+        errorMessage("Weights list missing from LinearCombination trajectory");
+        return NULL;
+    }
+
+    if (trajectoriesVar.type() != QVariant::List)
+    {
+        errorMessage("In LinearCombination trajectory, 'trajectories' must be a list");
+        return NULL;
+    }
+
+    if (weightsVar.type() != QVariant::List)
+    {
+        errorMessage("In LinearCombination trajectory, 'weights' must be a list");
+        return NULL;
+    }
+
+    QVariantList trajectories = trajectoriesVar.toList();
+    QVariantList weights = weightsVar.toList();
+
+    if (trajectories.size() != weights.size())
+    {
+        errorMessage("Must have one weight for each trajectory in LinearCombination trajectory");
+        return NULL;
+    }
+
+    // This requirement may be relaxed eventually
+    if (trajectories.size() != 2)
+    {
+        errorMessage("LinearCombination trajectory must contain exactly two child trajectories");
+        return NULL;
+    }
+
+    QList<counted_ptr<Trajectory> > trajectoryList;
+    QList<double> weightList;
+
+    for (int i = 0; i < trajectories.size(); ++i)
+    {
+        QVariant trajectoryVar = trajectories.at(i);
+        if (trajectoryVar.type() != QVariant::Map)
+        {
+            errorMessage("Invalid child trajectory in LinearCombination trajectory");
+            return NULL;
+        }
+
+        Trajectory* t = loadTrajectory(trajectoryVar.toMap());
+        if (!t)
+        {
+            return NULL;
+        }
+
+        trajectoryList << counted_ptr<Trajectory>(t);
+
+        bool weightOk = false;
+        double weight = weights.at(i).toDouble(&weightOk);
+        if (!weightOk)
+        {
+            errorMessage("Invalid weight in LinearCombinationTrajectory");
+            return NULL;
+        }
+
+        weightList << weight;
+    }
+
+    return new LinearCombinationTrajectory(trajectoryList.at(0).ptr(), weightList.at(0),
+                                           trajectoryList.at(1).ptr(), weightList.at(1));
+}
+
+
+vesta::Trajectory*
 UniverseLoader::loadTrajectory(const QVariantMap& map)
 {
     QVariant typeData = map.value("type");
@@ -1022,9 +1141,17 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     {
         return loadInterpolatedStatesTrajectory(map);
     }
+    else if (type == "ChebyshevPoly")
+    {
+        return loadChebyshevPolynomialsTrajectory(map);
+    }
     else if (type == "TLE")
     {
         return loadTleTrajectory(map);
+    }
+    else if (type == "LinearCombination")
+    {
+        return loadLinearCombinationTrajectory(map);
     }
     else
     {

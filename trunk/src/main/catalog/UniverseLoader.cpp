@@ -906,7 +906,6 @@ UniverseLoader::loadChebyshevPolynomialsTrajectory(const QVariantMap& info)
         counted_ptr<Trajectory> trajectory = m_trajectoryCache.value(fileName);
         if (trajectory.isValid())
         {
-            qDebug() << "Using cached trajectory: " << fileName;
             return trajectory.ptr();
         }
 
@@ -1034,6 +1033,7 @@ UniverseLoader::loadLinearCombinationTrajectory(const QVariantMap& map)
 {
     QVariant trajectoriesVar = map.value("trajectories");
     QVariant weightsVar = map.value("weights");
+    QVariant periodVar = map.value("period");
 
     if (!trajectoriesVar.isValid())
     {
@@ -1106,8 +1106,26 @@ UniverseLoader::loadLinearCombinationTrajectory(const QVariantMap& map)
         weightList << weight;
     }
 
-    return new LinearCombinationTrajectory(trajectoryList.at(0).ptr(), weightList.at(0),
-                                           trajectoryList.at(1).ptr(), weightList.at(1));
+    LinearCombinationTrajectory* lct =  new LinearCombinationTrajectory(trajectoryList.at(0).ptr(), weightList.at(0),
+                                                                        trajectoryList.at(1).ptr(), weightList.at(1));
+
+    if (periodVar.isValid())
+    {
+        bool periodOk = false;
+        double period = durationValue(periodVar, Unit_Day, 1.0, &periodOk);
+        if (!periodOk)
+        {
+            delete lct;
+            return NULL;
+        }
+
+        if (period > 0.0)
+        {
+            lct->setPeriod(period);
+        }
+    }
+
+    return lct;
 }
 
 

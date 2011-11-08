@@ -852,8 +852,7 @@ macx {
         data/help/iapetus-global.jpg \
         data/help/miranda.jpg \
         data/help/vesta_dawn_20110714.jpg \
-        data/help/lutetia.jpg \
-        data/help/vestademo.html
+        data/help/lutetia.jpg
 
     QMAKE_BUNDLE_DATA += HELPFILES
 

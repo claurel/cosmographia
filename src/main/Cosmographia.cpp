@@ -28,7 +28,6 @@
 #include "../video/VideoEncoder.h"
 #endif
 #include "JPLEphemeris.h"
-#include "catalog/ChebyshevPolyFileLoader.h"
 #include "NetworkTextureLoader.h"
 #include "LinearCombinationTrajectory.h"
 #include "astro/IAULunarRotationModel.h"
@@ -653,40 +652,6 @@ Cosmographia::initialize()
     m_loader->addBuiltinOrbit("Umbriel",   Gust86Orbit::Create(Gust86Orbit::Umbriel));
     m_loader->addBuiltinOrbit("Titania",   Gust86Orbit::Create(Gust86Orbit::Titania));
     m_loader->addBuiltinOrbit("Oberon",    Gust86Orbit::Create(Gust86Orbit::Oberon));
-
-    // Load data for Enceladus. The TASS17 theory isn't accurate enough for Cassini's
-    // closest approaches. enceladusBaryOrbit is the orbit of Enceladus around the Saturn
-    // system barycenter; saturnBary is the position of Saturn with respect to the
-    // barycenter. Both are required in order to calculate the position of Enceladus
-    // with respect to Saturn.
-    ChebyshevPolyTrajectory* saturnBary = LoadChebyshevPolyFile("saturn.cheb");
-
-    if (saturnBary)
-    {
-        ChebyshevPolyTrajectory* enceladusBaryOrbit = LoadChebyshevPolyFile("enceladus.cheb");
-        if (enceladusBaryOrbit)
-        {
-            LinearCombinationTrajectory* enceladusOrbit = new LinearCombinationTrajectory(enceladusBaryOrbit, 1.0, saturnBary, -1.0);
-            enceladusOrbit->setPeriod(daysToSeconds(1.370218));
-            m_loader->addBuiltinOrbit("Enceladus-cheby", enceladusOrbit);
-        }
-
-        ChebyshevPolyTrajectory* dioneBaryOrbit = LoadChebyshevPolyFile("dione.cheb");
-        if (dioneBaryOrbit)
-        {
-            LinearCombinationTrajectory* dioneOrbit = new LinearCombinationTrajectory(dioneBaryOrbit, 1.0, saturnBary, -1.0);
-            dioneOrbit->setPeriod(daysToSeconds(2.736915));
-            m_loader->addBuiltinOrbit("Dione-cheby", dioneOrbit);
-        }
-
-        ChebyshevPolyTrajectory* phoebeBaryOrbit = LoadChebyshevPolyFile("phoebe.cheb");
-        if (phoebeBaryOrbit)
-        {
-            LinearCombinationTrajectory* phoebeOrbit = new LinearCombinationTrajectory(phoebeBaryOrbit, 1.0, saturnBary, -1.0);
-            phoebeOrbit->setPeriod(daysToSeconds(550.564));
-            m_loader->addBuiltinOrbit("Phoebe-cheby", phoebeOrbit);
-        }
-    }
 
     // Set up builtin rotation models
     m_loader->addBuiltinRotationModel("IAU Moon", new IAULunarRotationModel());

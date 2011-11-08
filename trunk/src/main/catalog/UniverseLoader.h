@@ -120,9 +120,11 @@ private:
     vesta::Trajectory* loadTrajectory(const QVariantMap& map);
     vesta::Trajectory* loadBuiltinTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadInterpolatedStatesTrajectory(const QVariantMap& info);
+    vesta::Trajectory* loadChebyshevPolynomialsTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadTleTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadFixedPointTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadFixedSphericalTrajectory(const QVariantMap& info);
+    vesta::Trajectory* loadLinearCombinationTrajectory(const QVariantMap& info);
 
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadBuiltinRotationModel(const QVariantMap& info);
@@ -184,6 +186,8 @@ private:
     QSet<QString> m_resourceRequests;
 
     QHash<QString, vesta::counted_ptr<vesta::Geometry> > m_geometryCache;
+
+    QHash<QString, vesta::counted_ptr<vesta::Trajectory> > m_trajectoryCache;
 
     QSet<QString> m_loadedCatalogFiles;
     QString m_messageLog;

@@ -245,7 +245,8 @@ TransformSscGeometry(QVariantMap* obj)
 
     // To match the orientation of meshes in Celestia, an extra 90 degree rotation about
     // the x-axis is required
-    meshRotation = (meshRotation * AngleAxisd(vesta::toRadians(-90), Vector3d::UnitX())).conjugate();
+    const Quaterniond xn90(AngleAxisd(vesta::toRadians(-90), Vector3d::UnitX()));
+    meshRotation = (meshRotation * xn90).conjugate();
 
     if (obj->value("Sensor").type() == QVariant::Map)
     {
@@ -279,6 +280,8 @@ TransformSscGeometry(QVariantMap* obj)
         {
             geometry.insert("target", TransformSolarSystemName(geometry.value("target").toString()));
         }
+
+        geometry.insert("orientation", quaternionToVariant(xn90));
     }
     else if (obj->contains("Mesh"))
     {

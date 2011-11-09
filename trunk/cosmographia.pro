@@ -658,6 +658,7 @@ macx {
         data/models/25143itokawa.cmod \
         data/models/amalthea.cmod \
         data/models/hyperion.cmod \
+        data/models/phoebe.cmod \
         data/models/proteus.cmod \
         data/models/jason.obj \
         data/models/jason.mtl \

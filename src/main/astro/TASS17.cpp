@@ -3322,12 +3322,15 @@ TASS17Orbit::Create(Satellite satellite)
     // Test code for TASS17 theory. Compares calculated results with test results from original
     // FORTRAN code.
     double jd = TASS17TestData[index][0];
-    Vector3d testPosition = Vector3d(TASS17TestData[index][1], TASS17TestData[index][2], TASS17TestData[index][3]) * AU;
+
+    Vector3d testPosition = Vector3d(TASS17TestData[index][1], TASS17TestData[index][2], TASS17TestData[index][3]) * astro::AU;
     StateVector result = orbit->state(daysToSeconds(jd - J2000));
     Vector3d position = result.position();
 
-    cerr << "TASS17Orbit test for sat #" << index << " at JD " << jd << ": " << (position - testPosition).norm() << endl;
-    cerr << (result.position() / AU).transpose().format(16) << endl;
+    Matrix3d r = InertialFrame::eclipticJ2000()->orientation().toRotationMatrix();
+
+    cerr << "TASS17Orbit test for sat #" << index << " at JD " << jd << ": " << (r.transpose() * position - testPosition).norm() << endl;
+    cerr << (result.position()).transpose().format(16) << endl;
     cerr << result.velocity().norm() << endl << endl;
 #endif // TEST_TASS17
 

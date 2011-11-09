@@ -477,8 +477,7 @@
           "geometry" :
           {
               "type" : "Mesh",
-              "source" : "models/proteus.cmod",
-              "size" : 115
+              "source" : "models/phoebe.cmod"
           }
         }
     ]

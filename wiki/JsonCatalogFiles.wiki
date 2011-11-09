@@ -249,6 +249,43 @@ Note that FixedSpherical has no notion of the IAU defined planetographic coordin
 }
 }}}
 
+
+== Chebyshev Polynomials ==
+
+Trajectory is loaded from a binary data file containing Chebyshev polynomial coefficients.
+
+{{{
+"trajectory" :
+{
+    "type": "ChebyshevPoly",
+    "source": "saturn.cheb"
+}
+}}}
+
+
+== Linear Combination ==
+
+A linear combination trajectory is the weighted sum of two other trajectories. It is used in Cosmographia's default Solar System files convert barycentric orbit definitions to planet-centered.
+
+{{{
+"trajectory" :
+{
+    "type" : "LinearCombination",
+    "period" : "2.736915552552733d",
+    "weights" : [ 1.0, -1.0 ],
+    "trajectories" : [
+        {
+            "type": "ChebyshevPoly",
+            "source": "dione.cheb"
+        },
+        {
+            "type": "ChebyshevPoly",
+            "source": "saturn.cheb"
+        }
+    ]
+}
+}}}
+
 == TLE ==
 
 {{{

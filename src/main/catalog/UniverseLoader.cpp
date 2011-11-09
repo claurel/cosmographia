@@ -700,7 +700,17 @@ static double dateValue(QVariant v, bool* ok)
     if (v.type() == QVariant::String)
     {
         QString dateString = v.toString();
-        QDateTime d = QDateTime::fromString(dateString, Qt::ISODate);
+
+        // Try different methods of date parsing. The ISODate format requires the seconds field to be present
+        // in the time, otherwise the time is silently ignored. This results in 2011-11-19 14:00 getting
+        // treated as 2011-11-19 00:00:00
+        QDateTime d;
+        d = QDateTime::fromString(dateString, "yyyy-M-d hh:mm");
+        if (!d.isValid())
+        {
+            d = QDateTime::fromString(dateString, Qt::ISODate);
+        }
+
         if (d.isValid())
         {
             *ok = true;

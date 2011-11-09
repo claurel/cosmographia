@@ -2350,6 +2350,7 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
     QVariant frustumBaseColorVar = map.value("frustumBaseColor");
     QVariant frustumOpacityVar = map.value("frustumOpacity");
     QVariant gridOpacityVar = map.value("gridOpacity");
+    QVariant orientationVar = map.value("orientation");
 
     if (targetVar.type() != QVariant::String)
     {
@@ -2371,6 +2372,18 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
     Spectrum frustumBaseColor = colorValue(frustumColorVar, Spectrum(1.0f, 1.0f, 1.0f));
     double frustumOpacity = doubleValue(frustumOpacityVar, 0.3);
     double gridOpacity = doubleValue(gridOpacityVar, 0.15);
+    Quaterniond orientation = Quaterniond::Identity();
+
+    if (orientationVar.isValid())
+    {
+        bool ok = false;
+        orientation = quaternionValue(orientationVar, &ok);
+        if (!ok)
+        {
+            errorMessage("Bad orientation given for sensor geometry");
+            return NULL;
+        }
+    }
 
     Entity* target = catalog->find(targetVar.toString());
     if (!target)
@@ -2385,6 +2398,8 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
     sensorFrustum->setOpacity(frustumOpacity);
     sensorFrustum->setRange(range);
     sensorFrustum->setFrustumAngles(horizontalFov, verticalFov);
+    sensorFrustum->setSensorOrientation(orientation);
+
     if (shape == "elliptical")
     {
         sensorFrustum->setFrustumShape(SensorFrustumGeometry::Elliptical);

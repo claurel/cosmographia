@@ -149,9 +149,13 @@ CmodLoader::loadMaterial()
                 if (m_textureLoader.isValid())
                 {
                     TextureProperties texProps(TextureProperties::Wrap);
-                    if (textureSource.toLower().endsWith("dxt5nm"))
+                    if (textureType == 1)
                     {
-                        texProps.usage = TextureProperties::CompressedNormalMap;
+                        if (textureSource.toLower().endsWith("dxt5nm") ||
+                            textureSource.toLower().endsWith("dds"))
+                        {
+                            texProps.usage = TextureProperties::CompressedNormalMap;
+                        }
                     }
 
                     counted_ptr<TextureMap> texture(m_textureLoader->loadTexture(textureSource.toUtf8().constData(), texProps));

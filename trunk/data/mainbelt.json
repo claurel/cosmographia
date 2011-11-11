@@ -49,6 +49,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "2.11e20 kg",
+         "density" : 2.8,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -82,6 +83,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "2.67e19 kg",
+         "density" : 3.0,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -115,6 +117,7 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "mass" : "2.59e20 kg",
+          "density" : 3.42,
 
           "center" : "Sun",
           "trajectoryFrame" : "EclipticJ2000",
@@ -153,6 +156,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "2.9e18 kg",
+         "density" : 3.3,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -186,6 +190,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "8.47e18 kg",
+         "density" : 3.0,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -220,6 +225,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "8.67e19 kg",
+         "density" : 2.08,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -254,6 +260,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "1.7e18 kg",
+         "density" : 3.4,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",
@@ -291,6 +298,7 @@
          "trajectoryPlot": { "fade": 0.3 },
 
          "mass" : "3.84e19 kg",
+         "density" : 3.5,
 
          "center": "Sun",
          "trajectoryFrame": "EclipticJ2000",

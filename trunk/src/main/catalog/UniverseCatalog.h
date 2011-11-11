@@ -40,7 +40,8 @@ public:
         trajectoryPlotColor(vesta::Spectrum::White()),
         trajectoryPlotLead(0.0),
         trajectoryPlotFade(0.0),
-        massKg(0.0)
+        massKg(0.0),
+        density(0.0f)
     {
     }
 
@@ -69,6 +70,7 @@ public:
     QString description;
     QString infoSource;
     double massKg;
+    float density;
 };
 
 

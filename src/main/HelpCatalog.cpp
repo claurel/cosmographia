@@ -349,29 +349,45 @@ HelpCatalog::getObjectDataText(const QString &name) const
             }
         }
 
-        if (body->geometry() && body->geometry()->isEllipsoidal() && info->massKg > 0.0)
+        double rho = info->density;
+        if (rho == 0.0)
         {
-            Vector3d semiAxes = body->geometry()->ellipsoid().semiAxes();
-            double volumeKm3 = semiAxes.x() * semiAxes.y() * semiAxes.z() * 4.0 / 3.0 * PI;
+            // Automatically calculate the density
+            if (body->geometry() && body->geometry()->isEllipsoidal() && info->massKg > 0.0)
+            {
+                Vector3d semiAxes = body->geometry()->ellipsoid().semiAxes();
+                double volumeKm3 = semiAxes.x() * semiAxes.y() * semiAxes.z() * 4.0 / 3.0 * PI;
 
-            // Compute density in grams per cubic centimeter
-            double rho = (info->massKg * 1000.0) / (volumeKm3 * 1.0e15);
+                // Compute density in grams per cubic centimeter
+                rho = (info->massKg * 1000.0) / (volumeKm3 * 1.0e15);
+            }
+        }
+
+        if (rho > 0.0)
+        {
             out << tableRow(QObject::tr("Density"), QObject::tr("%1 g/cm<sup>3</sup>").arg(rho, 0, 'g', 3));
 
-            double equatorialRadius = (semiAxes.x() + semiAxes.y()) / 2.0;
-            double surfaceGravity = (G * info->massKg) / pow(equatorialRadius, 2.0) * 1000;
+            // Only show surface gravity for ellipsoidal objects. For irregular bodies, it varies
+            // dramatically over the surface
+            if (body->geometry() && body->geometry()->isEllipsoidal() && info->massKg > 0.0)
+            {
+                Vector3d semiAxes = body->geometry()->ellipsoid().semiAxes();
 
-            if (isEarth)
-            {
-                surfaceGravity = EarthG;
-                out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1 m/s<sup>2</sup>").
-                                arg(roundToSigDigits(surfaceGravity, 3)));
-            }
-            else
-            {
-                out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1% Earth (%2 m/s<sup>2</sup>)").
-                                arg(roundToSigDigits(surfaceGravity / EarthG * 100, 3)).
-                                arg(roundToSigDigits(surfaceGravity, 3)));
+                double equatorialRadius = (semiAxes.x() + semiAxes.y()) / 2.0;
+                double surfaceGravity = (G * info->massKg) / pow(equatorialRadius, 2.0) * 1000;
+
+                if (isEarth)
+                {
+                    surfaceGravity = EarthG;
+                    out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1 m/s<sup>2</sup>").
+                                    arg(roundToSigDigits(surfaceGravity, 3)));
+                }
+                else
+                {
+                    out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1% Earth (%2 m/s<sup>2</sup>)").
+                                    arg(roundToSigDigits(surfaceGravity / EarthG * 100, 3)).
+                                    arg(roundToSigDigits(surfaceGravity, 3)));
+                }
             }
         }
 

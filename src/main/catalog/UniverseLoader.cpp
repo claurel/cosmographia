@@ -3395,6 +3395,17 @@ UniverseLoader::loadBodyInfo(const QVariantMap& item)
         }
     }
 
+    QVariant densityVar = item.value("density");
+    if (densityVar.isValid())
+    {
+        bool ok = false;
+        info->density = densityVar.toFloat(&ok);
+        if (!ok)
+        {
+            errorMessage("Bad value given for density");
+        }
+    }
+
     QVariant labelVar = item.value("label");
     if (labelVar.type() == QVariant::Map)
     {

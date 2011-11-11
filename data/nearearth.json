@@ -1,0 +1,90 @@
+{
+    "version": "1.0",
+    "name": "Near Earth Asteroids",
+
+    "items" :
+    [
+        {
+          "name" : "Eros",
+          "class" : "asteroid",
+          "label" : { "color" : "#aa8855" },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "mass" : "6.69e15 kg",
+          "density" : 2.67,
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+           "type": "Keplerian",
+           "epoch": "2011-08-27T00:00:00",
+           "period": "643.1870340159045d",
+           "semiMajorAxis": "1.45822957694945au",
+           "eccentricity": 0.222707161736866,
+           "inclination": 10.82802788734755,
+           "ascendingNode": 304.3584690335396,
+           "argumentOfPeriapsis": 178.7156781496042,
+           "meanAnomaly": 279.6063109907311
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : 0.2195940545,
+              "inclination" : 72.78,
+              "ascendingNode" : 101.35,
+              "meridianAngle" : 326.07
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/433eros.cmod"
+          }
+        },
+
+        {
+          "name" : "Itokawa",
+          "class" : "asteroid",
+          "label" : { "color" : "#aa8855" },
+          "trajectoryPlot" : { "fade" : 0.3 },
+
+          "mass" : "3.51e10 kg",
+          "density" : 1.9,
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+           "type": "Keplerian",
+           "epoch": "2011-08-27T00:00:00",
+           "period": "556.4777323953151d",
+           "semiMajorAxis": "1.324035336210575au",
+           "eccentricity": 0.2803057536426115,
+           "inclination": 1.62190770147638,
+           "ascendingNode": 69.0835456564777,
+           "argumentOfPeriapsis": 162.7870956664504,
+           "meanAnomaly": 277.7373777570771
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "0.5055164484d",
+              "inclination" : 156.30,
+              "ascendingNode" : 180.53,
+              "meridianAngle" : 0.000
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "source" : "models/25143itokawa.cmod"
+          }
+        }
+    ]
+}
+

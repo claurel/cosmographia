@@ -644,6 +644,7 @@ macx {
         data/models/README.html \
         data/models/phobos.cmod \
         data/models/phobos.dds \
+        data/models/phobos-normals.dds \
         data/models/deimos.cmod \
         data/models/deimos.dds \
         data/models/2pallas.cmod \
@@ -654,11 +655,15 @@ macx {
         data/models/8flora.cmod \
         data/models/10hygiea.cmod \
         data/models/21lutetia.cmod \
+        data/models/433eros.cmod \
+        data/models/eros-normals.dds \
         data/models/511davida.cmod \
         data/models/25143itokawa.cmod \
+        data/models/itokawa-normals.dds \
         data/models/amalthea.cmod \
         data/models/hyperion.cmod \
         data/models/phoebe.cmod \
+        data/models/phoebe-normals.dds \
         data/models/proteus.cmod \
         data/models/jason.obj \
         data/models/jason.mtl \
@@ -723,6 +728,7 @@ macx {
         data/neptune.json \
         data/pluto.json \
         data/mainbelt.json \
+        data/nearearth.json \
         data/kuiperbelt.json \
         data/scattereddisc.json \
         data/cassini.json \
@@ -831,7 +837,9 @@ macx {
         data/help/flora.html \
         data/help/hygiea.html \
         data/help/lutetia.html \
+        data/help/eros.html \
         data/help/davida.html \
+        data/help/itokawa.html \
         data/help/pluto.html \
         data/help/charon.html \
         data/help/nix.html \

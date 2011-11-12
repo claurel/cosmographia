@@ -922,6 +922,8 @@ UniverseView::drawInfoOverlay()
 
     QLocale locale = QLocale::system();
 
+    const float textLeftMargin = 32.0f;
+
     if (m_infoTextVisible)
     {
         if (m_textFont.isValid())
@@ -980,7 +982,7 @@ UniverseView::drawInfoOverlay()
             {
                 m_titleFont->bind();
                 glColor4fv(titleColor.data());
-                m_titleFont->render(m_selectedBody->name(), Vector2f(10.0f, float(viewportHeight - titleFontHeight)));
+                m_titleFont->render(m_selectedBody->name(), Vector2f(textLeftMargin, float(viewportHeight - titleFontHeight)));
                 glColor4fv(textColor.data());
                 m_textFont->bind();
 
@@ -995,7 +997,7 @@ UniverseView::drawInfoOverlay()
 
                 QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
                 string distanceStdString = string(distanceString.toLatin1().constData());
-                m_textFont->render(distanceStdString, Vector2f(10.0f, viewportHeight - 20.0f - titleFontHeight));
+                m_textFont->render(distanceStdString, Vector2f(textLeftMargin, viewportHeight - 20.0f - titleFontHeight));
 
                 // Display the subpoint for ellipsoidal bodies that are sufficiently close
                 // to the observer.
@@ -1012,7 +1014,7 @@ UniverseView::drawInfoOverlay()
                             arg(coord.longitude, 0, 'f', 3).
                             arg(coord.longitudeHemiId);
 
-                    m_textFont->render(coordString.toLatin1().data(), Vector2f(10.0f + dx, viewportHeight - 20.0f - (titleFontHeight)));
+                    m_textFont->render(coordString.toLatin1().data(), Vector2f(textLeftMargin + dx, viewportHeight - 20.0f - (titleFontHeight)));
                 }
 
                 // Show the size of the selected object
@@ -1030,7 +1032,7 @@ UniverseView::drawInfoOverlay()
                     if (radius > 0.01)
                     {
                         QString sizeString = QString("Radius: %1 km").arg(readableNumber(radius, 4));
-                        m_textFont->render(sizeString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
+                        m_textFont->render(sizeString.toLatin1().data(), Vector2f(textLeftMargin, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
                     }
                 }
             }
@@ -1047,7 +1049,7 @@ UniverseView::drawInfoOverlay()
                 if (tileCount > 0)
                 {
                     QString tileCountString = QString("Loading tiles: %1").arg(tileCount);
-                    m_textFont->render(tileCountString.toLatin1().data(), Vector2f(10.0f, viewportHeight - 20.0f - (titleFontHeight + textFontHeight * 2)));
+                    m_textFont->render(tileCountString.toLatin1().data(), Vector2f(textLeftMargin, viewportHeight - 20.0f - (titleFontHeight + textFontHeight * 2)));
                 }
             }
 
@@ -2208,6 +2210,8 @@ UniverseView::tick()
         if (complete)
         {
             m_observerAction = NULL;
+            m_observer->updatePointingFrame(InertialFrame::icrf(), m_simulationTime);
+            m_observer->updatePositionFrame(InertialFrame::icrf(), m_simulationTime);
         }
     }
 

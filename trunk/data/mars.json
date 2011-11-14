@@ -43,6 +43,7 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "mass" : "1.072e16 kg",
+          "density" : 1.876,
 
           "center" : "Mars",
 
@@ -74,6 +75,7 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "mass" : "1.48e15 kg",
+          "density" : 1.471,
 
           "center" : "Mars",
 

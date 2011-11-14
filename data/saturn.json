@@ -377,6 +377,7 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "mass" : "5.6199e18 kg",
+          "density" : 0.544,
 
           "center" : "Saturn",
 
@@ -389,10 +390,8 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : "15.945447576488629d",
-              "inclination" : 6.48,
-              "ascendingNode" : 130.66,
-              "meridianAngle" : 337.46
+              "period" : "4.9d",
+              "inclination" : 30
           },
 
           "geometry" :
@@ -441,6 +440,8 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "mass" : "8.292e19 kg",
+          "density" : 1.638,
+
           "startTime" : "1900-01-02",
           "endTime" : "2050-01-01",
 

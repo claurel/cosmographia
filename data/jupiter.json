@@ -169,6 +169,9 @@
           "label" : { "color" : [ 0.6, 0.3, 0.3 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
+          "mass": "2.08e18 kg",
+          "density" : 0.857,
+
           "center" : "Jupiter",
 
           "trajectoryFrame" : "EclipticJ2000",

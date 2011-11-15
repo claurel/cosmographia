@@ -17,6 +17,8 @@
 
 #include "HelpCatalog.h"
 #include "UnitConversion.h"
+#include "TleTrajectory.h"
+#include "DateUtility.h"
 #include "catalog/UniverseCatalog.h"
 #include "geometry/MeshInstanceGeometry.h"
 #include <vesta/Geometry.h>
@@ -26,6 +28,7 @@
 #include <vesta/Units.h>
 #include <QDir>
 #include <QDebug>
+#include <QDateTime>
 #include <algorithm>
 #include <cmath>
 
@@ -162,15 +165,16 @@ QString formatDuration(double seconds)
         double minutes = (seconds - hours * 3600.0) / 60.0;
         double seconds = (minutes - int(minutes)) * 60.0;
 
-        if (hours >= 1)
+        if (hours >= 3)
         {
             return QObject::tr("%1h %2m %3s").arg(hours).arg(int(minutes)).arg(int(seconds));
         }
         else
         {
+            minutes += hours * 60;
             return QObject::tr("%1m %2s").arg(int(minutes)).arg(int(seconds));
         }
-    }
+    }    
 }
 
 
@@ -251,6 +255,16 @@ QString formatDistance(double km)
 }
 
 
+static
+QString formatAngle(double radians)
+{
+    double deg = toDegrees(radians);
+    {
+        return QObject::tr("%1&deg;").arg(deg, 0, 'f', 1);
+    }
+}
+
+
 static QString
 tableRow(const QString& s1, const QString& s2)
 {
@@ -261,6 +275,8 @@ tableRow(const QString& s1, const QString& s2)
 QString
 HelpCatalog::getObjectDataText(const QString &name) const
 {
+    bool isEarthSat = false;
+
     // No help available; see if the named object has a custom info resource and use
     // that. If not, create a default info page.
     Entity* body = m_universeCatalog->find(name, Qt::CaseInsensitive);
@@ -282,6 +298,18 @@ HelpCatalog::getObjectDataText(const QString &name) const
     {
         // Osculating elements will be calculated at this time
         double sampleTime = body->chronology()->beginning() + body->chronology()->duration() / 2.0;
+
+        // Special case for TLE orbits: use the current system time instead
+        if (body->chronology()->arcCount() > 0)
+        {
+            TleTrajectory* tle = dynamic_cast<TleTrajectory*>(body->chronology()->firstArc()->trajectory());
+            if (tle)
+            {
+                vesta::GregorianDate now = QtDateToVestaDate(QDateTime::currentDateTimeUtc());
+                sampleTime = now.toTDBSec();
+                isEarthSat = true;
+            }
+        }
 
         // Earth needs a bit of special handling, such as eliding the 'percent of Earth' comparisons
         bool isEarth = body->name() == "Earth";
@@ -436,6 +464,9 @@ HelpCatalog::getObjectDataText(const QString &name) const
 
                 double a = 1.0 / (2.0 / v.position().norm() - v.velocity().squaredNorm() / GM);
 
+                Vector3d N = v.position().normalized().cross(v.velocity().normalized());
+                double inclination = acos(N.z());
+
                 //Vector3d L = v.position().cross(v.velocity());
                 //double p = L.squaredNorm();
                 double q = v.position().dot(v.velocity());
@@ -456,13 +487,25 @@ HelpCatalog::getObjectDataText(const QString &name) const
                     apoapsisLabel = QObject::tr("Apogee");
                 }
 
+                double periapsis = a * (1.0 - ecc);
+                double apoapsis = a * (1.0 + ecc);
+                if (isEarthSat)
+                {
+                    periapsis -= 6378.1;
+                    apoapsis -= 6378.1;
+                }
+
                 out << tableRow(QObject::tr("<b>Orbit</b>"), "");
                 out << tableRow("", "");
                 out << tableRow("Period", formatDuration(orbitalPeriod));
-                out << tableRow(periapsisLabel, formatDistance(a * (1.0 - ecc)));
-                out << tableRow(apoapsisLabel, formatDistance(a * (1.0 + ecc)));
+                out << tableRow(periapsisLabel, formatDistance(periapsis));
+                out << tableRow(apoapsisLabel, formatDistance(apoapsis));
                 out << tableRow(QObject::tr("Semi-major axis"), formatDistance(a));
                 out << tableRow(QObject::tr("Eccentricity"), QString::number(ecc, 'g', 2));
+                if (isEarthSat)
+                {
+                    out << tableRow(QObject::tr("Inclination"), formatAngle(inclination));
+                }
             }
         }
 

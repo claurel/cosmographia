@@ -20,7 +20,7 @@ import QtQuick 1.0
 Item {
     id: button
     height: 25
-    width: 75
+    width: 90
 
     property bool enabled: false
     property string fontFamily: "Century Gothic"

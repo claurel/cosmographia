@@ -67,7 +67,7 @@ Item {
 
     Column {
         anchors.top: title.bottom
-        x: 8
+        x: 10
 
         spacing: 5
 
@@ -146,7 +146,7 @@ Item {
             spacing: 10
 
             Row {
-                spacing: 40
+                spacing: 30
 
                 Button {
                     id: selectButton
@@ -176,10 +176,10 @@ Item {
             }
 
             Row {
-                spacing: 40
+                spacing: 30
                 Button {
                     id: infoButton
-                    text: "View Info"
+                    text: "Description"
                     onPressed: {
                         universeView.setSelectedBody(textInput.text);
                         container.showInfo()

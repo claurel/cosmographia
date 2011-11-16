@@ -1,0 +1,281 @@
+{
+     "version": "1.0",
+     "name": "Radar Shape Models",
+
+     "items" :
+     [
+      {
+         "name" : "Kleopatra",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "4.67813682425y",
+           "semiMajorAxis": "2.79714693au",
+           "eccentricity": 0.24853241,
+           "inclination": 13.097639,
+           "ascendingNode": 215.492149,
+           "argumentOfPeriapsis": 180.05051,
+           "meanAnomaly": 136.822914
+         },
+
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "5.385h",
+             "inclination" : 74,
+             "ascendingNode" : 166
+         },
+         "geometry": {
+           "source": "models/216kleopatra.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "Geographos",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "1.39008394476y",
+           "semiMajorAxis": "1.24554862au",
+           "eccentricity": 0.3354655,
+           "inclination": 13.337796,
+           "ascendingNode": 337.263292,
+           "argumentOfPeriapsis": 276.791395,
+           "meanAnomaly": 273.284018
+         },
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : 0.21764,
+             "inclination" : 136,
+             "ascendingNode" : 145
+         },
+
+         "geometry": {
+           "source": "models/1620geographos.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "Bacchus",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "1.11954979434y",
+           "semiMajorAxis": "1.07819077au",
+           "eccentricity": 0.34943946,
+           "inclination": 9.433429,
+           "ascendingNode": 33.139143,
+           "argumentOfPeriapsis": 55.261084,
+           "meanAnomaly": 71.727968
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/2063bacchus.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "Toutatis",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "4.02543778803y",
+           "semiMajorAxis": "2.53051401au",
+           "eccentricity": 0.62913127,
+           "inclination": 0.446361,
+           "ascendingNode": 124.412881,
+           "argumentOfPeriapsis": 278.613392,
+           "meanAnomaly": 177.17961
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/4179toutatis.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "Castalia",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "1.09627235644y",
+           "semiMajorAxis": "1.06319349au",
+           "eccentricity": 0.48311842,
+           "inclination": 8.888347,
+           "ascendingNode": 325.635202,
+           "argumentOfPeriapsis": 121.327959,
+           "meanAnomaly": 59.20157
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/4769castalia.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "Golevka",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "3.94871933768y",
+           "semiMajorAxis": "2.49825929au",
+           "eccentricity": 0.60490064,
+           "inclination": 2.276343,
+           "ascendingNode": 210.863186,
+           "argumentOfPeriapsis": 66.950001,
+           "meanAnomaly": 312.194107
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/6489golevka.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "1998 ML14",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "3.74462471276y",
+           "semiMajorAxis": "2.41141634au",
+           "eccentricity": 0.62062304,
+           "inclination": 2.432818,
+           "ascendingNode": 338.917852,
+           "argumentOfPeriapsis": 20.128081,
+           "meanAnomaly": 83.862176
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/52760.cmod",
+           "type": "Mesh"
+         }
+      },
+      {
+         "name" : "1998 KY26",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2010-10-31T00:00:00",
+           "period": "1.36748459916y",
+           "semiMajorAxis": "1.23201207au",
+           "eccentricity": 0.20137276,
+           "inclination": 1.4812,
+           "ascendingNode": 84.446828,
+           "argumentOfPeriapsis": 209.217094,
+           "meanAnomaly": 358.730748
+         },
+         "bodyFrame": "EquatorJ2000",
+         "geometry": {
+           "source": "models/1998ky26.cmod",
+           "type": "Mesh"
+         }
+      },
+
+      {
+         "name" : "Cleoselene",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Kleopatra",
+         "trajectoryFrame": "EquatorJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": 2454728.5,
+           "period": "1.24d",
+           "semiMajorAxis": 454,
+           "eccentricity": 0,
+           "inclination": 49,
+           "ascendingNode": 160
+         },
+
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "1.24d",
+             "inclination" : 74,
+             "ascendingNode" : 166
+         },
+         "geometry": {
+           "source": "models/52760.cmod",
+           "type": "Mesh",
+           "radius": 3.45
+         }
+      },
+
+      {
+         "name" : "Alexhelios",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Kleopatra",
+         "trajectoryFrame": "EquatorJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": 2454728.5,
+           "period": "2.32d",
+           "semiMajorAxis": 678,
+           "eccentricity": 0,
+           "inclination": 51,
+           "ascendingNode": 166
+         },
+
+         "bodyFrame": "EclipticJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "2.32d",
+             "inclination" : 74,
+             "ascendingNode" : 166
+         },
+         "geometry": {
+           "source": "models/52760.cmod",
+           "type": "Mesh",
+           "radius": 4.45
+         }
+      }
+
+     ]
+}

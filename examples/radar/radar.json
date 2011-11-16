@@ -241,7 +241,7 @@
          "geometry": {
            "source": "models/52760.cmod",
            "type": "Mesh",
-           "radius": 3.45
+           "size": 3.45
          }
       },
 
@@ -273,7 +273,7 @@
          "geometry": {
            "source": "models/52760.cmod",
            "type": "Mesh",
-           "radius": 4.45
+           "size": 4.45
          }
       }
 

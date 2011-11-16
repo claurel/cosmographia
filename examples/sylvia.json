@@ -1,0 +1,107 @@
+{
+     "version": "1.0",
+     "name": "Asteroid 87 Sylvia and Moons",
+
+     "items" :
+     [
+      {
+         "name" : "Sylvia",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2011-08-27T00:00:00",
+           "period": "2384.859776845315d",
+           "semiMajorAxis": "3.493356821282997au",
+           "eccentricity": 0.08340019810488516,
+           "inclination": 10.85830955262668,
+           "ascendingNode": 73.23688497563813,
+           "argumentOfPeriapsis": 266.1614275822225,
+           "meanAnomaly": 26.24643308156126
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "5.18364h",
+             "inclination" : 8,
+             "ascendingNode" : 85,
+             "meridianAngle" : 247,
+             "epoch" : 2445386.907620
+         },
+         "geometry": {
+           "source": "smallbodies/87sylvia.cmod",
+           "type": "Mesh",
+           "size": 192
+         }
+      },
+
+      {
+         "name" : "Remus",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sylvia",
+         "trajectoryFrame": "EquatorJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": 2454728.5,
+           "period": "1.3788d",
+           "semiMajorAxis": 706,
+           "eccentricity": 0.016,
+           "inclination": 49,
+           "ascendingNode": 160
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "1.3788dd",
+             "inclination" : 49,
+             "ascendingNode" : 160
+         },
+         "geometry": {
+           "source": "radar/models/52760.cmod",
+           "type": "Mesh",
+           "size": 3.5
+         }
+      },
+
+      {
+         "name" : "Romulus",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sylvia",
+         "trajectoryFrame": "EquatorJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": 2454728.5,
+           "period": "3.6496d",
+           "semiMajorAxis": 1356,
+           "eccentricity": 0,
+           "inclination": 49,
+           "ascendingNode": 160
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "3.6496d",
+             "inclination" : 49,
+             "ascendingNode" : 160
+         },
+         "geometry": {
+           "source": "radar/models/52760.cmod",
+           "type": "Mesh",
+           "size": 9
+         }
+      }
+    ]
+}

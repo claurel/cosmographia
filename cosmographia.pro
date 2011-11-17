@@ -790,6 +790,7 @@ macx {
         data/help/keyboard.html \
         data/help/navigation.html \
         data/help/settings.html \
+        data/help/properties.html \
         data/help/solarsysguide.html \
         data/help/how.html \
         data/help/code.html \

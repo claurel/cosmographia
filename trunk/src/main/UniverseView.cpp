@@ -963,19 +963,38 @@ UniverseView::drawInfoOverlay()
             }
 
             // Show the time rate below the time/date
-            if (m_paused)
             {
-                QString timeScaleString = QString("%1x time (paused)").arg(m_timeScale);
-                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
-            }
-            else
-            {
-                QString timeScaleString = QString("%1x time").arg(m_timeScale);
-                m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
+                // Some complexity to show the time nicely formatted...
+                QString timeScaleFormatted;
+                if (abs(m_timeScale) > 100)
+                {
+                    int sigDigits = 1;
+                    sigDigits = int(abs(floor(log10(abs(m_timeScale))))) + 1;
+                    timeScaleFormatted = readableNumber(m_timeScale, sigDigits);
+                }
+                else
+                {
+                    timeScaleFormatted = QLocale::system().toString(m_timeScale, 'g');
+                }
+
+                if (m_paused)
+                {
+                    QString timeScaleString = QString("%1x time (paused)").arg(timeScaleFormatted);
+                    m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
+                }
+                else
+                {
+                    QString timeScaleString = QString("%1x time").arg(timeScaleFormatted);
+                    m_textFont->render(timeScaleString.toLatin1().data(), Vector2f(dateX, dateY));
+                }
             }
 
-            //QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
-            //m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
+            /*
+            QString frameCountString = QString("%1 fps").arg(m_framesPerSecond);
+            QString texMemString = QString("%1 MB textures").arg(double(m_textureLoader->textureMemoryUsed()) / (1024 * 1024));
+            m_textFont->render(frameCountString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 30.0f));
+            m_textFont->render(texMemString.toLatin1().data(), Vector2f(viewportWidth - 200.0f, 10.0f));
+            */
 
             // Display information about the selection
             if (m_selectedBody.isValid())
@@ -1845,6 +1864,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
                 AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::BodyAxes, visualizerSize);
                 axes->setLabelEnabled(true, ArrowGeometry::AllAxes);
                 axes->setVisibility(true);
+                //axes->arrows()->setMinimumScreenSize(100.0f);
                 body->setVisualizer("body axes", axes);
             }
             else
@@ -1860,6 +1880,7 @@ UniverseView::contextMenuEvent(QContextMenuEvent* event)
                 axes->setLabelEnabled(true, ArrowGeometry::AllAxes);
                 axes->setVisibility(true);
                 axes->arrows()->setOpacity(0.3f);
+                //axes->arrows()->setMinimumScreenSize(100.0f);
                 body->setVisualizer("frame axes", axes);
             }
             else

@@ -37,6 +37,7 @@ Item {
         opacity: 0.2
         color: "#808080"
         border.color: "#d0d0d0"
+        radius: 3
     }
 
     Text {

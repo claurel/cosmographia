@@ -35,7 +35,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onPressed: { flickable.contentY = Math.max(0, flickable.contentY - 100); console.log("height: " + flickable.contentHeight + ", " + flickable.height); }
+            onPressed: { flickable.contentY = Math.max(0, flickable.contentY - 100); }
         }
     }
 

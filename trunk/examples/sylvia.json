@@ -61,13 +61,14 @@
          "rotationModel" :
          {
              "type" : "Uniform",
-             "period" : "1.3788dd",
+             "period" : "1.3788d",
              "inclination" : 49,
              "ascendingNode" : 160
          },
+
          "geometry": {
-           "source": "radar/models/52760.cmod",
            "type": "Mesh",
+           "source": "radar/models/52760.cmod",
            "size": 3.5
          }
       },
@@ -97,9 +98,10 @@
              "inclination" : 49,
              "ascendingNode" : 160
          },
+
          "geometry": {
-           "source": "radar/models/52760.cmod",
            "type": "Mesh",
+           "source": "radar/models/52760.cmod",
            "size": 9
          }
       }

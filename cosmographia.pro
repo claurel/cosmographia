@@ -855,6 +855,8 @@ macx {
         data/help/voyager1.html \
         data/help/voyager2.html \
         data/help/dawn.html \
+        data/help/hubble.html \
+        data/help/iss.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \
         data/help/hyperion.jpg \

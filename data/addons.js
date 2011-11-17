@@ -58,5 +58,11 @@ var InstalledAddons =
     name: "Asteroid 2008 TC3",
     description: "2008 TC3 was a small asteroid that burned up in Earth's atmosphere on October 7, 2008.",
     source: "addons/2008TC3.json"
+    },
+
+    {
+    name: "Satellite Collision",
+    description: "Debris from the 10 Feb 2009 collision between Iridium 33 (orange) and Kosmos 2251 (blue).",
+    source: "addons/debris.json"
     }
 ];

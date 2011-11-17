@@ -289,6 +289,10 @@ HelpCatalog::getObjectDataText(const QString &name) const
     QString text;
     QTextStream out(&text, QIODevice::WriteOnly);
 
+    out << "<html><head>\n";
+    out << "<style type=\"text/css\"> a { color: #72c0ff }</style>\n";
+    out << "</head><body>";
+
     if (!body || !info)
     {
         // Object not found. Create an error page
@@ -510,7 +514,11 @@ HelpCatalog::getObjectDataText(const QString &name) const
         }
 
         out << "</table>\n";
+
+        out << "<br><br><br><a href=\"help:properties\">" << QObject::tr("Explain this data...") << "</a>";
     }
+
+    out << "</body></html>";
 
     return text;
 }

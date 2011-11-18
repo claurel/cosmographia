@@ -8,8 +8,8 @@
           "center" : "Sun",
           "altitude" : 1.5e9,
           "reference" : "Earth",
-          "azimuth" : 60.0,
-	  "elevation": 20.0,
+          "azimuth" : -60.0,
+          "elevation": 30.0,
           "up" : "EclipticNorth"
 	},
 

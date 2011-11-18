@@ -403,7 +403,7 @@ QSize UniverseView::sizeHint() const
 
 // Set up the labels to fade when the labeled object is very close or very distant
 static void
-setLabelFadeRange(LabelGeometry* label, Entity* body, vesta::Arc* arc, double fadeSize)
+setLabelFadeRange(LabelGeometry* label, Entity* body, const BodyInfo* info, vesta::Arc* arc, double fadeSize)
 {
     float geometrySize = 1.0f;
     if (body->geometry())
@@ -415,9 +415,15 @@ setLabelFadeRange(LabelGeometry* label, Entity* body, vesta::Arc* arc, double fa
     if (fadeSize == 0.0)
     {
         fadeSize = orbitSize;
+        if (info && info->classification == BodyInfo::Asteroid)
+        {
+            // There are a lot of asteroids; prevent them from crowding out everything
+            // else in the Solar System.
+            fadeSize /= 3;
+        }
     }
 
-    float minPixels = 20.0f;
+    float minPixels = 40.0f;
     float maxPixels = 20.0f * fadeSize / geometrySize;
 
     if (body->name() != "Sun")
@@ -429,7 +435,7 @@ setLabelFadeRange(LabelGeometry* label, Entity* body, vesta::Arc* arc, double fa
 
 
 static Visualizer*
-labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, double fadeSize, bool visible)
+labelBody(Entity* planet, const BodyInfo* info, const QString& labelText, TextureFont* font, TextureMap* icon, const Spectrum& color, double fadeSize, bool visible)
 {
     if (!planet || !planet->isVisible())
     {
@@ -469,7 +475,7 @@ labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMa
             LabelVisualizer* label = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
             label->label()->setIcon(icon);
             label->label()->setIconColor(color);
-            setLabelFadeRange(label->label(), planet, arc, fadeSize);
+            setLabelFadeRange(label->label(), planet, info, arc, fadeSize);
             multiLabel->addLabel(startTime, label);
             startTime += arc->duration();
         }
@@ -481,7 +487,7 @@ labelBody(Entity* planet, const QString& labelText, TextureFont* font, TextureMa
         LabelVisualizer* labelVis = new LabelVisualizer(labelText.toUtf8().data(), font, color, 6.0f);
         labelVis->label()->setIcon(icon);
         labelVis->label()->setIconColor(color);
-        setLabelFadeRange(labelVis->label(), planet, planet->chronology()->firstArc(), fadeSize);
+        setLabelFadeRange(labelVis->label(), planet, info, planet->chronology()->firstArc(), fadeSize);
         vis = labelVis;
     }
 
@@ -3232,7 +3238,7 @@ UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
         color = info->labelColor;
         fadeSize = info->labelFadeSize;
     }
-    labelBody(entity, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, fadeSize, m_labelsVisible);
+    labelBody(entity, info, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, fadeSize, m_labelsVisible);
 
     // Special handling for the Sun
     if (entity->name() == "Sun")

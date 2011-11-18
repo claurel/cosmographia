@@ -43,7 +43,7 @@ LabelVisualizer::handleRayPick(const PickContext* pc, const Eigen::Vector3d& pic
         double cameraDistance = pickOrigin.norm();
         float pixelSize = m_label->fadeSize() / float(pc->pixelAngle() * cameraDistance);
 
-        if (m_label->fadeRange()->opacity(pixelSize) < 0.1f)
+        if (m_label->fadeRange()->opacity(pixelSize) < 0.3f)
         {
             return false;
         }

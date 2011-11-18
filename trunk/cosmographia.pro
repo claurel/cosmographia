@@ -889,7 +889,10 @@ macx {
         data/addons/sciencesat.json \
         data/addons/sorce.obj \
         data/addons/sorce.mtl \
-        data/addons/solar_panel.png
+        data/addons/solar_panel.png \
+        data/addons/debris.json \
+        data/addons/iridium33.kep \
+        data/addons/cosmos2251.kep
 
     QMAKE_BUNDLE_DATA += ADDONS
 

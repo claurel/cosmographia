@@ -13,7 +13,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -51,7 +51,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -89,7 +89,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -127,7 +127,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -165,7 +165,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -203,7 +203,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -241,7 +241,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -279,7 +279,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -317,7 +317,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -355,7 +355,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -393,7 +393,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -431,7 +431,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -469,7 +469,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -507,7 +507,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -545,7 +545,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -583,7 +583,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -621,7 +621,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -659,7 +659,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -697,7 +697,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -735,7 +735,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -773,7 +773,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -811,7 +811,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -849,7 +849,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -887,7 +887,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -925,7 +925,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -963,7 +963,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1001,7 +1001,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1039,7 +1039,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1077,7 +1077,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1115,7 +1115,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1153,7 +1153,7 @@
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1187,11 +1187,11 @@
     "trajectoryPlot": {
         "fade": 0.5
     }, 
-    "name": "GPS 2F-1 ", 
+    "name": "GPS 2F-1", 
     "geometry": {
         "source": "models/jason.obj", 
         "type": "Mesh", 
-        "size": 0.10000000000000001
+        "size": 0.005
     }, 
     "trajectory": {
         "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
@@ -1207,12 +1207,50 @@
         "primary": {
             "type": "RelativePosition", 
             "target": "Earth", 
-            "observer": "GPS 2F-1 "
+            "observer": "GPS 2F-1"
         }, 
         "secondary": {
             "type": "RelativeVelocity", 
             "target": "Earth", 
-            "observer": "GPS 2F-1 "
+            "observer": "GPS 2F-1"
+        }
+    }, 
+    "center": "Earth", 
+    "label": {
+        "color": "#11bb44"
+    }
+},
+{
+    "trajectoryFrame": "EquatorJ2000", 
+    "trajectoryPlot": {
+        "fade": 0.5
+    }, 
+    "name": "GPS 2F-2", 
+    "geometry": {
+        "source": "models/jason.obj", 
+        "type": "Mesh", 
+        "size": 0.005
+    }, 
+    "trajectory": {
+        "source": "http://www.celestrak.com/NORAD/elements/gps-ops.txt", 
+        "type": "TLE", 
+        "name": "GPS BIIF-2  (PRN 01)", 
+        "line1": "1 37753U 11036A   11321.01548290  .00000061  00000-0  00000+0 0   855",
+        "line2": "2 37753  55.0087 181.8956 0002669  66.9218 293.1969  2.00564699  2467"
+    }, 
+    "bodyFrame": {
+        "secondaryAxis": "-y", 
+        "primaryAxis": "-x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Earth", 
+            "observer": "GPS 2F-2"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Earth", 
+            "observer": "GPS 2F-2"
         }
     }, 
     "center": "Earth", 

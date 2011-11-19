@@ -142,11 +142,13 @@ Item {
         Column {
             id: buttons
             opacity: 0
+            anchors.left: parent.left
+            anchors.leftMargin: 5
 
             spacing: 10
 
             Row {
-                spacing: 30
+                spacing: 25
 
                 Button {
                     id: selectButton
@@ -176,7 +178,7 @@ Item {
             }
 
             Row {
-                spacing: 30
+                spacing: 25
                 Button {
                     id: infoButton
                     text: "Description"

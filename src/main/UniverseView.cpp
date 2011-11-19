@@ -2135,7 +2135,12 @@ UniverseView::initializeSkyLayers()
     milkyWayLayer->setOpacity(0.3f);
     milkyWayLayer->setDrawOrder(-1);
     milkyWayLayer->setTexture(m_textureLoader->loadTexture("textures/milkyway.jpg", SkyLayerTextureProperties()));
-    milkyWayLayer->setOrientation(InertialFrame::galactic()->orientation());
+
+    // Adjustment applied because the ESO all-sky map is not exactly aligned with the galactic coordinate system.
+    // TODO: Sky images should be set up in a configuration file, not hard-coded.
+    Quaterniond rotationOffset(AngleAxisd(toRadians(3.8767255), Vector3d(-0.5411, -0.6441, 0.5406)));
+    milkyWayLayer->setOrientation(rotationOffset * InertialFrame::galactic()->orientation());
+
     m_universe->setLayer("milky way", milkyWayLayer);
     milkyWayLayer->setVisibility(false);
 

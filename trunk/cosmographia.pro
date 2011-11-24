@@ -11,7 +11,7 @@ QT += declarative
 
 #### App sources ####
 
-MAIN_PATH = src/Main
+MAIN_PATH = src/main
 
 APP_SOURCES = \
     $$MAIN_PATH/main.cpp \

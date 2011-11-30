@@ -19,6 +19,8 @@
 #define _GALLERY_VIEW_H_
 
 #include <vesta/Viewport.h>
+#include <vesta/TextureMap.h>
+#include <vector>
 
 
 class GalleryView
@@ -30,7 +32,16 @@ public:
     void initializeGL();
     void render(const vesta::Viewport& viewport);
 
+    void addTile(vesta::TextureMap* texture);
+
 private:
+    struct GalleryTile
+    {
+        vesta::counted_ptr<vesta::TextureMap> texture;
+    };
+
+private:
+    std::vector<GalleryTile> m_tiles;
 };
 
 #endif // _GALLERY_VIEW_H_

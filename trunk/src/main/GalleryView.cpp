@@ -99,7 +99,7 @@ drawRoundRectangle(float width, float height, float radius)
     for (unsigned int i = 0; i < vertexCount; ++i)
     {
         vertices[i].texCoord = Vector2f(vertices[i].position.x() / width + 0.5f,
-                                        vertices[i].position.y() / height + 0.5f);
+                                        -vertices[i].position.y() / height + 0.5f);
     }
 
     const unsigned int triangleCount = 10 + arcSegments * 4;
@@ -164,7 +164,7 @@ GalleryView::render(const Viewport& viewport)
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 15.0f);
 
-    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
 
     static float deg = 0.0f;
     deg += 1.0f;
@@ -184,7 +184,15 @@ GalleryView::render(const Viewport& viewport)
             glRotatef(-(toDegrees(theta) + 90.0f), 0.0f, 1.0f, 0.0f);
             glScalef(1.5f, 1.5f, 1.5f);
 
-            glColor4f(0.2f, 0.2f, 0.2f, 1.0f);
+            unsigned int tileIndex = i * columns + j;
+            const GalleryTile& tile = m_tiles[tileIndex % m_tiles.size()];
+
+            if (tile.texture.isValid() && tile.texture->makeResident())
+            {
+                glBindTexture(GL_TEXTURE_2D, tile.texture->id());
+            }
+
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             /*
             glBegin(GL_QUADS);
             glVertex3f(-1.0f, -1.0f, 0.0f);
@@ -204,4 +212,13 @@ GalleryView::render(const Viewport& viewport)
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
+}
+
+
+void
+GalleryView::addTile(TextureMap* texture)
+{
+    GalleryTile tile;
+    tile.texture = texture;
+    m_tiles.push_back(tile);
 }

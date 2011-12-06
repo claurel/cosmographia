@@ -1,0 +1,53 @@
+{
+"version": "1.0",
+"name": "Mars Science Laboratory",
+
+"items" :
+[
+{
+    "name": "MSL", 
+    "class": "spacecraft",
+
+    "label": {
+        "color": "#d0d0d0"
+    },
+    "trajectoryPlot": {
+        "fade": 0.5,
+        "duration": "0.75 y"
+    }, 
+
+    "center": "Sun",
+
+    "trajectoryFrame": "EclipticJ2000", 
+    "trajectory" :
+    {
+        "type" : "InterpolatedStates",
+        "source" : "msl.xyzv"
+    },
+
+    "bodyFrame": {
+        "primaryAxis": "-z", 
+        "secondaryAxis": "x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }
+    }, 
+
+    "geometry": {
+        "source": "mer-cruise.cmod", 
+        "type": "Mesh", 
+        "size": 0.003
+    }
+}
+
+]
+}
+

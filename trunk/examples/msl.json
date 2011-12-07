@@ -16,6 +16,10 @@
         "duration": "0.75 y"
     }, 
 
+    "startTime" : "2011-11-26 15:52:13",
+
+    "arcs" : [
+    {
     "center": "Sun",
 
     "trajectoryFrame": "EclipticJ2000", 
@@ -39,7 +43,38 @@
             "target": "Sun", 
             "observer": "MSL"
         }
-    }, 
+    },
+    "endTime" : "2012-08-06 05:23:06.5"
+    },
+
+    {
+    "center": "Mars",
+
+    "trajectoryFrame": { "type" : "BodyFixed", "body": "Mars" }, 
+    "trajectory" :
+    {
+        "type" : "FixedPoint",
+        "position" : [ -2492.7174249882, 2283.7760531933, -246.57248398216 ]
+    },
+
+    "bodyFrame": {
+        "primaryAxis": "-z", 
+        "secondaryAxis": "x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }
+    },
+    "endTime" : "2014-01-01 00:00:00"
+    }
+    ],
 
     "geometry": {
         "source": "mer-cruise.cmod", 

@@ -126,6 +126,13 @@
     },
 
     {
+        "name": "Rhea",
+        "image" : "rhea.png",
+        "source" : "http://photojournal.jpl.nasa.gov/catalog/PIA08871",
+        "credit" : "NASA / JPL / Space Science Institute"
+    },
+
+    {
         "name": "Hyperion",
         "image" : "hyperion.png",
         "source" : "",
@@ -214,6 +221,13 @@
         "image" : "proteus.png",
         "source" : "",
         "credit" : "NASA / JPL"
+    },
+
+    {
+        "name": "Pluto",
+        "image" : "pluto.png",
+        "source" : "http://hubblesite.org/newscenter/archive/releases/1996/09/image/a/",
+        "credit" : "Alan Stern (Southwest Research Institute), Marc Buie (Lowell Observatory), NASA and ESA"
     },
 
     {

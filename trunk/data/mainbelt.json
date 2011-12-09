@@ -138,8 +138,10 @@
           "rotationModel" :
           {
               "type" : "Uniform",
-              "period" : 0.222583,
-              "inclination" : 31.0
+              "period" : "5.342128798853947 h",
+              "inclination" : 48.6,
+              "ascendingNode" : 35.8,
+              "meridianAngle" : 292
           },
 
           "geometry" :

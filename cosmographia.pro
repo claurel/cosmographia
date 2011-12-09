@@ -643,14 +643,13 @@ macx {
     MODELS.files = \
         data/models/README.html \
         data/models/phobos.cmod \
-        data/models/phobos.dds \
         data/models/phobos-normals.dds \
         data/models/deimos.cmod \
         data/models/deimos.dds \
         data/models/2pallas.cmod \
         data/models/3juno.cmod \
         data/models/4vesta.cmod \
-        data/models/vesta.dds \
+        data/models/vesta-normals.dds \
         data/models/5astraea.cmod \
         data/models/8flora.cmod \
         data/models/10hygiea.cmod \

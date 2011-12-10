@@ -19,15 +19,34 @@
 #include <vesta/OGLHeaders.h>
 #include <vesta/VertexSpec.h>
 #include <vesta/Units.h>
+#include <vesta/PlanarProjection.h>
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <cmath>
+#include <algorithm>
 
 using namespace vesta;
 using namespace Eigen;
 using namespace std;
 
 
-GalleryView::GalleryView()
+// Gallery parameters:
+//
+// columns - The number of columns in the tile grid
+// rows - The number of rows in the tile grid
+// tileSpacing - Space between tiles, as a fraction of the tile size
+
+GalleryView::GalleryView() :
+    m_state(Hidden),
+    m_time(0.0),
+    m_opacity(0.0f),
+    m_rows(4),
+    m_columns(10),
+    m_cameraFov(toRadians(45.0f)),
+    m_galleryRadius(50.0f),
+    m_galleryAngle(toRadians(60.0f)),
+    m_tileSpacing(0.1f),
+    m_selectedTileIndex(-1)
 {
 }
 
@@ -59,7 +78,7 @@ quadIndices(v_uint16* indices, v_uint16 v0, v_uint16 v1, v_uint16 v2, v_uint16 v
 
 
 static void
-drawRoundRectangle(float width, float height, float radius)
+drawRoundRectangle(float width, float height, float radius, float opacity)
 {
     const unsigned int arcSegments = 10;
     const unsigned int vertexCount = arcSegments * 4 + 8;
@@ -140,71 +159,110 @@ drawRoundRectangle(float width, float height, float radius)
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, stride, reinterpret_cast<const char*>(vertices) + 12);
     glDisableClientState(GL_COLOR_ARRAY);
+
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, indices);
+    glColor4f(0.0f, 0.0f, 0.0f, opacity);
+    glDisable(GL_TEXTURE_2D);
+    glLineWidth(2.5f);
+    glEnable(GL_LINE_SMOOTH);
+    //glDrawArrays(GL_LINE_LOOP, 4, 4 * (arcSegments + 1));
+    glLineWidth(1.0f);
+    glDisable(GL_LINE_SMOOTH);
+    glEnable(GL_TEXTURE_2D);
+
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 
+PlanarProjection
+GalleryView::camera() const
+{
+    return PlanarProjection::CreatePerspective(m_cameraFov, 1.0f, 1.0f, 1000.0f);
+}
+
+
+// Return the length of the chord between two points on the unit
+// circle separated by the angle theta.
+static float chordLength(float theta)
+{
+    return 2.0f * sin(theta * 0.5f);
+}
+
+
+Eigen::Vector3f
+GalleryView::tilePosition(const GalleryTile& tile)
+{
+    const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
+    const float galleryHeight = viewPlaneWidth * float(m_rows) / float(m_columns);
+    double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
+    float x = m_galleryRadius * cos(theta);
+    float y = (float(tile.row) / float(m_rows - 1) - 0.5f) * galleryHeight;
+    float z = m_galleryRadius * sin(theta);
+
+    return Vector3f(x, y, z);
+}
+
 void
 GalleryView::render(const Viewport& viewport)
 {
-    const unsigned int rows = 4;
-    const unsigned int columns = 10;
-    const float galleryRadius = 50.0f;
-    const float galleryHeight = 12.0f;
-    const float galleryAngle = toRadians(40.0f);
+    const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
+    const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
+
+    const float tileFraction = 1.0f / (1.0f + m_tileSpacing);
+    const float tileScale = 0.5f * tileFraction * m_galleryRadius * chordLength(m_galleryAngle / m_columns);
+
+    if (m_opacity <= 0.0f)
+    {
+        return;
+    }
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    gluPerspective(45.0, viewport.aspectRatio(), 1.0, 100.0);
+    gluPerspective(toDegrees(m_cameraFov), viewport.aspectRatio(), 1.0, 1000.0);
     glMatrixMode(GL_MODELVIEW);
 
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 15.0f);
+    glTranslatef(0.0f, 0.0f, -centerOffset);
 
     glEnable(GL_TEXTURE_2D);
 
-    static float deg = 0.0f;
-    deg += 1.0f;
-    for (unsigned int i = 0; i < rows; ++i)
+    for (int tileIndex = 0; tileIndex < int(m_tiles.size()); ++tileIndex)
     {
-        float y = (float(i) / float(rows - 1) - 0.5f) * galleryHeight;
+        const GalleryTile& tile = m_tiles[tileIndex];
 
-        for (unsigned int j = 0; j < columns; ++j)
+        double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
+        float t = float(tile.row + tile.column) / float(m_rows + m_columns) * 1.0f + m_opacity * 2.0f - 1.0f;
+        t = max(-1.0f, min(1.0f, t));
+        if (tileIndex != m_selectedTileIndex)
         {
-            double theta = (float(j) / float(columns - 1) - 0.5f) * galleryAngle - toRadians(90.0);
-
-            float x = galleryRadius * cos(theta);
-            float z = galleryRadius * sin(theta);
-
-            glPushMatrix();
-            glTranslatef(x, y, z);
-            glRotatef(-(toDegrees(theta) + 90.0f), 0.0f, 1.0f, 0.0f);
-            glScalef(1.5f, 1.5f, 1.5f);
-
-            unsigned int tileIndex = i * columns + j;
-            const GalleryTile& tile = m_tiles[tileIndex % m_tiles.size()];
-
-            if (tile.texture.isValid() && tile.texture->makeResident())
-            {
-                glBindTexture(GL_TEXTURE_2D, tile.texture->id());
-            }
-
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-            /*
-            glBegin(GL_QUADS);
-            glVertex3f(-1.0f, -1.0f, 0.0f);
-            glVertex3f( 1.0f, -1.0f, 0.0f);
-            glVertex3f( 1.0f,  1.0f, 0.0f);
-            glVertex3f(-1.0f,  1.0f, 0.0f);
-            glEnd();
-            */
-            drawRoundRectangle(2.0f, 2.0f, 0.3f);
-
-            glPopMatrix();
+            theta += (t - 1.0f) * toRadians(90.0f);
         }
+
+        float scaleFactor = tileScale;
+        float alpha = m_opacity;
+        if (tileIndex == m_selectedTileIndex)
+        {
+            scaleFactor = (1.0f + 3.0f * (1.0f - m_opacity)) * tileScale;
+            alpha = min(1.0f, m_opacity * 3.0f);
+        }
+
+        Vector3f tilePos = tilePosition(tile);
+
+        glPushMatrix();
+        glTranslatef(tilePos.x(), tilePos.y(), tilePos.z());
+        glRotatef(-(toDegrees(theta) + 90.0f), 0.0f, 1.0f, 0.0f);
+        glScalef(scaleFactor, scaleFactor, scaleFactor);
+
+        if (tile.texture.isValid() && tile.texture->makeResident())
+        {
+            glBindTexture(GL_TEXTURE_2D, tile.texture->id());
+            glColor4f(1.0f, 1.0f, 1.0f, alpha);
+            drawRoundRectangle(2.0f, 2.0f, 0.3f, alpha);
+        }
+
+        glPopMatrix();
     }
 
     glPopMatrix();
@@ -216,9 +274,124 @@ GalleryView::render(const Viewport& viewport)
 
 
 void
-GalleryView::addTile(TextureMap* texture)
+GalleryView::addTile(TextureMap* texture, const std::string& name)
 {
     GalleryTile tile;
     tile.texture = texture;
+    tile.name = name;
+    tile.row = m_tiles.size() / m_columns;
+    tile.column = m_tiles.size() % m_columns;
     m_tiles.push_back(tile);
+}
+
+
+std::string
+GalleryView::tileName(int tileIndex) const
+{
+    if (tileIndex < 0 || tileIndex >= int(m_tiles.size()))
+    {
+        return "";
+    }
+    else
+    {
+        return m_tiles[tileIndex].name;
+    }
+}
+
+
+void
+GalleryView::setVisible(bool visible)
+{
+    if (visible)
+    {
+        m_state = Active;
+        m_selectedTileIndex = -1;
+    }
+    else
+    {
+        m_state = Hidden;
+    }
+}
+
+
+bool
+GalleryView::isVisible() const
+{
+    return m_state != Hidden;
+}
+
+
+void
+GalleryView::update(double dt)
+{
+    m_time += dt;
+
+    if (m_state == Active)
+    {
+        m_opacity = std::min(1.0f, m_opacity + float(dt) * 1.0f);
+    }
+    else if (m_state == Hidden)
+    {
+        m_opacity = std::max(0.0f, m_opacity - float(dt) * 1.0f);
+    }
+}
+
+
+bool
+GalleryView::mouseReleased(const Viewport& viewport, int x, int y)
+{
+    if (m_opacity <= 0.0f)
+    {
+        return false;
+    }
+
+    m_selectedTileIndex = -1;
+
+    Vector2f p = Vector2f((float(x) - viewport.x()) / viewport.width(),
+                          -(float(y) - viewport.y()) / viewport.height()) * 2.0f + Vector2f(-1.0f, 1.0f);
+
+    float h = tan(m_cameraFov / 2.0f);
+    Vector3f direction = Vector3f(h * viewport.aspectRatio() * p.x(), h * p.y(), -1.0).normalized();
+
+    const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
+    const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
+
+    const float tileFraction = 1.0f / (1.0f + m_tileSpacing);
+    const float tileScale = 0.5f * tileFraction * m_galleryRadius * chordLength(m_galleryAngle / m_columns);
+
+    Vector3f cameraPosition(0.0f, 0.0f, centerOffset);
+
+    for (int tileIndex = 0; tileIndex < int(m_tiles.size()); ++tileIndex)
+    {
+        const GalleryTile& tile = m_tiles[tileIndex];
+
+        Vector3f tileCenter = tilePosition(tile);
+        double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
+
+        float t = float(tile.row + tile.column) / float(m_rows + m_columns) * 1.0f + m_opacity * 2.0f - 1.0f;
+        t = max(-1.0f, min(1.0f, t));
+        theta += (t - 1.0f) * toRadians(90.0f);
+
+        Vector3f planeNormal = -Vector3f::UnitX();
+        planeNormal = AngleAxisf(-theta, Vector3f::UnitY()) * planeNormal;
+
+        Vector3f rayOrigin = cameraPosition - tileCenter;
+        float u = -planeNormal.dot(rayOrigin) / planeNormal.dot(direction);
+        Vector3f intersection = rayOrigin + direction * u;
+
+        if (abs(intersection.x()) < tileScale && abs(intersection.y()) < tileScale)
+        {
+            m_selectedTileIndex = tileIndex;
+        }
+    }
+
+    if (m_selectedTileIndex >= 0)
+    {
+        setVisible(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

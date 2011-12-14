@@ -116,6 +116,7 @@ private:
     void updateUnloadAction();
     void loadCatalogFile(const QString& fileName);
     void loadStarNamesFile(const QString& fileName, vesta::StarCatalog* starCatalog);
+    void loadGallery(const QString& fileName);
 
     void showCatalogErrorDialog(const QString& errorMessages);
     void showAnnouncement(const QString& text, const QDateTime& modifiedTime);

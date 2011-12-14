@@ -18,6 +18,7 @@
 #include <QtGui>
 
 #include "UniverseView.h"
+//#include "GalleryView.h"
 #include "catalog/UniverseCatalog.h"
 #include "catalog/UniverseLoader.h"
 #include "qtwrapper/UniverseCatalogObject.h"
@@ -443,6 +444,10 @@ Cosmographia::setupMenuBar()
 
     menuBar()->addMenu(helpMenu);
 
+    QAction* galleryAction = new QAction("Worlds Gallery", this);
+    galleryAction->setShortcut(QKeySequence("Ctrl+E"));
+    connect(galleryAction, SIGNAL(triggered()), m_view3d, SLOT(toggleGallery()));
+
 #ifdef Q_OS_MAC
     QAction* minimizeAction = new QAction("Minimize", this);
     minimizeAction->setShortcut(QKeySequence("Ctrl+M"));
@@ -479,11 +484,13 @@ Cosmographia::setupMenuBar()
     addAction(bodyFixedAction);
     addAction(planetOrbitsAction);
     addAction(plotTrajectoryAction);
+    addAction(galleryAction);
 #else
     // These should go into the edit menu, but there currently
     // isn't one.
     addAction(copyScreenShotAction);
     addAction(copyStateUrlAction);
+    addAction(galleryAction);
 #endif // NOMENUBAR
 }
 
@@ -675,6 +682,8 @@ Cosmographia::initialize()
     loadCatalogFile("solarsys.json");
     loadCatalogFile("start-viewpoints.json");
 
+    loadGallery("gallery/gallery.json");
+
     {
         QNetworkRequest request(QUrl("http://www.cosmographia.info/announcements/current.html"));
         request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
@@ -703,21 +712,57 @@ Cosmographia::initialize()
         m_view3d->setViewpoint(m_catalog->findViewpoint(viewpointName));
     }
 
-    // Load catalog files that were listed on the command line
-    QStringList args = QCoreApplication::arguments();
-    if (!args.isEmpty())
+    // Parse the command line
+    QStringList argList = QCoreApplication::arguments();
+    QStringList catalogLoadList;
+    QVariantMap argMap;
+    if (!argList.isEmpty())
     {
         // Remove the program name
-        args.removeAt(0);
+        argList.removeAt(0);
 
+        int argIndex = 0;
+        while (argIndex < argList.size())
+        {
+            QString arg = argList.at(argIndex);
+
+            // Treat all command line arguments starting with a dash as
+            // switches with arguments.
+            if (arg.at(0) == '-')
+            {
+                if (argIndex < argList.size() - 1)
+                {
+                    argMap[arg] = argList[argIndex + 1];
+                }
+                argIndex += 2;
+            }
+            else
+            {
+                // Everything else on the command line is a file that will be loaded
+                // at startup time.
+                catalogLoadList << arg;
+                ++argIndex;
+            }
+        }
+    }
+
+    // Load catalog files
+    if (!catalogLoadList.empty())
+    {
         QString saveDir = QDir::currentPath();
         QDir::setCurrent(QCoreApplication::applicationDirPath());
-        foreach (QString arg, args)
+        foreach (QString fileName, catalogLoadList)
         {
-            QFileInfo fileInfo(arg);
+            QFileInfo fileInfo(fileName);
             loadCatalogFile(fileInfo.absoluteFilePath());
         }
         QDir::setCurrent(saveDir);
+    }
+
+    // Handle URLs passed on the command line
+    if (argMap.contains("-u"))
+    {
+        m_view3d->setStateFromUrl(QUrl(argMap.value("-u").toString()));
     }
 
     // Reapply the earth map month setting, because it requires the Solar System
@@ -1224,7 +1269,7 @@ Cosmographia::loadStarNamesFile(const QString &fileName, StarCatalog* starCatalo
             qDebug() << "Bad or missing Tycho ID in star names list";
         }
 
-        if (!nameVar.type() == QVariant::String)
+        if (nameVar.type() != QVariant::String)
         {
             qDebug() << "Bad or missing name in star names list";
         }
@@ -1441,6 +1486,77 @@ Cosmographia::loadCatalogFile(const QString& fileName)
     }
 }
 
+
+void
+Cosmographia::loadGallery(const QString& fileName)
+{
+#if 0
+    if (fileName.isEmpty())
+    {
+        return;
+    }
+
+    QFile galleryFile(fileName);
+    QFileInfo info = QFileInfo(galleryFile);
+    //QString path = info.absolutePath();
+    QString path = QDir::current().relativeFilePath(info.absolutePath());
+
+    if (!galleryFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Could not open gallery file " << fileName;
+        return;
+    }
+
+    QJson::Parser parser;
+    bool parseOk = false;
+    QVariant nameListVar = parser.parse(&galleryFile, &parseOk);
+    if (!parseOk)
+    {
+        qDebug() << "Error parsing gallery file: " << parser.errorString() << " (line: " << parser.errorLine() << ")";
+        return;
+    }
+
+    if (!nameListVar.type() == QVariant::List)
+    {
+        qDebug() << "Gallery file must contain a single JSON list.";
+        return;
+    }
+
+    QVariantList nameList = nameListVar.toList();
+    foreach (QVariant recordVar, nameList)
+    {
+        if (recordVar.type() != QVariant::Map)
+        {
+            qDebug() << "Bad record in gallery list.";
+        }
+
+        QVariantMap record = recordVar.toMap();
+        QVariant nameVar = record.value("name");
+        QVariant imageVar = record.value("image");
+
+        if (nameVar.type() != QVariant::String)
+        {
+            qDebug() << "Bad or missing name in gallery file";
+        }
+
+        if (imageVar.type() != QVariant::String)
+        {
+            qDebug() << "Bad or missing name in gallery file";
+        }
+
+        QString name = nameVar.toString();
+        QString image = imageVar.toString();
+
+        if (!name.isEmpty() && !image.isEmpty())
+        {
+            QString imageFile = path + "/" + image;
+            TextureProperties tileTexProperties(TextureProperties::Clamp);
+            m_view3d->gallery()->addTile(m_view3d->textureLoader()->loadTexture(imageFile.toUtf8().data(), tileTexProperties),
+                                         name.toUtf8().data());
+        }
+    }
+#endif
+}
 
 void
 Cosmographia::processReceivedResource(QNetworkReply* reply)

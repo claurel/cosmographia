@@ -294,6 +294,45 @@
         },
 
         {
+         "name" : "Ida",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+
+         "mass" : "4.2e16 kg",
+         "density" : 2.7,
+
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "1993-08-28T00:00:00",
+           "period": "4.8409y",
+           "semiMajorAxis": "2.863735151131143au",
+           "eccentricity": 0.04310709497717546,
+           "inclination": 1.137111297187000,
+           "ascendingNode": 324.5865455514056,
+           "argumentOfPeriapsis": 113.0166537690101,
+           "meanAnomaly": 131.4933755035950
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "4.63363199928596h",
+           "inclination" : 92.88,
+           "ascendingNode" : 258.76,
+           "meridianAngle" : 274.05
+         },
+
+         "geometry": {
+           "source": "models/243ida.cmod",
+           "type": "Mesh"
+         }
+      },
+
+      {
          "name" : "Davida",
          "class" : "asteroid",
          "label" : { "color" : "#aa8855" },

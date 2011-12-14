@@ -27,6 +27,7 @@ APP_SOURCES = \
     $$MAIN_PATH/DateUtility.cpp \
     $$MAIN_PATH/RotationUtility.cpp \
     $$MAIN_PATH/ChebyshevPolyTrajectory.cpp \
+    $$MAIN_PATH/GalleryView.cpp \
     $$MAIN_PATH/InterpolatedRotation.cpp \
     $$MAIN_PATH/InterpolatedStateTrajectory.cpp \
     $$MAIN_PATH/JPLEphemeris.cpp \
@@ -82,6 +83,7 @@ APP_HEADERS = \
     $$MAIN_PATH/DateUtility.h \
     $$MAIN_PATH/RotationUtility.h \
     $$MAIN_PATH/ChebyshevPolyTrajectory.h \
+    $$MAIN_PATH/GalleryView.h \
     $$MAIN_PATH/InterpolatedRotation.h \
     $$MAIN_PATH/InterpolatedStateTrajectory.h \
     $$MAIN_PATH/JPLEphemeris.h \
@@ -605,6 +607,7 @@ macx {
         data/textures/oberon.dds \
         data/textures/triton.dds \
         data/textures/pluto.png \
+        data/textures/charon.png \
         data/textures/ceres.png \
         data/textures/earth-clouds.dds
 
@@ -654,6 +657,8 @@ macx {
         data/models/8flora.cmod \
         data/models/10hygiea.cmod \
         data/models/21lutetia.cmod \
+        data/models/243ida.cmod \
+        data/models/ida.dds \
         data/models/433eros.cmod \
         data/models/eros-normals.dds \
         data/models/511davida.cmod \
@@ -894,6 +899,51 @@ macx {
         data/addons/cosmos2251.kep
 
     QMAKE_BUNDLE_DATA += ADDONS
+
+    GALLERY.path = Contents/Resources/data/gallery
+    GALLERY.files = \
+        data/gallery/gallery.json \
+        data/gallery/mercury.png \
+        data/gallery/venus.png \
+        data/gallery/earth.png \
+        data/gallery/moon.png \
+        data/gallery/mars.png \
+        data/gallery/phobos.png \
+        data/gallery/deimos.png \
+        data/gallery/jupiter.png \
+        data/gallery/io.png \
+        data/gallery/europa.png \
+        data/gallery/ganymede.png \
+        data/gallery/callisto.png \
+        data/gallery/amalthea.png \
+        data/gallery/saturn.png \
+        data/gallery/mimas.png \
+        data/gallery/enceladus.png \
+        data/gallery/tethys.png \
+        data/gallery/dione.png \
+        data/gallery/rhea.png \
+        data/gallery/hyperion.png \
+        data/gallery/titan.png \
+        data/gallery/iapetus.png \
+        data/gallery/phoebe.png \
+        data/gallery/uranus.png \
+        data/gallery/miranda.png \
+        data/gallery/ariel.png \
+        data/gallery/umbriel.png \
+        data/gallery/titania.png \
+        data/gallery/oberon.png \
+        data/gallery/neptune.png \
+        data/gallery/triton.png \
+        data/gallery/proteus.png \
+        data/gallery/pluto.png \
+        data/gallery/ceres.png \
+        data/gallery/vesta.png \
+        data/gallery/lutetia.png \
+        data/gallery/eros.png \
+        data/gallery/itokawa.png
+
+    QMAKE_BUNDLE_DATA += GALLERY
+
 
     QMAKE_LFLAGS += -framework CoreFoundation
 }

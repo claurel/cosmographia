@@ -15,11 +15,76 @@
 #include "TiledMap.h"
 #include "WorldLayer.h"
 #include "Debug.h"
+#include <vector>
+#include <algorithm>
+#include <cassert>
 
 using namespace vesta;
 using namespace Eigen;
 using namespace std;
 
+
+// QuadtreeTile implements a 'restricted quadtree': adjacent
+// tiles are not allowed to have more differ by more than one
+// level of subdivision. This greatly simplifies the process of stitching
+// together tiles to avoid cracks.
+//
+// The neighbor pointers of a tile will be null when no neighbors exist
+// at the current level of detail. When a tile is split into four child
+// tiles, missing neighbors must first be created in order to prevent violating
+// the level of detail restriction.
+//
+// Each tile is a patch of the ellipsoid surface, subdivided to TileSubdivision
+// squares per side. Batching is essential for performance on modern GPUs, since
+// the cost to cull at per-quad granularity is much higher than the cost of
+// rendering a few extra primitives.
+//
+// Some care is required when two adjacent tiles have different LODs. The
+// diagram below shows the bottom two rows of a 4x4 tile. Vertices are indicated by
+// plus signs. The size of the tile refers to the number of square cells it contains;
+// an N x N tile will have (N + 1) x (N + 1) vertices.
+//
+//    +--+--+--+--+
+//    |\ | /|\ | /|
+//    | \|/ | \|/ |
+//    +--+--+--+--+
+//    | /|\ | /|\ |
+//    |/ | \|/ | \|
+//    +--+--+--+--+
+//
+// In order to avoid troublesome 'T' junctions, a different triangulation is used for
+// any edge of a finely tessellated tile that abuts a more coarsely tessellated tile. This
+// diagram shows the section of the above tile with a coarsely tessellated tile below
+// it:
+//
+//    +--+--+--+--+
+//    |\ | /|\ | /|    Fine tessellated tile, row N - 1
+//    | \|/ | \|/ |
+//    +--+--+--+--+
+//    | / \ | / \ |    Finely tessellated tile, row N
+//    |/   \|/   \|
+//    +--+--+--+--+
+//    |\    |    /|
+//    | \   |   / |
+//    |  \  |  /  |    Coarsely tesselated tile, row 1
+//    |   \ | /   |
+//    |    \|/    |
+//    +-----+-----+
+//
+// In the code, a tile edge that abuts a more coarsely tessellated tile is called a
+// transitional edge.
+//
+// The tile vertices are _not_ affected by the tessellation level of neighboring tiles;
+// it is only the triangulation that changes. There are sixteen different triangulations
+// possible: all combinations of transitional or normal edges in the north, south, east
+// and west directions.
+
+
+// Indices for all 16 possible tile triangulations. These are generated once and reused.
+// TODO: These should eventually be stored in GPU index buffers.
+v_uint16* QuadtreeTile::ms_tileMeshIndices[16];
+unsigned int QuadtreeTile::ms_tileMeshTriangleCounts[16];
+bool QuadtreeTile::ms_indicesInitialized = false;
 
 static const float SquareSize = 1.0f / float(QuadtreeTile::TileSubdivision);
 
@@ -32,6 +97,250 @@ static VertexAttribute posNormTexTangentAttributes[] = {
 };
 
 static VertexSpec PositionNormalTexTangent(4, posNormTexTangentAttributes);
+
+
+// TileTriangulationBuilder is a utility class used to construct tile meshes. Only 16
+// unique tile meshes are used, and they are generated just once.
+class TileTriangulationBuilder
+{
+public:
+    TileTriangulationBuilder(unsigned int subdivision) :
+        m_subdivision(subdivision)
+    {
+        assert(m_subdivision > 1);
+        assert((m_subdivision & 1) == 0); // Require an even count of cells in each dimension
+    }
+
+    unsigned int triangleCount() const
+    {
+        return m_vertexIndices.size() / 3;
+    }
+
+    // Add a new triangle with the specified vertex indices
+    void addTriangle(v_uint16 t0, v_uint16 t1, v_uint16 t2)
+    {
+        m_vertexIndices.push_back(t0);
+        m_vertexIndices.push_back(t1);
+        m_vertexIndices.push_back(t2);
+    }
+
+    // Generate vertices for a triangle in the specified cell of the tile mesh.
+    // The 'half' parameter specifies the half of the cell that should be filled
+    // by the triangle. The vertices are always ordered counterclockwise (as seen
+    // from the exterior of the sphere.)
+    void fillHalfCell(unsigned int x, unsigned int y, QuadtreeTile::Quadrant half)
+    {
+        v_uint16 i00 = v_uint16(y * (m_subdivision + 1) + x);
+        v_uint16 i01 = i00 + 1;
+        v_uint16 i10 = i00 + v_uint16(m_subdivision + 1);
+        v_uint16 i11 = i10 + 1;
+
+        switch (half)
+        {
+        case QuadtreeTile::Northeast:
+            addTriangle(i01, i11, i10);
+            break;
+        case QuadtreeTile::Southwest:
+            addTriangle(i00, i01, i10);
+            break;
+        case QuadtreeTile::Southeast:
+            addTriangle(i00, i01, i11);
+            break;
+        case QuadtreeTile::Northwest:
+            addTriangle(i00, i11, i10);
+            break;
+        }
+    }
+
+    // Fill a tile cell with two triangles. The split of the cell
+    // (NW-to-SE or NE-to-SW) depends on its position in the mesh.
+    void fillCell(unsigned int x, unsigned int y)
+    {
+        unsigned int diagonal = (x + y) & 1;
+
+        v_uint16 i00 = v_uint16(y * (m_subdivision + 1) + x);
+        v_uint16 i01 = i00 + 1;
+        v_uint16 i10 = i00 + v_uint16(m_subdivision + 1);
+        v_uint16 i11 = i10 + 1;
+
+        if (diagonal == 0)
+        {
+            addTriangle(i00, i01, i11);
+            addTriangle(i00, i11, i10);
+        }
+        else
+        {
+            addTriangle(i01, i11, i10);
+            addTriangle(i01, i10, i00);
+        }
+    }
+
+    // Create the edge triangles of a tile mesh that will match with the
+    // edge of an adjacent tile with the same or finer tessellation.
+    void generateEdge(QuadtreeTile::Direction edge)
+    {
+        unsigned int x = 0;
+        unsigned int y = 0;
+        unsigned int xstep = 0;
+        unsigned int ystep = 0;
+
+        const unsigned int last = m_subdivision - 1;
+        switch (edge)
+        {
+        case QuadtreeTile::North:
+            fillHalfCell(0,    last, QuadtreeTile::Northeast);
+            fillHalfCell(last, last, QuadtreeTile::Northwest);
+            y = last;
+            xstep = 1;
+            break;
+        case QuadtreeTile::East:
+            fillHalfCell(last, 0,    QuadtreeTile::Northeast);
+            fillHalfCell(last, last, QuadtreeTile::Southeast);
+            x = last;
+            ystep = 1;
+            break;
+        case QuadtreeTile::South:
+            fillHalfCell(0,    0, QuadtreeTile::Southeast);
+            fillHalfCell(last, 0, QuadtreeTile::Southwest);
+            xstep = 1;
+            break;
+        case QuadtreeTile::West:
+            fillHalfCell(0, 0,    QuadtreeTile::Northwest);
+            fillHalfCell(0, last, QuadtreeTile::Southwest);
+            ystep = 1;
+            break;
+        }
+
+        x += xstep;
+        y += ystep;
+
+        for (unsigned int i = 1; i < m_subdivision - 1; ++i)
+        {
+            fillCell(x, y);
+            x += xstep;
+            y += ystep;
+        }
+    }
+
+
+    // Create the edge triangles of a tile mesh that will match with the
+    // edge of an adjacent tile with coarser tessellation.
+    void generateTransitionEdge(QuadtreeTile::Direction edge)
+    {
+        const unsigned int last = m_subdivision - 1;
+
+        for (unsigned int i = 0; i < m_subdivision; i += 2)
+        {
+            unsigned int i0 = 0;
+            unsigned int i1 = 0;
+            unsigned int i2 = 0;
+
+            switch (edge)
+            {
+            case QuadtreeTile::North:
+                if (i > 0)
+                {
+                    fillHalfCell(i,     last, QuadtreeTile::Southwest);
+                }
+                if (i < last - 1)
+                {
+                    fillHalfCell(i + 1, last, QuadtreeTile::Southeast);
+                }
+                i0 = m_subdivision * (m_subdivision + 1) + i;
+                i1 = i0 - (m_subdivision + 1) + 1;
+                i2 = i0 + 2;
+                break;
+            case QuadtreeTile::East:
+                if (i > 0)
+                {
+                    fillHalfCell(last, i,     QuadtreeTile::Southwest);
+                }
+                if (i < last - 1)
+                {
+                    fillHalfCell(last, i + 1, QuadtreeTile::Northwest);
+                }
+                i0 = i * (m_subdivision + 1) + m_subdivision;
+                i1 = i0 + 2 * (m_subdivision + 1);
+                i2 = i0 + (m_subdivision + 1) - 1;
+                break;
+            case QuadtreeTile::South:
+                if (i > 0)
+                {
+                    fillHalfCell(i,     0, QuadtreeTile::Northwest);
+                }
+                if (i < last - 1)
+                {
+                    fillHalfCell(i + 1, 0, QuadtreeTile::Northeast);
+                }
+                i0 = i;
+                i1 = i0 + 2;
+                i2 = i0 + (m_subdivision + 1) + 1;
+                break;
+            case QuadtreeTile::West:
+                if (i > 0)
+                {
+                    fillHalfCell(0, i,     QuadtreeTile::Southeast);
+                }
+                if (i < last - 1)
+                {
+                    fillHalfCell(0, i + 1, QuadtreeTile::Northeast);
+                }
+                i0 = i * (m_subdivision + 1);
+                i1 = i0 + (m_subdivision + 1) + 1;
+                i2 = i0 + 2 * (m_subdivision + 1);
+                break;
+            }
+
+            addTriangle(i0, i1, i2);
+        }
+    }
+
+    // Create a tile mesh. The transitionEdges parameter specifies which adjacent tiles are
+    // more coarsely tesselated (and thus which edges are transition edges.)
+    void generateTile(unsigned int transitionEdges)
+    {
+        for (unsigned int y = 1; y < m_subdivision - 1; ++y)
+        {
+            for (unsigned int x = 1; x < m_subdivision - 1; ++x)
+            {
+                fillCell(x, y);
+            }
+        }
+
+        for (unsigned int i = 0; i < 4; ++i)
+        {
+            QuadtreeTile::Direction dir = (QuadtreeTile::Direction) i;
+            if ((transitionEdges & (1 << i)) != 0)
+            {
+                generateTransitionEdge(dir);
+            }
+            else
+            {
+                generateEdge(dir);
+            }
+        }
+    }
+
+    // Allocate a block of memory and fill it with all the vertex indices for the tile mesh
+    v_uint16* allocateIndexList()
+    {
+        v_uint16* indices = NULL;
+        if (!m_vertexIndices.empty())
+        {
+            indices = new v_uint16[m_vertexIndices.size()];
+            if (indices)
+            {
+                std::copy(m_vertexIndices.begin(), m_vertexIndices.end(), indices);
+            }
+        }
+
+        return indices;
+    }
+
+private:
+    unsigned int m_subdivision;
+    vector<v_uint16> m_vertexIndices;
+};
 
 
 
@@ -352,12 +661,8 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
     }
 
     const unsigned int vertexCount = (TileSubdivision + 1) * (TileSubdivision + 1);
-    const unsigned int triangleCount = TileSubdivision * TileSubdivision * 2;
 
     float vertexData[vertexCount * MaxVertexSize];
-
-    v_uint16 indexData[triangleCount * 3];
-
     unsigned int vertexIndex = 0;
 
     float tileArc = float(PI) * m_extent;
@@ -454,28 +759,6 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
         }
     }
 
-    unsigned int triangleIndex = 0;
-    for (unsigned int i = 0; i < TileSubdivision; ++i)
-    {
-        for (unsigned int j = 0; j < TileSubdivision; ++j)
-        {
-            v_uint16 i00 = v_uint16(i * (TileSubdivision + 1) + j);
-            v_uint16 i01 = i00 + 1;
-            v_uint16 i10 = i00 + v_uint16(TileSubdivision + 1);
-            v_uint16 i11 = i10 + 1;
-
-            indexData[triangleIndex * 3 + 0] = i00;
-            indexData[triangleIndex * 3 + 1] = i01;
-            indexData[triangleIndex * 3 + 2] = i11;
-            ++triangleIndex;
-
-            indexData[triangleIndex * 3 + 0] = i00;
-            indexData[triangleIndex * 3 + 1] = i11;
-            indexData[triangleIndex * 3 + 2] = i10;
-            ++triangleIndex;
-        }
-    }
-
     if ((features & NormalMap) != 0)
     {
         rc.bindVertexArray(PositionNormalTexTangent, vertexData, vertexStride * 4);
@@ -488,7 +771,8 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
     {
         rc.bindVertexArray(VertexSpec::PositionTex, vertexData, vertexStride * 4);
     }
-    rc.drawPrimitives(PrimitiveBatch::Triangles, triangleCount * 3, PrimitiveBatch::Index16, reinterpret_cast<char*>(indexData));
+
+    drawTriangles(rc);
 }
 
 
@@ -499,11 +783,8 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
     unsigned int vertexStride = 8;
 
     const unsigned int vertexCount = (TileSubdivision + 1) * (TileSubdivision + 1);
-    const unsigned int triangleCount = TileSubdivision * TileSubdivision * 2;
 
     float vertexData[vertexCount * MaxVertexSize];
-    v_uint16 indexData[triangleCount * 3];
-
     unsigned int vertexIndex = 0;
 
     float tileArc = float(PI) * m_extent;
@@ -588,28 +869,6 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
         }
     }
 
-    unsigned int triangleIndex = 0;
-    for (unsigned int i = 0; i < TileSubdivision; ++i)
-    {
-        for (unsigned int j = 0; j < TileSubdivision; ++j)
-        {
-            v_uint16 i00 = v_uint16(i * (TileSubdivision + 1) + j);
-            v_uint16 i01 = i00 + 1;
-            v_uint16 i10 = i00 + v_uint16(TileSubdivision + 1);
-            v_uint16 i11 = i10 + 1;
-
-            indexData[triangleIndex * 3 + 0] = i00;
-            indexData[triangleIndex * 3 + 1] = i01;
-            indexData[triangleIndex * 3 + 2] = i11;
-            ++triangleIndex;
-
-            indexData[triangleIndex * 3 + 0] = i00;
-            indexData[triangleIndex * 3 + 1] = i11;
-            indexData[triangleIndex * 3 + 2] = i10;
-            ++triangleIndex;
-        }
-    }
-
     material.setBaseTexture(r.texture);
     rc.bindMaterial(&material);
 
@@ -625,7 +884,8 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
     {
         rc.bindVertexArray(VertexSpec::PositionTex, vertexData, vertexStride * 4);
     }
-    rc.drawPrimitives(PrimitiveBatch::Triangles, triangleCount * 3, PrimitiveBatch::Index16, reinterpret_cast<char*>(indexData));
+
+    drawTriangles(rc);
 }
 
 
@@ -816,20 +1076,37 @@ QuadtreeTile::drawPatch(RenderContext& rc, const MapLayer& layer, unsigned int f
     {
         for (unsigned int j = 0; j < columnCount; ++j)
         {
+            unsigned int diagonal = (i + j) & 1;
+
             v_uint16 i00 = v_uint16(i * (columnCount + 1) + j);
             v_uint16 i01 = i00 + 1;
             v_uint16 i10 = i00 + v_uint16(columnCount + 1);
             v_uint16 i11 = i10 + 1;
 
-            indexData[triangleIndex * 3 + 0] = i00;
-            indexData[triangleIndex * 3 + 1] = i01;
-            indexData[triangleIndex * 3 + 2] = i11;
-            ++triangleIndex;
+            if (diagonal == 0)
+            {
+                indexData[triangleIndex * 3 + 0] = i00;
+                indexData[triangleIndex * 3 + 1] = i01;
+                indexData[triangleIndex * 3 + 2] = i11;
+                ++triangleIndex;
 
-            indexData[triangleIndex * 3 + 0] = i00;
-            indexData[triangleIndex * 3 + 1] = i11;
-            indexData[triangleIndex * 3 + 2] = i10;
-            ++triangleIndex;
+                indexData[triangleIndex * 3 + 0] = i00;
+                indexData[triangleIndex * 3 + 1] = i11;
+                indexData[triangleIndex * 3 + 2] = i10;
+                ++triangleIndex;
+            }
+            else
+            {
+                indexData[triangleIndex * 3 + 0] = i01;
+                indexData[triangleIndex * 3 + 1] = i11;
+                indexData[triangleIndex * 3 + 2] = i10;
+                ++triangleIndex;
+
+                indexData[triangleIndex * 3 + 0] = i01;
+                indexData[triangleIndex * 3 + 1] = i10;
+                indexData[triangleIndex * 3 + 2] = i00;
+                ++triangleIndex;
+            }
         }
     }
 
@@ -848,6 +1125,36 @@ QuadtreeTile::drawPatch(RenderContext& rc, const MapLayer& layer, unsigned int f
 
         rc.drawPrimitives(PrimitiveBatch::Triangles, triangleCount * 3, PrimitiveBatch::Index16, reinterpret_cast<char*>(indexData));
     }
+}
+
+
+// Draw the tile mesh. This method assumes that the vertex arrays have already been set up.
+void
+QuadtreeTile::drawTriangles(RenderContext& rc) const
+{
+    if (!ms_indicesInitialized)
+    {
+        if (!createTileMeshIndices())
+        {
+            return;
+        }
+    }
+
+    // Choose the right mesh for this tile based on the tessellation of neighboring tiles
+    unsigned int stitchFlags = 0;
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+        if (!m_neighbors[i])
+        {
+            stitchFlags |= 1 << i;
+        }
+    }
+
+    rc.drawPrimitives(PrimitiveBatch::Triangles,
+                      ms_tileMeshTriangleCounts[stitchFlags] * 3,
+                      PrimitiveBatch::Index16,
+                      reinterpret_cast<const char*>(ms_tileMeshIndices[stitchFlags]));
+
 }
 
 
@@ -872,4 +1179,35 @@ QuadtreeTile::computeCenterAndRadius(const Vector3f& semiAxes)
     Vector3f corner(cosCornerLat * cos(lonWest), cosCornerLat * sin(lonWest), sin(cornerLat));
     corner = corner.cwise() * semiAxes;
     m_boundingSphereRadius = (corner - m_center).norm();
+}
+
+
+// Initialize vertex indices for all 16 possible tile meshes
+bool
+QuadtreeTile::createTileMeshIndices()
+{
+    // Don't reallocate
+    if (ms_indicesInitialized)
+    {
+        return true;
+    }
+
+    bool ok = true;
+
+    // Allocate indices for all 16 possible tile meshes
+    for (unsigned int i = 0; i < 16; ++i)
+    {
+        TileTriangulationBuilder builder(TileSubdivision);
+
+        builder.generateTile(i);
+        ms_tileMeshTriangleCounts[i] = builder.triangleCount();
+        ms_tileMeshIndices[i] = builder.allocateIndexList();
+    }
+
+    if (ok)
+    {
+        ms_indicesInitialized = true;
+    }
+
+    return ok;
 }

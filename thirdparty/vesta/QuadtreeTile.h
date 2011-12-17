@@ -17,20 +17,10 @@
 
 
 // The QuadtreeTile class is used for level of detail when rendering
-// planet geometry. QuadtreeTile implements a 'restricted quadtree':
-// adjacent tiles are not allowed to have more differ by more than
-// one level of detail. This greatly simplifies the process of stitching
-// together tiles to avoid cracks.
-//
-// The neighbor pointers of a tile will be null when no neighbors exist
-// at the current level of detail. When a tile is split into four child
-// tiles, missing neighbors must first be created in order to prevent violating
-// the level of detail restriction.
-//
-// Each tile is a patch of the ellipsoid surface, subdivided to TileSubdivision
-// squares per side. Batching is essential for performance on modern GPUs, since
-// the cost to cull at per-quad granularity is much higher than the cost of
-// rendering a few extra primitives.
+// planet geometry.
+
+#include "IntegerTypes.h"
+
 
 namespace vesta
 {
@@ -59,7 +49,7 @@ public:
         East  = 0,
         North = 1,
         West  = 2,
-        South = 3,
+        South = 3
     };
 
     enum Quadrant
@@ -67,13 +57,13 @@ public:
         Northeast = 0,
         Northwest = 1,
         Southwest = 2,
-        Southeast = 3,
+        Southeast = 3
     };
 
     enum
     {
         NormalMap = 0x1,
-        Normals   = 0x2,
+        Normals   = 0x2
     };
 
     QuadtreeTile();
@@ -141,6 +131,9 @@ public:
 
 private:
     void computeCenterAndRadius(const Eigen::Vector3f& semiAxes);
+    void drawTriangles(RenderContext& rc) const;
+
+    static bool createTileMeshIndices();
 
 private:
     QuadtreeTile* m_parent;
@@ -156,6 +149,10 @@ private:
     float m_boundingSphereRadius;
     float m_approxPixelSize;
     bool m_isCulled;
+
+    static v_uint16* ms_tileMeshIndices[16];
+    static unsigned int ms_tileMeshTriangleCounts[16];
+    static bool ms_indicesInitialized;
 };
 
 

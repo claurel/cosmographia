@@ -19,6 +19,7 @@
 // Celestia format. All transformations are performed on variant maps.
 
 #include "TransformCatalog.h"
+#include "../astro/Rotation.h"
 #include <vesta/Units.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -202,6 +203,39 @@ angleAxisValue(QVariant v, bool* ok)
     return result;
 }
 
+
+// Load a quaternion from a variant. The quaternion components are
+// expected to be stored in a list in the order w, x, y, z
+static Quaterniond quaternionValue(QVariant v, bool* ok)
+{
+    Quaterniond result = Quaterniond::Identity();
+    bool loadOk = false;
+
+    if (v.type() == QVariant::List)
+    {
+        QVariantList list = v.toList();
+        if (list.length() == 4)
+        {
+            if (list.at(0).canConvert(QVariant::Double) &&
+                list.at(1).canConvert(QVariant::Double) &&
+                list.at(2).canConvert(QVariant::Double) &&
+                list.at(3).canConvert(QVariant::Double))
+            {
+                result = Quaterniond(list.at(0).toDouble(), list.at(1).toDouble(), list.at(2).toDouble(), list.at(3).toDouble());
+                loadOk = true;
+            }
+        }
+    }
+
+    if (ok)
+    {
+        *ok = loadOk;
+    }
+
+    result.normalize();
+
+    return result;
+}
 
 
 TransformSscStatus
@@ -499,7 +533,18 @@ TransformSscRotationModel(QVariantMap* obj)
     else if (obj->contains("FixedQuaternion"))
     {
         rotationModel["type"] = "Fixed";
-        rotationModel["quaternion"] = obj->value("Quaternion");
+        QVariant qval = obj->value("FixedQuaternion");
+        bool ok = false;
+        Quaterniond q = quaternionValue(qval, &ok);
+        if (ok)
+        {
+            // Normalize the quaternion and convert it from Celestia's non-standard coordinate system
+            // conventions.
+            q.normalize();
+            q = xRotation(vesta::toRadians(90.0)) * q.conjugate() * xRotation(vesta::toRadians(-90.0));
+
+            rotationModel["quaternion"] = quaternionToVariant(q);
+        }
     }
 
     if (!rotationModel.empty())

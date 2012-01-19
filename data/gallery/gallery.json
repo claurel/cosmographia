@@ -252,6 +252,13 @@
     },
 
     {
+        "name" : "Ida",
+        "image" : "ida.png",
+        "source" : "http://photojournal.jpl.nasa.gov/catalog/PIA00330",
+        "credit" : "NASA/JPL/USGS"
+    },
+
+    {
         "name" : "Eros",
         "image" : "eros.png",
         "source" : "http://photojournal.jpl.nasa.gov/catalog/PIA02923",

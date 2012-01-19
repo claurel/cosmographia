@@ -117,7 +117,7 @@
           "trajectoryPlot" : { "fade" : 0.3 },
 
           "mass" : "2.59e20 kg",
-          "density" : 3.42,
+          "density" : 3.475,
 
           "center" : "Sun",
           "trajectoryFrame" : "EclipticJ2000",
@@ -329,6 +329,43 @@
          "geometry": {
            "source": "models/243ida.cmod",
            "type": "Mesh"
+         }
+      },
+
+      {
+         "name" : "Dactyl",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+
+         "center": "Ida",
+         "trajectoryFrame": "EquatorJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "1993-08-28T00:00:00",
+           "period": "23.1681599964298h",
+           "semiMajorAxis": 83.5,
+           "eccentricity": 0.13,
+           "inclination": 84.88,
+           "ascendingNode": 258.76,
+           "argumentOfPeriapsis": 113.0166537690101,
+           "meanAnomaly": 131.4933755035950
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+           "type" : "Uniform",
+           "period" : "23.1681599964298h",
+           "inclination" : 84.88,
+           "ascendingNode" : 90,
+           "meridianAngle" : 274.05
+         },
+
+         "geometry": {
+           "type": "Mesh",
+           "source": "models/2pallas.cmod",
+           "size" : 0.7
          }
       },
 

@@ -908,6 +908,24 @@ UniverseLoader::loadBuiltinTrajectory(const QVariantMap& info)
 vesta::Trajectory*
 UniverseLoader::loadChebyshevPolynomialsTrajectory(const QVariantMap& info)
 {
+    double period = 0.0;
+    bool isPeriodic = false;
+
+    if (info.contains("period"))
+    {
+        bool ok = false;
+        period = durationValue(info.value("period"), Unit_Day, 0.0, &ok);
+        if (!ok)
+        {
+            errorMessage("Invalid period given for Chebyshev polynomial trajectory.");
+            return NULL;
+        }
+        else
+        {
+            isPeriodic = true;
+        }
+    }
+
     if (info.contains("source"))
     {
         QString name = info.value("source").toString();
@@ -919,7 +937,13 @@ UniverseLoader::loadChebyshevPolynomialsTrajectory(const QVariantMap& info)
             return trajectory.ptr();
         }
 
-        trajectory = LoadChebyshevPolyFile(fileName);
+        ChebyshevPolyTrajectory* chebTrajectory = LoadChebyshevPolyFile(fileName);
+        if (chebTrajectory && isPeriodic)
+        {
+            chebTrajectory->setPeriod(period);
+        }
+
+        trajectory = chebTrajectory;
         if (!trajectory.isValid())
         {
             errorMessage(QString("Chebyshev polynomial trajectory file %1 not found or invalid").arg(fileName));

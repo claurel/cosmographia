@@ -46,7 +46,8 @@ GalleryView::GalleryView() :
     m_galleryRadius(50.0f),
     m_galleryAngle(toRadians(60.0f)),
     m_tileSpacing(0.1f),
-    m_selectedTileIndex(-1)
+    m_selectedTileIndex(-1),
+    m_hoverTileIndex(-1)
 {
 }
 
@@ -217,10 +218,13 @@ GalleryView::render(const Viewport& viewport)
         return;
     }
 
+    PlanarProjection projectionMat = PlanarProjection::CreatePerspective(m_cameraFov, viewport.aspectRatio(), 1.0f, 1000.0f);
+
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    gluPerspective(toDegrees(m_cameraFov), viewport.aspectRatio(), 1.0, 1000.0);
+    //glLoadIdentity();
+    //gluPerspective(toDegrees(m_cameraFov), viewport.aspectRatio(), 1.0, 1000.0);
+    glLoadMatrixf(projectionMat.matrix().data());
     glMatrixMode(GL_MODELVIEW);
 
     glPushMatrix();
@@ -263,6 +267,38 @@ GalleryView::render(const Viewport& viewport)
         }
 
         glPopMatrix();
+
+        if (tile.hover > 0.0f)
+        {
+            Transform3f projectionXform(projectionMat.matrix());
+            Transform3f cameraXform(Translation3f(Vector3f(0.0f, 0.0f, -centerOffset)));
+            Transform3f mvp = projectionXform * cameraXform;
+            Vector3f labelPos = tilePos + Vector3f(0.0f, -scaleFactor, 0.0f);
+            Vector3f projPosition = mvp * labelPos;
+            Vector2f screenPos((projPosition.x() * 0.5f + 0.5f) * viewport.width(),
+                               (projPosition.y() * 0.5f + 0.5f) * viewport.height());
+
+            glMatrixMode(GL_PROJECTION);
+            glPushMatrix();
+            glLoadIdentity();
+            gluOrtho2D(0, viewport.width(), 0, viewport.height());
+            glMatrixMode(GL_MODELVIEW);
+            glPushMatrix();
+            glLoadIdentity();
+            glTranslatef(0.125f, 0.125f, 0);
+
+            if (m_font.isValid())
+            {
+                glColor4f(1.0f, 1.0f, 1.0f, tile.hover);
+                m_font->bind();
+                m_font->render(tile.name, screenPos + Vector2f(m_font->textWidth(tile.name) * -0.5f, -5.0f));
+            }
+
+            glPopMatrix();
+            glMatrixMode(GL_PROJECTION);
+            glPopMatrix();
+            glMatrixMode(GL_MODELVIEW);
+        }
     }
 
     glPopMatrix();
@@ -281,6 +317,7 @@ GalleryView::addTile(TextureMap* texture, const std::string& name)
     tile.name = name;
     tile.row = m_tiles.size() / m_columns;
     tile.column = m_tiles.size() % m_columns;
+    tile.hover = 0.0f;
     m_tiles.push_back(tile);
 }
 
@@ -334,6 +371,19 @@ GalleryView::update(double dt)
     {
         m_opacity = std::max(0.0f, m_opacity - float(dt) * 1.0f);
     }
+
+    for (int tileIndex = 0; tileIndex < int(m_tiles.size()); ++tileIndex)
+    {
+        GalleryTile& tile = m_tiles[tileIndex];
+        if (tileIndex == m_hoverTileIndex)
+        {
+            tile.hover = min(1.0f, float(tile.hover + dt * 6));
+        }
+        else
+        {
+            tile.hover = max(0.0f, float(tile.hover - dt * 2));
+        }
+    }
 }
 
 
@@ -345,7 +395,35 @@ GalleryView::mouseReleased(const Viewport& viewport, int x, int y)
         return false;
     }
 
-    m_selectedTileIndex = -1;
+    m_selectedTileIndex = pickTile(viewport, x, y);
+    if (m_selectedTileIndex >= 0)
+    {
+        setVisible(false);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+void
+GalleryView::mouseMoved(const Viewport& viewport, int x, int y)
+{
+    m_hoverTileIndex = pickTile(viewport, x, y);
+}
+
+
+int
+GalleryView::pickTile(const Viewport& viewport, int x, int y)
+{
+    if (m_opacity <= 0.0f)
+    {
+        return false;
+    }
+
+    int pickedTileIndex = -1;
 
     Vector2f p = Vector2f((float(x) - viewport.x()) / viewport.width(),
                           -(float(y) - viewport.y()) / viewport.height()) * 2.0f + Vector2f(-1.0f, 1.0f);
@@ -381,17 +459,10 @@ GalleryView::mouseReleased(const Viewport& viewport, int x, int y)
 
         if (abs(intersection.x()) < tileScale && abs(intersection.y()) < tileScale)
         {
-            m_selectedTileIndex = tileIndex;
+            pickedTileIndex = tileIndex;
         }
     }
 
-    if (m_selectedTileIndex >= 0)
-    {
-        setVisible(false);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return pickedTileIndex;
 }
+

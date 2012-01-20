@@ -20,6 +20,7 @@
 
 #include <vesta/Viewport.h>
 #include <vesta/TextureMap.h>
+#include <vesta/TextureFont.h>
 #include <Eigen/Core>
 #include <vector>
 #include <string>
@@ -46,6 +47,7 @@ public:
     void update(double dt);
 
     bool mouseReleased(const vesta::Viewport& viewport, int x, int y);
+    void mouseMoved(const vesta::Viewport& viewport, int x, int y);
 
     /** Return the number of tiles in the gallery. */
     unsigned int tileCount() const
@@ -67,6 +69,16 @@ public:
 
     std::string tileName(int tileIndex) const;
 
+    vesta::TextureFont* font() const
+    {
+        return m_font.ptr();
+    }
+
+    void setFont(vesta::TextureFont* font)
+    {
+        m_font = font;
+    }
+
 private:
     struct GalleryTile
     {
@@ -74,6 +86,7 @@ private:
         std::string name;
         int row;
         int column;
+        float hover;
     };
 
     enum State
@@ -84,6 +97,8 @@ private:
 
     vesta::PlanarProjection camera() const;
     Eigen::Vector3f tilePosition(const GalleryTile& tile);
+
+    int pickTile(const vesta::Viewport& viewport, int x, int y);
 
 private:
     std::vector<GalleryTile> m_tiles;
@@ -100,6 +115,9 @@ private:
     float m_tileSpacing;
 
     int m_selectedTileIndex;
+    int m_hoverTileIndex;
+
+    vesta::counted_ptr<vesta::TextureFont> m_font;
 };
 
 #endif // _GALLERY_VIEW_H_

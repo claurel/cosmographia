@@ -204,14 +204,90 @@ GalleryView::tilePosition(const GalleryTile& tile)
     return Vector3f(x, y, z);
 }
 
+
 void
-GalleryView::render(const Viewport& viewport)
+GalleryView::renderTile(const Viewport& viewport,
+                        const Matrix4f& projectionMat,
+                        const GalleryTile& tile,
+                        bool isSelected)
 {
     const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
     const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
 
     const float tileFraction = 1.0f / (1.0f + m_tileSpacing);
     const float tileScale = 0.5f * tileFraction * m_galleryRadius * chordLength(m_galleryAngle / m_columns);
+
+    double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
+    float t = float(tile.row + tile.column) / float(m_rows + m_columns) * 1.0f + m_opacity * 2.0f - 1.0f;
+    t = max(-1.0f, min(1.0f, t));
+    if (!isSelected)
+    {
+        theta += (t - 1.0f) * toRadians(90.0f);
+    }
+
+    float scaleFactor = tileScale;
+    float alpha = m_opacity;
+    if (isSelected)
+    {
+        scaleFactor = (1.0f + 3.0f * (1.0f - m_opacity)) * tileScale;
+        alpha = min(1.0f, m_opacity * 3.0f);
+    }
+
+    Vector3f tilePos = tilePosition(tile);
+
+    glPushMatrix();
+    glTranslatef(tilePos.x(), tilePos.y(), tilePos.z());
+    glRotatef(-(toDegrees(theta) + 90.0f), 0.0f, 1.0f, 0.0f);
+    glScalef(scaleFactor, scaleFactor, scaleFactor);
+
+    if (tile.texture.isValid() && tile.texture->makeResident())
+    {
+        glBindTexture(GL_TEXTURE_2D, tile.texture->id());
+        glColor4f(1.0f, 1.0f, 1.0f, alpha);
+        drawRoundRectangle(2.0f, 2.0f, 0.3f, alpha);
+    }
+
+    glPopMatrix();
+
+    if (tile.hover > 0.0f)
+    {
+        Transform3f projectionXform(projectionMat);
+        Transform3f cameraXform(Translation3f(Vector3f(0.0f, 0.0f, -centerOffset)));
+        Transform3f mvp = projectionXform * cameraXform;
+        Vector3f labelPos = tilePos + Vector3f(0.0f, -scaleFactor, 0.0f);
+        Vector3f projPosition = mvp * labelPos;
+        Vector2f screenPos((projPosition.x() * 0.5f + 0.5f) * viewport.width(),
+                           (projPosition.y() * 0.5f + 0.5f) * viewport.height());
+
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        gluOrtho2D(0, viewport.width(), 0, viewport.height());
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        glTranslatef(0.125f, 0.125f, 0);
+
+        if (m_font.isValid())
+        {
+            glColor4f(1.0f, 1.0f, 1.0f, tile.hover);
+            m_font->bind();
+            m_font->render(tile.name, screenPos + Vector2f(m_font->textWidth(tile.name) * -0.5f, 4.0f));
+        }
+
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+    }
+}
+
+
+void
+GalleryView::render(const Viewport& viewport)
+{
+    const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
+    const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
 
     if (m_opacity <= 0.0f)
     {
@@ -222,8 +298,6 @@ GalleryView::render(const Viewport& viewport)
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    //glLoadIdentity();
-    //gluPerspective(toDegrees(m_cameraFov), viewport.aspectRatio(), 1.0, 1000.0);
     glLoadMatrixf(projectionMat.matrix().data());
     glMatrixMode(GL_MODELVIEW);
 
@@ -232,73 +306,22 @@ GalleryView::render(const Viewport& viewport)
 
     glEnable(GL_TEXTURE_2D);
 
+    // First, draw all tiles except the selected one
     for (int tileIndex = 0; tileIndex < int(m_tiles.size()); ++tileIndex)
     {
-        const GalleryTile& tile = m_tiles[tileIndex];
-
-        double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
-        float t = float(tile.row + tile.column) / float(m_rows + m_columns) * 1.0f + m_opacity * 2.0f - 1.0f;
-        t = max(-1.0f, min(1.0f, t));
         if (tileIndex != m_selectedTileIndex)
         {
-            theta += (t - 1.0f) * toRadians(90.0f);
+            const GalleryTile& tile = m_tiles[tileIndex];
+            renderTile(viewport, projectionMat.matrix(), tile, false);
         }
+    }
 
-        float scaleFactor = tileScale;
-        float alpha = m_opacity;
-        if (tileIndex == m_selectedTileIndex)
-        {
-            scaleFactor = (1.0f + 3.0f * (1.0f - m_opacity)) * tileScale;
-            alpha = min(1.0f, m_opacity * 3.0f);
-        }
-
-        Vector3f tilePos = tilePosition(tile);
-
-        glPushMatrix();
-        glTranslatef(tilePos.x(), tilePos.y(), tilePos.z());
-        glRotatef(-(toDegrees(theta) + 90.0f), 0.0f, 1.0f, 0.0f);
-        glScalef(scaleFactor, scaleFactor, scaleFactor);
-
-        if (tile.texture.isValid() && tile.texture->makeResident())
-        {
-            glBindTexture(GL_TEXTURE_2D, tile.texture->id());
-            glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            drawRoundRectangle(2.0f, 2.0f, 0.3f, alpha);
-        }
-
-        glPopMatrix();
-
-        if (tile.hover > 0.0f)
-        {
-            Transform3f projectionXform(projectionMat.matrix());
-            Transform3f cameraXform(Translation3f(Vector3f(0.0f, 0.0f, -centerOffset)));
-            Transform3f mvp = projectionXform * cameraXform;
-            Vector3f labelPos = tilePos + Vector3f(0.0f, -scaleFactor, 0.0f);
-            Vector3f projPosition = mvp * labelPos;
-            Vector2f screenPos((projPosition.x() * 0.5f + 0.5f) * viewport.width(),
-                               (projPosition.y() * 0.5f + 0.5f) * viewport.height());
-
-            glMatrixMode(GL_PROJECTION);
-            glPushMatrix();
-            glLoadIdentity();
-            gluOrtho2D(0, viewport.width(), 0, viewport.height());
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-            glLoadIdentity();
-            glTranslatef(0.125f, 0.125f, 0);
-
-            if (m_font.isValid())
-            {
-                glColor4f(1.0f, 1.0f, 1.0f, tile.hover);
-                m_font->bind();
-                m_font->render(tile.name, screenPos + Vector2f(m_font->textWidth(tile.name) * -0.5f, -5.0f));
-            }
-
-            glPopMatrix();
-            glMatrixMode(GL_PROJECTION);
-            glPopMatrix();
-            glMatrixMode(GL_MODELVIEW);
-        }
+    // Draw the selected tile last: it's in front and should occlude the others.
+    // (The z-buffer is disabled, otherwise we'd have to clear it between rendering
+    // the solar system and drawing the gallery tiles.)
+    if (m_selectedTileIndex >= 0 && m_selectedTileIndex < int(m_tiles.size()))
+    {
+        renderTile(viewport, projectionMat.matrix(), m_tiles[m_selectedTileIndex], true);
     }
 
     glPopMatrix();

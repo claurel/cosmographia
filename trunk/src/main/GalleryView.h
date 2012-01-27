@@ -97,6 +97,7 @@ private:
 
     vesta::PlanarProjection camera() const;
     Eigen::Vector3f tilePosition(const GalleryTile& tile);
+    void renderTile(const vesta::Viewport& viewport, const Eigen::Matrix4f& projectionMat, const GalleryTile& tile, bool isSelected);
 
     int pickTile(const vesta::Viewport& viewport, int x, int y);
 

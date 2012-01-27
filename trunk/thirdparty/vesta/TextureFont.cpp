@@ -1,5 +1,5 @@
 /*
- * $Revision: 623 $ $Date: 2011-09-26 13:34:12 -0700 (Mon, 26 Sep 2011) $
+ * $Revision: 638 $ $Date: 2012-01-26 14:36:47 -0800 (Thu, 26 Jan 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -145,7 +145,7 @@ TextureFont::renderUtf8(const string& text, const Vector2f& startPosition) const
             decodeBytes = 6;
         }
 
-        if (decodeBytes == 0 || i + decodeBytes >= text.length())
+        if (decodeBytes == 0 || i + decodeBytes > text.length())
         {
             // Invalid UTF-8 encoding
             break;

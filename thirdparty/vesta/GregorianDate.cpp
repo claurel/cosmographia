@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cassert>
+#include <limits>
 
 using namespace vesta;
 using namespace std;
@@ -199,6 +200,48 @@ static double UniformCalendarToJD(int year, unsigned int month, unsigned int day
 }
 
 
+// Convert day fraction to a time in hours, minutes, and seconds. This function handles leap seconds
+// correctly: when fraction is >= 1, hours and minutes are clamped to 23 and 59, but second is allowed
+// to be 60.
+static void DayFractionToTime(double fracDay, unsigned int& hour, unsigned int& minute, double& second)
+{
+    double fracHour = fracDay * 24.0;
+    hour = min(23, int(fracHour));
+
+    double fracMinute = (fracHour - hour) * 60.0;
+    minute = min(59, int(fracMinute));
+
+    second = (fracMinute - minute) * 60.0;
+}
+
+
+static void JDToCalendar(double jd, int& year, unsigned int& month, unsigned int& day)
+{
+    int a = int(floor(jd + 0.5));
+
+    double c;
+    if (a < 2299161)
+    {
+        c = double(a + 1524);
+    }
+    else
+    {
+        double b = double(int(floor((a - 1867216.25) / 36524.25)));
+        c = a + b - int(floor(b / 4)) + 1525;
+    }
+
+    int d = int(floor((c - 122.1) / 365.25));
+    int e = int(floor(365.25 * d));
+    int f = int(floor((c - e) / 30.6001));
+
+    double fracDay = c - e - floor(30.6001 * f) + jd + 0.5 - a;
+
+    month = f - 1 - 12 * (f / 14);
+    year = d - 4715 - (7 + month) / 10;
+    day = int(fracDay);
+}
+
+
 static void JDToCalendar(double jd,
                          int& year, unsigned int& month, unsigned int& day,
                          unsigned int& hour, unsigned int& minute, double& second)
@@ -295,6 +338,7 @@ static const LeapSecond DefaultLeapSecondList[] =
     { 32, 1999,  1,  1 },
     { 33, 2006,  1,  1 },
     { 34, 2009,  1,  1 },
+    { 35, 2012,  7,  1 },
 };
 
 
@@ -364,7 +408,7 @@ public:
 
             UTCDifferenceRecord utcDiff;
             utcDiff.diffSec = ls.taiOffset;
-            utcDiff.tai = UniformCalendarToJD(ls.year, ls.month, ls.day, 0, 0, 0);
+            utcDiff.tai = UniformCalendarToJD(ls.year, ls.month, ls.day, 0, 0, 0) + secondsToDays(ls.taiOffset);
             m_utcDiffs.push_back(utcDiff);
        }
    }
@@ -400,41 +444,68 @@ public:
        return m_calendarOffsets.find(dateHash(year, month, day)) != m_calendarOffsets.end();
    }
 
-   // Get the difference betweeen UTC and TAI at the specified instant
-   // in the TAI time scale.
-   double utcDifference(double taijd)
+
+   // Because of leap seconds, UTC is not a uniform time system: it is split into uniform
+   // intervals that begin and end when leap seconds are added (or subtracted, though
+   // to date there has not been a negative leap second.) This function converts atomic
+   // time (TAI) to a UTC Julian day number and day fraction.
+   void taiToUTCDayAndFraction(double taijd, double* utcDay, double* dayFraction)
    {
+       // Empty leap seconds table
        if (m_utcDiffs.empty())
        {
-           return 0.0;
+           double utc = taijd;
+           *utcDay = floor(utc + 0.5) - 0.5;
+           *dayFraction = utc - *utcDay;
+           return;
        }
 
+       // Find the uniform interval containing the TAI instant
        UTCDifferenceRecord comp;
        comp.tai = taijd;
        comp.diffSec = 0.0;
        vector<UTCDifferenceRecord>::const_iterator iter = lower_bound(m_utcDiffs.begin(), m_utcDiffs.end(), comp);
 
+       // The instant occurs before the introduction of leap seconds
+       if (iter == m_utcDiffs.begin())
+       {
+           double utc = taijd - secondsToDays(iter->diffSec);
+           *utcDay = floor(utc + 0.5) - 0.5;
+           *dayFraction = utc - *utcDay;
+           return;
+       }
+
+       UTCDifferenceRecord timeInterval;
+       double intervalLength;
        if (iter == m_utcDiffs.end())
        {
-           return m_utcDiffs.back().diffSec;
-       }
-       else if (taijd < iter->tai)
-       {
-           if (iter == m_utcDiffs.begin())
-           {
-               return 0.0;
-           }
-           else
-           {
-               --iter;
-               return iter->diffSec;
-           }
+           // The instant occurs in the last time interval (need special handling because end() - 1 isn't valid)
+           timeInterval = m_utcDiffs.back();
+           intervalLength = numeric_limits<double>::infinity();
        }
        else
        {
-           return iter->diffSec;
+           timeInterval = *(iter - 1);
+           intervalLength = iter->tai - timeInterval.tai;
+       }
+
+       double utcBase = timeInterval.tai - secondsToDays(timeInterval.diffSec);
+       double utcOffset = taijd - timeInterval.tai;
+
+       double days = floor(utcOffset);
+       *utcDay = utcBase + days;
+       *dayFraction = utcOffset - days;
+       if (intervalLength < numeric_limits<double>::infinity())
+       {
+           if (intervalLength - days < 0.5)
+           {
+               // We're in a day containing a leap second; decrement the day count and increment the day fraction
+               *utcDay -= 1.0;
+               *dayFraction += 1.0;
+           }
        }
    }
+
 
    // Get the difference betweeen UTC and TAI at the specified UTC
    // calendar day.
@@ -459,7 +530,7 @@ public:
        {
            if (iter == m_leapSeconds.begin())
            {
-               return 0.0;
+               return iter->taiOffset;
            }
            else
            {
@@ -724,9 +795,18 @@ GregorianDate::UTCDateFromTDBJD(double tdbjd)
     double second = 0;
 
     double tai = tdbjd - DeltaTAI / 86400.0;    
-    tai -= s_DefaultLeapSecondTable->utcDifference(tai) / 86400.0;
 
-    JDToCalendar(tai, year, month, day, hour, minute, second);
+    // Convert TAI to a UTC day and day fraction. If the instant occurs during a
+    // leap second, dayFraction will be >= 1
+    double utcDay = 0.0;
+    double dayFraction = 0.0;
+    s_DefaultLeapSecondTable->taiToUTCDayAndFraction(tai, &utcDay, &dayFraction);
+
+    // Get the calendar day; add a small fraction to prevent rounding errors
+    JDToCalendar(utcDay + 0.01, year, month, day);
+
+    // Convert the day fraction to a time of day
+    DayFractionToTime(dayFraction, hour, minute, second);
     unsigned int s = unsigned(second);
     unsigned int usec = unsigned((second - s) * 1.0e6);
 

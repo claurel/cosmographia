@@ -17,6 +17,8 @@
 
 #include "FeatureLabelSetGeometry.h"
 #include <vesta/RenderContext.h>
+#include <vesta/Intersect.h>
+#include <Eigen/LU>
 #include <algorithm>
 
 using namespace vesta;
@@ -25,7 +27,8 @@ using namespace std;
 
 
 FeatureLabelSetGeometry::FeatureLabelSetGeometry() :
-    m_maxFeatureDistance(0.0f)
+    m_maxFeatureDistance(0.0f),
+    m_occludingEllipsoid(Vector3d::Zero())
 {
 }
 
@@ -43,14 +46,38 @@ FeatureLabelSetGeometry::render(RenderContext& rc, double /* clock */) const
     // Render during the opaque pass if opaque or during the translucent pass if not.
     if (rc.pass() == RenderContext::TranslucentPass)
     {
+        AlignedEllipsoid testEllipsoid(m_occludingEllipsoid.semiAxes() * 0.999);
+        Vector3f ellipsoidSemiAxes = testEllipsoid.semiAxes().cast<float>();
+
+        // Get the position of the camera in the body-fixed frame of the labeled object
+        Transform3f inv = Transform3f(rc.modelview().inverse(Affine)); // Assuming an affine modelview matrix
+        Vector3f cameraPosition = inv.translation();
+
+        Vector3f viewDir = -cameraPosition.normalized();
+        double distanceToEllipsoid = 0.0;
+        TestRayEllipsoidIntersection(cameraPosition, viewDir, ellipsoidSemiAxes, &distanceToEllipsoid);
+
+        Hyperplane<float, 3> labelPlane(viewDir, cameraPosition + viewDir * float(distanceToEllipsoid));
+
         for (vector<Feature>::const_iterator iter = m_features.begin(); iter != m_features.end(); ++iter)
         {
-            rc.pushModelView();
-            rc.translateModelView(iter->position);
-            float cameraDistance = rc.modelview().translation().norm();
-            float pixelSize = iter->size / (rc.pixelSize() * cameraDistance);
+            Vector3f r = iter->position - cameraPosition;
 
-            if (pixelSize > 10.0f)
+            Vector3f labelPosition = labelPlane.projection(iter->position);
+            float k = -(labelPlane.normal().dot(cameraPosition) + labelPlane.offset()) / (labelPlane.normal().dot(r));
+            labelPosition = cameraPosition + k * r;
+
+            rc.pushModelView();
+            rc.translateModelView(labelPosition);
+            float featureDistance = rc.modelview().translation().norm();
+            float pixelSize = iter->size / (rc.pixelSize() * featureDistance);
+
+            float d = r.norm();
+            r /= d;
+            double t = 0.0;
+            TestRayEllipsoidIntersection(cameraPosition, r, ellipsoidSemiAxes, &t);
+
+            if (pixelSize > 10.0f && d < t)
             {
                 rc.drawText(Vector3f::Zero(), iter->label, m_font.ptr(), Spectrum(1.0f, 1.0f, 1.0f), 1.0f);
             }

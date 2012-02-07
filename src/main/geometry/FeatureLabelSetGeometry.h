@@ -20,6 +20,7 @@
 
 #include <vesta/Geometry.h>
 #include <vesta/TextureFont.h>
+#include <vesta/AlignedEllipsoid.h>
 #include <vector>
 #include <string>
 
@@ -52,6 +53,16 @@ public:
         m_font = font;
     }
 
+    vesta::AlignedEllipsoid occluder() const
+    {
+        return m_occludingEllipsoid;
+    }
+
+    void setOccluder(vesta::AlignedEllipsoid& e)
+    {
+        m_occludingEllipsoid = e;
+    }
+
 private:
     struct Feature
     {
@@ -64,6 +75,7 @@ private:
     float m_maxFeatureDistance;
 
     vesta::counted_ptr<vesta::TextureFont> m_font;
+    vesta::AlignedEllipsoid m_occludingEllipsoid;
 };
 
 #endif // _FEATURE_LABEL_SET_GEOMETRY_H_

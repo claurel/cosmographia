@@ -80,7 +80,7 @@
 #include <Eigen/LU>
 
 #include <QtGui>
-#include <QtOpenGL>
+#include <QGLWidget>
 #include <QFile>
 #include <QDataStream>
 

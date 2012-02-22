@@ -120,6 +120,11 @@
            "meanAnomaly": 153.074909
          },
          "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "7.771h"
+         },
          "geometry": {
            "type": "Globe",
            "radius": 750
@@ -144,9 +149,14 @@
            "meanAnomaly": 101.765285
          },
          "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+            "type" : "Uniform",
+            "period" : "3.17h"
+         },
          "geometry": {
            "type": "Globe",
-           "radius": 250
+           "radii" : [ 500, 350, 250 ]
          }
       },
 

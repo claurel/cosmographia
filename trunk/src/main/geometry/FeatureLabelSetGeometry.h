@@ -21,6 +21,7 @@
 #include <vesta/Geometry.h>
 #include <vesta/TextureFont.h>
 #include <vesta/AlignedEllipsoid.h>
+#include <Eigen/StdVector>
 #include <vector>
 #include <string>
 
@@ -41,7 +42,7 @@ public:
         return false;
     }
 
-    void addFeature(const std::string& label, const Eigen::Vector3f& position, float radius);
+    void addFeature(const std::string& label, const Eigen::Vector3f& position, float radius, const vesta::Spectrum& color);
 
     vesta::TextureFont* font() const
     {
@@ -66,12 +67,14 @@ public:
 private:
     struct Feature
     {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         std::string label;
         Eigen::Vector3f position;
         float size;
+        vesta::Spectrum color;
     };
 
-    std::vector<Feature> m_features;
+    std::vector<Feature, Eigen::aligned_allocator<Feature> > m_features;
     float m_maxFeatureDistance;
 
     vesta::counted_ptr<vesta::TextureFont> m_font;

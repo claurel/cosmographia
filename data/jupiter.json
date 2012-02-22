@@ -62,7 +62,7 @@
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 1821.6,
+              "radii" : [ 1829.4, 1819.4, 1815.7 ],
               "baseMap" : "textures/io.dds"
           }
 
@@ -95,7 +95,7 @@
           "geometry" :
           {
               "type" : "Globe",
-              "radius" : 1560.8,
+              "radii" : [ 1562.6, 1560.3, 1559.5 ],
               "baseMap" : "textures/europa.dds"
           }
         },

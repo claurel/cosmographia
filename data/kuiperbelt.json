@@ -28,7 +28,7 @@
          "rotationModel" :
          {
             "type" : "Uniform",
-            "period" : "3.9152h",
+            "period" : "3.915331h",
             "inclination" : 255,
             "ascendingNode": 25
          },

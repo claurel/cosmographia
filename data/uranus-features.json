@@ -1,0 +1,817 @@
+{
+  "version": "1.0",
+  "name": "Uranian Moon Surface Features",
+
+  "items" :
+  [
+    {
+      "type" : "FeatureLabels",
+      "name" : "Miranda Surface Features",
+      "body" : "Miranda",
+
+      "features": [
+        {
+          "origin": "King of Naples in \"The Tempest.\"", 
+          "diameter": 25.0, 
+          "code": "AA", 
+          "name": "Alonso", 
+          "longitude": 352.6, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/200", 
+          "latitude": -44.0
+        }, 
+        {
+          "origin": "Forest, location of \"As You Like It.\"", 
+          "diameter": 318.0, 
+          "code": "CR", 
+          "name": "Arden Corona", 
+          "longitude": 73.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/353", 
+          "latitude": -29.1
+        }, 
+        {
+          "origin": "Location of earlier action in \"The Tempest.\"", 
+          "diameter": 141.0, 
+          "code": "RU", 
+          "name": "Argier Rupes", 
+          "longitude": 322.8, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/365", 
+          "latitude": -43.2
+        }, 
+        {
+          "origin": "Location of Hamlet's castle.", 
+          "diameter": 323.0, 
+          "code": "CR", 
+          "name": "Elsinore Corona", 
+          "longitude": 257.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1776", 
+          "latitude": -24.8
+        }, 
+        {
+          "origin": "Home of twins and setting for \"The Comedy of Errors.\"", 
+          "diameter": 225.0, 
+          "code": "RE", 
+          "name": "Ephesus Regio", 
+          "longitude": 250.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1814", 
+          "latitude": -15.0
+        }, 
+        {
+          "origin": "Son of King of Naples; loves Miranda in \"The Tempest.\"", 
+          "diameter": 17.0, 
+          "code": "AA", 
+          "name": "Ferdinand", 
+          "longitude": 202.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1938", 
+          "latitude": -34.8
+        }, 
+        {
+          "origin": "A lord of Naples in \"The Tempest.\"", 
+          "diameter": 14.0, 
+          "code": "AA", 
+          "name": "Francisco", 
+          "longitude": 236.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2011", 
+          "latitude": -73.2
+        }, 
+        {
+          "origin": "Honest old counselor of Naples in \"The Tempest.\"", 
+          "diameter": 11.0, 
+          "code": "AA", 
+          "name": "Gonzalo", 
+          "longitude": 77.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2220", 
+          "latitude": -11.4
+        }, 
+        {
+          "origin": "Location of Macbeth's castle.", 
+          "diameter": 234.0, 
+          "code": "CR", 
+          "name": "Inverness Corona", 
+          "longitude": 325.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2704", 
+          "latitude": -66.9
+        }, 
+        {
+          "origin": "Location of part of \"Two Gentlemen From Verona.\"", 
+          "diameter": 399.0, 
+          "code": "RE", 
+          "name": "Mantua Regio", 
+          "longitude": 180.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3642", 
+          "latitude": -39.6
+        }, 
+        {
+          "origin": "Destination in \"The Tempest.\"", 
+          "diameter": 260.0, 
+          "code": "SU", 
+          "name": "Naples Sulcus", 
+          "longitude": 260.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4150", 
+          "latitude": -32.0
+        }, 
+        {
+          "origin": "Rightful Duke of Mila in \"The Tempest.\"", 
+          "diameter": 21.0, 
+          "code": "AA", 
+          "name": "Prospero", 
+          "longitude": 329.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4848", 
+          "latitude": -32.9
+        }, 
+        {
+          "origin": "Location of \"Winter's Tale.\"", 
+          "diameter": 174.0, 
+          "code": "RE", 
+          "name": "Sicilia Regio", 
+          "longitude": 317.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5515", 
+          "latitude": -30.0
+        }, 
+        {
+          "origin": "A drunken butler in \"The Tempest.\"", 
+          "diameter": 16.0, 
+          "code": "AA", 
+          "name": "Stephano", 
+          "longitude": 234.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5699", 
+          "latitude": -41.1
+        }, 
+        {
+          "origin": "Home of twins in the \"Comedy of Errors.\"", 
+          "diameter": 40.0, 
+          "code": "SU", 
+          "name": "Syracusa Sulcus", 
+          "longitude": 293.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5792", 
+          "latitude": -15.0
+        }, 
+        {
+          "origin": "Where Romeo and Juliet lived.", 
+          "diameter": 116.0, 
+          "code": "RU", 
+          "name": "Verona Rupes", 
+          "longitude": 347.8, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6359", 
+          "latitude": -18.3
+        }, 
+        {
+          "origin": "Location of castle where Macbeth was defeated.", 
+          "diameter": 244.0, 
+          "code": "RE", 
+          "name": "Dunsinane Regio", 
+          "longitude": 11.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1667", 
+          "latitude": -31.5
+        }, 
+        {
+          "origin": "A jester in \"The Tempest.\"", 
+          "diameter": 11.0, 
+          "code": "AA", 
+          "name": "Trinculo", 
+          "longitude": 163.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6084", 
+          "latitude": -63.7
+        }
+      ]
+    },
+
+    {
+      "type" : "FeatureLabels",
+      "name" : "Ariel Surface Features",
+      "body" : "Ariel",
+
+      "features": [
+        {
+          "origin": "Spirit of the iron mines.", 
+          "diameter": 20.0, 
+          "code": "AA", 
+          "name": "Abans", 
+          "longitude": 251.3, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/7", 
+          "latitude": -15.5
+        }, 
+        {
+          "origin": "Spirit in Spenser's \"Fairy Queene.\"", 
+          "diameter": 34.0, 
+          "code": "AA", 
+          "name": "Agape", 
+          "longitude": 336.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/80", 
+          "latitude": -46.9
+        }, 
+        {
+          "origin": "Eskimo benevolent spirit.", 
+          "diameter": 22.0, 
+          "code": "AA", 
+          "name": "Ataksak", 
+          "longitude": 224.3, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/446", 
+          "latitude": -53.1
+        }, 
+        {
+          "origin": "Good spirit in Maeterlinck's \"The Bluebird.\"", 
+          "diameter": 29.0, 
+          "code": "AA", 
+          "name": "Berylune", 
+          "longitude": 327.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/715", 
+          "latitude": -22.5
+        }, 
+        {
+          "origin": "German good spirits who live in woods.", 
+          "diameter": 343.0, 
+          "code": "CM", 
+          "name": "Brownie Chasma", 
+          "longitude": 337.6, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/895", 
+          "latitude": -16.0
+        }, 
+        {
+          "origin": "Spirit of beautiful maiden.", 
+          "diameter": 20.0, 
+          "code": "AA", 
+          "name": "Deive", 
+          "longitude": 23.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1462", 
+          "latitude": -22.3
+        }, 
+        {
+          "origin": "Czech ancestral benevolent spirit and household guardian.", 
+          "diameter": 22.0, 
+          "code": "AA", 
+          "name": "Djadek", 
+          "longitude": 251.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1555", 
+          "latitude": -12.0
+        }, 
+        {
+          "origin": "Slavic spirit protector of home.", 
+          "diameter": 71.0, 
+          "code": "AA", 
+          "name": "Domovoy", 
+          "longitude": 339.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1570", 
+          "latitude": -71.5
+        }, 
+        {
+          "origin": "Irish king of spirits; provided horses and wine to men.", 
+          "diameter": 31.0, 
+          "code": "AA", 
+          "name": "Finvara", 
+          "longitude": 19.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1961", 
+          "latitude": -15.8
+        }, 
+        {
+          "origin": "Irish god of battle; leads mens' souls to Annwn.", 
+          "diameter": 34.0, 
+          "code": "AA", 
+          "name": "Gwyn", 
+          "longitude": 22.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2297", 
+          "latitude": -77.5
+        }, 
+        {
+          "origin": "Replaced Oberon as King of Spirits when Oberon died.", 
+          "diameter": 40.0, 
+          "code": "AA", 
+          "name": "Huon", 
+          "longitude": 33.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2587", 
+          "latitude": -37.8
+        }, 
+        {
+          "origin": "Pueblo (USA) good spirits who bring rain or other blessings.", 
+          "diameter": 622.0, 
+          "code": "CM", 
+          "name": "Kachina Chasmata", 
+          "longitude": 246.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2879", 
+          "latitude": -33.7
+        }, 
+        {
+          "origin": "British race of quaint spirit babies.", 
+          "diameter": 467.0, 
+          "code": "CM", 
+          "name": "Kewpie Chasma", 
+          "longitude": 326.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2996", 
+          "latitude": -28.3
+        }, 
+        {
+          "origin": "French wind spirits who cure diseases.", 
+          "diameter": 365.0, 
+          "code": "CM", 
+          "name": "Korrigan Chasma", 
+          "longitude": 347.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3093", 
+          "latitude": -27.6
+        }, 
+        {
+          "origin": "Vital spirits (Gold Coast).", 
+          "diameter": 142.0, 
+          "code": "CM", 
+          "name": "Kra Chasma", 
+          "longitude": 354.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3110", 
+          "latitude": -32.1
+        }, 
+        {
+          "origin": "Inca good spirit.", 
+          "diameter": 30.0, 
+          "code": "AA", 
+          "name": "Laica", 
+          "longitude": 44.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3236", 
+          "latitude": -21.3
+        }, 
+        {
+          "origin": "Queen of Spirits, dethroned Titania.", 
+          "diameter": 34.0, 
+          "code": "AA", 
+          "name": "Mab", 
+          "longitude": 352.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3551", 
+          "latitude": -38.8
+        }, 
+        {
+          "origin": "Spirit heroine of medieval French story.", 
+          "diameter": 50.0, 
+          "code": "AA", 
+          "name": "Melusine", 
+          "longitude": 8.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3823", 
+          "latitude": -52.9
+        }, 
+        {
+          "origin": "Irish Queen of Fairies.", 
+          "diameter": 39.0, 
+          "code": "AA", 
+          "name": "Oonagh", 
+          "longitude": 244.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4471", 
+          "latitude": -21.9
+        }, 
+        {
+          "origin": "Spirit in Hudson's \"Green Mansions.\"", 
+          "diameter": 41.0, 
+          "code": "AA", 
+          "name": "Rima", 
+          "longitude": 260.8, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5036", 
+          "latitude": -18.3
+        }, 
+        {
+          "origin": "Earth spirits.", 
+          "diameter": 305.0, 
+          "code": "VA", 
+          "name": "Sprite Vallis", 
+          "longitude": 340.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5671", 
+          "latitude": -14.9
+        }, 
+        {
+          "origin": "British air spirits who influence the temperaments man.", 
+          "diameter": 349.0, 
+          "code": "CM", 
+          "name": "Sylph Chasma", 
+          "longitude": 353.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5790", 
+          "latitude": -48.6
+        }, 
+        {
+          "origin": "Spirits or dwarfs.", 
+          "diameter": 328.0, 
+          "code": "VA", 
+          "name": "Leprechaun Vallis", 
+          "longitude": 10.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3355", 
+          "latitude": -10.4
+        }, 
+        {
+          "origin": "British spirits that live in rocks.", 
+          "diameter": 278.0, 
+          "code": "CM", 
+          "name": "Pixie Chasma", 
+          "longitude": 5.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4744", 
+          "latitude": -20.4
+        }, 
+        {
+          "origin": "Good spirit who fills Italian children's stockings with toys on twelfth night.", 
+          "diameter": 21.0, 
+          "code": "AA", 
+          "name": "Befana", 
+          "longitude": 31.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/661", 
+          "latitude": -17.0
+        }, 
+        {
+          "origin": "Spirit that brings day.", 
+          "diameter": 78.0, 
+          "code": "AA", 
+          "name": "Yangoor", 
+          "longitude": 279.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6638", 
+          "latitude": -68.7
+        }
+      ]
+    },
+
+    {
+      "type" : "FeatureLabels",
+      "name" : "Umbriel Surface Features",
+      "body" : "Umbriel",
+
+      "features": [
+        {
+          "origin": "Dwarf who guarded Niebelung gold, also had a mantle of invisibility.", 
+          "diameter": 52.0, 
+          "code": "AA", 
+          "name": "Alberich", 
+          "longitude": 42.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/163", 
+          "latitude": -33.6
+        }, 
+        {
+          "origin": "Troll who helped build a church in Kallundburg, Zealand.", 
+          "diameter": 43.0, 
+          "code": "AA", 
+          "name": "Fin", 
+          "longitude": 44.3, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1955", 
+          "latitude": -37.4
+        }, 
+        {
+          "origin": "King of gnomes.", 
+          "diameter": 88.0, 
+          "code": "AA", 
+          "name": "Gob", 
+          "longitude": 27.8, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2196", 
+          "latitude": -12.7
+        }, 
+        {
+          "origin": "Polynesian chief evil spirit.", 
+          "diameter": 86.0, 
+          "code": "AA", 
+          "name": "Kanaloa", 
+          "longitude": 345.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2912", 
+          "latitude": -10.8
+        }, 
+        {
+          "origin": "Macouas and Banayis evil spirit.", 
+          "diameter": 58.0, 
+          "code": "AA", 
+          "name": "Minepa", 
+          "longitude": 8.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3909", 
+          "latitude": -42.7
+        }, 
+        {
+          "origin": "Persian evil spirit who disguised malevolence by charm; disturbed natural elements and heavenly bodies.", 
+          "diameter": 61.0, 
+          "code": "AA", 
+          "name": "Peri", 
+          "longitude": 4.3, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4657", 
+          "latitude": -9.2
+        }, 
+        {
+          "origin": "Chief devil.", 
+          "diameter": 50.0, 
+          "code": "AA", 
+          "name": "Setibos", 
+          "longitude": 346.3, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5443", 
+          "latitude": -30.8
+        }, 
+        {
+          "origin": "Volga Finn evil spirit.", 
+          "diameter": 98.0, 
+          "code": "AA", 
+          "name": "Vuver", 
+          "longitude": 311.6, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6460", 
+          "latitude": -4.7
+        }, 
+        {
+          "origin": "Australian dark spirit.", 
+          "diameter": 131.0, 
+          "code": "AA", 
+          "name": "Wunda", 
+          "longitude": 273.6, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6587", 
+          "latitude": -7.9
+        }, 
+        {
+          "origin": "Slavic evil spirit.", 
+          "diameter": 44.0, 
+          "code": "AA", 
+          "name": "Zlyden", 
+          "longitude": 326.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6747", 
+          "latitude": -23.3
+        }, 
+        {
+          "origin": "Baramba (West Africa) devil spirit.", 
+          "diameter": 208.0, 
+          "code": "AA", 
+          "name": "Wokolo", 
+          "longitude": 1.8, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6568", 
+          "latitude": -30.0
+        }, 
+        {
+          "origin": "Aboriginal spirit who travels at night.", 
+          "diameter": 164.0, 
+          "code": "AA", 
+          "name": "Malingee", 
+          "longitude": 13.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3608", 
+          "latitude": -22.9
+        }, 
+        {
+          "origin": "Troll who stole three wives of a man living in Englerup.", 
+          "diameter": 72.0, 
+          "code": "AA", 
+          "name": "Skynd", 
+          "longitude": 331.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5595", 
+          "latitude": -1.8
+        }
+      ]
+    },
+
+    {
+      "type" : "FeatureLabels",
+      "name" : "Titania Surface Features",
+      "body" : "Titania",
+
+      "features": [
+        {
+          "origin": "Wife of Antipholus of Ephesus in \"The Comedy of Errors.\"", 
+          "diameter": 50.0, 
+          "code": "AA", 
+          "name": "Adriana", 
+          "longitude": 3.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/59", 
+          "latitude": -20.1
+        }, 
+        {
+          "origin": "Location in \"As You Like It.\"", 
+          "diameter": 258.0, 
+          "code": "CM", 
+          "name": "Belmont Chasma", 
+          "longitude": 32.6, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/678", 
+          "latitude": -8.5
+        }, 
+        {
+          "origin": "Sister of the French queen in \"Henry VI, part 3.\"", 
+          "diameter": 51.0, 
+          "code": "AA", 
+          "name": "Bona", 
+          "longitude": 351.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/809", 
+          "latitude": -55.8
+        }, 
+        {
+          "origin": "Mother of King John.", 
+          "diameter": 74.0, 
+          "code": "AA", 
+          "name": "Elinor", 
+          "longitude": 333.6, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1765", 
+          "latitude": -44.8
+        }, 
+        {
+          "origin": "Mother of Hamlet.", 
+          "diameter": 326.0, 
+          "code": "AA", 
+          "name": "Gertrude", 
+          "longitude": 287.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2150", 
+          "latitude": -15.8
+        }, 
+        {
+          "origin": "Cymbelline's daughter.", 
+          "diameter": 28.0, 
+          "code": "AA", 
+          "name": "Imogen", 
+          "longitude": 321.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2679", 
+          "latitude": -23.8
+        }, 
+        {
+          "origin": "Attendant to Cleopatra in \"Anthony and Cleopatra.\"", 
+          "diameter": 33.0, 
+          "code": "AA", 
+          "name": "Iras", 
+          "longitude": 338.8, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2712", 
+          "latitude": -19.2
+        }, 
+        {
+          "origin": "Shylock's daughter in \"The Merchant of Venice.\"", 
+          "diameter": 64.0, 
+          "code": "AA", 
+          "name": "Jessica", 
+          "longitude": 285.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2824", 
+          "latitude": -55.3
+        }, 
+        {
+          "origin": "Henry VIII's first queen.", 
+          "diameter": 75.0, 
+          "code": "AA", 
+          "name": "Katherine", 
+          "longitude": 331.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2954", 
+          "latitude": -51.2
+        }, 
+        {
+          "origin": "Waiting woman to Julia in \"Two Gentlemen of Verona.\"", 
+          "diameter": 58.0, 
+          "code": "AA", 
+          "name": "Lucetta", 
+          "longitude": 277.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3501", 
+          "latitude": -14.7
+        }, 
+        {
+          "origin": "Daughter to Pericles in \"Pericles, Prince of Tyre.\"", 
+          "diameter": 40.0, 
+          "code": "AA", 
+          "name": "Marina", 
+          "longitude": 316.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3710", 
+          "latitude": -15.5
+        }, 
+        {
+          "origin": "Location in \"Much Ado About Nothing.\"", 
+          "diameter": 1492.0, 
+          "code": "CM", 
+          "name": "Messina Chasmata", 
+          "longitude": 335.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3870", 
+          "latitude": -33.3
+        }, 
+        {
+          "origin": "Shepardess in \"The Winter's Tale.\"", 
+          "diameter": 101.0, 
+          "code": "AA", 
+          "name": "Mopsa", 
+          "longitude": 302.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4028", 
+          "latitude": -11.9
+        }, 
+        {
+          "origin": "Alcibiades' mistress in \"Timon of Athens.\"", 
+          "diameter": 35.0, 
+          "code": "AA", 
+          "name": "Phrynia", 
+          "longitude": 309.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4714", 
+          "latitude": -24.3
+        }, 
+        {
+          "origin": "Location in \"All's Well That Ends Well.\"", 
+          "diameter": 402.0, 
+          "code": "RU", 
+          "name": "Rousillon Rupes", 
+          "longitude": 26.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5202", 
+          "latitude": -14.7
+        }, 
+        {
+          "origin": "Friend to Vergilia in \"Coriolanus.\"", 
+          "diameter": 59.0, 
+          "code": "AA", 
+          "name": "Valeria", 
+          "longitude": 4.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6280", 
+          "latitude": -34.5
+        }, 
+        {
+          "origin": "Wife of Julius Caesar.", 
+          "diameter": 100.0, 
+          "code": "AA", 
+          "name": "Calphurnia", 
+          "longitude": 291.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/980", 
+          "latitude": -42.4
+        }, 
+        {
+          "origin": "Attendant to Hero and Beatrice in \"Much Ado About Nothing.\"", 
+          "diameter": 135.0, 
+          "code": "AA", 
+          "name": "Ursula", 
+          "longitude": 45.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6245", 
+          "latitude": -12.4
+        }
+      ]
+    },
+
+    {
+      "type" : "FeatureLabels",
+      "name" : "Oberon Surface Features",
+      "body" : "Oberon",
+
+      "features": [
+        {
+          "origin": "Shakespearean hero in \"Anthony and Cleopatra.\"", 
+          "diameter": 47.0, 
+          "code": "AA", 
+          "name": "Antony", 
+          "longitude": 65.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/300", 
+          "latitude": -27.5
+        }, 
+        {
+          "origin": "Shakespearean character in \"Merry Wives of Windsor.\"", 
+          "diameter": 124.0, 
+          "code": "AA", 
+          "name": "Falstaff", 
+          "longitude": 19.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1905", 
+          "latitude": -22.1
+        }, 
+        {
+          "origin": "Shakespearean hero.", 
+          "diameter": 206.0, 
+          "code": "AA", 
+          "name": "Hamlet", 
+          "longitude": 44.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2340", 
+          "latitude": -46.1
+        }, 
+        {
+          "origin": "Shakespearean hero in \"King Lear.\"", 
+          "diameter": 126.0, 
+          "code": "AA", 
+          "name": "Lear", 
+          "longitude": 31.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3318", 
+          "latitude": -5.4
+        }, 
+        {
+          "origin": "Shakespearean hero.", 
+          "diameter": 203.0, 
+          "code": "AA", 
+          "name": "MacBeth", 
+          "longitude": 112.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3552", 
+          "latitude": -58.4
+        }, 
+        {
+          "origin": "Spirit place, forest home of Oberon in \"Midsummer Night's Dream.\"", 
+          "diameter": 537.0, 
+          "code": "CM", 
+          "name": "Mommur Chasma", 
+          "longitude": 323.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3958", 
+          "latitude": -16.3
+        }, 
+        {
+          "origin": "Shakespearean character.", 
+          "diameter": 114.0, 
+          "code": "AA", 
+          "name": "Othello", 
+          "longitude": 42.9, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4521", 
+          "latitude": -66.0
+        }, 
+        {
+          "origin": "Shakespearean character in \"Romeo and Juliet.\"", 
+          "diameter": 159.0, 
+          "code": "AA", 
+          "name": "Romeo", 
+          "longitude": 89.4, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5176", 
+          "latitude": -28.7
+        }, 
+        {
+          "origin": "Shakespearean hero in \"Julius Caesar.\"", 
+          "diameter": 76.0, 
+          "code": "AA", 
+          "name": "Caesar", 
+          "longitude": 61.1, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/957", 
+          "latitude": -26.6
+        }, 
+        {
+          "origin": "Shakespearean hero.", 
+          "diameter": 120.0, 
+          "code": "AA", 
+          "name": "Coriolanus", 
+          "longitude": 345.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1312", 
+          "latitude": -11.4
+        }
+      ]
+    }
+  ]
+}

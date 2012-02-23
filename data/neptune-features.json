@@ -1,0 +1,566 @@
+{
+  "version": "1.0",
+  "name": "Neptunian Moon Surface Features",
+
+  "items" :
+  [
+    {
+      "type" : "FeatureLabels",
+      "name" : "Triton Surface Features",
+      "body" : "Triton",
+
+      "features": [
+        {
+          "origin": "Egyptian sacred island in Nile, \"paradise.\"", 
+          "diameter": 0.0, 
+          "code": "PM", 
+          "name": "Abatos Planum", 
+          "longitude": 58.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/8", 
+          "latitude": -21.5
+        }, 
+        {
+          "origin": "Tortoise upholding the world (India).", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Akupara Maculae", 
+          "longitude": 63.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/142", 
+          "latitude": -27.5
+        }, 
+        {
+          "origin": "Quecha (Ecuador) water boa.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Amarum", 
+          "longitude": 24.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/214", 
+          "latitude": 26.0
+        }, 
+        {
+          "origin": "Norse fish shaped dwarf.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Andvari", 
+          "longitude": 34.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/266", 
+          "latitude": 20.5
+        }, 
+        {
+          "origin": "Egyptian dragon of darkness.", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Apep Cavus", 
+          "longitude": 301.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/315", 
+          "latitude": 20.0
+        }, 
+        {
+          "origin": "Nama Bushman word for rain.", 
+          "diameter": 0.0, 
+          "code": "DO", 
+          "name": "Awib Dorsa", 
+          "longitude": 80.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/514", 
+          "latitude": -7.0
+        }, 
+        {
+          "origin": "Frog symbolizing the sun on the horizon (India).", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Bheki Cavus", 
+          "longitude": 308.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/729", 
+          "latitude": 16.0
+        }, 
+        {
+          "origin": "Yoruba; river named for obedient son of god.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Bia Sulci", 
+          "longitude": 3.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/733", 
+          "latitude": -38.0
+        }, 
+        {
+          "origin": "Celtic mythological river.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Boynne Sulci", 
+          "longitude": 350.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/852", 
+          "latitude": -13.0
+        }, 
+        {
+          "origin": "Island location of temple of Mukasa (Uganda).", 
+          "diameter": 0.0, 
+          "code": "RE", 
+          "name": "Bubembe Regio", 
+          "longitude": 335.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/905", 
+          "latitude": 18.0
+        }, 
+        {
+          "origin": "Mayan deity.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Cay", 
+          "longitude": 44.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1092", 
+          "latitude": -12.0
+        }, 
+        {
+          "origin": "Legendary island described by Marco Polo.", 
+          "diameter": 0.0, 
+          "code": "PM", 
+          "name": "Cipango Planum", 
+          "longitude": 34.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1219", 
+          "latitude": 11.5
+        }, 
+        {
+          "origin": "Babylonian fertility god represented as a fish.", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Dagon Cavus", 
+          "longitude": 345.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1387", 
+          "latitude": 29.0
+        }, 
+        {
+          "origin": "Angolan sacred lake.", 
+          "diameter": 0.0, 
+          "code": "PE", 
+          "name": "Dilolo Patera", 
+          "longitude": 24.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1535", 
+          "latitude": 26.0
+        }, 
+        {
+          "origin": "Nanay mistress of fishing, Sea of Okhotsk.", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Doro Macula", 
+          "longitude": 31.7, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/1583", 
+          "latitude": -27.5
+        }, 
+        {
+          "origin": "Tortuous sea; literally, \"Serpent Bay\" (Norse).", 
+          "diameter": 0.0, 
+          "code": "PE", 
+          "name": "Gandvik Patera", 
+          "longitude": 5.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2091", 
+          "latitude": 28.0
+        }, 
+        {
+          "origin": "Egyptian frog goddess.", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Hekt Cavus", 
+          "longitude": 342.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2420", 
+          "latitude": 26.0
+        }, 
+        {
+          "origin": "Zulu water-sprite.", 
+          "diameter": 0.0, 
+          "code": "PU", 
+          "name": "Hili", 
+          "longitude": 35.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2504", 
+          "latitude": -57.0
+        }, 
+        {
+          "origin": "Japanese deity born in shape of a jellyfish.", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Hirugo Cavus", 
+          "longitude": 345.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2524", 
+          "latitude": 14.5
+        }, 
+        {
+          "origin": "Chinese sacred river.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Ho Sulci", 
+          "longitude": 305.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2530", 
+          "latitude": 2.0
+        }, 
+        {
+          "origin": "Lozi (Zambia) water snake linked with destruction.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Ilomba", 
+          "longitude": 57.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2670", 
+          "latitude": -14.5
+        }, 
+        {
+          "origin": "Hindu river goddess.", 
+          "diameter": 0.0, 
+          "code": "FO", 
+          "name": "Jumna Fossae", 
+          "longitude": 44.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2864", 
+          "latitude": -13.5
+        }, 
+        {
+          "origin": "Sacred lake of Zoroastrianism.", 
+          "diameter": 0.0, 
+          "code": "PE", 
+          "name": "Kasu Patera", 
+          "longitude": 14.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2951", 
+          "latitude": 39.0
+        }, 
+        {
+          "origin": "The god Prajapati as a tortoise (India).", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Kasyapa Cavus", 
+          "longitude": 358.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/2952", 
+          "latitude": 7.5
+        }, 
+        {
+          "origin": "Mabuiag (Melanisia) island of the dead.", 
+          "diameter": 0.0, 
+          "code": "PE", 
+          "name": "Kibu Patera", 
+          "longitude": 43.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3022", 
+          "latitude": 10.5
+        }, 
+        {
+          "origin": "Slavic spirit of swamps, household spirit.", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Kikimora Maculae", 
+          "longitude": 78.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3029", 
+          "latitude": -31.0
+        }, 
+        {
+          "origin": "Norse river through which dead must pass.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Kormet Sulci", 
+          "longitude": 335.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3089", 
+          "latitude": 23.0
+        }, 
+        {
+          "origin": "Norse giant sea monster.", 
+          "diameter": 0.0, 
+          "code": "CA", 
+          "name": "Kraken Catena", 
+          "longitude": 35.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3112", 
+          "latitude": 14.0
+        }, 
+        {
+          "origin": "Babylonian destructive fish-man spirit.", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Kulilu Cavus", 
+          "longitude": 4.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3144", 
+          "latitude": 41.0
+        }, 
+        {
+          "origin": "Vishnu in the form of a tortoise.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Kurma", 
+          "longitude": 61.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3167", 
+          "latitude": -16.5
+        }, 
+        {
+          "origin": "Norse sacred river.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Leipter Sulci", 
+          "longitude": 9.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3338", 
+          "latitude": 7.0
+        }, 
+        {
+          "origin": "Hebrew sea monster upholding earth.", 
+          "diameter": 0.0, 
+          "code": "PE", 
+          "name": "Leviathan Patera", 
+          "longitude": 28.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3368", 
+          "latitude": 17.0
+        }, 
+        {
+          "origin": "Chinese sacred river.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Lo Sulci", 
+          "longitude": 321.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3437", 
+          "latitude": 3.8
+        }, 
+        {
+          "origin": "Fish that holds up the universe (Persian).", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Mah Cavus", 
+          "longitude": 6.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3588", 
+          "latitude": 38.0
+        }, 
+        {
+          "origin": "Tonga sea spirit.", 
+          "diameter": 0.0, 
+          "code": "PU", 
+          "name": "Mahilani", 
+          "longitude": 359.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3590", 
+          "latitude": -50.5
+        }, 
+        {
+          "origin": "Ila (Zambia) \"the flooder.\"", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Mangwe Cavus", 
+          "longitude": 343.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3629", 
+          "latitude": -7.0
+        }, 
+        {
+          "origin": "Chaga (Tazania) mythical large fish.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Mazomba", 
+          "longitude": 63.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3771", 
+          "latitude": -18.5
+        }, 
+        {
+          "origin": "French fictional island, meaning \"nowhere.\"", 
+          "diameter": 0.0, 
+          "code": "PM", 
+          "name": "Medamothi Planum", 
+          "longitude": 69.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3789", 
+          "latitude": 3.5
+        }, 
+        {
+          "origin": "Chinese symbol of duality in nature.", 
+          "diameter": 0.0, 
+          "code": "RE", 
+          "name": "Monad Regio", 
+          "longitude": 37.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/3961", 
+          "latitude": 20.0
+        }, 
+        {
+          "origin": "Japanese mythic fish; maker of earthquakes.", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Namazu Macula", 
+          "longitude": 14.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4125", 
+          "latitude": -25.5
+        }, 
+        {
+          "origin": "Mouth of this river is Ostiak entrance to underworld.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Ob Sulci", 
+          "longitude": 328.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4385", 
+          "latitude": -6.0
+        }, 
+        {
+          "origin": "Norse river through which dead pass.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Ormet Sulci", 
+          "longitude": 337.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4496", 
+          "latitude": 17.0
+        }, 
+        {
+          "origin": "Finnish fortune-telling fish god.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Ravgga", 
+          "longitude": 71.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4959", 
+          "latitude": -3.0
+        }, 
+        {
+          "origin": "Breton bay of souls.", 
+          "diameter": 0.0, 
+          "code": "FO", 
+          "name": "Raz Fossae", 
+          "longitude": 21.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4969", 
+          "latitude": 8.0
+        }, 
+        {
+          "origin": "Egyptian fish who wept fertilizing tears.", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Rem Maculae", 
+          "longitude": 349.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/4990", 
+          "latitude": 13.0
+        }, 
+        {
+          "origin": "French isle of winds.", 
+          "diameter": 0.0, 
+          "code": "PL", 
+          "name": "Ruach Planitia", 
+          "longitude": 24.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5208", 
+          "latitude": 28.0
+        }, 
+        {
+          "origin": "Japanese undersea dragon palace.", 
+          "diameter": 0.0, 
+          "code": "PL", 
+          "name": "Ryugu Planitia", 
+          "longitude": 27.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5249", 
+          "latitude": -5.0
+        }, 
+        {
+          "origin": "Egypian water monster; personification of evil.", 
+          "diameter": 0.0, 
+          "code": "CA", 
+          "name": "Set Catena", 
+          "longitude": 33.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5439", 
+          "latitude": 22.0
+        }, 
+        {
+          "origin": "Pueblo (USA) hole or lake of emergence from underworld.", 
+          "diameter": 0.0, 
+          "code": "PL", 
+          "name": "Sipapu Planitia", 
+          "longitude": 36.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5572", 
+          "latitude": -4.0
+        }, 
+        {
+          "origin": "Norse river of daggers and spears.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Slidr Sulci", 
+          "longitude": 350.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5598", 
+          "latitude": 23.5
+        }, 
+        {
+          "origin": "M\u0101ori fishing and sea god.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Tangaroa", 
+          "longitude": 65.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5853", 
+          "latitude": -25.0
+        }, 
+        {
+          "origin": "Yoruba; river named for willful son of god.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Tano Sulci", 
+          "longitude": 337.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/5857", 
+          "latitude": 33.5
+        }, 
+        {
+          "origin": "Underground realm across Black River (Finnish).", 
+          "diameter": 0.0, 
+          "code": "PL", 
+          "name": "Tuonela Planitia", 
+          "longitude": 14.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6134", 
+          "latitude": 34.0
+        }, 
+        {
+          "origin": "Zulu reed from which humanity sprang.", 
+          "diameter": 0.0, 
+          "code": "RE", 
+          "name": "Uhlanga Regio", 
+          "longitude": 357.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6189", 
+          "latitude": -37.0
+        }, 
+        {
+          "origin": "Hawaiian shark god.", 
+          "diameter": 0.0, 
+          "code": "CB", 
+          "name": "Ukupanio Cavus", 
+          "longitude": 23.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6196", 
+          "latitude": 35.0
+        }, 
+        {
+          "origin": "Greatest of Elivagar rivers, a stream of ice.", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Vimur Sulci", 
+          "longitude": 59.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6391", 
+          "latitude": -11.0
+        }, 
+        {
+          "origin": "Amour of Merlin (Welsh).", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Viviane Macula", 
+          "longitude": 36.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6418", 
+          "latitude": -31.0
+        }, 
+        {
+          "origin": "Slavic water spirit.", 
+          "diameter": 0.0, 
+          "code": "AA", 
+          "name": "Vodyanoy", 
+          "longitude": 28.5, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6423", 
+          "latitude": -17.0
+        }, 
+        {
+          "origin": "Japanese heavenly river; literally, \"peace.\"", 
+          "diameter": 0.0, 
+          "code": "SU", 
+          "name": "Yasu Sulci", 
+          "longitude": 347.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6642", 
+          "latitude": 2.0
+        }, 
+        {
+          "origin": "Siberian mythical holy river.", 
+          "diameter": 0.0, 
+          "code": "FO", 
+          "name": "Yenisey Fossa", 
+          "longitude": 56.2, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6654", 
+          "latitude": 3.0
+        }, 
+        {
+          "origin": "Niger water spirits.", 
+          "diameter": 0.0, 
+          "code": "MA", 
+          "name": "Zin Maculae", 
+          "longitude": 68.0, 
+          "link": "http://planetarynames.wr.usgs.gov/Feature/6739", 
+          "latitude": -24.5
+        }
+      ]
+    }
+  ]
+}
+

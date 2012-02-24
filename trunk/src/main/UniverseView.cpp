@@ -31,6 +31,7 @@
 #include "TwoVectorFrame.h"
 #include "MultiWMSTiledMap.h"
 #include "MultiLabelVisualizer.h"
+#include "geometry/FeatureLabelSetGeometry.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -295,6 +296,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_planetOrbitsVisible(false),
     m_infoTextVisible(true),
     m_labelsVisible(true),
+    m_surfaceFeatureLabelsVisible(false),
     m_centerIndicatorVisible(true),
     m_gotoObjectTime(6.0),
     m_videoEncoder(NULL),
@@ -2624,6 +2626,14 @@ UniverseView::setLabelVisibility(bool enable)
 
 
 void
+UniverseView::setSurfaceFeatureLabelVisibility(bool enable)
+{
+    m_surfaceFeatureLabelsVisible = enable;
+    FeatureLabelSetGeometry::setGlobalOpacity(enable ? 1.0f : 0.0f);
+}
+
+
+void
 UniverseView::setCenterIndicatorVisibility(bool enable)
 {
     if (enable != m_centerIndicatorVisible)
@@ -3311,6 +3321,7 @@ UniverseView::setTimeDisplay(TimeDisplayMode mode)
 {
     m_timeDisplay = mode;
 }
+
 
 void
 UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)

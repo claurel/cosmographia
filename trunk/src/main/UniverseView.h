@@ -60,6 +60,7 @@ class UniverseView : public QDeclarativeView
     Q_OBJECT
     Q_PROPERTY(double realTime READ realTime);
     Q_PROPERTY(bool labelsVisible READ labelVisibility WRITE setLabelVisibility);
+    Q_PROPERTY(bool surfaceFeatureLabelsVisible READ surfaceFeatureLabelVisibility WRITE setSurfaceFeatureLabelVisibility);
     Q_PROPERTY(bool centerIndicatorVisible READ centerIndicatorVisibility WRITE setCenterIndicatorVisibility NOTIFY centerIndicatorVisibilityChanged);
     Q_PROPERTY(bool constellationFiguresVisible READ constellationFigureVisibility WRITE setConstellationFigureVisibility);
     Q_PROPERTY(bool constellationNamesVisible READ constellationNameVisibility WRITE setConstellationNameVisibility);
@@ -179,6 +180,11 @@ public:
     bool labelVisibility() const
     {
         return m_labelsVisible;
+    }
+
+    bool surfaceFeatureLabelVisibility() const
+    {
+        return m_surfaceFeatureLabelsVisible;
     }
 
     bool centerIndicatorVisibility() const
@@ -304,6 +310,7 @@ public slots:
     void setConstellationNameVisibility(bool checked);
     void setStarNameVisibility(bool checked);
     void setLabelVisibility(bool enable);
+    void setSurfaceFeatureLabelVisibility(bool enable);
     void setCenterIndicatorVisibility(bool enable);
     void setShadows(bool enable);
     void setEclipseShadows(bool enable);
@@ -457,6 +464,7 @@ private:
     bool m_planetOrbitsVisible;
     bool m_infoTextVisible;
     bool m_labelsVisible;
+    bool m_surfaceFeatureLabelsVisible;
     bool m_centerIndicatorVisible;
     double m_gotoObjectTime;
 

@@ -20,6 +20,13 @@
         "cassini.json",
         "voyager.json",
         "dawn.json",
-        "earthorbiting.json"
+        "earthorbiting.json",
+        "mercury-features.json",
+        "venus-features.json",
+        "mars-features.json",
+        "jupiter-features.json",
+        "saturn-features.json",
+        "uranus-features.json",
+        "neptune-features.json"
     ]
 }

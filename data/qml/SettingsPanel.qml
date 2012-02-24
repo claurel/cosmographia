@@ -280,6 +280,13 @@ Item {
                 onToggled: { universeView.labelsVisible = enabled }
             }
 
+            PanelText { text: "Surface Feature Labels" }
+            TextToggle {
+                enabled: true
+                Component.onCompleted: { enabled = universeView.surfaceFeatureLabelsVisible }
+                onToggled: { universeView.surfaceFeatureLabelsVisible = enabled }
+            }
+
             PanelText { text: "Planet Orbits" }
             TextToggle {
                 enabled: true

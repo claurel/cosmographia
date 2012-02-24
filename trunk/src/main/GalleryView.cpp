@@ -42,9 +42,9 @@ GalleryView::GalleryView() :
     m_opacity(0.0f),
     m_rows(4),
     m_columns(10),
-    m_cameraFov(toRadians(45.0f)),
+    m_cameraFov(float(toRadians(45.0))),
     m_galleryRadius(50.0f),
-    m_galleryAngle(toRadians(60.0f)),
+    m_galleryAngle(float(toRadians(60.0f))),
     m_tileSpacing(0.1f),
     m_selectedTileIndex(-1),
     m_hoverTileIndex(-1)
@@ -99,7 +99,7 @@ drawRoundRectangle(float width, float height, float radius, float opacity)
     {
         for (unsigned int i = 0; i <= arcSegments; ++i)
         {
-            float theta = toRadians(90.0f * (arc + float(i) / float(arcSegments)));
+            float theta = float(toRadians(90.0 * (arc + float(i) / float(arcSegments))));
             Vector3f v(radius * cos(theta), radius * sin(theta), 0.0f);
 
             v -= Vector3f(inWidth * 0.5f, inHeight * 0.5f, 0.0f);
@@ -197,9 +197,9 @@ GalleryView::tilePosition(const GalleryTile& tile)
     const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
     const float galleryHeight = viewPlaneWidth * float(m_rows) / float(m_columns);
     double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
-    float x = m_galleryRadius * cos(theta);
+    float x = float(m_galleryRadius * cos(theta));
     float y = (float(tile.row) / float(m_rows - 1) - 0.5f) * galleryHeight;
-    float z = m_galleryRadius * sin(theta);
+    float z = float(m_galleryRadius * sin(theta));
 
     return Vector3f(x, y, z);
 }
@@ -474,7 +474,7 @@ GalleryView::pickTile(const Viewport& viewport, int x, int y)
         theta += (t - 1.0f) * toRadians(90.0f);
 
         Vector3f planeNormal = -Vector3f::UnitX();
-        planeNormal = AngleAxisf(-theta, Vector3f::UnitY()) * planeNormal;
+        planeNormal = AngleAxisf(float(-theta), Vector3f::UnitY()) * planeNormal;
 
         Vector3f rayOrigin = cameraPosition - tileCenter;
         float u = -planeNormal.dot(rayOrigin) / planeNormal.dot(direction);

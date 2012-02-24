@@ -925,14 +925,6 @@ UniverseView::drawInfoOverlay()
     int viewportHeight = size().height();
     glViewport(0, 0, viewportWidth, viewportHeight);
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    gluOrtho2D(0, viewportWidth, 0, viewportHeight);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glTranslatef(0.125f, 0.125f, 0);
     glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -959,6 +951,16 @@ UniverseView::drawInfoOverlay()
         Viewport viewport(size().width(), size().height());
         m_galleryView->render(viewport);
     }
+
+    // Set up matrices for text rendering
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, viewportWidth, 0, viewportHeight);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glTranslatef(0.125f, 0.125f, 0);
 
     glColor4fv(textColor.data());
     glEnable(GL_TEXTURE_2D);

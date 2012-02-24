@@ -26,6 +26,9 @@ using namespace Eigen;
 using namespace std;
 
 
+float FeatureLabelSetGeometry::ms_globalOpacity = 1.0f;
+
+
 FeatureLabelSetGeometry::FeatureLabelSetGeometry() :
     m_maxFeatureDistance(0.0f),
     m_occludingEllipsoid(Vector3d::Zero())
@@ -44,6 +47,13 @@ void
 FeatureLabelSetGeometry::render(RenderContext& rc, double /* clock */) const
 {
     const float visibleSizeThreshold = 20.0f; // in pixels
+
+    // No need to draw anything if the labels are turned off with an opacity
+    // setting near 0.
+    if (ms_globalOpacity <= 0.01f)
+    {
+        return;
+    }
 
     // Render during the opaque pass if opaque or during the translucent pass if not.
     if (rc.pass() == RenderContext::TranslucentPass)
@@ -92,7 +102,7 @@ FeatureLabelSetGeometry::render(RenderContext& rc, double /* clock */) const
 
                 if (pixelSize > visibleSizeThreshold && d < t)
                 {
-                    rc.drawEncodedText(Vector3f::Zero(), iter->label, m_font.ptr(), TextureFont::Utf8, iter->color, 1.0f);
+                    rc.drawEncodedText(Vector3f::Zero(), iter->label, m_font.ptr(), TextureFont::Utf8, iter->color, ms_globalOpacity);
                 }
 
                 rc.popModelView();

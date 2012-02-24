@@ -64,6 +64,24 @@ public:
         m_occludingEllipsoid = e;
     }
 
+    /** Get the value of the global label opacity. This controls the visibility of
+      * all feature label sets.
+      */
+    static float globalOpacity()
+    {
+        return ms_globalOpacity;
+    }
+
+    /** Set the value of the global label opacity. This controls the visibility of
+      * all feature label sets. The default opacity is 1 (fully visible labels)
+      *
+      * \param opacity a value between 0 and 1, with 0 meaning completely transparent labels and 1 meaning fully visible.
+      */
+    static void setGlobalOpacity(float opacity)
+    {
+        ms_globalOpacity = opacity;
+    }
+
 private:
     struct Feature
     {
@@ -79,6 +97,8 @@ private:
 
     vesta::counted_ptr<vesta::TextureFont> m_font;
     vesta::AlignedEllipsoid m_occludingEllipsoid;
+
+    static float ms_globalOpacity;
 };
 
 #endif // _FEATURE_LABEL_SET_GEOMETRY_H_

@@ -38,6 +38,7 @@ class QVideoEncoder;
 class ObserverAction;
 class Viewpoint;
 class MarkerLayer;
+class GalleryView;
 
 class QGraphicsScene;
 
@@ -101,6 +102,7 @@ public:
     Q_INVOKABLE void setCentralBody(BodyObject* body);
     Q_INVOKABLE void setCentralBodyFixed(BodyObject* body);
     Q_INVOKABLE void trackBody(BodyObject* body);
+    Q_INVOKABLE void trackBodyLevel(BodyObject* body);
     Q_INVOKABLE VisualizerObject* createBodyDirectionVisualizer(BodyObject* from, BodyObject* target);
     Q_INVOKABLE void plotTrajectory(QObject* body);
     Q_INVOKABLE void clearTrajectoryPlots(QObject* body);
@@ -262,6 +264,11 @@ public:
         return m_earthMapMonth;
     }
 
+    GalleryView* gallery() const
+    {
+        return m_galleryView;
+    }
+
 signals:
     void timeChanged();
     void simulationDateTimeChanged();
@@ -326,6 +333,7 @@ public slots:
 
     void setUpdateInterval(unsigned int msec);
     void findObject();
+    void toggleGallery();
 
     void copyNextFrameToClipboard(bool withAlpha = false);
 
@@ -362,10 +370,11 @@ private:
         Frame_Inertial,
         Frame_BodyFixed,
         Frame_Synodic,
-        Frame_Locked
+        Frame_Locked,
+        Frame_LockedLevel
     };
 
-    void setCenterAndFrame(vesta::Entity* center, FrameType f);
+    void setCenterAndFrame(vesta::Entity* center, FrameType f, const Eigen::Vector3d& refVector = Eigen::Vector3d::UnitY());
     void initializeSkyLayers();
     void initializeObserver();
     double secondsFromBaseTime() const;
@@ -465,6 +474,7 @@ private:
     QString m_statusMessage;
 
     MarkerLayer* m_markers;
+    GalleryView* m_galleryView;
 
     int m_earthMapMonth;
 };

@@ -28,6 +28,7 @@
 #include "../UnitConversion.h"
 #include "../geometry/MeshInstanceGeometry.h"
 #include "../geometry/TimeSwitchedGeometry.h"
+#include "../geometry/FeatureLabelSetGeometry.h"
 #include "../NetworkTextureLoader.h"
 #include "../compatibility/Scanner.h"
 #include "../compatibility/CmodLoader.h"
@@ -59,6 +60,7 @@
 #include <vesta/SensorFrustumGeometry.h>
 #include <vesta/AxesVisualizer.h>
 #include <vesta/BodyDirectionVisualizer.h>
+#include <vesta/LocalVisualizer.h>
 #include <vesta/PlaneVisualizer.h>
 #include <vesta/PlaneGeometry.h>
 #include <vesta/ParticleSystemGeometry.h>
@@ -3200,6 +3202,124 @@ UniverseLoader::loadVisualizer(const QVariantMap& map,
     }
 }
 
+#if 0
+static Vector3d
+planetographicToRectangular(const AlignedEllipsoid& e, const PlanetographicCoord3& c)
+{
+    // Compute the planetographic normal
+    Vector3d n(cos(c.latitude()) * cos(c.longitude()),
+               cos(c.latitude()) * sin(c.longitude()),
+               sin(c.latitude()));
+
+    Vector3d k = e.semiAxes().cwise().square().cwise() * n;
+    double s = sqrt(k.dot(n));
+
+    Vector3d surfacePoint = k / s;
+    return surfacePoint + c.height() * n;
+}
+
+
+static Vector3d
+planetocentricToRectangular(const AlignedEllipsoid& e, const PlanetographicCoord3& c)
+{
+    Vector3d d(cos(c.latitude()) * cos(c.longitude()),
+               cos(c.latitude()) * sin(c.longitude()),
+               sin(c.latitude()));
+
+    return e.semiAxes().cwise() * d + c.height() * d;
+}
+#endif
+
+Visualizer*
+UniverseLoader::loadFeatureLabels(const QVariantMap& map,
+                                  const Entity* body,
+                                  const UniverseCatalog* catalog)
+{
+    QVariant featuresVar = map.value("features");
+
+    if (featuresVar.type() != QVariant::List)
+    {
+        errorMessage("Features list in FeatureLabels item is missing or invalid.");
+        return NULL;
+    }
+
+    if (!body->geometry() || !body->geometry()->isEllipsoidal())
+    {
+        return NULL;
+    }
+
+    // Get the spin axis at the J2000.0 epoch; use this to determine whether the body
+    // is a retrograde rotator.
+    Vector3d spinAxisEcl = InertialFrame::eclipticJ2000()->orientation().conjugate() * body->orientation(0.0) * Vector3d::UnitZ();
+    bool isRetrogradeRotator = spinAxisEcl.z() < 0.0;
+
+    AlignedEllipsoid ellipsoid = body->geometry()->ellipsoid();
+
+    counted_ptr<FeatureLabelSetGeometry> featureLabelSet(new FeatureLabelSetGeometry());
+    featureLabelSet->setOccluder(ellipsoid);
+
+    QVariantList featuresList = featuresVar.toList();
+    foreach (QVariant featureVar, featuresList)
+    {
+        if (featureVar.type() != QVariant::Map)
+        {
+            errorMessage("Bad feature in FeatureLabels list");
+            return NULL;
+        }
+
+        QVariantMap feature = featureVar.toMap();
+
+        QVariant nameVar = feature.value("name");
+        if (nameVar.type() != QVariant::String)
+        {
+            errorMessage("Bad or missing name for feature");
+            return NULL;
+        }
+
+        std::string name(nameVar.toString().toUtf8().data());
+
+        bool ok = false;
+        double longitude = feature.value("longitude").toDouble(&ok);
+        if (!ok)
+        {
+            errorMessage("Bad or missing longitude for feature");
+            return NULL;
+        }
+
+        double latitude = feature.value("latitude").toDouble(&ok);
+        if (!ok)
+        {
+            errorMessage("Bad or missing latitude for feature");
+            return NULL;
+        }
+
+        double diameter = distanceValue(feature.value("diameter"), Unit_Kilometer, 0.0, &ok);
+        if (!ok)
+        {
+            errorMessage("Bad or missing diameter for feature");
+            return NULL;
+        }
+
+        // Reverse coordinates for retrograde rotators: the IAU coordinate systems for planets
+        // and moons use ecliptic north, while Cosmographia uses rotational north.
+        if (isRetrogradeRotator)
+        {
+            longitude = -longitude;
+            latitude = -latitude;
+        }
+
+        longitude = toRadians(longitude);
+        latitude = toRadians(latitude);
+
+        PlanetographicCoord3 position(latitude, longitude, 0.0);
+        Vector3d rectPosition = ellipsoid.planetographicToRectangular(position);
+
+        featureLabelSet->addFeature(name, rectPosition.cast<float>(), float(diameter / 2.0), Spectrum(1.0f, 1.0f, 0.85f));
+    }
+
+    return new LocalVisualizer(featureLabelSet.ptr());
+}
+
 
 Viewpoint*
 UniverseLoader::loadViewpoint(const QVariantMap& map,
@@ -3876,6 +3996,34 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                         if (visualizer)
                         {
                             body->setVisualizer(tag.toUtf8().data(), visualizer);
+                        }
+                    }
+                }
+            }
+            else if (type == "FeatureLabels")
+            {
+                QVariant bodyVar = item.value("body");
+
+                if (bodyVar.type() != QVariant::String)
+                {
+                    errorMessage("Bad or missing body name for visualizer");
+                }
+                else
+                {
+                    QString bodyName = bodyVar.toString();
+
+                    Entity* body = catalog->find(bodyName);
+                    if (body == NULL)
+                    {
+                        errorMessage(QString("Can't find body '%1' for feature labels.").arg(bodyName));
+                    }
+                    else
+                    {
+                        Visualizer* visualizer = loadFeatureLabels(item, body, catalog);
+                        if (visualizer)
+                        {
+                            qDebug() << "got it!";
+                            body->setVisualizer("surface features", visualizer);
                         }
                     }
                 }

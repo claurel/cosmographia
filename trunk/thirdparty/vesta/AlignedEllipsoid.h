@@ -12,8 +12,10 @@
 #define _VESTA_ELLIPSOID_H_
 
 #include "GeneralEllipse.h"
+#include "PlanetographicCoord.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <cmath>
 
 
 namespace vesta
@@ -45,7 +47,7 @@ public:
       */
     Eigen::Vector3d normal(const Eigen::Vector3d& v)
     {
-        return m_semiAxes.cwise().square().cwise().inverse().asDiagonal() * v;
+        return (m_semiAxes.cwise().square().cwise().inverse().asDiagonal() * v).normalized();
     }
 
     /** Get the length of the semi-major axis.
@@ -63,6 +65,30 @@ public:
     {
         return m_semiAxes.x() <= 0.0 || m_semiAxes.y() <= 0.0 || m_semiAxes.z() <= 0.0;
     }
+
+    /** Convert a planetographic coordinate to rectangular coordinates.
+      * When c lies on the ellipsoid, the latitude is the angle between the ellipsoid
+      * normal at c and the xy-plane.
+      */
+    Eigen::Vector3d planetographicToRectangular(const PlanetographicCoord3& c)
+    {
+        // Compute the planetographic normal
+        double cosLat = std::cos(c.latitude());
+        Eigen::Vector3d n(cosLat * std::cos(c.longitude()),
+                          cosLat * std::sin(c.longitude()),
+                          std::sin(c.latitude()));
+
+        Eigen::Vector3d k = m_semiAxes.cwise().square().cwise() * n;
+        double s = std::sqrt(k.dot(n));
+
+        Eigen::Vector3d surfacePoint = k / s;
+        return surfacePoint + c.height() * n;
+    }
+
+
+    PlanetographicCoord3 rectangularToPlanetographic(const Eigen::Vector3d& r);
+    Eigen::Vector3d nearestPoint(const Eigen::Vector3d& r);
+    double distance(const Eigen::Vector3d& r);
 
     GeneralEllipse intersection(const Eigen::Hyperplane<double, 3>& plane, bool* foundIntersection) const;
     GeneralEllipse limb(const Eigen::Vector3d& p) const;

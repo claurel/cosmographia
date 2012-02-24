@@ -65,6 +65,9 @@ TextureFont::lookupGlyph(wchar_t ch) const
 }
 
 
+/** Render a string of text at the specified starting poisition. The string encoding
+  * is assumed to be Latin-1 (ISO 8859-1).
+  */
 Vector2f
 TextureFont::render(const string& text, const Vector2f& startPosition) const
 {
@@ -214,6 +217,26 @@ TextureFont::renderUtf8(const string& text, const Vector2f& startPosition) const
     glEnd();
 
     return currentPosition;
+}
+
+
+/** Render a string at the specified starting position. The string encoding is specified as a parameter.
+  */
+Vector2f
+TextureFont::renderEncodedString(const string &text, const Eigen::Vector2f &startPosition, Encoding encoding) const
+{
+    switch (encoding)
+    {
+    // ASCII and Latin-1 are currently treated as identical encodings
+    case Ascii:
+    case Latin1:
+        return render(text, startPosition);
+    case Utf8:
+        return renderUtf8(text, startPosition);
+    default:
+        VESTA_WARNING("Unknown string encoding.");
+        return startPosition;
+    }
 }
 
 

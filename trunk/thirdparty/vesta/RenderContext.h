@@ -16,6 +16,7 @@
 #include "Material.h"
 #include "ShaderInfo.h"
 #include "PlanarProjection.h"
+#include "TextureFont.h"
 #include "glhelp/GLVertexBuffer.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -25,7 +26,6 @@ namespace vesta
 {
 
 class TextureMap;
-class TextureFont;
 class ParticleEmitter;
 class ParticleBuffer;
 class VertexBuffer;
@@ -329,6 +329,12 @@ public:
 
     void drawBillboard(const Eigen::Vector3f& position, float size);
     void drawText(const Eigen::Vector3f& position, const std::string& text, const TextureFont* font, const Spectrum& color, float opacity = 1.0f);
+    void drawEncodedText(const Eigen::Vector3f& position,
+                         const std::string& text,
+                         const TextureFont* font,
+                         TextureFont::Encoding encoding,
+                         const Spectrum& color,
+                         float opacity = 1.0f);
     void drawCone(float apexAngle, const Eigen::Vector3f& axis,
                   const Spectrum& color, float opacity,
                   unsigned int radialSubdivision, unsigned int axialSubdivision);

@@ -38,6 +38,13 @@ public:
         float advance;
     };
 
+    enum Encoding
+    {
+        Ascii,
+        Latin1,
+        Utf8
+    };
+
     TextureFont();
     ~TextureFont();
 
@@ -45,6 +52,10 @@ public:
                            const Eigen::Vector2f& startPosition) const;
     Eigen::Vector2f renderUtf8(const std::string& text,
                                const Eigen::Vector2f& startPosition) const;
+    Eigen::Vector2f renderEncodedString(const std::string& text,
+                                        const Eigen::Vector2f& startPosition,
+                                        Encoding encoding) const;
+
     float textWidth(const std::string& text) const;
     float textAscent(const std::string& text) const;
     float maxAscent() const;

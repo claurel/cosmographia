@@ -195,3 +195,100 @@ AlignedEllipsoid::orthogonalProjection(const Vector3d& planeNormal) const
 
     return GeneralEllipse(Vector3d::Zero(), plane_v0, plane_v1);
 }
+
+
+/** Convert rectangular coordinates to planetographic coordinates.
+  */
+PlanetographicCoord3
+AlignedEllipsoid::rectangularToPlanetographic(const Vector3d& r)
+{
+    // Find the nearest point to r on the surface of the ellipsoid
+    Vector3d surfacePoint = nearestPoint(r);
+
+    // Get the surface normal at that point
+    Vector3d n = normal(surfacePoint);
+
+    double longitude = atan2(n.y(), n.x());
+    double latitude = asin(n.z());
+
+    Vector3d h = r - surfacePoint;
+    double height = h.norm();
+
+    // Return a negative height for points inside the ellipsoid.
+    if (h.dot(r) < 0.0)
+    {
+        height = -height;
+    }
+
+    return PlanetographicCoord3(latitude, longitude, height);
+}
+
+
+/** Calculate the distance from the specified point to the
+  * ellipsoid surface.
+  */
+double
+AlignedEllipsoid::distance(const Vector3d& r)
+{
+    // Find the nearest point to r on the surface of the ellipsoid
+    Vector3d surfacePoint = nearestPoint(r);
+
+    // Return the distance to the nearest point
+    return (r - surfacePoint).norm();
+}
+
+
+/** Find the point on the surface of the ellipsoid that is nearest to
+  * some arbitrary point.
+  */
+Vector3d
+AlignedEllipsoid::nearestPoint(const Vector3d& v)
+{
+    // No closed form solution available, so we'll iterate to find
+    // the point. Decreasing maxErr improves the accuracy of the
+    // solution at the cost of additional iterations.
+    const double maxErr = 1.0e-10;
+    static const unsigned int maxIterations = 20;
+
+    const Vector3d invSemiAxes = m_semiAxes.cwise().inverse();
+    const Vector3d invSemiAxes2 = invSemiAxes.cwise().square();
+    const Vector3d semiAxes2 = m_semiAxes.cwise().square();
+    const Vector3d semiAxes4 = semiAxes2.cwise().square();
+
+    // beta is scale factor that will produce the planetocentric surface
+    // point for v, i.e. beta*v will lie on the surface of the ellipsoid.
+    // This point, beta*v, is our initial guess for the nearest point on the
+    // surface of the ellipsoid. In general, the guess in only the actual nearest
+    // point in the special case of a sphere.
+    const double beta = 1.0 / (v.cwise() * invSemiAxes).norm();
+
+    // n is the unnormalized surface normal at the initial guess point
+    Vector3d n = beta * (v.cwise() * invSemiAxes2);
+    double nMag = n.norm();
+    double vMag = v.norm();
+
+    Vector3d v2 = v.cwise().square();
+    Vector3d d(Vector3d::Zero());
+
+    double alpha = (1.0 - beta) * (vMag / nMag);
+    double s = 0.0;
+    double ds = 1.0;
+    unsigned int i = 0;
+
+    // Newton-Raphson iteration until error is sufficiently small
+    do
+    {
+        alpha -= (s / ds);
+
+        d = Vector3d::Ones() + alpha * invSemiAxes2;
+        Vector3d d2 = d.cwise().square();
+        Vector3d d3 = d.cwise() * d2;
+
+        s = (v2.cwise() / (semiAxes2.cwise() * d2)).sum() - 1.0;
+
+        ds = -2.0 * (v2.cwise() / (semiAxes4.cwise() * d3)).sum();
+    }
+    while (abs(s) > maxErr && ++i < maxIterations);
+
+    return v.cwise() * d.cwise().inverse();
+}

@@ -4022,7 +4022,6 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                         Visualizer* visualizer = loadFeatureLabels(item, body, catalog);
                         if (visualizer)
                         {
-                            qDebug() << "got it!";
                             body->setVisualizer("surface features", visualizer);
                         }
                     }

@@ -63,7 +63,10 @@ FeatureLabelSetGeometry::render(RenderContext& rc, double /* clock */) const
 
             Vector3f viewDir = -cameraPosition.normalized();
             double distanceToEllipsoid = 0.0;
-            TestRayEllipsoidIntersection(cameraPosition, viewDir, ellipsoidSemiAxes, &distanceToEllipsoid);
+
+            // Instead of computing the ellipsoid intersection (as the line below), just treat the planet as a sphere
+            //TestRayEllipsoidIntersection(cameraPosition, viewDir, ellipsoidSemiAxes, &distanceToEllipsoid);
+            distanceToEllipsoid = (cameraPosition.norm() - ellipsoidSemiAxes.maxCoeff()) * 0.99f;
 
             // We don't want labels partially hidden by the planet ellipsoid, so we'll project them onto a
             // plane that lies just in front of the planet ellipsoid and which is parallel to the view plane
@@ -89,7 +92,7 @@ FeatureLabelSetGeometry::render(RenderContext& rc, double /* clock */) const
 
                 if (pixelSize > visibleSizeThreshold && d < t)
                 {
-                    rc.drawText(Vector3f::Zero(), iter->label, m_font.ptr(), iter->color, 1.0f);
+                    rc.drawEncodedText(Vector3f::Zero(), iter->label, m_font.ptr(), TextureFont::Utf8, iter->color, 1.0f);
                 }
 
                 rc.popModelView();

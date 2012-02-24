@@ -20,6 +20,7 @@
 #include <vesta/OGLHeaders.h>
 #include "UniverseView.h"
 #include "MarkerLayer.h"
+#include "GalleryView.h"
 
 #include "ObserverAction.h"
 #include "Viewpoint.h"
@@ -79,11 +80,17 @@
 
 #include <Eigen/LU>
 
-#include <QtGui>
 #include <QGLWidget>
+#include <QSettings>
+#include <QAction>
+#include <QMenu>
+#include <QClipboard>
+#include <QApplication>
+#include <QGraphicsItem>
 #include <QFile>
 #include <QDataStream>
 
+#include <QDebug>
 #include <QUrl>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -140,7 +147,8 @@ static string TrajectoryVisualizerName(Entity* entity)
 }
 
 
-struct PlanetographicCoordinate
+// Planetographic coordinate with hemisphere information
+struct PlanetographicCoordHemi
 {
     double latitude;
     double longitude;
@@ -157,12 +165,22 @@ struct PlanetographicCoordinate
 //
 // This function uses rotational north convention rather than ecliptic north
 //
-static PlanetographicCoordinate getPlanetographicCoordinate(const Vector3d& position, const Entity* body)
+static PlanetographicCoordHemi getPlanetographicCoordinate(const Vector3d& position, const Entity* body)
 {
-    PlanetographicCoordinate coord;
+    PlanetographicCoordHemi coord;
 
-    coord.latitude = toDegrees(asin(position.z()));
-    coord.longitude = toDegrees(atan2(position.y(), position.x()));
+    if (body->geometry() && body->geometry()->isEllipsoidal())
+    {
+        PlanetographicCoord3 pc = body->geometry()->ellipsoid().rectangularToPlanetographic(position);
+        coord.latitude = toDegrees(pc.latitude());
+        coord.longitude = toDegrees(pc.longitude());
+    }
+    else
+    {
+        Vector3d n = position.normalized();
+        coord.latitude = toDegrees(asin(n.z()));
+        coord.longitude = toDegrees(atan2(n.y(), n.x()));
+    }
     coord.longitudeHemiId = 'E';
     coord.latitudeHemiId = 'N';
 
@@ -287,9 +305,11 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_reticleUpdateTime(-1.0e10),
     m_statusUpdateTime(0.0),
     m_markers(NULL),
+    m_galleryView(NULL),
     m_earthMapMonth(1)
 {
     setAutoFillBackground(false);
+    setMouseTracking(true);
 
     m_universe = universe;
     m_textureLoader = new NetworkTextureLoader(this);
@@ -302,6 +322,9 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_spacecraftIcon = m_textureLoader->loadTexture(":/icons/disk.png", TextureProperties(TextureProperties::Clamp));
 
     m_markers = new MarkerLayer();
+
+    m_galleryView = new GalleryView();
+    m_galleryView->setFont(m_textFont.ptr());
 
     // Enable multisample antialiasing if its enabled in the settings
     {
@@ -361,6 +384,7 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
 UniverseView::~UniverseView()
 {
     //makeCurrent();
+    delete m_galleryView;
     delete m_renderer;
 }
 
@@ -538,6 +562,7 @@ void UniverseView::initializeGL()
         QByteArray data = labelFontFile.readAll();
         DataChunk chunk(data.data(), data.size());
         m_labelFont->loadTxf(&chunk);
+        m_renderer->setDefaultFont(m_labelFont.ptr());
     }
 
     if (m_renderer->shadowsSupported())
@@ -560,6 +585,8 @@ void UniverseView::initializeGL()
     }
 
     m_glareOverlay = m_renderer->createGlareOverlay();
+
+    m_galleryView->initializeGL();
 }
 
 
@@ -922,13 +949,19 @@ UniverseView::drawInfoOverlay()
     Vector4f titleColor(0.45f, 0.75f, 1.0f, alpha);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_TEXTURE_2D);
-
-    glColor4fv(textColor.data());
 
     QLocale locale = QLocale::system();
 
     const float textLeftMargin = 32.0f;
+
+    if (m_galleryView)
+    {
+        Viewport viewport(size().width(), size().height());
+        m_galleryView->render(viewport);
+    }
+
+    glColor4fv(textColor.data());
+    glEnable(GL_TEXTURE_2D);
 
     if (m_infoTextVisible)
     {
@@ -1017,7 +1050,8 @@ UniverseView::drawInfoOverlay()
                 bool isEllipsoidal = m_selectedBody->geometry() && m_selectedBody->geometry()->isEllipsoidal();
                 if (isEllipsoidal)
                 {
-                    distance -= m_selectedBody->geometry()->ellipsoid().semiMajorAxisLength();
+                    PlanetographicCoord3 pc = m_selectedBody->geometry()->ellipsoid().rectangularToPlanetographic(r);
+                    distance = pc.height();
                 }
 
                 QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
@@ -1030,9 +1064,8 @@ UniverseView::drawInfoOverlay()
                 {
                     float dx = m_textFont->textWidth(distanceStdString);
                     Vector3d q = m_selectedBody->orientation(m_simulationTime).conjugate() * r;
-                    q = q.normalized();
 
-                    PlanetographicCoordinate coord = getPlanetographicCoordinate(q, m_selectedBody.ptr());
+                    PlanetographicCoordHemi coord = getPlanetographicCoordinate(q, m_selectedBody.ptr());
                     QString coordString = QString(" (%1\260%2, %3\260%4)").
                             arg(coord.latitude, 0, 'f', 3).
                             arg(coord.latitudeHemiId).
@@ -1458,6 +1491,21 @@ void UniverseView::mouseReleaseEvent(QMouseEvent* event)
         return;
     }
 
+    if (m_galleryView->isVisible())
+    {
+        if (m_galleryView->mouseReleased(Viewport(width(), height()), event->x(), event->y()))
+        {
+            int selected = m_galleryView->selectedTile();
+            if (selected >= 0)
+            {
+                QString selectedName = QString::fromUtf8(m_galleryView->tileName(selected).c_str());
+                setSelectedBody(selectedName);
+                gotoSelectedObject();
+            }
+        }
+        return;
+    }
+
     // Process the mouse release as a click if the mouse hasn't moved
     // much since the mouse button was pressed
     if (m_mouseMovement < 4)
@@ -1524,6 +1572,12 @@ void UniverseView::mouseMoveEvent(QMouseEvent *event)
     QDeclarativeView::mouseMoveEvent(event);
     if (m_mouseMoveEventProcessed)
     {
+        return;
+    }
+
+    if (m_galleryView->isVisible())
+    {
+        m_galleryView->mouseMoved(Viewport(width(), height()), event->x(), event->y());
         return;
     }
 
@@ -2203,6 +2257,11 @@ UniverseView::tick()
     }
 #endif
 
+    if (m_galleryView)
+    {
+        m_galleryView->update(dt);
+    }
+
     m_realTime += dt;
 
     if (!isPaused())
@@ -2264,7 +2323,7 @@ UniverseView::tick()
 
 
 void
-UniverseView::setCenterAndFrame(Entity* center, FrameType f)
+UniverseView::setCenterAndFrame(Entity* center, FrameType f, const Eigen::Vector3d& refVector)
 {
     m_observerFrame = f;
 
@@ -2295,7 +2354,19 @@ UniverseView::setCenterAndFrame(Entity* center, FrameType f)
         {
             RelativePositionVector* primary = new RelativePositionVector(center, m_selectedBody.ptr());
             RelativeVelocityVector* secondary = new RelativeVelocityVector(center, m_selectedBody.ptr());
-            //ConstantFrameDirection* secondary = new ConstantFrameDirection(InertialFrame::icrf(), Vector3d::UnitZ());
+            frame = new TwoVectorFrame(primary, TwoVectorFrame::NegativeZ, secondary, TwoVectorFrame::PositiveY);
+        }
+    }
+    else if (f == Frame_LockedLevel)
+    {
+        if (center == m_selectedBody.ptr() || m_selectedBody.isNull())
+        {
+            frame = InertialFrame::equatorJ2000();
+        }
+        else
+        {
+            RelativePositionVector* primary = new RelativePositionVector(center, m_selectedBody.ptr());
+            ConstantFrameDirection* secondary = new ConstantFrameDirection(InertialFrame::icrf(), refVector);
             frame = new TwoVectorFrame(primary, TwoVectorFrame::NegativeZ, secondary, TwoVectorFrame::PositiveY);
         }
     }
@@ -3213,6 +3284,27 @@ UniverseView::findObject()
 
 
 void
+UniverseView::toggleGallery()
+{
+    m_galleryView->setVisible(!m_galleryView->isVisible());
+
+    Entity* center = m_observer->center();
+    Entity* selection = m_selectedBody.ptr();
+
+    if (center && selection)
+    {
+        counted_ptr<BodyFixedFrame> frame(new BodyFixedFrame(selection));
+        Vector3d centerPos = center->position(m_simulationTime);
+        Vector3d selectionPos = selection->position(m_simulationTime);
+        Vector3d v = frame->orientation(m_simulationTime).conjugate() * (centerPos - selectionPos);
+        GregorianDate now = GregorianDate::TDBDateFromTDBSec(m_simulationTime);
+        QDateTime qnow = VestaDateToQtDate(now);
+        qDebug() << qnow.toString("yyyy-mm-dd hh:mm:ss.zzz") << QString("%1 %2 %3").arg(v.x(), 0, 'g', 16).arg(v.y(), 0, 'g', 16).arg(v.z(), 0, 'g', 16);
+    }
+}
+
+
+void
 UniverseView::setTimeDisplay(TimeDisplayMode mode)
 {
     m_timeDisplay = mode;
@@ -3407,6 +3499,22 @@ UniverseView::trackBody(BodyObject* body)
 }
 
 
+void
+UniverseView::trackBodyLevel(BodyObject* body)
+{
+    if (body && body->body())
+    {
+        if (m_observer->center() != body->body())
+        {
+            Vector3d up = m_observer->absoluteOrientation(m_simulationTime) * Vector3d::UnitY();
+            setSelectedBody(body->body());
+            setCenterAndFrame(m_observer->center(), Frame_LockedLevel, up);
+            setStatusMessage(QString("Tracking %1").arg(bodyName(body->body())));
+        }
+    }
+}
+
+
 VisualizerObject*
 UniverseView::createBodyDirectionVisualizer(BodyObject* from, BodyObject* target)
 {
@@ -3470,6 +3578,27 @@ UniverseView::getStateUrl()
             {
                 frame = "track";
                 url.addQueryItem("ftarget", bodyName(vec->target()));
+            }
+        }
+    }
+    else if (m_observerFrame == Frame_LockedLevel)
+    {
+        TwoVectorFrame* f = dynamic_cast<TwoVectorFrame*>(m_observer->positionFrame());
+        if (f)
+        {
+            RelativePositionVector* vec = dynamic_cast<RelativePositionVector*>(f->primaryDirection());
+            if (vec)
+            {
+                frame = "tracklev";
+                url.addQueryItem("ftarget", bodyName(vec->target()));
+            }
+
+            ConstantFrameDirection* dir = dynamic_cast<ConstantFrameDirection*>(f->secondaryDirection());
+            if (dir)
+            {
+                url.addQueryItem("upx", QString::number(dir->vector().x(), 'f'));
+                url.addQueryItem("upy", QString::number(dir->vector().y(), 'f'));
+                url.addQueryItem("upz", QString::number(dir->vector().z(), 'f'));
             }
         }
     }
@@ -3564,6 +3693,12 @@ UniverseView::setStateFromUrl(const QUrl& url)
     else if (frame == "track")
     {
         newFrame = Frame_Locked;
+        QString targetName = url.queryItemValue("ftarget");
+        setSelectedBody(m_catalog->find(targetName));
+    }
+    else if (frame == "tracklev")
+    {
+        newFrame = Frame_LockedLevel;
         QString targetName = url.queryItemValue("ftarget");
         setSelectedBody(m_catalog->find(targetName));
     }

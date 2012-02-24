@@ -55,6 +55,7 @@ APP_SOURCES = \
     $$MAIN_PATH/catalog/ChebyshevPolyFileLoader.cpp \
     $$MAIN_PATH/catalog/UniverseCatalog.cpp \
     $$MAIN_PATH/catalog/UniverseLoader.cpp \
+    $$MAIN_PATH/geometry/FeatureLabelSetGeometry.cpp \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/geometry/MultiLabelGeometry.cpp \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.cpp \
@@ -112,6 +113,7 @@ APP_HEADERS = \
     $$MAIN_PATH/catalog/ChebyshevPolyFileLoader.h \
     $$MAIN_PATH/catalog/UniverseCatalog.h \
     $$MAIN_PATH/catalog/UniverseLoader.h \
+    $$MAIN_PATH/geometry/FeatureLabelSetGeometry.h \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.h \
     $$MAIN_PATH/geometry/MultiLabelGeometry.h \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.h \
@@ -168,6 +170,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/LabelGeometry.cpp \
     $$VESTA_PATH/LabelVisualizer.cpp \
     $$VESTA_PATH/LightSource.cpp \
+    $$VESTA_PATH/LocalVisualizer.cpp \
     $$VESTA_PATH/MapLayer.cpp \
     $$VESTA_PATH/MeshGeometry.cpp \
     $$VESTA_PATH/NadirVisualizer.cpp \
@@ -255,6 +258,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/LabelGeometry.h \
     $$VESTA_PATH/LabelVisualizer.h \
     $$VESTA_PATH/LightSource.h \
+    $$VESTA_PATH/LocalVisualizer.h \
     $$VESTA_PATH/MapLayer.h \
     $$VESTA_PATH/Material.h \
     $$VESTA_PATH/MeshGeometry.h \
@@ -270,6 +274,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/PlaneGeometry.h \
     $$VESTA_PATH/PlanetaryRings.h \
     $$VESTA_PATH/PlanetGridLayer.h \
+    $$VESTA_PATH/PlanetographicCoord.h \
     $$VESTA_PATH/PlaneVisualizer.h \
     $$VESTA_PATH/PrimitiveBatch.h \
     $$VESTA_PATH/QuadtreeTile.h \
@@ -842,6 +847,8 @@ macx {
         data/help/flora.html \
         data/help/hygiea.html \
         data/help/lutetia.html \
+        data/help/ida.html \
+        data/help/dactyl.html \
         data/help/eros.html \
         data/help/davida.html \
         data/help/itokawa.html \
@@ -939,6 +946,7 @@ macx {
         data/gallery/ceres.png \
         data/gallery/vesta.png \
         data/gallery/lutetia.png \
+        data/gallery/ida.png \
         data/gallery/eros.png \
         data/gallery/itokawa.png
 

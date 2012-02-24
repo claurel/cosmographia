@@ -11,7 +11,6 @@
 #include "SensorFrustumGeometry.h"
 #include "Material.h"
 #include "RenderContext.h"
-#include "WorldGeometry.h"
 #include "Intersect.h"
 
 using namespace vesta;
@@ -67,14 +66,13 @@ SensorFrustumGeometry::render(RenderContext& rc,
         Matrix3d targetRotation = target()->orientation(currentTime).conjugate().toRotationMatrix();
         Vector3d p2 = targetRotation * -p;
 
-        // Special handling for ellipsoidal objects, i.e. planets.
-        // TODO: Should have a cleaner solution here than a dynamic_cast
+        // Special handling for ellipsoidal target objects, i.e. planets.
         bool ellipsoidalTarget = false;
         Vector3d targetSemiAxes = Vector3d::Ones();
-        if (dynamic_cast<WorldGeometry*>(target()->geometry()))
+        if (target()->geometry() && target()->geometry()->isEllipsoidal())
         {
             ellipsoidalTarget = true;
-            targetSemiAxes = dynamic_cast<WorldGeometry*>(target()->geometry())->ellipsoidAxes().cast<double>() / 2.0;
+            targetSemiAxes = target()->geometry()->ellipsoid().semiAxes();
         }
 
         Quaterniond rotation = source()->orientation(currentTime);

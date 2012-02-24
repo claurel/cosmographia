@@ -1669,8 +1669,27 @@ RenderContext::drawBillboard(const Vector3f& position, float size)
 }
 
 
+/** Draw an ISO 8859-1 encoded string of text. This is a shortcut for drawEncodedText() with the encoding
+  * set to Latin1.
+  *
+  * \see RenderContext::drawEncodedText
+  */
 void
-RenderContext::drawText(const Vector3f& position, const std::string& text, const TextureFont* font, const Spectrum& color, float opacity)
+RenderContext::drawText(const Eigen::Vector3f &position, const string &text, const TextureFont *font, const Spectrum &color, float opacity)
+{
+    drawEncodedText(position, text, font, TextureFont::Latin1, color, opacity);
+}
+
+
+/** Draw a string of text.
+  */
+void
+RenderContext::drawEncodedText(const Vector3f& position,
+                               const std::string& text,
+                               const TextureFont* font,
+                               TextureFont::Encoding encoding,
+                               const Spectrum& color,
+                               float opacity)
 {
     if (!font)
     {
@@ -1712,7 +1731,7 @@ RenderContext::drawText(const Vector3f& position, const std::string& text, const
     // any objects in front of it.
     translateModelView(position + Vector3f(0.125f, 0.125f, -ndc.z()));
 
-    font->render(text, Vector2f(std::floor(p.x() * m_viewportWidth + 0.5f), std::floor(p.y() * m_viewportHeight + 0.5f)));
+    font->renderEncodedString(text, Vector2f(std::floor(p.x() * m_viewportWidth + 0.5f), std::floor(p.y() * m_viewportHeight + 0.5f)), encoding);
 
     popModelView();
     popProjection();

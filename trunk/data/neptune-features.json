@@ -12,7 +12,7 @@
       "features": [
         {
           "origin": "Egyptian sacred island in Nile, \"paradise.\"", 
-          "diameter": 0.0, 
+          "diameter": 400.0, 
           "code": "PM", 
           "name": "Abatos Planum", 
           "longitude": 58.0, 
@@ -21,7 +21,7 @@
         }, 
         {
           "origin": "Tortoise upholding the world (India).", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "MA", 
           "name": "Akupara Maculae", 
           "longitude": 63.0, 
@@ -30,7 +30,7 @@
         }, 
         {
           "origin": "Quecha (Ecuador) water boa.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Amarum", 
           "longitude": 24.5, 
@@ -39,7 +39,7 @@
         }, 
         {
           "origin": "Norse fish shaped dwarf.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Andvari", 
           "longitude": 34.0, 
@@ -48,7 +48,7 @@
         }, 
         {
           "origin": "Egyptian dragon of darkness.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Apep Cavus", 
           "longitude": 301.5, 
@@ -57,7 +57,7 @@
         }, 
         {
           "origin": "Nama Bushman word for rain.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "DO", 
           "name": "Awib Dorsa", 
           "longitude": 80.0, 
@@ -66,7 +66,7 @@
         }, 
         {
           "origin": "Frog symbolizing the sun on the horizon (India).", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Bheki Cavus", 
           "longitude": 308.0, 
@@ -75,7 +75,7 @@
         }, 
         {
           "origin": "Yoruba; river named for obedient son of god.", 
-          "diameter": 0.0, 
+          "diameter": 200.0, 
           "code": "SU", 
           "name": "Bia Sulci", 
           "longitude": 3.0, 
@@ -84,7 +84,7 @@
         }, 
         {
           "origin": "Celtic mythological river.", 
-          "diameter": 0.0, 
+          "diameter": 500.0, 
           "code": "SU", 
           "name": "Boynne Sulci", 
           "longitude": 350.0, 
@@ -93,7 +93,7 @@
         }, 
         {
           "origin": "Island location of temple of Mukasa (Uganda).", 
-          "diameter": 0.0, 
+          "diameter": 700.0, 
           "code": "RE", 
           "name": "Bubembe Regio", 
           "longitude": 335.0, 
@@ -102,7 +102,7 @@
         }, 
         {
           "origin": "Mayan deity.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Cay", 
           "longitude": 44.0, 
@@ -111,7 +111,7 @@
         }, 
         {
           "origin": "Legendary island described by Marco Polo.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "PM", 
           "name": "Cipango Planum", 
           "longitude": 34.0, 
@@ -120,7 +120,7 @@
         }, 
         {
           "origin": "Babylonian fertility god represented as a fish.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Dagon Cavus", 
           "longitude": 345.0, 
@@ -129,7 +129,7 @@
         }, 
         {
           "origin": "Angolan sacred lake.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "PE", 
           "name": "Dilolo Patera", 
           "longitude": 24.5, 
@@ -138,7 +138,7 @@
         }, 
         {
           "origin": "Nanay mistress of fishing, Sea of Okhotsk.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "MA", 
           "name": "Doro Macula", 
           "longitude": 31.7, 
@@ -147,7 +147,7 @@
         }, 
         {
           "origin": "Tortuous sea; literally, \"Serpent Bay\" (Norse).", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "PE", 
           "name": "Gandvik Patera", 
           "longitude": 5.5, 
@@ -156,7 +156,7 @@
         }, 
         {
           "origin": "Egyptian frog goddess.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Hekt Cavus", 
           "longitude": 342.0, 
@@ -165,7 +165,7 @@
         }, 
         {
           "origin": "Zulu water-sprite.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "PU", 
           "name": "Hili", 
           "longitude": 35.0, 
@@ -174,7 +174,7 @@
         }, 
         {
           "origin": "Japanese deity born in shape of a jellyfish.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Hirugo Cavus", 
           "longitude": 345.0, 
@@ -183,7 +183,7 @@
         }, 
         {
           "origin": "Chinese sacred river.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "SU", 
           "name": "Ho Sulci", 
           "longitude": 305.0, 
@@ -192,7 +192,7 @@
         }, 
         {
           "origin": "Lozi (Zambia) water snake linked with destruction.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Ilomba", 
           "longitude": 57.0, 
@@ -201,7 +201,7 @@
         }, 
         {
           "origin": "Hindu river goddess.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "FO", 
           "name": "Jumna Fossae", 
           "longitude": 44.0, 
@@ -210,7 +210,7 @@
         }, 
         {
           "origin": "Sacred lake of Zoroastrianism.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "PE", 
           "name": "Kasu Patera", 
           "longitude": 14.0, 
@@ -219,7 +219,7 @@
         }, 
         {
           "origin": "The god Prajapati as a tortoise (India).", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Kasyapa Cavus", 
           "longitude": 358.0, 
@@ -228,7 +228,7 @@
         }, 
         {
           "origin": "Mabuiag (Melanisia) island of the dead.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "PE", 
           "name": "Kibu Patera", 
           "longitude": 43.0, 
@@ -237,7 +237,7 @@
         }, 
         {
           "origin": "Slavic spirit of swamps, household spirit.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "MA", 
           "name": "Kikimora Maculae", 
           "longitude": 78.0, 
@@ -246,7 +246,7 @@
         }, 
         {
           "origin": "Norse river through which dead must pass.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "SU", 
           "name": "Kormet Sulci", 
           "longitude": 335.5, 
@@ -255,7 +255,7 @@
         }, 
         {
           "origin": "Norse giant sea monster.", 
-          "diameter": 0.0, 
+          "diameter": 150.0, 
           "code": "CA", 
           "name": "Kraken Catena", 
           "longitude": 35.5, 
@@ -264,7 +264,7 @@
         }, 
         {
           "origin": "Babylonian destructive fish-man spirit.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Kulilu Cavus", 
           "longitude": 4.0, 
@@ -273,7 +273,7 @@
         }, 
         {
           "origin": "Vishnu in the form of a tortoise.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Kurma", 
           "longitude": 61.0, 
@@ -282,7 +282,7 @@
         }, 
         {
           "origin": "Norse sacred river.", 
-          "diameter": 0.0, 
+          "diameter": 200.0, 
           "code": "SU", 
           "name": "Leipter Sulci", 
           "longitude": 9.0, 
@@ -291,7 +291,7 @@
         }, 
         {
           "origin": "Hebrew sea monster upholding earth.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "PE", 
           "name": "Leviathan Patera", 
           "longitude": 28.5, 
@@ -300,7 +300,7 @@
         }, 
         {
           "origin": "Chinese sacred river.", 
-          "diameter": 0.0, 
+          "diameter": 150.0, 
           "code": "SU", 
           "name": "Lo Sulci", 
           "longitude": 321.0, 
@@ -309,7 +309,7 @@
         }, 
         {
           "origin": "Fish that holds up the universe (Persian).", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Mah Cavus", 
           "longitude": 6.0, 
@@ -318,7 +318,7 @@
         }, 
         {
           "origin": "Tonga sea spirit.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "PU", 
           "name": "Mahilani", 
           "longitude": 359.5, 
@@ -327,7 +327,7 @@
         }, 
         {
           "origin": "Ila (Zambia) \"the flooder.\"", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Mangwe Cavus", 
           "longitude": 343.0, 
@@ -336,7 +336,7 @@
         }, 
         {
           "origin": "Chaga (Tazania) mythical large fish.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Mazomba", 
           "longitude": 63.5, 
@@ -345,7 +345,7 @@
         }, 
         {
           "origin": "French fictional island, meaning \"nowhere.\"", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "PM", 
           "name": "Medamothi Planum", 
           "longitude": 69.0, 
@@ -354,7 +354,7 @@
         }, 
         {
           "origin": "Chinese symbol of duality in nature.", 
-          "diameter": 0.0, 
+          "diameter": 1000.0, 
           "code": "RE", 
           "name": "Monad Regio", 
           "longitude": 37.0, 
@@ -363,7 +363,7 @@
         }, 
         {
           "origin": "Japanese mythic fish; maker of earthquakes.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "MA", 
           "name": "Namazu Macula", 
           "longitude": 14.0, 
@@ -372,7 +372,7 @@
         }, 
         {
           "origin": "Mouth of this river is Ostiak entrance to underworld.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "SU", 
           "name": "Ob Sulci", 
           "longitude": 328.0, 
@@ -381,7 +381,7 @@
         }, 
         {
           "origin": "Norse river through which dead pass.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "SU", 
           "name": "Ormet Sulci", 
           "longitude": 337.0, 
@@ -390,7 +390,7 @@
         }, 
         {
           "origin": "Finnish fortune-telling fish god.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "AA", 
           "name": "Ravgga", 
           "longitude": 71.5, 
@@ -399,7 +399,7 @@
         }, 
         {
           "origin": "Breton bay of souls.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "FO", 
           "name": "Raz Fossae", 
           "longitude": 21.5, 
@@ -408,7 +408,7 @@
         }, 
         {
           "origin": "Egyptian fish who wept fertilizing tears.", 
-          "diameter": 0.0, 
+          "diameter": 150.0, 
           "code": "MA", 
           "name": "Rem Maculae", 
           "longitude": 349.5, 
@@ -417,7 +417,7 @@
         }, 
         {
           "origin": "French isle of winds.", 
-          "diameter": 0.0, 
+          "diameter": 200.0, 
           "code": "PL", 
           "name": "Ruach Planitia", 
           "longitude": 24.0, 
@@ -426,7 +426,7 @@
         }, 
         {
           "origin": "Japanese undersea dragon palace.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "PL", 
           "name": "Ryugu Planitia", 
           "longitude": 27.0, 
@@ -435,7 +435,7 @@
         }, 
         {
           "origin": "Egypian water monster; personification of evil.", 
-          "diameter": 0.0, 
+          "diameter": 200.0, 
           "code": "CA", 
           "name": "Set Catena", 
           "longitude": 33.5, 
@@ -444,7 +444,7 @@
         }, 
         {
           "origin": "Pueblo (USA) hole or lake of emergence from underworld.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "PL", 
           "name": "Sipapu Planitia", 
           "longitude": 36.0, 
@@ -453,7 +453,7 @@
         }, 
         {
           "origin": "Norse river of daggers and spears.", 
-          "diameter": 0.0, 
+          "diameter": 200.0, 
           "code": "SU", 
           "name": "Slidr Sulci", 
           "longitude": 350.0, 
@@ -462,7 +462,7 @@
         }, 
         {
           "origin": "M\u0101ori fishing and sea god.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "AA", 
           "name": "Tangaroa", 
           "longitude": 65.5, 
@@ -471,7 +471,7 @@
         }, 
         {
           "origin": "Yoruba; river named for willful son of god.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "SU", 
           "name": "Tano Sulci", 
           "longitude": 337.0, 
@@ -480,7 +480,7 @@
         }, 
         {
           "origin": "Underground realm across Black River (Finnish).", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "PL", 
           "name": "Tuonela Planitia", 
           "longitude": 14.5, 
@@ -489,7 +489,7 @@
         }, 
         {
           "origin": "Zulu reed from which humanity sprang.", 
-          "diameter": 0.0, 
+          "diameter": 1000.0, 
           "code": "RE", 
           "name": "Uhlanga Regio", 
           "longitude": 357.0, 
@@ -498,7 +498,7 @@
         }, 
         {
           "origin": "Hawaiian shark god.", 
-          "diameter": 0.0, 
+          "diameter": 25.0, 
           "code": "CB", 
           "name": "Ukupanio Cavus", 
           "longitude": 23.0, 
@@ -507,7 +507,7 @@
         }, 
         {
           "origin": "Greatest of Elivagar rivers, a stream of ice.", 
-          "diameter": 0.0, 
+          "diameter": 400.0, 
           "code": "SU", 
           "name": "Vimur Sulci", 
           "longitude": 59.0, 
@@ -516,7 +516,7 @@
         }, 
         {
           "origin": "Amour of Merlin (Welsh).", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "MA", 
           "name": "Viviane Macula", 
           "longitude": 36.5, 
@@ -525,7 +525,7 @@
         }, 
         {
           "origin": "Slavic water spirit.", 
-          "diameter": 0.0, 
+          "diameter": 100.0, 
           "code": "AA", 
           "name": "Vodyanoy", 
           "longitude": 28.5, 
@@ -534,7 +534,7 @@
         }, 
         {
           "origin": "Japanese heavenly river; literally, \"peace.\"", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "SU", 
           "name": "Yasu Sulci", 
           "longitude": 347.0, 
@@ -543,7 +543,7 @@
         }, 
         {
           "origin": "Siberian mythical holy river.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "FO", 
           "name": "Yenisey Fossa", 
           "longitude": 56.2, 
@@ -552,7 +552,7 @@
         }, 
         {
           "origin": "Niger water spirits.", 
-          "diameter": 0.0, 
+          "diameter": 300.0, 
           "code": "MA", 
           "name": "Zin Maculae", 
           "longitude": 68.0, 

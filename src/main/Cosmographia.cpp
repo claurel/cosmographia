@@ -18,7 +18,7 @@
 #include <QtGui>
 
 #include "UniverseView.h"
-//#include "GalleryView.h"
+#include "GalleryView.h"
 #include "catalog/UniverseCatalog.h"
 #include "catalog/UniverseLoader.h"
 #include "qtwrapper/UniverseCatalogObject.h"
@@ -66,6 +66,10 @@
 
 using namespace vesta;
 using namespace Eigen;
+
+
+// Set this to 1 to enable the Solar System gallery view
+#define ENABLE_GALLERY 1
 
 
 Cosmographia::Cosmographia() :
@@ -1244,7 +1248,7 @@ Cosmographia::loadStarNamesFile(const QString &fileName, StarCatalog* starCatalo
         return;
     }
 
-    if (!nameListVar.type() == QVariant::List)
+    if (nameListVar.type() != QVariant::List)
     {
         qDebug() << "Star names file must contain a single JSON list.";
         return;
@@ -1490,7 +1494,7 @@ Cosmographia::loadCatalogFile(const QString& fileName)
 void
 Cosmographia::loadGallery(const QString& fileName)
 {
-#if 0
+#if ENABLE_GALLERY
     if (fileName.isEmpty())
     {
         return;
@@ -1516,7 +1520,7 @@ Cosmographia::loadGallery(const QString& fileName)
         return;
     }
 
-    if (!nameListVar.type() == QVariant::List)
+    if (nameListVar.type() != QVariant::List)
     {
         qDebug() << "Gallery file must contain a single JSON list.";
         return;

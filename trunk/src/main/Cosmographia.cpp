@@ -1040,6 +1040,7 @@ Cosmographia::loadSettings()
     m_view3d->setEclipticVisibility(settings.value("ecliptic", false).toBool());
     m_view3d->setEquatorialGridVisibility(settings.value("equatorialGrid", false).toBool());
     m_view3d->setLabelVisibility(settings.value("labels", true).toBool());
+    m_view3d->setSurfaceFeatureLabelVisibility(settings.value("surfaceFeatureLabels", false).toBool());
     m_view3d->setConstellationFigureVisibility(settings.value("constellationFigures", false).toBool());
     m_view3d->setConstellationNameVisibility(settings.value("constellationNames", false).toBool());
     m_view3d->setStarNameVisibility(settings.value("starNames", false).toBool());
@@ -1077,6 +1078,7 @@ Cosmographia::saveSettings()
     settings.setValue("ecliptic", m_view3d->eclipticVisibility());
     settings.setValue("equatorialGrid", m_view3d->equatorialGridVisibility());
     settings.setValue("labels", m_view3d->labelVisibility());
+    settings.setValue("surfaceFeatureLabels", m_view3d->surfaceFeatureLabelVisibility());
     settings.setValue("constellationFigures", m_view3d->constellationFigureVisibility());
     settings.setValue("constellationNames", m_view3d->constellationFigureVisibility());
     settings.setValue("starNames", m_view3d->starNameVisibility());
@@ -1561,6 +1563,7 @@ Cosmographia::loadGallery(const QString& fileName)
     }
 #endif
 }
+
 
 void
 Cosmographia::processReceivedResource(QNetworkReply* reply)

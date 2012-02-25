@@ -746,6 +746,14 @@ macx {
         data/earthorbiting.json \
         data/iss.json \
         data/hst.json \
+        data/mercury-features.json \
+        data/venus-features.json \
+        data/moon-features.json \
+        data/mars-features.json \
+        data/jupiter-features.json \
+        data/saturn-features.json \
+        data/uranus-features.json \
+        data/neptune-features.json \
         data/start-viewpoints.json \
         data/sans-12.txf \
         data/sans-24.txf \

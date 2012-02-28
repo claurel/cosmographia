@@ -918,6 +918,7 @@ macx {
     GALLERY.path = Contents/Resources/data/gallery
     GALLERY.files = \
         data/gallery/gallery.json \
+        data/gallery/sun.png \
         data/gallery/mercury.png \
         data/gallery/venus.png \
         data/gallery/earth.png \

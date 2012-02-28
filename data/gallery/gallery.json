@@ -1,5 +1,12 @@
 [
     {
+        "name" : "Sun",
+        "image" : "sun.png",
+        "source" : "http://sdo.gsfc.nasa.gov/gallery/main.php?v=item&id=33",
+        "credit" : "Solar Dynamics Observatory"
+    },
+
+    {
         "name" : "Mercury",
         "image" : "mercury.png",
         "source" : "http://apod.nasa.gov/apod/ap081008.html",

@@ -1,5 +1,5 @@
 /*
- * $Revision: 615 $ $Date: 2011-06-22 12:02:16 -0700 (Wed, 22 Jun 2011) $
+ * $Revision: 656 $ $Date: 2012-02-29 14:56:26 -0800 (Wed, 29 Feb 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -760,7 +760,13 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
             }
             else if (m_mergedDepthBufferSpans[i - 1].itemCount == 0)
             {
-                // TODO: Possibly expand this span into an adjacent empty span
+                // Expand this span if the adjacent span is empty
+                float newFarDistance = m_mergedDepthBufferSpans[i].farDistance * 1.01f;
+                if (newFarDistance < m_mergedDepthBufferSpans[i - 1].farDistance)
+                {
+                    m_mergedDepthBufferSpans[i].farDistance = newFarDistance;
+                    m_mergedDepthBufferSpans[i - 1].nearDistance = newFarDistance;
+                }
             }
         }
     }

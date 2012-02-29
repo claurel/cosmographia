@@ -45,6 +45,7 @@ GalleryView::GalleryView() :
     m_cameraFov(float(toRadians(45.0))),
     m_galleryRadius(50.0f),
     m_galleryAngle(float(toRadians(60.0f))),
+    m_galleryHeightScale(1.3f),
     m_tileSpacing(0.1f),
     m_selectedTileIndex(-1),
     m_hoverTileIndex(-1)
@@ -195,7 +196,7 @@ Eigen::Vector3f
 GalleryView::tilePosition(const GalleryTile& tile)
 {
     const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
-    const float galleryHeight = viewPlaneWidth * float(m_rows) / float(m_columns);
+    const float galleryHeight = viewPlaneWidth * float(m_rows) / float(m_columns) * m_galleryHeightScale;
     double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
     float x = float(m_galleryRadius * cos(theta));
     float y = (float(tile.row) / float(m_rows - 1) - 0.5f) * galleryHeight;
@@ -272,7 +273,7 @@ GalleryView::renderTile(const Viewport& viewport,
         {
             glColor4f(1.0f, 1.0f, 1.0f, tile.hover);
             m_font->bind();
-            m_font->render(tile.name, screenPos + Vector2f(m_font->textWidth(tile.name) * -0.5f, 4.0f));
+            m_font->render(tile.name, screenPos + Vector2f(m_font->textWidth(tile.name) * -0.5f, -15.0f));
         }
 
         glPopMatrix();

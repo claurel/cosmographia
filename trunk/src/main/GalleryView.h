@@ -113,6 +113,7 @@ private:
     float m_cameraFov;
     float m_galleryRadius;
     float m_galleryAngle;
+    float m_galleryHeightScale;
     float m_tileSpacing;
 
     int m_selectedTileIndex;

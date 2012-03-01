@@ -1318,7 +1318,7 @@ UniverseLoader::loadFixedEulerRotationModel(const QVariantMap& map)
 
 
 vesta::RotationModel*
-loadUniformRotationModel(const QVariantMap& map)
+UniverseLoader::loadUniformRotationModel(const QVariantMap& map)
 {
     bool ok = false;
 
@@ -1327,12 +1327,24 @@ loadUniformRotationModel(const QVariantMap& map)
     double meridianAngle = angleValue(map.value("meridianAngle"));
     double period        = durationValue(map.value("period"), Unit_Day, 1.0, &ok);
 
+    double epoch = 0.0;
+    QVariant epochVar = map.value("epoch");
+    if (epochVar.isValid())
+    {
+        epoch = dateValue(epochVar, &ok);
+        if (!ok)
+        {
+            errorMessage("Invalid epoch for uniform rotation.");
+            return NULL;
+        }
+    }
+
     Vector3d axis = (AngleAxisd(ascendingNode, Vector3d::UnitZ()) * AngleAxisd(inclination, Vector3d::UnitX())) * Vector3d::UnitZ();
     //Vector3d axis = (AngleAxisd(inclination, Vector3d::UnitX()) * AngleAxisd(ascendingNode, Vector3d::UnitZ())) * Vector3d::UnitZ();
     double rotationRate = 2 * PI / period;
 
     //return new UniformRotationModel(axis, rotationRate, meridianAngle);
-    return new SimpleRotationModel(inclination, ascendingNode, rotationRate, meridianAngle, 0.0);
+    return new SimpleRotationModel(inclination, ascendingNode, rotationRate, meridianAngle, epoch);
 }
 
 

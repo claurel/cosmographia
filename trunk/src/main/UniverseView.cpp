@@ -1739,6 +1739,13 @@ UniverseView::keyReleaseEvent(QKeyEvent* event)
             setStatusMessage("Motion canceled");
             m_observerAction = NULL;
         }
+
+        // Dismiss the gallery if it's visible
+        if (m_galleryView && m_galleryView->isVisible())
+        {
+            m_galleryView->setVisible(false);
+        }
+
         break;
     default:
         QWidget::keyReleaseEvent(event);

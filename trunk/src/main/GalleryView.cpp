@@ -367,6 +367,12 @@ GalleryView::setVisible(bool visible)
     {
         m_state = Active;
         m_selectedTileIndex = -1;
+        m_hoverTileIndex = -1;
+        for (int tileIndex = 0; tileIndex < int(m_tiles.size()); ++tileIndex)
+        {
+            GalleryTile& tile = m_tiles[tileIndex];
+            tile.hover = 0.0f;
+        }
     }
     else
     {

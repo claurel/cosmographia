@@ -1,0 +1,88 @@
+{
+     "version": "1.0",
+     "name": "Binary asteroid 1999 KW4",
+
+     "items" :
+     [
+      {
+         "name" : "1999 KW4",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+
+         "mass" : "2.353e12 kg",
+         "density" : 1.97,
+
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2012-03-14T00:00:00",
+           "period": "0.514781508424y",
+           "semiMajorAxis": "0.64231583au",
+           "eccentricity": 0.68843901,
+           "inclination": 38.8881,
+           "ascendingNode": 244.925051,
+           "argumentOfPeriapsis": 192.607996,
+           "meanAnomaly": 129.51994
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "2.7645h",
+             "inclination" : 156.1,
+             "ascendingNode" : 105.4
+         },
+
+         "geometry": {
+           "source": "models/1999kw4a.cmod",
+           "type": "Mesh"
+         }
+      },
+
+      {
+         "name" : "1999 KW4 Beta",
+         "class" : "asteroid",
+         "label" : { "color" : "#ffff55" },
+         "trajectoryPlot": { "fade": 0.3 },
+
+         "mass" : "1.35e11 kg",
+         "density" : 2.81,
+
+         "center": "1999 KW4",
+
+         "trajectoryFrame": "EquatorJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2001-05-26T09:55:00",
+           "period": "17.4223h",
+           "semiMajorAxis": 2.548,
+           "eccentricity": 0.0004,
+           "inclination": 156.1,
+           "ascendingNode": 105.4,
+           "argumentOfPeriapsis": 319.7,
+           "meanAnomaly": 0.0
+         },
+
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "17.4223h",
+             "epoch": "2001-05-26T09:55:00",
+             "inclination" : 156.1,
+             "ascendingNode" : 105.4,
+             "meridianAngle" : 319.7
+         },
+
+         "geometry": {
+           "type": "Mesh",
+           "source": "models/1999kw4b.cmod"
+         }
+      }
+
+     ]
+}
+

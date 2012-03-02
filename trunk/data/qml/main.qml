@@ -300,6 +300,20 @@ Item {
 
          Column {
              Image {
+                 id: galleryButton
+                 width: 32; height: 32
+                 source: "qrc:/icons/gallery.png"
+                 smooth: true
+
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: { universeView.toggleGallery() }
+                 }
+             }
+         }
+
+         Column {
+             Image {
                  id: defaultViewButton
                  width: 32; height: 32
                  source: "qrc:/icons/solarsys.png"

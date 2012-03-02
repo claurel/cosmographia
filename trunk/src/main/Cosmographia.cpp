@@ -1607,6 +1607,13 @@ Cosmographia::showAnnouncement(const QString& text, const QDateTime& modifiedTim
 {
     QSettings settings;
 
+    // If this is the first time that Cosmographia has been run, don't show
+    // the news window; the users focus should be on the intro window.
+    if (!settings.value("previouslyRun", false).toBool())
+    {
+        return;
+    }
+
     // Only show the announcement if it has changed
     QDateTime lastAnnouncementTime = settings.value("lastAnnouncementTime", QDateTime(QDate(2000, 1, 1))).toDateTime();
     if (modifiedTime > lastAnnouncementTime)

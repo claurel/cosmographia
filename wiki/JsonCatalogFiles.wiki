@@ -351,9 +351,12 @@ axis:
     "period" : 6.387206,
     "inclination" : 115.60,
     "ascendingNode" : 228.34,
-    "meridianAngle" : 320.75
+    "meridianAngle" : 320.75,
+    "epoch": "2001-05-26T19:30:00"
 }
 }}}
+
+The only required property is period. The angle properties all default to zero, and the default epoch is J2000.0.
 
 == Interpolated ==
 

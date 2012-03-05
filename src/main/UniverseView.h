@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2010-2012 Chris Laurel <claurel@gmail.com>
 //
 // Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -80,6 +80,7 @@ class UniverseView : public QDeclarativeView
 
     Q_PROPERTY(int earthMapMonth READ earthMapMonth WRITE setEarthMapMonth);
 
+    Q_PROPERTY(double simulationTime READ simulationTime WRITE setSimulationTime);
     Q_PROPERTY(QString currentTimeString READ currentTimeString NOTIFY timeChanged);
     Q_PROPERTY(QDateTime simulationDateTime READ simulationDateTime WRITE setSimulationDateTime NOTIFY simulationDateTimeChanged);
     Q_PROPERTY(double timeScale READ timeScale WRITE setTimeScale NOTIFY timeScaleChanged);

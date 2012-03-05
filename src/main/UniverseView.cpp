@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2010-2011 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2010-2012 Chris Laurel <claurel@gmail.com>
 //
 // Cosmographia is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,8 @@
 #include "MultiWMSTiledMap.h"
 #include "MultiLabelVisualizer.h"
 #include "geometry/FeatureLabelSetGeometry.h"
+
+#include "NumberFormat.h"
 
 #if FFMPEG_SUPPORT
 #include "QVideoEncoder.h"
@@ -769,28 +771,6 @@ void UniverseView::paintEvent(QPaintEvent* /* event */)
 
 
 static
-QString readableNumber(double value, int significantDigits)
-{
-    double roundValue = value;
-    int useDigits = 1;
-
-    if (value != 0.0)
-    {
-        double n = log10(abs(value));
-        useDigits = max(0, significantDigits - (int) n - 1);
-        double m = pow(10.0, floor(n) - significantDigits + 1);
-        roundValue = floor(value / m + 0.5) * m;
-    }
-    else
-    {
-        useDigits = significantDigits;
-    }
-
-    return QLocale::system().toString(roundValue, 'f', useDigits);
-}
-
-
-static
 QString formatDate(const GregorianDate& date)
 {
     const char* timeSystem = "";
@@ -980,7 +960,7 @@ UniverseView::drawInfoOverlay()
             m_textFont->bind();
 
             float dateY = float(viewportHeight - titleFontHeight);
-            float dateX = viewportWidth - 250.0f;
+            float dateX = viewportWidth - 350.0f;
 
             if (m_timeDisplay == TimeDisplay_UTC)
             {
@@ -1013,7 +993,7 @@ UniverseView::drawInfoOverlay()
                 {
                     int sigDigits = 1;
                     sigDigits = int(abs(floor(log10(abs(m_timeScale))))) + 1;
-                    timeScaleFormatted = readableNumber(m_timeScale, sigDigits);
+                    timeScaleFormatted = NumberFormat((unsigned int) sigDigits).toString(m_timeScale);
                 }
                 else
                 {
@@ -1058,7 +1038,7 @@ UniverseView::drawInfoOverlay()
                     distance = pc.height();
                 }
 
-                QString distanceString = QString("Distance: %1 km").arg(readableNumber(distance, 6));;
+                QString distanceString = QString("Distance: %1 km").arg(NumberFormat(6u).toString(distance));
                 string distanceStdString = string(distanceString.toLatin1().constData());
                 m_textFont->render(distanceStdString, Vector2f(textLeftMargin, viewportHeight - 20.0f - titleFontHeight));
 
@@ -1093,7 +1073,7 @@ UniverseView::drawInfoOverlay()
                     // TODO: Use the object class field to determine when something is spacecraft or now
                     if (radius > 0.01)
                     {
-                        QString sizeString = QString("Radius: %1 km").arg(readableNumber(radius, 4));
+                        QString sizeString = QString("Radius: %1 km").arg(NumberFormat(4u).toString(radius));
                         m_textFont->render(sizeString.toLatin1().data(), Vector2f(textLeftMargin, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
                     }
                 }
@@ -3009,7 +2989,7 @@ UniverseView::plotTrajectoryObserver(const BodyInfo* info)
             TrajectoryGeometry* plot = new TrajectoryGeometry();
             Visualizer* visualizer = new Visualizer(plot);
             plot->setFrame(frame);
-            plot->setWindowDuration(daysToSeconds(3.0));
+            plot->setWindowDuration(daysToSeconds(2.0));
             plot->setDisplayedPortion(TrajectoryGeometry::WindowBeforeCurrentTime);
             plot->setFadeFraction(0.5);
             plot->setColor(color);
@@ -3019,7 +2999,7 @@ UniverseView::plotTrajectoryObserver(const BodyInfo* info)
             plotEntry.trajectory = NULL;
             plotEntry.visualizer = visualizer;
             plotEntry.generator = new BodyPositionSampleGenerator(m_selectedBody.ptr(), center, frame);
-            plotEntry.sampleCount = 300;
+            plotEntry.sampleCount = 1000;
             m_trajectoryPlots.push_back(plotEntry);
         }
     }

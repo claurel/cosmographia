@@ -49,6 +49,7 @@ public:
     Q_INVOKABLE void loadAddOn(const QString& source);
     Q_INVOKABLE void unloadAddOn(const QString& source);
     Q_INVOKABLE QVariant getSetting(const QString& key);
+    Q_INVOKABLE QString formatNumber(double value, int precision);
 
     bool autoHideToolBar() const
     {

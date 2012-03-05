@@ -19,6 +19,7 @@
 #include "UnitConversion.h"
 #include "TleTrajectory.h"
 #include "DateUtility.h"
+#include "NumberFormat.h"
 #include "catalog/UniverseCatalog.h"
 #include "geometry/MeshInstanceGeometry.h"
 #include <vesta/Geometry.h>
@@ -195,29 +196,7 @@ double roundToSigDigits(double value, int significantDigits)
 
 
 static
-QString readableNumber(double value, int significantDigits)
-{
-    double roundValue = value;
-    int useDigits = 1;
-
-    if (value != 0.0)
-    {
-        double n = log10(abs(value));
-        useDigits = max(0, significantDigits - (int) n - 1);
-        double m = pow(10.0, floor(n) - significantDigits + 1);
-        roundValue = floor(value / m + 0.5) * m;
-    }
-    else
-    {
-        useDigits = significantDigits;
-    }
-
-    return QLocale::system().toString(roundValue, 'f', useDigits);
-}
-
-
-static
-QString formatScientific(double v, int minExp = 4, int sigDigits = 4)
+QString formatScientific(double v, int minExp = 4, unsigned int sigDigits = 4)
 {
     if (v != 0.0)
     {
@@ -230,7 +209,7 @@ QString formatScientific(double v, int minExp = 4, int sigDigits = 4)
         else
         {
             //return QString("%1").arg(v, 0, 'f');
-            return readableNumber(v, sigDigits);
+            return NumberFormat(sigDigits).toString(v);
         }
     }
     else
@@ -334,13 +313,13 @@ HelpCatalog::getObjectDataText(const QString &name) const
                 bool isSpherical = semiAxes.x() == semiAxes.y() && semiAxes.y() == semiAxes.z();
                 if (isSpherical)
                 {
-                    out << tableRow(QObject::tr("Radius"), QObject::tr("%1 km").arg(readableNumber(semiAxes.x(), 4)));
+                    out << tableRow(QObject::tr("Radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.x())));
                 }
                 else
                 {
-                    //out << tableRow(QObject::tr("Mean radius"), QObject::tr("%1 km").arg(readableNumber(semiAxes.sum() / 3.0f, 4)));
-                    out << tableRow(QObject::tr("Equatorial radius"), QObject::tr("%1 km").arg(readableNumber((semiAxes.x() + semiAxes.y()) / 2.0f, 4)));
-                    out << tableRow(QObject::tr("Polar radius"), QObject::tr("%1 km").arg(readableNumber(semiAxes.z(), 4)));
+                    //out << tableRow(QObject::tr("Mean radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.sum() / 3.0f)));
+                    out << tableRow(QObject::tr("Equatorial radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString((semiAxes.x() + semiAxes.y()) / 2.0f)));
+                    out << tableRow(QObject::tr("Polar radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.z())));
                 }
             }
             else if (dynamic_cast<MeshInstanceGeometry*>(body->geometry()))

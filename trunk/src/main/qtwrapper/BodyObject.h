@@ -38,6 +38,8 @@ public:
     Q_INVOKABLE bool hasVisualizer(const QString& name) const;
     Q_INVOKABLE void removeVisualizer(const QString& name);
     Q_INVOKABLE void setVisualizer(const QString& name, VisualizerObject* visualizer);
+    Q_INVOKABLE double distanceTo(BodyObject* other, double t);
+    Q_INVOKABLE double relativeSpeed(BodyObject* other, double t);
 
 public:
     BodyObject(vesta::Entity* body = NULL, QObject* parent = NULL);

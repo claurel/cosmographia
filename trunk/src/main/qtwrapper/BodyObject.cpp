@@ -22,6 +22,7 @@
 #include <QDebug>
 
 using namespace vesta;
+using namespace Eigen;
 
 
 BodyObject::BodyObject(vesta::Entity* body, QObject* parent) :
@@ -39,7 +40,14 @@ BodyObject::~BodyObject()
 QString
 BodyObject::name() const
 {
-    return QString::fromUtf8(m_body->name().c_str(), m_body->name().length());
+    if (m_body.isValid())
+    {
+        return QString::fromUtf8(m_body->name().c_str(), m_body->name().length());
+    }
+    else
+    {
+        return "";
+    }
 }
 
 
@@ -58,6 +66,7 @@ BodyObject::setBodyAxes(bool enabled)
         AxesVisualizer* axes = new AxesVisualizer(AxesVisualizer::BodyAxes, visualizerSize());
         axes->setLabelEnabled(true, ArrowGeometry::AllAxes);
         axes->setVisibility(true);
+        //axes->arrows()->setMinimumScreenSize(100.0f);
         m_body->setVisualizer("body axes", axes);
     }
     else
@@ -158,3 +167,47 @@ BodyObject::visualizerSize() const
     return size;
 }
 
+
+/** Get the distance between this body and another at the specified time.
+  *
+  * This function returns 0 if either object is null, or if one of the objects
+  * doesn't exist at the specified time.
+  *
+  * \returns distance between the two bodies in kilometers
+  */
+double
+BodyObject::distanceTo(BodyObject* other, double t)
+{
+    Vector3d thisPosition = Vector3d::Zero();
+    Vector3d otherPosition = Vector3d::Zero();
+
+    if (m_body.isValid() && other->body())
+    {
+        if (m_body->chronology()->includesTime(t) && other->body()->chronology()->includesTime(t))
+        {
+            thisPosition = m_body->position(t);
+            otherPosition = other->body()->position(t);
+        }
+    }
+
+    return (thisPosition - otherPosition).norm();
+}
+
+
+double
+BodyObject::relativeSpeed(BodyObject* other, double t)
+{
+    Vector3d thisVelocity = Vector3d::Zero();
+    Vector3d otherVelocity = Vector3d::Zero();
+
+    if (m_body.isValid() && other->body())
+    {
+        if (m_body->chronology()->includesTime(t) && other->body()->chronology()->includesTime(t))
+        {
+            thisVelocity = m_body->state(t).velocity();
+            otherVelocity = other->body()->state(t).velocity();
+        }
+    }
+
+    return (thisVelocity - otherVelocity).norm();
+}

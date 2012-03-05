@@ -37,6 +37,7 @@
 #include "astro/TASS17.h"
 #include "astro/Gust86.h"
 #include "DateUtility.h"
+#include "NumberFormat.h"
 #include "SkyLabelLayer.h"
 #include <vesta/GregorianDate.h>
 #include <vesta/Body.h>
@@ -326,6 +327,7 @@ Cosmographia::setupMenuBar()
     plotTrajectoryAction->setShortcut(QKeySequence("Shift+Ctrl+P"));
     visualAidsMenu->addAction(plotTrajectoryAction);
     QAction* plotTrajectoryObserverAction = new QAction("&Plot Trajectory in Observer Frame", visualAidsMenu);
+    plotTrajectoryObserverAction->setShortcut(QKeySequence("Shift+Alt+Ctrl+P"));
     visualAidsMenu->addAction(plotTrajectoryObserverAction);
 
     visualAidsMenu->addSeparator();
@@ -1100,6 +1102,16 @@ Cosmographia::getSetting(const QString &key)
 {
     QSettings settings;
     return settings.value(key);
+}
+
+
+// Useful for converting numbers to human-friendly strings in QML
+// (which doesn't seem to have any locale support)
+QString
+Cosmographia::formatNumber(double value, int precision)
+{
+    NumberFormat format((unsigned int) std::max(0, precision));
+    return format.toString(value);
 }
 
 

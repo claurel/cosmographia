@@ -28,6 +28,7 @@ Item
 
     signal showInfo()
     signal showProperties()
+    signal showDistance(variant target, variant center)
 
     function show(x, y, body)
     {
@@ -58,6 +59,12 @@ Item
         }
         if (selectionName != "Earth") {
             menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction"), type: "vectors" });
+        }
+
+        var targetBodyName = universeView.getSelectedBody().name;
+        if (selectionName != targetBodyName && targetBodyName != "")
+        {
+            menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "vectors" })
         }
     }
 
@@ -142,6 +149,10 @@ Item
                 selection.setVisualizer("earth direction", universeView.createBodyDirectionVisualizer(selection, universeCatalog.getEarth()));
             }
         }
+        else if (item.action == "distance")
+        {
+            showDistance(selection, universeView.getSelectedBody())
+        }
     }
 
     // This mouse area is activated when the context menu is shown. It is used
@@ -190,7 +201,9 @@ Item
                 }
 
                 InfoText {
-                    text: labelText; color: "white"
+                    text: labelText;
+                    color: "white";
+                    elide: Text.ElideMiddle;
                 }
             }
 

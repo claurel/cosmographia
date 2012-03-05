@@ -35,6 +35,7 @@ APP_SOURCES = \
     $$MAIN_PATH/LinearCombinationTrajectory.cpp \
     $$MAIN_PATH/MarkerLayer.cpp \
     $$MAIN_PATH/MultiLabelVisualizer.cpp \
+    $$MAIN_PATH/NumberFormat.cpp \
     $$MAIN_PATH/ObserverAction.cpp \
     $$MAIN_PATH/SkyLabelLayer.cpp \
     $$MAIN_PATH/TleTrajectory.cpp \
@@ -92,6 +93,7 @@ APP_HEADERS = \
     $$MAIN_PATH/LinearCombinationTrajectory.h \
     $$MAIN_PATH/MarkerLayer.h \
     $$MAIN_PATH/MultiLabelVisualizer.h \
+    $$MAIN_PATH/NumberFormat.h \
     $$MAIN_PATH/ObserverAction.h \
     $$MAIN_PATH/SkyLabelLayer.h \
     $$MAIN_PATH/TleTrajectory.h \
@@ -781,6 +783,7 @@ macx {
         data/qml/CheckBox.qml \
         data/qml/ChoiceBox.qml \
         data/qml/ContextMenu.qml \
+        data/qml/DistancePanel.qml \
         data/qml/FindObjectPanel.qml \
         data/qml/HelpBrowser.qml \
         data/qml/InfoText.qml \

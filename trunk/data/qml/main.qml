@@ -113,6 +113,9 @@ Item {
             }
             setActivePanel("infoPanel")
         }
+        onShowDistance: {
+            distancePanel.show(target, center);
+        }
     }
 
     Connections
@@ -181,6 +184,14 @@ Item {
 
         width: 350; height: 300
         x: 32; y: panelY
+        opacity: 0
+    }
+
+    DistancePanel {
+        id: distancePanel
+        anchors.horizontalCenter: page.horizontalCenter
+        anchors.bottom: page.bottom
+        anchors.bottomMargin: 30
         opacity: 0
     }
 

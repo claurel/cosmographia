@@ -7,6 +7,9 @@
         {
           "name" : "TDRS-1",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -30,6 +33,9 @@
         {
           "name" : "TDRS-3",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -53,6 +59,9 @@
         {
           "name" : "TDRS-4",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -76,6 +85,9 @@
         {
           "name" : "TDRS-5",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -99,6 +111,9 @@
         {
           "name" : "TDRS-6",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -122,6 +137,9 @@
         {
           "name" : "TDRS-7",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -145,6 +163,9 @@
         {
           "name" : "TDRS-8",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -168,6 +189,9 @@
         {
           "name" : "TDRS-9",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",
@@ -191,6 +215,9 @@
         {
           "name" : "TDRS-10",
           "label" : { "color" : "lime" },
+          "trajectoryPlot": {
+              "fade": 0.5
+          }, 
 
           "center" : "Earth",
           "trajectoryFrame" : "EquatorJ2000",

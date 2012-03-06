@@ -42,6 +42,9 @@ Item
         selection = body
         selectionName = selection.name
 
+        height = 310
+        var rowHeight = 20
+
         menuModel.clear();
         menuModel.append({ action: "goto",        labelText: "Go To", checked: false, type: "camera" });
         menuModel.append({ action: "center",      labelText: "Set As Center", checked: false, type: "camera" });
@@ -56,15 +59,18 @@ Item
         menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow, type: "vectors" });
         if (selectionName != "Sun") {
             menuModel.append({ action: "sun",         labelText: "Sun Direction", checked: body.hasVisualizer("sun direction"), type: "vectors" });
+            height += rowHeight
         }
         if (selectionName != "Earth") {
             menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction"), type: "vectors" });
+            height += rowHeight
         }
 
         var targetBodyName = universeView.getSelectedBody().name;
         if (selectionName != targetBodyName && targetBodyName != "")
         {
             menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "vectors" })
+            height += rowHeight
         }
     }
 

@@ -41,7 +41,7 @@ Item {
                     var distance = target.distanceTo(center, universeView.simulationTime);
                     var speed = target.relativeSpeed(center, universeView.simulationTime);
                     distanceLabel.text = "Distance: " + cosmoApp.formatNumber(distance, 6) + " km";
-                    speedLabel.text = "Speed: " + cosmoApp.formatNumber(speed, 3) + " km/s";
+                    speedLabel.text = "Relative speed: " + cosmoApp.formatNumber(speed, 3) + " km/s";
                 }
             }
         }

@@ -801,8 +801,6 @@ QString formatDate(const GregorianDate& date)
 }
 
 
-/*
-// Only required for debugging
 static void drawQuad(float x, float y, float width, float height)
 {
     glBegin(GL_QUADS);
@@ -816,7 +814,6 @@ static void drawQuad(float x, float y, float width, float height)
     glVertex2f(x, y + height);
     glEnd();
 }
-*/
 
 
 QString
@@ -896,6 +893,47 @@ static void drawArc(float fromAngle, float toAngle, float radius, const Vector2f
         glVertex2fv(v.data());
     }
     glEnd();
+}
+
+
+// Draw a dark frame around a rectangular area. This is used to darken the
+// regions that will be cropped during video recording.
+void
+UniverseView::drawFrame(float width, float height)
+{
+    int viewportWidth = size().width();
+    int viewportHeight = size().height();
+    glViewport(0, 0, viewportWidth, viewportHeight);
+
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_TEXTURE_2D);
+
+    // Set up matrices for text rendering
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, viewportWidth, 0, viewportHeight);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    float sideWidth = (viewportWidth - width) / 2.0f;
+    float topHeight = (viewportHeight - height) / 2.0f;
+
+    glColor4f(0.0f, 0.0f, 0.0f, 0.7f);
+
+    drawQuad(0.0f, 0.0f, viewportWidth, topHeight); // bottom
+    drawQuad(0.0f, height + topHeight, viewportWidth, topHeight); // top
+    drawQuad(0.0f, topHeight, sideWidth, height);
+    drawQuad(sideWidth + width, topHeight, sideWidth, height);
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
 }
 
 
@@ -1429,21 +1467,29 @@ void UniverseView::paintGL()
 
         float imageAspectRatio = float(image.width()) / float(image.height());
         float videoAspectRatio = float(m_videoEncoder->getWidth()) / float(m_videoEncoder->getHeight());
+
+        // Dimensions of the area of the screen that will be captured (and then scaled isotropically
+        // to the video size.)
+        int captureWidth = image.width();
+        int captureHeight = image.height();
+
         if (videoAspectRatio > imageAspectRatio)
         {
-            int h = int(image.width() / videoAspectRatio + 0.5f);
-            image = image.copy(0, (image.height() - h) / 2, image.width(), h);
+            captureHeight = int(image.width() / videoAspectRatio + 0.5f);
+            image = image.copy(0, (image.height() - captureHeight) / 2, image.width(), captureHeight);
         }
         else
         {
-            int w = int(image.height() * videoAspectRatio + 0.5f);
-            image = image.copy((image.width() - w) / 2, 0, w, image.height());
+            captureWidth = int(image.height() * videoAspectRatio + 0.5f);
+            image = image.copy((image.width() - captureWidth) / 2, 0, captureWidth, image.height());
         }
         image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 #if QTKIT_SUPPORT
         image = image.rgbSwapped();
 #endif
         m_videoEncoder->encodeImage(image);
+
+        drawFrame(captureWidth, captureHeight);
     }
 #endif
 

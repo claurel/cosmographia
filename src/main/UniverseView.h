@@ -369,6 +369,7 @@ protected:
 private:
     QString bodyName(const vesta::Entity* body) const;
     void drawInfoOverlay();
+    void drawFrame(float width, float height);
     void drawFovReticle(float brightness);
     bool skyLayerVisible(const std::string& layerName) const;
     void setSkyLayerVisible(const std::string& layerName, bool enable);

@@ -134,6 +134,9 @@ static const double StatusMessageDuration = 2.5;
 
 static const float CenterMarkerSize = 10.0f;
 
+static const bool ShowTimeInVideos = false;
+
+
 static TextureProperties SkyLayerTextureProperties()
 {
     TextureProperties props;
@@ -896,10 +899,9 @@ static void drawArc(float fromAngle, float toAngle, float radius, const Vector2f
 }
 
 
-// Draw a dark frame around a rectangular area. This is used to darken the
-// regions that will be cropped during video recording.
+// Set up for 2D drawing
 void
-UniverseView::drawFrame(float width, float height)
+UniverseView::begin2DDrawing()
 {
     int viewportWidth = size().width();
     int viewportHeight = size().height();
@@ -909,7 +911,6 @@ UniverseView::drawFrame(float width, float height)
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_TEXTURE_2D);
 
     // Set up matrices for text rendering
     glMatrixMode(GL_PROJECTION);
@@ -919,6 +920,32 @@ UniverseView::drawFrame(float width, float height)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
+    glTranslatef(0.125f, 0.125f, 0);
+}
+
+
+void
+UniverseView::end2DDrawing()
+{
+    glEnable(GL_DEPTH_TEST);
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
+
+// Draw a dark frame around a rectangular area. This is used to darken the
+// regions that will be cropped during video recording.
+void
+UniverseView::drawFrame(float width, float height)
+{
+    int viewportWidth = size().width();
+    int viewportHeight = size().height();
+
+    begin2DDrawing();
+    glDisable(GL_TEXTURE_2D);
 
     float sideWidth = (viewportWidth - width) / 2.0f;
     float topHeight = (viewportHeight - height) / 2.0f;
@@ -930,10 +957,7 @@ UniverseView::drawFrame(float width, float height)
     drawQuad(0.0f, topHeight, sideWidth, height);
     drawQuad(sideWidth + width, topHeight, sideWidth, height);
 
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
+    end2DDrawing();
 }
 
 
@@ -972,15 +996,7 @@ UniverseView::drawInfoOverlay()
         m_galleryView->render(viewport);
     }
 
-    // Set up matrices for text rendering
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    gluOrtho2D(0, viewportWidth, 0, viewportHeight);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glTranslatef(0.125f, 0.125f, 0);
+    begin2DDrawing();
 
     glColor4fv(textColor.data());
     glEnable(GL_TEXTURE_2D);
@@ -1213,12 +1229,7 @@ UniverseView::drawInfoOverlay()
         glEnd();
     }
 
-    glEnable(GL_DEPTH_TEST);
-
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
+    end2DDrawing();
 }
 
 
@@ -1463,26 +1474,48 @@ void UniverseView::paintGL()
 #if FFMPEG_SUPPORT || QTKIT_SUPPORT
     if (m_videoEncoder)
     {
-        QImage image = grabFrameBuffer(false);
+        int fbWidth = width();
+        int fbHeight = height();
 
-        float imageAspectRatio = float(image.width()) / float(image.height());
+        float imageAspectRatio = float(fbWidth) / float(fbHeight);
         float videoAspectRatio = float(m_videoEncoder->getWidth()) / float(m_videoEncoder->getHeight());
 
         // Dimensions of the area of the screen that will be captured (and then scaled isotropically
         // to the video size.)
-        int captureWidth = image.width();
-        int captureHeight = image.height();
+        int captureWidth = fbWidth;
+        int captureHeight = fbHeight;
 
         if (videoAspectRatio > imageAspectRatio)
         {
-            captureHeight = int(image.width() / videoAspectRatio + 0.5f);
+            captureHeight = int(fbWidth / videoAspectRatio + 0.5f);
+        }
+        else
+        {
+            captureWidth = int(fbHeight * videoAspectRatio + 0.5f);
+        }
+
+        if (ShowTimeInVideos)
+        {
+            // Display the time and date in the video
+            begin2DDrawing();
+            m_titleFont->bind();
+            QByteArray dateString = formatDate(GregorianDate::UTCDateFromTDBSec(m_simulationTime)).toUtf8();
+            float textWidth = m_titleFont->textWidth(dateString.data());
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            m_titleFont->renderUtf8(dateString.data(), Vector2f((fbWidth - textWidth) / 2.0f, (fbHeight + captureHeight) / 2.0f - 45.0f));
+            end2DDrawing();
+        }
+
+        QImage image = grabFrameBuffer(false);
+        if (captureHeight < fbHeight)
+        {
             image = image.copy(0, (image.height() - captureHeight) / 2, image.width(), captureHeight);
         }
         else
         {
-            captureWidth = int(image.height() * videoAspectRatio + 0.5f);
             image = image.copy((image.width() - captureWidth) / 2, 0, captureWidth, image.height());
         }
+
         image = image.scaled(QSize(m_videoEncoder->getWidth(), m_videoEncoder->getHeight()), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 #if QTKIT_SUPPORT
         image = image.rgbSwapped();

@@ -18,6 +18,12 @@
 #ifndef _UNIT_CONVERSION_H_
 #define _UNIT_CONVERSION_H_
 
+enum MeasurementSystem
+{
+    MetricUnits,
+    ImperialUnits
+};
+
 enum TimeUnit
 {
     Unit_Millisecond,
@@ -36,6 +42,9 @@ enum DistanceUnit
     Unit_Meter,
     Unit_Kilometer,
     Unit_AU,
+    Unit_Foot,
+    Unit_Yard,
+    Unit_Mile,
     InvalidDistanceUnit
 };
 
@@ -44,12 +53,18 @@ enum MassUnit
     Unit_Kilogram,
     Unit_Gram,
     Unit_EarthMass,
+    Unit_MetricTon,
+    Unit_Pound,
+    Unit_Ton,
     InvalidMassUnit
 };
 
 double ConvertTime(double value, TimeUnit fromUnit, TimeUnit toUnit);
 double ConvertDistance(double value, DistanceUnit fromUnit, DistanceUnit toUnit);
 double ConvertMass(double value, MassUnit fromUnit, MassUnit toUnit);
+
+MeasurementSystem GetDefaultMeasurementSystem();
+void SetDefaultMeasurementSystem(MeasurementSystem ms);
 
 #endif // _UNIT_CONVERSION_H_
 

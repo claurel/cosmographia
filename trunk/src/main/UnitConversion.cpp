@@ -21,6 +21,21 @@
 static const double AU = 149597870.691;
 static const double EarthMassKg = 5.9721986e24;
 
+static MeasurementSystem s_DefaultMeasurementSystem = MetricUnits;
+
+MeasurementSystem
+GetDefaultMeasurementSystem()
+{
+    return s_DefaultMeasurementSystem;
+}
+
+
+void
+SetDefaultMeasurementSystem(MeasurementSystem ms)
+{
+    s_DefaultMeasurementSystem = ms;
+}
+
 
 static
 double timeUnitConversion(TimeUnit unit)
@@ -60,6 +75,12 @@ double distanceUnitConversion(DistanceUnit unit)
         return 1.0;
     case Unit_AU:
         return AU;
+    case Unit_Foot:
+        return 3.048e-4;
+    case Unit_Yard:
+        return 3 * 3.048e-4;
+    case Unit_Mile:
+        return 1.609344;
     default:
         return 0.0;
     }
@@ -77,6 +98,12 @@ double massUnitConversion(MassUnit unit)
         return 1.0;
     case Unit_EarthMass:
         return EarthMassKg;
+    case Unit_MetricTon:
+        return 1000.0;
+    case Unit_Pound:
+        return 0.45359237;
+    case Unit_Ton:
+        return 453.59237;
     default:
         return 0.0;
     }

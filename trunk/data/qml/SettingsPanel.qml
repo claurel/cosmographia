@@ -392,6 +392,28 @@ Item {
             Item { height: 10; width: 10 }
             Item { height: 10; width: 10 }
 
+            PanelText { text: "Units" }
+            Item { height: 10; width: 10 }
+
+            CheckBox {
+                text: "Metric"
+                checked: cosmoApp.measurementSystem == "metric"
+                onClicked: { cosmoApp.measurementSystem = "metric" }
+            }
+            Item { height: 1; width: 1 }
+
+            CheckBox {
+                text: "Imperial (US)"
+                checked: cosmoApp.measurementSystem == "imperial"
+                onClicked: { cosmoApp.measurementSystem = "imperial" }
+            }            
+            Item { height: 1; width: 1 }
+
+
+            // Spacer
+            Item { height: 10; width: 10 }
+            Item { height: 10; width: 10 }
+
             PanelText { text: "Recorded Video Resolution" }
             Item { height: 10; width: 10 }
 

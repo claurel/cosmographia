@@ -20,6 +20,7 @@
 
 #include "Addon.h"
 #include "HelpCatalog.h"
+#include "UnitConversion.h"
 #include <vesta/Universe.h>
 #include <QMainWindow>
 #include <QNetworkAccessManager>
@@ -45,6 +46,7 @@ public:
 
     Q_PROPERTY(bool autoHideToolBar READ autoHideToolBar WRITE setAutoHideToolBar NOTIFY autoHideToolBarChanged);
     Q_PROPERTY(QString videoSize READ videoSize WRITE setVideoSize NOTIFY videoSizeChanged);
+    Q_PROPERTY(QString measurementSystem READ measurementSystem WRITE setMeasurementSystem NOTIFY measurementSystemChanged);
 
     Q_INVOKABLE void loadAddOn(const QString& source);
     Q_INVOKABLE void unloadAddOn(const QString& source);
@@ -60,6 +62,9 @@ public:
     {
         return m_videoSize;
     }
+
+    QString measurementSystem() const;
+    void setMeasurementSystem(const QString& ms);
 
 public slots:
     void findObject();
@@ -93,6 +98,7 @@ public slots:
 signals:
     void autoHideToolBarChanged();
     void videoSizeChanged(const QString&);
+    void measurementSystemChanged(const QString&);
     void announcementReceived(const QString& text);
 
 protected:

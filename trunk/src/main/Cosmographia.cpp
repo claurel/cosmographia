@@ -1052,6 +1052,7 @@ Cosmographia::loadSettings()
     setVideoSize(settings.value("videoSize", "wvga").toString());
 
     settings.beginGroup("ui");
+    setMeasurementSystem(settings.value("measurementSystem", "metric").toString());
     setAutoHideToolBar(settings.value("autoHideToolBar", false).toBool());
     m_fullScreenAction->setChecked(settings.value("fullscreen", true).toBool());
     setFullScreen(m_fullScreenAction->isChecked());
@@ -1090,6 +1091,7 @@ Cosmographia::saveSettings()
     settings.setValue("videoSize", videoSize());
 
     settings.beginGroup("ui");
+    settings.setValue("measurementSystem", measurementSystem());
     settings.setValue("autoHideToolBar", m_autoHideToolBar);
     settings.setValue("fullscreen", m_fullScreenAction->isChecked());
     settings.endGroup();
@@ -1720,5 +1722,47 @@ Cosmographia::minimize()
     if (!isFullScreen())
     {
         showMinimized();
+    }
+}
+
+
+/** Get the current measurement system used when displaying distances and masses to the user.
+  * The return value is either "metric" or "imperial"
+  */
+QString
+Cosmographia::measurementSystem() const
+{
+    switch (GetDefaultMeasurementSystem())
+    {
+    case MetricUnits:
+        return "metric";
+    case ImperialUnits:
+        return "imperial";
+    default:
+        return "";
+    }
+}
+
+
+/** Set the measurement system used when displaying distances and masses to the user.
+  * The string should be either "metric" or "imperial"
+  */
+void
+Cosmographia::setMeasurementSystem(const QString& ms)
+{
+    MeasurementSystem m = GetDefaultMeasurementSystem();
+    if (ms == "metric")
+    {
+        m = MetricUnits;
+    }
+    else if (ms == "imperial")
+    {
+        m = ImperialUnits;
+    }
+
+    if (m != GetDefaultMeasurementSystem())
+    {
+        SetDefaultMeasurementSystem(m);
+        emit measurementSystemChanged(ms);
     }
 }

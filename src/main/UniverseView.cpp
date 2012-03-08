@@ -21,6 +21,7 @@
 #include "UniverseView.h"
 #include "MarkerLayer.h"
 #include "GalleryView.h"
+#include "UnitConversion.h"
 
 #include "ObserverAction.h"
 #include "Viewpoint.h"
@@ -961,6 +962,36 @@ UniverseView::drawFrame(float width, float height)
 }
 
 
+QString readableDistance(double km, unsigned int precision)
+{
+    if (GetDefaultMeasurementSystem() == ImperialUnits)
+    {
+        double miles = ConvertDistance(km, Unit_Kilometer, Unit_Mile);
+        if (miles < 0.5)
+        {
+            double feet = ConvertDistance(km, Unit_Kilometer, Unit_Foot);
+            return QString(QObject::tr("%1 feet").arg(NumberFormat(precision).toString(feet)));
+        }
+        else
+        {
+            return QString(QObject::tr("%1 miles").arg(NumberFormat(precision).toString(miles)));
+        }
+    }
+    else
+    {
+        if (km < 0.5)
+        {
+            double meters = ConvertDistance(km, Unit_Kilometer, Unit_Meter);
+            return QString(QObject::tr("%1 m").arg(NumberFormat(precision).toString(meters)));
+        }
+        else
+        {
+            return QString(QObject::tr("%1 km").arg(NumberFormat(precision).toString(km)));
+        }
+    }
+}
+
+
 // Draw informational text over the 3D view
 void
 UniverseView::drawInfoOverlay()
@@ -1092,9 +1123,9 @@ UniverseView::drawInfoOverlay()
                     distance = pc.height();
                 }
 
-                QString distanceString = QString("Distance: %1 km").arg(NumberFormat(6u).toString(distance));
-                string distanceStdString = string(distanceString.toLatin1().constData());
-                m_textFont->render(distanceStdString, Vector2f(textLeftMargin, viewportHeight - 20.0f - titleFontHeight));
+                QString distanceString = tr("Distance: ") + readableDistance(distance, 6u);
+                string distanceStdString = string(distanceString.toUtf8().constData());
+                m_textFont->renderUtf8(distanceStdString, Vector2f(textLeftMargin, viewportHeight - 20.0f - titleFontHeight));
 
                 // Display the subpoint for ellipsoidal bodies that are sufficiently close
                 // to the observer.
@@ -1127,7 +1158,7 @@ UniverseView::drawInfoOverlay()
                     // TODO: Use the object class field to determine when something is spacecraft or now
                     if (radius > 0.01)
                     {
-                        QString sizeString = QString("Radius: %1 km").arg(NumberFormat(4u).toString(radius));
+                        QString sizeString = tr("Radius: ") + readableDistance(radius, 4u);
                         m_textFont->render(sizeString.toLatin1().data(), Vector2f(textLeftMargin, viewportHeight - 20.0f - (titleFontHeight + textFontHeight)));
                     }
                 }

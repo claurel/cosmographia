@@ -572,6 +572,15 @@ win32 {
     DEFINES += NOMINMAX
 }
 
+win32-msvc2008|win32-msvc2010 {
+    # Disable MSVC's warnings about some standard C and C++ library
+    # functions.
+    DEFINES += _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS
+
+    # Necessary to avoid linker warnings when not building lib3ds as a library
+    DEFINES += LIB3DSAPI=" "
+}
+
 macx {
     ICON = resources/cosmographia.icns
 

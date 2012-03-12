@@ -241,6 +241,8 @@ Note that FixedSpherical has no notion of the IAU defined planetographic coordin
 
 == Interpolated States ==
 
+Trajectory given by a list of time-tagged state vectors stored in a separate file. See the InterpolatedStates page for details on state vector files.
+
 {{{
 "trajectory" :
 {

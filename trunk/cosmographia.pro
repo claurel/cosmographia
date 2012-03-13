@@ -137,6 +137,7 @@ LIB3DS_PATH = thirdparty/lib3ds
 GLEW_PATH = thirdparty/glew
 NORADTLE_PATH = thirdparty/noradtle
 QJSON_PATH = thirdparty/qjson
+LUA_PATH = thirdparty/lua
 
 VESTA_SOURCES = \
     $$VESTA_PATH/AlignedEllipsoid.cpp \
@@ -445,6 +446,49 @@ QJSON_HEADERS = \
     $$QJSON_PATH/qjson_export.h
 
 
+### Optional Lua scripting ###
+
+LUA_SOURCES = \
+    $$LUA_PATH/lapi.c \
+    $$LUA_PATH/lcode.c \
+    $$LUA_PATH/lctype.c \
+    $$LUA_PATH/ldebug.c \
+    $$LUA_PATH/ldo.c \
+    $$LUA_PATH/ldump.c \
+    $$LUA_PATH/lfunc.c \
+    $$LUA_PATH/lgc.c \
+    $$LUA_PATH/llex.c \
+    $$LUA_PATH/lmem.c \
+    $$LUA_PATH/lobject.c \
+    $$LUA_PATH/lopcodes.c \
+    $$LUA_PATH/lparser.c \
+    $$LUA_PATH/lstate.c \
+    $$LUA_PATH/lstring.c \
+    $$LUA_PATH/ltable.c \
+    $$LUA_PATH/ltm.c \
+    $$LUA_PATH/lundump.c \
+    $$LUA_PATH/lvm.c \
+    $$LUA_PATH/lzio.c \
+    $$LUA_PATH/lauxlib.c \
+    $$LUA_PATH/lbaselib.c \
+    $$LUA_PATH/lbitlib.c \
+    $$LUA_PATH/lcorolib.c \
+    $$LUA_PATH/ldblib.c \
+    $$LUA_PATH/liolib.c \
+    $$LUA_PATH/lmathlib.c \
+    $$LUA_PATH/loslib.c \
+    $$LUA_PATH/lstrlib.c \
+    $$LUA_PATH/ltablib.c \
+    $$LUA_PATH/loadlib.c \
+    $$LUA_PATH/linit.c
+
+LUA_HEADERS = \
+    $$LUA_PATH/lua.hpp \
+    $$LUA_PATH/lapi.h \
+    $$LUA_PATH/lualib.h \
+    $$LUA_PATH/lauxlib.h \
+    $$LUA_PATH/luaconf.h
+
 
 SOURCES = \
     $$VESTA_SOURCES \
@@ -471,6 +515,13 @@ INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 #CONFIG += ffmpeg
 #CONFIG += nomenu
 #CONFIG += storedeploy
+#CONFIG += lua
+
+lua {
+    message("Building with Lua scripting support")
+    SOURCES += $$LUA_SOURCES
+    HEADERS += $$LUA_HEADERS
+}
 
 macx {
     # Always enable QTKit support on Mac

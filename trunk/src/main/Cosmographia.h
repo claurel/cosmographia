@@ -52,6 +52,8 @@ public:
     Q_INVOKABLE void unloadAddOn(const QString& source);
     Q_INVOKABLE QVariant getSetting(const QString& key);
     Q_INVOKABLE QString formatNumber(double value, int precision);
+    Q_INVOKABLE QString formatDistance(double value, int precision);
+    Q_INVOKABLE QString formatSpeed(double value, int precision);
 
     bool autoHideToolBar() const
     {

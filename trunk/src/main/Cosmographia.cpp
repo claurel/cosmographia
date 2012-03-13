@@ -1117,6 +1117,36 @@ Cosmographia::formatNumber(double value, int precision)
 }
 
 
+QString
+Cosmographia::formatDistance(double value, int precision)
+{
+    NumberFormat format((unsigned int) std::max(0, precision));
+    if (GetDefaultMeasurementSystem() == ImperialUnits)
+    {
+        return tr("%1 miles").arg(format.toString(ConvertDistance(value, Unit_Kilometer, Unit_Mile)));
+    }
+    else
+    {
+        return tr("%1 km").arg(format.toString(value));
+    }
+}
+
+
+QString
+Cosmographia::formatSpeed(double value, int precision)
+{
+    NumberFormat format((unsigned int) std::max(0, precision));
+    if (GetDefaultMeasurementSystem() == ImperialUnits)
+    {
+        return tr("%1 mph").arg(format.toString(ConvertDistance(value, Unit_Kilometer, Unit_Mile) * 3600));
+    }
+    else
+    {
+        return tr("%1 km/s").arg(format.toString(value));
+    }
+}
+
+
 void
 Cosmographia::setVideoSize(const QString& videoSize)
 {

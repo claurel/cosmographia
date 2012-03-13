@@ -223,13 +223,23 @@ static
 QString formatDistance(double km)
 {
     double au = ConvertDistance(km, Unit_Kilometer, Unit_AU);
+    double miles = ConvertDistance(km, Unit_Kilometer, Unit_Mile);
+
+    DistanceUnit unit = GetDefaultMeasurementSystem() == ImperialUnits ? Unit_Mile : Unit_Kilometer;
+
     if (au > 0.1)
     {
-        return QObject::tr("%1 AU (%2 km)").arg(au, 0, 'g', 4).arg(formatScientific(km, 7));
+        if (unit == Unit_Mile)
+            return QObject::tr("%1 AU (%2 mi)").arg(au, 0, 'g', 4).arg(formatScientific(miles, 7));
+        else
+            return QObject::tr("%1 AU (%2 km)").arg(au, 0, 'g', 4).arg(formatScientific(km, 7));
     }
     else
     {
-        return QObject::tr("%1 km").arg(formatScientific(km, 7));
+        if (unit == Unit_Mile)
+            return QObject::tr("%1 mi").arg(formatScientific(miles, 7));
+        else
+            return QObject::tr("%1 km").arg(formatScientific(km, 7));
     }
 }
 
@@ -248,6 +258,37 @@ static QString
 tableRow(const QString& s1, const QString& s2)
 {
     return QString("<tr><td align=\"right\">%1</td><td>&nbsp;&nbsp;&nbsp;</td><td align=\"left\"><font color=\"#ccccff\">%2</font></td></tr>\n").arg(s1).arg(s2);
+}
+
+
+static QString
+readableDistance(double km, unsigned int precision)
+{
+    if (GetDefaultMeasurementSystem() == ImperialUnits)
+    {
+        double miles = ConvertDistance(km, Unit_Kilometer, Unit_Mile);
+        if (miles < 0.5)
+        {
+            double feet = ConvertDistance(km, Unit_Kilometer, Unit_Foot);
+            return QString(QObject::tr("%1 feet").arg(NumberFormat(precision).toString(feet)));
+        }
+        else
+        {
+            return QString(QObject::tr("%1 miles").arg(NumberFormat(precision).toString(miles)));
+        }
+    }
+    else
+    {
+        if (km < 0.5)
+        {
+            double meters = ConvertDistance(km, Unit_Kilometer, Unit_Meter);
+            return QString(QObject::tr("%1 m").arg(NumberFormat(precision).toString(meters)));
+        }
+        else
+        {
+            return QString(QObject::tr("%1 km").arg(NumberFormat(precision).toString(km)));
+        }
+    }
 }
 
 
@@ -313,13 +354,16 @@ HelpCatalog::getObjectDataText(const QString &name) const
                 bool isSpherical = semiAxes.x() == semiAxes.y() && semiAxes.y() == semiAxes.z();
                 if (isSpherical)
                 {
-                    out << tableRow(QObject::tr("Radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.x())));
+                    //out << tableRow(QObject::tr("Radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.x())));
+                    out << tableRow(QObject::tr("Radius"), readableDistance(semiAxes.x(), 4u));
                 }
                 else
                 {
                     //out << tableRow(QObject::tr("Mean radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.sum() / 3.0f)));
-                    out << tableRow(QObject::tr("Equatorial radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString((semiAxes.x() + semiAxes.y()) / 2.0f)));
-                    out << tableRow(QObject::tr("Polar radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.z())));
+                    //out << tableRow(QObject::tr("Equatorial radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString((semiAxes.x() + semiAxes.y()) / 2.0f)));
+                    //out << tableRow(QObject::tr("Polar radius"), QObject::tr("%1 km").arg(NumberFormat(4u).toString(semiAxes.z())));
+                    out << tableRow(QObject::tr("Equatorial radius"), readableDistance((semiAxes.x() + semiAxes.y()) / 2.0f, 4u));
+                    out << tableRow(QObject::tr("Polar radius"), readableDistance(semiAxes.z(), 4u));
                 }
             }
             else if (dynamic_cast<MeshInstanceGeometry*>(body->geometry()))
@@ -337,7 +381,12 @@ HelpCatalog::getObjectDataText(const QString &name) const
         if (info->massKg > 0.0)
         {
             double earthMass = ConvertMass(info->massKg, Unit_Kilogram, Unit_EarthMass);
-            QString kgMassString = QObject::tr("%1 kg").arg(formatScientific(info->massKg));
+
+            QString massString = QObject::tr("%1 kg").arg(formatScientific(info->massKg));
+            if (GetDefaultMeasurementSystem() == ImperialUnits)
+            {
+                massString = QObject::tr("%1 tons").arg(formatScientific(ConvertMass(info->massKg, Unit_Kilogram, Unit_Ton)));
+            }
 
             if (earthMass > 0.001)
             {
@@ -352,11 +401,11 @@ HelpCatalog::getObjectDataText(const QString &name) const
                 }
 
                 // Single line form
-                out << tableRow(QObject::tr("Mass"), QString("%1 (%2)").arg(earthMassString).arg(kgMassString));
+                out << tableRow(QObject::tr("Mass"), QString("%1 (%2)").arg(earthMassString).arg(massString));
             }
             else
             {
-                out << tableRow(QObject::tr("Mass"), kgMassString);
+                out << tableRow(QObject::tr("Mass"), massString);
             }
         }
 
@@ -386,18 +435,33 @@ HelpCatalog::getObjectDataText(const QString &name) const
 
                 double equatorialRadius = (semiAxes.x() + semiAxes.y()) / 2.0;
                 double surfaceGravity = (G * info->massKg) / pow(equatorialRadius, 2.0) * 1000;
+                double earthGravPercent = surfaceGravity / EarthG * 100;
+                if (isEarth)
+                {
+                    // Force the displayed value to standard gravity for Earth. The calculated
+                    // value will be off by a small amount.
+                    surfaceGravity = EarthG;
+                }
+
+                QString units = QObject::tr("m/s");
+                if (GetDefaultMeasurementSystem() == ImperialUnits)
+                {
+                    surfaceGravity = ConvertDistance(surfaceGravity, Unit_Meter, Unit_Foot);
+                    units = QObject::tr("ft/s");
+                }
 
                 if (isEarth)
                 {
-                    surfaceGravity = EarthG;
-                    out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1 m/s<sup>2</sup>").
-                                    arg(roundToSigDigits(surfaceGravity, 3)));
+                    // Omit the % of Earth display for Earth
+                    out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1 %2<sup>2</sup>").
+                                    arg(roundToSigDigits(surfaceGravity, 3)).arg(units));
                 }
                 else
                 {
-                    out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1% Earth (%2 m/s<sup>2</sup>)").
-                                    arg(roundToSigDigits(surfaceGravity / EarthG * 100, 3)).
-                                    arg(roundToSigDigits(surfaceGravity, 3)));
+                    out << tableRow(QObject::tr("Surface gravity"), QObject::tr("%1% Earth (%2 %3<sup>2</sup>)").
+                                    arg(roundToSigDigits(earthGravPercent, 3)).
+                                    arg(roundToSigDigits(surfaceGravity, 3)).
+                                    arg(units));
                 }
             }
         }

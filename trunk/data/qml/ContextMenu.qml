@@ -52,8 +52,19 @@ Item
         menuModel.append({ action: "track",       labelText: "Track", checked: false, type: "camera" });
         menuModel.append({ action: "description",        labelText: "Show Description", checked: false, type: "camera" });
         menuModel.append({ action: "properties",        labelText: "Show Properties", checked: false, type: "camera" });
-        menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body), type: "camera" });
+
+        var targetBodyName = universeView.getSelectedBody().name;
+        if (selectionName != targetBodyName && targetBodyName != "")
+        {
+            menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
+            menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "vectors" })
+            height += rowHeight
+        }
+
         menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
+
+        menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body), type: "camera" });
+
         menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes, type: "vectors" });
         menuModel.append({ action: "frameaxes",   labelText: "Frame Axes", checked: body.frameAxes, type: "vectors" });
         menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow, type: "vectors" });
@@ -63,13 +74,6 @@ Item
         }
         if (selectionName != "Earth") {
             menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction"), type: "vectors" });
-            height += rowHeight
-        }
-
-        var targetBodyName = universeView.getSelectedBody().name;
-        if (selectionName != targetBodyName && targetBodyName != "")
-        {
-            menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "vectors" })
             height += rowHeight
         }
     }
@@ -209,6 +213,7 @@ Item
                 InfoText {
                     text: labelText;
                     color: "white";
+                    width: 180;
                     elide: Text.ElideMiddle;
                 }
             }

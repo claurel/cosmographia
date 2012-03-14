@@ -50,14 +50,15 @@ Item
         menuModel.append({ action: "center",      labelText: "Set As Center", checked: false, type: "camera" });
         menuModel.append({ action: "fixcenter",   labelText: "Set As Fixed Center", checked: false, type: "camera" });
         menuModel.append({ action: "track",       labelText: "Track", checked: false, type: "camera" });
-        menuModel.append({ action: "description",        labelText: "Show Description", checked: false, type: "camera" });
-        menuModel.append({ action: "properties",        labelText: "Show Properties", checked: false, type: "camera" });
+
+        menuModel.append({ action: "none",        labelText: " ", checked: false, type: "info" });
+        menuModel.append({ action: "description",        labelText: "Show Description", checked: false, type: "info" });
+        menuModel.append({ action: "properties",        labelText: "Show Properties", checked: false, type: "info" });
 
         var targetBodyName = universeView.getSelectedBody().name;
         if (selectionName != targetBodyName && targetBodyName != "")
         {
-            menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
-            menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "vectors" })
+            menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "info" })
             height += rowHeight
         }
 

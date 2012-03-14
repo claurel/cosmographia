@@ -1,6 +1,6 @@
 // This file is part of Cosmographia.
 //
-// Copyright (C) 2011 Chris Laurel <claurel@gmail.com>
+// Copyright (C) 2011-2012 Chris Laurel <claurel@gmail.com>
 //
 // Eigen is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -18,60 +18,13 @@
 #ifndef _UNIVERSE_CATALOG_H_
 #define _UNIVERSE_CATALOG_H_
 
+#include "BodyInfo.h"
 #include <vesta/Entity.h>
-#include <vesta/Spectrum.h>
 #include <QString>
 #include <QStringList>
 #include <QMap>
 
 class Viewpoint;
-
-class BodyInfo : public vesta::Object
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    BodyInfo() :
-        classification(Other),
-        labelColor(vesta::Spectrum::White()),
-        labelFadeSize(0.0),
-        trajectoryPlotDuration(0.0),
-        trajectoryPlotSamples(100),
-        trajectoryPlotColor(vesta::Spectrum::White()),
-        trajectoryPlotLead(0.0),
-        trajectoryPlotFade(0.0),
-        massKg(0.0),
-        density(0.0f)
-    {
-    }
-
-    enum Classification
-    {
-        ReferencePoint,
-        Planet,
-        Satellite,
-        Asteroid,
-        DwarfPlanet,
-        Spacecraft,
-        Star,
-        Other
-    };
-
-    static Classification parseClassification(const QString& classificationName);
-
-    Classification classification;
-    vesta::Spectrum labelColor;
-    double labelFadeSize;
-    double trajectoryPlotDuration;
-    unsigned int trajectoryPlotSamples;
-    vesta::Spectrum trajectoryPlotColor;
-    double trajectoryPlotLead;
-    double trajectoryPlotFade;
-    QString description;
-    QString infoSource;
-    double massKg;
-    float density;
-};
 
 
 class UniverseCatalog

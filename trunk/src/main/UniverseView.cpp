@@ -962,7 +962,8 @@ UniverseView::drawFrame(float width, float height)
 }
 
 
-QString readableDistance(double km, unsigned int precision)
+static QString
+readableDistance(double km, unsigned int precision)
 {
     if (GetDefaultMeasurementSystem() == ImperialUnits)
     {
@@ -3392,11 +3393,29 @@ UniverseView::findObject()
 }
 
 
+bool
+UniverseView::isGalleryVisible() const
+{
+    return m_galleryView && m_galleryView->isVisible();
+}
+
+
+void
+UniverseView::setGalleryVisible(bool visible)
+{
+    if (m_galleryView)
+    {
+        m_galleryView->setVisible(visible);
+    }
+}
+
 void
 UniverseView::toggleGallery()
 {
-    m_galleryView->setVisible(!m_galleryView->isVisible());
+    setGalleryVisible(!isGalleryVisible());
 
+#if 0
+    // Debugging code to show position of center object in body fixed frame of selection
     Entity* center = m_observer->center();
     Entity* selection = m_selectedBody.ptr();
 
@@ -3410,6 +3429,7 @@ UniverseView::toggleGallery()
         QDateTime qnow = VestaDateToQtDate(now);
         qDebug() << qnow.toString("yyyy-mm-dd hh:mm:ss.zzz") << QString("%1 %2 %3").arg(v.x(), 0, 'g', 16).arg(v.y(), 0, 'g', 16).arg(v.z(), 0, 'g', 16);
     }
+#endif
 }
 
 
@@ -3444,6 +3464,10 @@ UniverseView::replaceEntity(Entity* entity, const BodyInfo* info)
     {
         color = info->labelColor;
         fadeSize = info->labelFadeSize;
+        if (!info->labelTextVisible)
+        {
+            labelText = "";
+        }
     }
     labelBody(entity, info, labelText, m_labelFont.ptr(), m_spacecraftIcon.ptr(), color, fadeSize, m_labelsVisible);
 

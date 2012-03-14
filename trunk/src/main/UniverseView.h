@@ -92,6 +92,8 @@ class UniverseView : public QDeclarativeView
     Q_PROPERTY(int antialiasingSamples READ antialiasingSamples WRITE setAntialiasingSamples);
     Q_PROPERTY(double gotoObjectTime READ gotoObjectTime WRITE setGotoObjectTime);
 
+    Q_PROPERTY(bool galleryVisible READ isGalleryVisible WRITE setGalleryVisible);
+
     Q_PROPERTY(bool recordingVideo READ isRecordingVideo NOTIFY recordingVideoChanged)
     Q_PROPERTY(double recordedVideoLength READ recordedVideoLength NOTIFY recordedVideoLengthChanged)
 
@@ -276,6 +278,8 @@ public:
         return m_galleryView;
     }
 
+    bool isGalleryVisible() const;
+
 signals:
     void timeChanged();
     void simulationDateTimeChanged();
@@ -341,6 +345,8 @@ public slots:
 
     void setUpdateInterval(unsigned int msec);
     void findObject();
+
+    void setGalleryVisible(bool visible);
     void toggleGallery();
 
     void copyNextFrameToClipboard(bool withAlpha = false);

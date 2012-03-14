@@ -57,6 +57,11 @@ Item {
             timePanel.show();
         else
             timePanel.hide();
+
+        if (name == "gallery")
+            universeView.galleryVisible = true;
+        else
+            universeView.galleryVisible = false;
     }
 
     Component.onCompleted:
@@ -318,7 +323,10 @@ Item {
 
                  MouseArea {
                      anchors.fill: parent
-                     onClicked: { universeView.toggleGallery() }
+                     onClicked: {
+                         universeView.toggleGallery();
+                         setActivePanel("gallery");
+                     }
                  }
              }
          }

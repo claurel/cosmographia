@@ -139,8 +139,7 @@ private:
                                            const UniverseCatalog* catalog);
 
     vesta::Visualizer* loadFeatureLabels(const QVariantMap& info,
-                                         const vesta::Entity* body,
-                                         const UniverseCatalog* catalog);
+                                         const vesta::Entity* body);
 
     Viewpoint* loadViewpoint(const QVariantMap& info,
                              UniverseCatalog* catalog);

@@ -2407,9 +2407,9 @@ UniverseLoader::loadSensorGeometry(const QVariantMap& map, const UniverseCatalog
     double horizontalFov = angleValue(horizontalFovVar, 5.0);
     double verticalFov = angleValue(verticalFovVar, 5.0);
     Spectrum frustumColor = colorValue(frustumColorVar, Spectrum(1.0f, 1.0f, 1.0f));
-    Spectrum frustumBaseColor = colorValue(frustumColorVar, Spectrum(1.0f, 1.0f, 1.0f));
+    //Spectrum frustumBaseColor = colorValue(frustumColorVar, Spectrum(1.0f, 1.0f, 1.0f));
     double frustumOpacity = doubleValue(frustumOpacityVar, 0.3);
-    double gridOpacity = doubleValue(gridOpacityVar, 0.15);
+    //double gridOpacity = doubleValue(gridOpacityVar, 0.15);
     Quaterniond orientation = Quaterniond::Identity();
 
     if (orientationVar.isValid())
@@ -3242,10 +3242,10 @@ planetocentricToRectangular(const AlignedEllipsoid& e, const PlanetographicCoord
 }
 #endif
 
+
 Visualizer*
 UniverseLoader::loadFeatureLabels(const QVariantMap& map,
-                                  const Entity* body,
-                                  const UniverseCatalog* catalog)
+                                  const Entity* body)
 {
     QVariant featuresVar = map.value("features");
 
@@ -3498,6 +3498,7 @@ loadLabelInfo(BodyInfo* info, const QVariantMap& map)
 {
     QVariant colorVar = map.value("color");
     QVariant labelFadeSizeVar = map.value("fadeSize");
+    QVariant showTextVar = map.value("showText");
 
     if (colorVar.isValid())
     {
@@ -3507,6 +3508,11 @@ loadLabelInfo(BodyInfo* info, const QVariantMap& map)
     if (labelFadeSizeVar.isValid())
     {
         info->labelFadeSize = doubleValue(labelFadeSizeVar, 0.0);
+    }
+
+    if (showTextVar.isValid())
+    {
+        info->labelTextVisible = showTextVar.toBool();
     }
 }
 
@@ -4031,7 +4037,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                     }
                     else
                     {
-                        Visualizer* visualizer = loadFeatureLabels(item, body, catalog);
+                        Visualizer* visualizer = loadFeatureLabels(item, body);
                         if (visualizer)
                         {
                             body->setVisualizer("surface features", visualizer);

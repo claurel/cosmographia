@@ -77,7 +77,7 @@ Item
             menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction"), type: "vectors" });
         }
 
-        height = menuModel.count * rowHeight + 50;
+        height = menuModel.count * rowHeight + 55;
     }
 
     function hide()

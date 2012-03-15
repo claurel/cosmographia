@@ -199,7 +199,7 @@ GalleryView::tilePosition(const GalleryTile& tile)
     const float galleryHeight = viewPlaneWidth * float(m_rows) / float(m_columns) * m_galleryHeightScale;
     double theta = (float(tile.column) / float(m_columns - 1) - 0.5f) * m_galleryAngle - toRadians(90.0);
     float x = float(m_galleryRadius * cos(theta));
-    float y = (float(tile.row) / float(m_rows - 1) - 0.5f) * galleryHeight;
+    float y = -(float(tile.row) / float(m_rows - 1) - 0.5f) * galleryHeight;
     float z = float(m_galleryRadius * sin(theta));
 
     return Vector3f(x, y, z);

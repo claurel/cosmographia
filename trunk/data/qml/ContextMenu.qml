@@ -42,8 +42,10 @@ Item
         selection = body
         selectionName = selection.name
 
-        height = 310
-        var rowHeight = 20
+        // We'll guess the height of the menu based on the height
+        // of an individual menu item
+        var c = Qt.createQmlObject("InfoText { text: 'Test' }", container);
+        var rowHeight = c.height + 3;
 
         menuModel.clear();
         menuModel.append({ action: "goto",        labelText: "Go To", checked: false, type: "camera" });
@@ -59,7 +61,6 @@ Item
         if (selectionName != targetBodyName && targetBodyName != "")
         {
             menuModel.append({ action: "distance", labelText: "Distance to " + targetBodyName, checked: false, type: "info" })
-            height += rowHeight
         }
 
         menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
@@ -71,12 +72,12 @@ Item
         menuModel.append({ action: "velocity",    labelText: "Velocity Direction", checked: body.velocityArrow, type: "vectors" });
         if (selectionName != "Sun") {
             menuModel.append({ action: "sun",         labelText: "Sun Direction", checked: body.hasVisualizer("sun direction"), type: "vectors" });
-            height += rowHeight
         }
         if (selectionName != "Earth") {
             menuModel.append({ action: "earth",       labelText: "Earth Direction", checked: body.hasVisualizer("earth direction"), type: "vectors" });
-            height += rowHeight
         }
+
+        height = menuModel.count * rowHeight + 50;
     }
 
     function hide()
@@ -190,7 +191,10 @@ Item
         model: menuModel
 
         anchors.fill:  parent
-        anchors.margins: 5
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
+        anchors.topMargin: 10
+        anchors.bottomMargin: 5
         spacing: 3
 
         interactive: false

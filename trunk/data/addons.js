@@ -49,6 +49,12 @@ var InstalledAddons =
     },
 
     {
+    name: "Asteroid 2012 DA14",
+    description: "2012 DA14 is a 40-meter diameter asteroid will make a close approach to Earth on Feb. 15, 2013.",
+    source: "addons/2012DA14.json"
+    },
+
+    {
     name: "Asteroid 2011 MD",
     description: "2011 MD is a small asteroid that came within 12,000 kilometers of Earth on June 27, 2011.",
     source: "addons/2011MD.json"

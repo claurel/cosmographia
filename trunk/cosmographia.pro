@@ -965,6 +965,10 @@ macx {
         data/addons/hildas.json \
         data/addons/hildas.dat \
         data/addons/gps.json \
+        data/addons/2012DA14.json \
+        data/addons/2012DA14.xyzv \
+        data/addons/2012da14.html \
+        data/addons/1998wt24.cmod \
         data/addons/2011MD.json \
         data/addons/2011MD.xyzv \
         data/addons/2008TC3.json \

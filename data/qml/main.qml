@@ -212,6 +212,11 @@ Item {
         Component.onCompleted: {
             text = helpCatalog.getHelpText("intro")
         }
+
+        onPanelRequested: {
+            setActivePanel(panel);
+            intro.hide();
+        }
     }
 
     Column {
@@ -226,6 +231,24 @@ Item {
 
          Column {
              Image {
+                 id: galleryButton
+                 width: 32; height: 32
+                 source: "qrc:/icons/gallery.png"
+                 smooth: true
+
+                 MouseArea {
+                     anchors.fill: parent
+                     onClicked: {
+                         universeView.toggleGallery();
+                         setActivePanel("gallery");
+                     }
+                 }
+             }
+             // Text { width: 32; color: "white"; text: "Gallery"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+         }
+
+         Column {
+             Image {
                  id: searchButton
                  width: 32; height: 32
                  source: "qrc:/icons/search.png"
@@ -236,7 +259,7 @@ Item {
                      onClicked: { setActivePanel("findObjectPanel") }
                  }
              }
-             //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+             // Text { width: 32; smooth: true; color: "white"; text: "Find"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
          Column {
@@ -251,7 +274,7 @@ Item {
                      onClicked: { setActivePanel("timePanel") }
                  }
              }
-             //Text { width: 48; smooth: true; color: "white"; text: "search"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
+             // Text { width: 32; smooth: true; color: "white"; text: "Time"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; }
          }
 
          /*
@@ -316,23 +339,6 @@ Item {
 
          Column {
              Image {
-                 id: galleryButton
-                 width: 32; height: 32
-                 source: "qrc:/icons/gallery.png"
-                 smooth: true
-
-                 MouseArea {
-                     anchors.fill: parent
-                     onClicked: {
-                         universeView.toggleGallery();
-                         setActivePanel("gallery");
-                     }
-                 }
-             }
-         }
-
-         Column {
-             Image {
                  id: defaultViewButton
                  width: 32; height: 32
                  source: "qrc:/icons/solarsys.png"
@@ -343,6 +349,7 @@ Item {
                      onClicked: { universeView.gotoHome() }
                  }
              }
+
          }
 
          states: [

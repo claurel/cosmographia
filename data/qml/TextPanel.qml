@@ -25,6 +25,8 @@ Item {
     property color textColor: "#72c0ff"
     property alias text: contents.text
 
+    signal panelRequested(string panel)
+
     function show()
     {
         state = "visible"
@@ -100,6 +102,10 @@ Item {
                      {
                          text = newText
                      }
+                 }
+                 else if (link.substr(0, 6) == "panel:")
+                 {
+                    panelRequested(link.substr(6))
                  }
                  else
                  {

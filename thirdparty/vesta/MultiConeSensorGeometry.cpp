@@ -230,14 +230,11 @@ MultiConeSensorGeometry::render(RenderContext& rc,
 
                     double t0 = 0.0;
                     double t1 = 0.0;
-                    if (TestLineConeIntersection(r, d, limitConeMatrix, &t0, &t1))
-                    {
-                        Vector3d p = r;
-                        center = p + d * min(t0, t1) * 0.5;
-                    }
+                    TestLineConeIntersection(r, d, limitConeMatrix, &t0, &t1);
+                    center = r + d * (max(t0, t1) * 0.5);
                 }
 
-                const unsigned int sideDivisions = 12;
+                const unsigned int sideDivisions = 24;
                 const unsigned int sections = 4 * sideDivisions;
                 for (unsigned int i = 0; i < sections; ++i)
                 {
@@ -245,8 +242,8 @@ MultiConeSensorGeometry::render(RenderContext& rc,
                     double theta = 2 * PI * t;
                     Vector3d r = m * Vector3d(baseSize * cos(theta), baseSize * sin(theta), 1.0).normalized();
 
-                    // If the point one the beam cone base lies outside the limit cone,
-                    // we need trim so that it lies on the limit cone
+                    // If the point on the beam cone base lies outside the limit cone,
+                    // we trim so that it lies on the limit cone
                     if (r.dot(limitConeAxis) < cosLimitConeAngle)
                     {
                         Vector3d rayOrigin = center;

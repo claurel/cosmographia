@@ -46,6 +46,7 @@ Item
         // of an individual menu item
         var c = Qt.createQmlObject("InfoText { text: 'Test' }", container);
         var rowHeight = c.height + 3;
+        c.opacity = 0;  // hide the test item
 
         menuModel.clear();
         menuModel.append({ action: "goto",        labelText: "Go To", checked: false, type: "camera" });

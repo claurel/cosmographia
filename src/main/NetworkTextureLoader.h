@@ -20,12 +20,12 @@
 #define _NETWORK_TEXTURE_LOADER_H_
 
 #include "WMSRequester.h"
-#include <vesta/TextureMapLoader.h>
+#include "vext/PathRelativeTextureLoader.h"
 #include <vesta/DataChunk.h>
 
 class LocalImageLoader;
 
-class NetworkTextureLoader : public QObject, public vesta::TextureMapLoader
+class NetworkTextureLoader : public QObject, public PathRelativeTextureLoader
 {
 Q_OBJECT
 public:
@@ -49,6 +49,10 @@ public:
     }
 
     void setTextureMemoryLimit(unsigned int megs);
+
+    // Required by PathRelativeTextureLoader
+    virtual std::string searchPath() const;
+    virtual void setSearchPath(const std::string& path);
 
     QString localSearchPath() const;
     void setLocalSearchPath(const QString& path);

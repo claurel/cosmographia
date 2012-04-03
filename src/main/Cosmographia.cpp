@@ -683,7 +683,7 @@ Cosmographia::initialize()
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processReceivedResource(QNetworkReply*)));
 
     // Set up the texture loader
-    m_loader->setTextureLoader(dynamic_cast<NetworkTextureLoader*>(m_view3d->textureLoader()));
+    m_loader->setTextureLoader(dynamic_cast<PathRelativeTextureLoader*>(m_view3d->textureLoader()));
 
     loadCatalogFile("solarsys.json");
     loadCatalogFile("start-viewpoints.json");

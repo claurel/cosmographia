@@ -29,7 +29,6 @@
 #include "../geometry/MeshInstanceGeometry.h"
 #include "../geometry/TimeSwitchedGeometry.h"
 #include "../geometry/FeatureLabelSetGeometry.h"
-#include "../NetworkTextureLoader.h"
 #include "../compatibility/Scanner.h"
 #include "../compatibility/CmodLoader.h"
 #include "../compatibility/CatalogParser.h"
@@ -38,6 +37,7 @@
 #include "../vext/SimpleRotationModel.h"
 #include "../vext/StripParticleGenerator.h"
 #include "../vext/ArcStripParticleGenerator.h"
+#include "../vext/PathRelativeTextureLoader.h"
 #include "../astro/Rotation.h"
 #include "../Viewpoint.h"
 #include <vesta/Units.h>
@@ -78,7 +78,6 @@
 #include <QDateTime>
 #include <QFile>
 #include <QFileInfo>
-#include <QColor>
 #include <QRegExp>
 #include <QBuffer>
 #include <QDebug>
@@ -98,6 +97,37 @@ QString TleKey(const QString& source, const QString& name)
     return source + "!" + name;
 }
 
+
+struct ColorPaletteEntry
+{
+    unsigned int rgb;
+    const char* name;
+};
+
+
+// List of color names recognized by all (even very old) browsers
+// magenta and cyan added for completeness
+static ColorPaletteEntry StandardColorPalette[] =
+{
+    { 0x000000, "black" },
+    { 0x000080, "navy" },
+    { 0x0000FF, "blue" },
+    { 0x008000, "green" },
+    { 0x008080, "teal" },
+    { 0x00FF00, "lime" },
+    { 0x00FFFF, "aqua" },
+    { 0x800000, "maroon" },
+    { 0x800080, "purple" },
+    { 0x808000, "olive" },
+    { 0x808080, "gray" },
+    { 0xC0C0C0, "silver" },
+    { 0xFF0000, "red" },
+    { 0xFF00FF, "fuchsia" },
+    { 0xFFFF00, "yellow" },
+    { 0xFFFFFF, "white" },
+    { 0x00FFFF, "cyan" },
+    { 0xFF00FF, "magenta" }
+};
 
 
 
@@ -441,8 +471,40 @@ static Spectrum colorValue(QVariant v, const Spectrum& defaultValue)
     }
     else if (v.type() == QVariant::String)
     {
-        QColor c = v.value<QColor>();
-        result = Spectrum(c.redF(), c.greenF(), c.blueF());
+        // Parse a color string: either a standard color name or a web-style hex value ('#ff8320')
+        QString colorString = v.toString().toLower();
+        bool colorOk = false;
+        unsigned int rgb = 0;
+
+        if (colorString.startsWith('#'))
+        {
+            if (colorString.length() == 7)
+            {
+                // Possibly a valid hex value
+                // TODO: use a regexp to be absolutely sure
+                rgb = colorString.right(6).toUInt(&colorOk, 16);
+            }
+        }
+        else
+        {
+            for (unsigned int i = 0; i != sizeof(StandardColorPalette) / sizeof(StandardColorPalette[0]); ++i)
+            {
+                if (colorString == StandardColorPalette[i].name)
+                {
+                    rgb = StandardColorPalette[i].rgb;
+                    colorOk = true;
+                    break;
+                }
+            }
+        }
+
+        if (colorOk)
+        {
+            // We've got a valid color; unpack it from the integer rgb
+            result = Spectrum(((rgb >> 16) & 0xff) / 255.0f,
+                              ((rgb >> 8) & 0xff) / 255.0f,
+                              (rgb & 0xff) / 255.0f);
+        }
     }
 
     return result;
@@ -2082,10 +2144,10 @@ UniverseLoader::loadMeshFile(const QString& fileName)
         // Set the texture loader path to search in the model file's directory for texture files
         // except when loading SSC files, when the texturesInModelDirectory property will be false.
         QFileInfo info(fileName);
-        QString savedPath = m_textureLoader->localSearchPath();
+        QString savedPath = QString::fromUtf8(m_textureLoader->searchPath().c_str());
         if (m_texturesInModelDirectory)
         {
-            m_textureLoader->setLocalSearchPath(info.absolutePath());
+            m_textureLoader->setSearchPath(info.absolutePath().toUtf8().data());
         }
 
         MeshGeometry* meshGeometry = NULL;
@@ -2124,7 +2186,7 @@ UniverseLoader::loadMeshFile(const QString& fileName)
             geometry = meshGeometry;
         }
 
-        m_textureLoader->setLocalSearchPath(savedPath);
+        m_textureLoader->setSearchPath(savedPath.toUtf8().data());
     }
 
     return geometry;
@@ -3648,7 +3710,7 @@ UniverseLoader::loadSSC(const QString& fileName,
 
     if (m_textureLoader.isValid())
     {
-        m_textureLoader->setLocalSearchPath(searchPath + "/textures/medres");
+        m_textureLoader->setSearchPath(std::string(searchPath.toUtf8().data()) + "/textures/medres");
     }
     setTexturesInModelDirectory(false);
 
@@ -3688,7 +3750,7 @@ UniverseLoader::loadSSC(const QString& fileName,
     setModelSearchPath(saveModelSearchPath);
     if (m_textureLoader.isValid())
     {
-        m_textureLoader->setLocalSearchPath(saveTextureSearchPath);
+        m_textureLoader->setSearchPath(saveTextureSearchPath.toUtf8().data());
     }
 
     // Reset the textures in model directory bit
@@ -4089,7 +4151,7 @@ UniverseLoader::removeBuiltinRotationModel(const QString& name)
 
 
 void
-UniverseLoader::setTextureLoader(NetworkTextureLoader *textureLoader)
+UniverseLoader::setTextureLoader(PathRelativeTextureLoader *textureLoader)
 {
     m_textureLoader = textureLoader;
 }

@@ -124,6 +124,30 @@ NetworkTextureLoader::~NetworkTextureLoader()
 
 
 std::string
+NetworkTextureLoader::searchPath() const
+{
+    if (m_localImageLoader)
+    {
+        return std::string(m_localImageLoader->searchPath().toUtf8().data());
+    }
+    else
+    {
+        return "";
+    }
+}
+
+
+void
+NetworkTextureLoader::setSearchPath(const std::string& path)
+{
+    if (m_localImageLoader)
+    {
+        m_localImageLoader->setSearchPath(QString::fromUtf8(path.c_str(), path.size()));
+    }
+}
+
+
+std::string
 NetworkTextureLoader::resolveResourceName(const std::string& resourceName)
 {
     if (resourceName.length() >= 4 && resourceName.substr(0, 4) == "wms:")

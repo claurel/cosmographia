@@ -40,9 +40,9 @@ namespace vesta
     class InertialFrame;
 }
 
-class NetworkTextureLoader;
 class Viewpoint;
 class TwoVectorFrameDirection;
+class PathRelativeTextureLoader;
 
 class UniverseLoader
 {
@@ -55,7 +55,7 @@ public:
 
     vesta::TextureMapLoader* textureLoader() const;
 
-    void setTextureLoader(NetworkTextureLoader* textureLoader);
+    void setTextureLoader(PathRelativeTextureLoader* textureLoader);
     void addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory);
     void removeBuiltinOrbit(const QString& name);
     void addBuiltinRotationModel(const QString& name, vesta::RotationModel* trajectory);
@@ -169,7 +169,7 @@ private:
 private:
     QMap<QString, vesta::counted_ptr<vesta::Trajectory> > m_builtinOrbits;
     QMap<QString, vesta::counted_ptr<vesta::RotationModel> > m_builtinRotations;
-    vesta::counted_ptr<NetworkTextureLoader> m_textureLoader;
+    vesta::counted_ptr<PathRelativeTextureLoader> m_textureLoader;
     QMap<QString, vesta::counted_ptr<vesta::Geometry> > m_modelCache;
     QString m_dataSearchPath;
     QString m_textureSearchPath;

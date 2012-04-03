@@ -62,6 +62,7 @@ APP_SOURCES = \
     $$MAIN_PATH/geometry/MultiLabelGeometry.cpp \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.cpp \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
+    $$MAIN_PATH/vext/PathRelativeTextureLoader.cpp \
     $$MAIN_PATH/vext/SimpleRotationModel.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
     $$MAIN_PATH/compatibility/CelBodyFixedFrame.cpp \
@@ -123,6 +124,7 @@ APP_HEADERS = \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
     $$MAIN_PATH/vext/LocalTiledMap.h \
+    $$MAIN_PATH/vext/PathRelativeTextureLoader.h \
     $$MAIN_PATH/vext/SimpleRotationModel.h \
     $$MAIN_PATH/vext/StripParticleGenerator.h \
     $$MAIN_PATH/compatibility/CatalogParser.h \
@@ -167,6 +169,7 @@ VESTA_SOURCES = \
     $$VESTA_PATH/Framebuffer.cpp \
     $$VESTA_PATH/GeneralEllipse.cpp \
     $$VESTA_PATH/Geometry.cpp \
+    $$VESTA_PATH/GeometryBuffer.cpp \
     $$VESTA_PATH/GlareOverlay.cpp \
     $$VESTA_PATH/GregorianDate.cpp \
     $$VESTA_PATH/HierarchicalTiledMap.cpp \
@@ -251,6 +254,7 @@ VESTA_HEADERS = \
     $$VESTA_PATH/FixedPointTrajectory.h \
     $$VESTA_PATH/FixedRotationModel.h \
     $$VESTA_PATH/Geometry.h \
+    $$VESTA_PATH/GeometryBuffer.h \
     $$VESTA_PATH/GeneralEllipse.h \
     $$VESTA_PATH/GlareOverlay.h \
     $$VESTA_PATH/GregorianDate.h \

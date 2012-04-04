@@ -169,7 +169,6 @@ VESTA_SOURCES = \
     $$VESTA_PATH/Framebuffer.cpp \
     $$VESTA_PATH/GeneralEllipse.cpp \
     $$VESTA_PATH/Geometry.cpp \
-    $$VESTA_PATH/GeometryBuffer.cpp \
     $$VESTA_PATH/GlareOverlay.cpp \
     $$VESTA_PATH/GregorianDate.cpp \
     $$VESTA_PATH/HierarchicalTiledMap.cpp \
@@ -254,7 +253,6 @@ VESTA_HEADERS = \
     $$VESTA_PATH/FixedPointTrajectory.h \
     $$VESTA_PATH/FixedRotationModel.h \
     $$VESTA_PATH/Geometry.h \
-    $$VESTA_PATH/GeometryBuffer.h \
     $$VESTA_PATH/GeneralEllipse.h \
     $$VESTA_PATH/GlareOverlay.h \
     $$VESTA_PATH/GregorianDate.h \

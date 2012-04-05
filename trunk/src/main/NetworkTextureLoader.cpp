@@ -154,9 +154,10 @@ NetworkTextureLoader::resolveResourceName(const std::string& resourceName)
     {
         return resourceName;
     }
-    else if (!resourceName.empty() && resourceName.at(0) == ':')
+    else if (!resourceName.empty() && (resourceName.at(0) == ':' || resourceName.at(0) == '/'))
     {
-        // Qt internal resource
+        // Either a Qt internal resource (prefix ':') or an absolute path (prefix '/')
+        // Don't prepend the search path, just use the resource name
         return resourceName;
     }
     else

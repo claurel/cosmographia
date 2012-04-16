@@ -1,5 +1,5 @@
 /*
- * $Revision: 620 $ $Date: 2011-08-19 15:21:14 -0700 (Fri, 19 Aug 2011) $
+ * $Revision: 654 $ $Date: 2012-02-22 16:22:33 -0800 (Wed, 22 Feb 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -176,7 +176,7 @@ ArrowGeometry::render(RenderContext& rc,
     bool opaqueArrows = opacity() >= 1.0f;
 
     // Draw arrows
-    if (rc.pass() == RenderContext::TranslucentPass ^ opaqueArrows)
+    if ((rc.pass() == RenderContext::TranslucentPass) ^ opaqueArrows)
     {
         if (visibleArrows() & XAxis)
         {
@@ -374,11 +374,11 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
     arrowHeadScreenSpace = rc.projection() * rc.modelview() * Vector3f(0.0, 0.0, 1.0);
 
     // note: length of an arrow is 0.5
-    labelPositionScreenSpace.x() = 0.5 * ( arrowHeadScreenSpace.x() - arrowOriginScreenSpace.x() ) *
+    labelPositionScreenSpace.x() = 0.5f * ( arrowHeadScreenSpace.x() - arrowOriginScreenSpace.x() ) *
                                    rc.viewportWidth();
-    labelPositionScreenSpace.y() = 0.5 * ( arrowHeadScreenSpace.y() - arrowOriginScreenSpace.y() ) *
+    labelPositionScreenSpace.y() = 0.5f * ( arrowHeadScreenSpace.y() - arrowOriginScreenSpace.y() ) *
                                    rc.viewportHeight();
-    labelPositionScreenSpace.z() = 0.0;// no need for a z value
+    labelPositionScreenSpace.z() = 0.0f;// no need for a z value
 
 
     // move the label to the left, otherwise the label will be drawn on top of the arrow
@@ -392,13 +392,13 @@ void ArrowGeometry::drawLabel(RenderContext& rc, unsigned int which) const
     // two times the textWidth of the uppercase character A is sufficent
     if(labelPositionScreenSpace.y() < 0)
     {
-        labelOffset.y() -= 2.0 * font->textWidth("A");
+        labelOffset.y() -= 2.0f * font->textWidth("A");
     }
 
     cameraDistance = rc.modelview().translation().norm();
-    pixelSize = 0.5 * m_scale / (rc.pixelSize() * cameraDistance);
+    pixelSize = float(0.5 * m_scale / (rc.pixelSize() * cameraDistance));
 
-    if (pixelSize >= 10.0)
+    if (pixelSize >= 10.0f)
     {
         rc.pushModelView();
         rc.translateModelView(Vector3f::UnitZ());

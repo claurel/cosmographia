@@ -746,6 +746,8 @@ macx {
         data/models/jas_brsh.png \
         data/models/cassini.cmod \
         data/models/voyager.cmod \
+        data/models/voyager-tex1.dds \
+        data/models/voyager-tex2.dds \
         data/models/iss.cmod \
         data/models/hst.cmod \
         data/models/hbltel_1.jpg \

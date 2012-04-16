@@ -841,6 +841,16 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
         dv = vExt / float(TileSubdivision);
     }
 
+    // Precompute a trig table for this patch
+    float sines[TileSubdivision + 1];
+    float cosines[TileSubdivision + 1];
+    for (unsigned int i = 0; i <= TileSubdivision; ++i)
+    {
+        float lon = lonWest + i * dlon;
+        sines[i] = sin(lon);
+        cosines[i] = cos(lon);
+    }
+
     for (unsigned int i = 0; i <= TileSubdivision; ++i)
     {
         float v = v0 + i * dv;
@@ -852,10 +862,9 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
         {
             unsigned int vertexStart = vertexStride * vertexIndex;
 
-            float lon = lonWest + j * dlon;
             float u = u0 + j * du;
 
-            Vector3f p(cosLat * cos(lon), cosLat * sin(lon), sinLat);
+            Vector3f p(cosLat * cosines[j], cosLat * sines[j], sinLat);
             vertexData[vertexStart + 0] = p.x();
             vertexData[vertexStart + 1] = p.y();
             vertexData[vertexStart + 2] = p.z();

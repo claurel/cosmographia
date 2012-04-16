@@ -12,6 +12,7 @@
 #define _VESTA_SKY_IMAGE_LAYER_H_
 
 #include "SkyLayer.h"
+#include "Spectrum.h"
 #include <Eigen/Geometry>
 
 
@@ -59,6 +60,20 @@ public:
         m_opacity = opacity;
     }
 
+    /** Get the tint color that will be applied to the image. */
+    Spectrum tintColor() const
+    {
+        return m_tintColor;
+    }
+
+    /** Set the tint color that will be applied to the image. The image
+      * colors are multiplied by the tint color.
+      */
+    void setTintColor(const Spectrum& color)
+    {
+        m_tintColor = color;
+    }
+
     /** Get the texture.
       */
     TextureMap* texture() const
@@ -75,6 +90,7 @@ public:
 private:
     Eigen::Quaterniond m_orientation;
     float m_opacity;
+    Spectrum m_tintColor;
     counted_ptr<TextureMap> m_texture;
 
     // TODO: move tile allocator to RenderContext so that it can be shared

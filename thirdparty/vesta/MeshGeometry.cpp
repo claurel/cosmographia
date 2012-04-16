@@ -384,6 +384,7 @@ MeshGeometry::compressIndices()
 
 
 #define TEST_PROPERTY(p0, p1) if ((p0) < (p1)) return true; else if ((p0) > (p1)) return false;
+#define TEST_PROPERTY_REVERSE(p0, p1) if ((p0) > (p1)) return true; else if ((p0) < (p1)) return false;
 
 static bool CompareSpectra(const Spectrum& s0, const Spectrum& s1)
 {
@@ -407,7 +408,7 @@ public:
     bool operator()(const Material& m0, const Material& m1) const
     {
         TEST_PROPERTY((int) m0.brdf(), (int) m1.brdf());
-        TEST_PROPERTY(m0.opacity(), m1.opacity());
+        TEST_PROPERTY_REVERSE(m0.opacity(), m1.opacity());
         TEST_COLOR_PROPERTY(m0.diffuse(), m1.diffuse());
         TEST_COLOR_PROPERTY(m0.specular(), m1.specular());
         TEST_PROPERTY(m0.phongExponent(), m1.phongExponent());

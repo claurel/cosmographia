@@ -25,6 +25,7 @@ static const float MaxSkyImageTileSquareSize = 256.0f;  // size in pixels
 SkyImageLayer::SkyImageLayer() :
     m_orientation(Quaterniond::Identity()),
     m_opacity(1.0f),
+    m_tintColor(1.0f, 1.0f, 1.0f),
     m_tileAllocator(NULL)
 {
     m_tileAllocator = new QuadtreeTileAllocator;
@@ -81,8 +82,8 @@ SkyImageLayer::render(RenderContext& rc)
     unsigned int tileFeatures = 0;
 
     Material material;
-    material.setDiffuse(Spectrum::White());
-    material.setEmission(Spectrum::White());
+    material.setDiffuse(m_tintColor);
+    material.setEmission(Spectrum::Black());
     material.setOpacity(m_opacity);
     material.setBaseTexture(m_texture.ptr());
     rc.bindMaterial(&material);

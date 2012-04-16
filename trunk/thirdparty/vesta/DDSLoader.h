@@ -19,7 +19,7 @@
 namespace vesta
 {
 
-class DDSHeader;
+struct DDSHeader;
 
 /** DDSLoader is a helper class for loading textures stored in Microsoft's DDS
   * (DirectDraw Surface) format. It is designed to be used by a TextureLoader

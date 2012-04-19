@@ -20,6 +20,7 @@
 #include <vesta/Material.h>
 #include <vesta/Units.h>
 #include <vesta/VertexBuffer.h>
+#include <vesta/ShaderBuilder.h>
 #include <vesta/glhelp/GLShaderProgram.h>
 #include <vesta/Debug.h>
 #include <Eigen/Geometry>
@@ -48,6 +49,56 @@ using namespace std;
 //
 // Where (qw, qx, qy, qz) is a quaternion giving the orientation of the orbital
 // plane.
+
+#ifdef VESTA_OGLES2
+
+static const char* SwarmVertexShaderSource =
+"attribute vec3 vesta_Position;   \n"
+"attribute vec3 vesta_Normal;     \n"
+"attribute vec3 vesta_TexCoord0;  \n"
+"uniform mat4 vesta_ModelViewProjectionMatrix;\n"
+"uniform float time;              \n"
+"uniform float pointSize;         \n"
+"uniform vec4 color;              \n"
+"varying lowp vec4 pointColor;    \n"
+"\n"
+"void main()                      \n"
+"{                                \n"
+"    float sma = vesta_Position.x;                                                 \n"
+"    float ecc = vesta_Position.y;                                                 \n"
+"    float M0  = vesta_Position.z;                                                 \n"
+"    float nu  = vesta_Normal.x;                                                 \n"
+"    vec4 q = vec4(vesta_Normal.z, vesta_TexCoord0.x, vesta_TexCoord0.y, vesta_Normal.y);\n"
+"\n"
+"    float M = M0 + time * nu;                                                \n"
+"    float E = M;                                                             \n"
+"    for (int i = 0; i < 4; i += 1)                                           \n"
+"        E = M + ecc * sin(E);                                                \n"
+"    vec3 position = vec3(sma * (cos(E) - ecc), sma * (sin(E) * sqrt(1.0 - ecc * ecc)), 0.0);\n"
+"\n"
+"    // Rotate by quaternion q                                                \n"
+"    vec3 a = cross(q.xyz, position) + q.w * position;                        \n"
+"    position = cross(a, -q.xyz) + dot(q.xyz, position) * q.xyz + q.w * a;    \n"
+"\n"
+"    float t = time - vesta_TexCoord0.z;                                      \n"
+"    if (t < 0.0)                                                             \n"
+"        pointColor = vec4(0.0, 0.0, 0.0, 0.0);                               \n"
+"    else                                                                     \n"
+"        pointColor = mix(vec4(1.0, 1.0, 1.0, 1.0), color, min(t / (86400.0 * 50.0), 1.0));  \n"
+"    gl_PointSize = pointSize;\n"
+"    gl_Position = vesta_ModelViewProjectionMatrix * vec4(position, 1.0);        \n"
+"}                                                                            \n"
+;
+
+static const char* SwarmFragmentShaderSource =
+"varying lowp vec4 pointColor;                   \n"
+"void main()                                     \n"
+"{                                               \n"
+"    gl_FragColor = pointColor;                  \n"
+"}                                               \n"
+;
+
+#else
 
 static const char* SwarmVertexShaderSource =
 "uniform float time;              \n"
@@ -90,6 +141,8 @@ static const char* SwarmFragmentShaderSource =
 "    gl_FragColor = pointColor;                  \n"
 "}                                               \n"
 ;
+
+#endif
 
 
 KeplerianSwarm::KeplerianSwarm() :
@@ -138,6 +191,16 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
         {
             m_swarmShader = GLShaderProgram::CreateShaderProgram(SwarmVertexShaderSource, SwarmFragmentShaderSource);
             m_shaderCompiled = true;
+#ifdef VESTA_OGLES2
+            // TODO: Need to make VESTA bind these automatically
+            if (m_swarmShader.isValid())
+            {
+                m_swarmShader->bindAttribute(ShaderBuilder::PositionAttribute, ShaderBuilder::PositionAttributeLocation);
+                m_swarmShader->bindAttribute(ShaderBuilder::NormalAttribute, ShaderBuilder::NormalAttributeLocation);
+                m_swarmShader->bindAttribute(ShaderBuilder::TexCoordAttribute, ShaderBuilder::TexCoordAttributeLocation);
+                m_swarmShader->link();
+            }
+#endif
         }
 
         if (m_swarmShader.isValid())
@@ -154,6 +217,9 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
             m_swarmShader->setConstant("time", float(clock - m_epoch));
             m_swarmShader->setConstant("pointSize", m_pointSize);
             m_swarmShader->setConstant("color", Vector4f(m_color.red(), m_color.green(), m_color.blue(), m_opacity));
+#ifdef VESTA_OGLES2
+            m_swarmShader->setConstant("vesta_ModelViewProjectionMatrix", (rc.projection() * rc.modelview()).matrix());                                                             
+#endif
 
             rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::Points, m_objects.size()));
             rc.unbindVertexBuffer();

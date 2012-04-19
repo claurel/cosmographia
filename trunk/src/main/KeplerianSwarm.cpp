@@ -94,7 +94,9 @@ static const char* SwarmFragmentShaderSource =
 "varying lowp vec4 pointColor;                   \n"
 "void main()                                     \n"
 "{                                               \n"
-"    gl_FragColor = pointColor;                  \n"
+"    mediump vec2 v = gl_PointCoord - vec2(0.5, 0.5); \n"
+"    mediump float opacity = 1.0 - dot(v, v) * 4.0; \n"
+"    gl_FragColor = vec4(pointColor.rgb, opacity * pointColor.a);\n"
 "}                                               \n"
 ;
 
@@ -152,6 +154,7 @@ KeplerianSwarm::KeplerianSwarm() :
     m_color(Spectrum(1.0f, 1.0f, 1.0f)),
     m_opacity(1.0f),
     m_pointSize(1.0f),
+    m_fadeSize(250.0f),
     m_shaderCompiled(false)
 {
     setClippingPolicy(PreventClipping);
@@ -179,6 +182,30 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
         return;
     }
 
+    // Contents are never treated as opaque; always draw during the translucent pass
+    if (rc.pass() != RenderContext::TranslucentPass)
+    {
+        return;
+    }
+
+    float fadeFactor = 1.0f;
+    if (m_fadeSize > 0.0f)
+    {
+        const float sizeFadeStart = m_fadeSize * 4;
+        const float sizeFadeEnd = m_fadeSize;
+        float pixelSize = boundingSphereRadius() / (rc.modelview().translation().norm() * rc.pixelSize());
+        if (pixelSize < sizeFadeStart)
+        {
+            fadeFactor = std::max(0.0f, (pixelSize - sizeFadeEnd) / (sizeFadeStart - sizeFadeEnd));
+        }
+    }
+    
+    if (fadeFactor < 0.001f)
+    {
+        // Total fade out
+        return;
+    }
+    
     if (m_vertexBuffer.isNull())
     {
         m_vertexBuffer = VertexBuffer::Create(m_objects.size() * sizeof(KeplerianObject), VertexBuffer::StaticDraw, &m_objects[0]);
@@ -205,18 +232,19 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
 
         if (m_swarmShader.isValid())
         {
-            //rc.bindVertexBuffer(VertexSpec::PositionNormalTex, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
+            float effectiveOpacity = fadeFactor * m_opacity;
+            
             rc.bindVertexBuffer(*m_vertexSpec, m_vertexBuffer.ptr(), sizeof(KeplerianObject));
 
             Material material;
-            material.setOpacity(m_opacity);
+            material.setOpacity(std::min(0.99f, effectiveOpacity));
             rc.bindMaterial(&material);
 
             rc.enableCustomShader(m_swarmShader.ptr());
             m_swarmShader->bind();
             m_swarmShader->setConstant("time", float(clock - m_epoch));
             m_swarmShader->setConstant("pointSize", m_pointSize);
-            m_swarmShader->setConstant("color", Vector4f(m_color.red(), m_color.green(), m_color.blue(), m_opacity));
+            m_swarmShader->setConstant("color", Vector4f(m_color.red(), m_color.green(), m_color.blue(), effectiveOpacity));
 #ifdef VESTA_OGLES2
             m_swarmShader->setConstant("vesta_ModelViewProjectionMatrix", (rc.projection() * rc.modelview()).matrix());                                                             
 #endif

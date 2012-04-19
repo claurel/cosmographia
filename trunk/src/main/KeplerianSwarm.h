@@ -85,6 +85,28 @@ public:
         m_pointSize = pointSize;
     }
 
+    /** Get projected size (in pixels) of the swarm where it becomes
+     *  completely invisible. Fading is disabled when fadeSize is zero.
+     *
+     *  \see setFadeSize
+     */
+    float fadeSize() const
+    {
+        return m_fadeSize;
+    }
+    
+    /** Set projected size (in pixels) of the swarm where it becomes
+     *  completely invisible. Setting the fade size to zero disables fading.
+     *  Fading is useful to prevent the swarm from appearing to bright and
+     *  dense when zoomed out.
+     *
+     *  \see setFadeSize
+     */
+    void setFadeSize(float fadeSize)
+    {
+        m_fadeSize = fadeSize;
+    }
+    
     void addObject(const OrbitalElements& elements, double discoveryTime);
     void clear();
 
@@ -110,6 +132,7 @@ private:
     Spectrum m_color;
     float m_opacity;
     float m_pointSize;
+    float m_fadeSize;
 
     // These are only mutable because render() is const; need to
     // change this.

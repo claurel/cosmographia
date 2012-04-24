@@ -1,0 +1,90 @@
+{
+     "version": "1.0",
+     "name": "NEAR Mission",
+
+     "items" :
+     [
+        {
+          "name" : "NEAR",
+
+          "startTime" : "1996-05-31 00:00:00",
+          "arcs" : [
+          {
+            "center" : "Sun",
+            "endTime" : "2000-01-01 00:00:00",
+
+            "trajectoryFrame" : "EclipticJ2000",
+            "trajectory" :
+            {
+              "type" : "InterpolatedStates",
+              "source" : "trajectories/near-cruise.xyzv"
+            },
+
+            "bodyFrame" :
+            {
+              "type" : "TwoVector",
+              "primaryAxis" : "z",
+              "primary" :
+              {
+                "type" : "RelativePosition",
+                "observer" : "NEAR",
+                "target" : "Earth"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                "type" : "RelativeVelocity",
+                "observer" : "NEAR",
+                "target" : "Earth"
+              }
+            }
+          },
+
+          {
+            "center" : "Eros",
+            "endTime" : "2001-02-12 19:45:20",
+
+            "trajectoryFrame" : "EclipticJ2000",
+            "trajectory" :
+            {
+              "type" : "InterpolatedStates",
+              "source" : "trajectories/near-eros-orbit.xyzv"
+            },
+
+            "bodyFrame" :
+            {
+              "type" : "TwoVector",
+              "primaryAxis" : "z",
+              "primary" :
+              {
+                "type" : "RelativePosition",
+                "observer" : "NEAR",
+                "target" : "Earth"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                "type" : "RelativeVelocity",
+                "observer" : "NEAR",
+                "target" : "Earth"
+              }
+            }
+          }
+          ],
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/near.cmod"
+          },
+
+          "label" : { "color" : "#d0d0d0" },
+          "trajectoryPlot" :
+          {
+              "duration" : "2 d",
+              "fade" : 0.5
+          }
+        }
+    ]
+}

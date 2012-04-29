@@ -65,6 +65,28 @@ public:
         return m_tileSize;
     }
 
+    /** Return the border thickness as a fraction of the overall tile size.
+      *
+      * \see setTileInset
+      */
+    float tileBorderFraction() const
+    {
+        return m_tileBorderFraction;
+    }
+
+    /** Set the tile border thickness as a fraction of overall tile size. By default,
+      * it is zero, and the tile has no border pixels. It can be set to a non-zero
+      * value in order to reduce or eliminate visible discontinuities across tiles.
+      * The border pixels should duplicate pixels from adjacent tiles.
+      *
+      * Example: 256x256 pixel tiles with a 1 pixel border will have a tile border
+      * fraction of 1/512 = 0.00390625.
+      */
+    void setTileBorderFraction(float fraction)
+    {
+        m_tileBorderFraction = fraction;
+    }
+
 private:
     TextureMapLoader* m_loader;
 
@@ -72,6 +94,7 @@ private:
     typedef std::map<v_uint64, counted_ptr<TextureMap> > TileCache;
     TileCache m_tiles;
     unsigned int m_tileSize;
+    float m_tileBorderFraction;
 };
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Revision: 547 $ $Date: 2010-10-21 14:15:29 -0700 (Thu, 21 Oct 2010) $
+ * $Revision: 671 $ $Date: 2012-04-28 18:42:13 -0700 (Sat, 28 Apr 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -70,6 +70,16 @@ public:
         m_font = font;
     }
 
+    float opacity() const
+    {
+        return m_opacity;
+    }
+    
+    void setOpacity(float opacity)
+    {
+        m_opacity = opacity;
+    }
+    
     Spectrum color() const
     {
         return m_color;
@@ -158,6 +168,7 @@ private:
     counted_ptr<TextureFont> m_font;
     counted_ptr<TextureMap> m_icon;
     Spectrum m_color;
+    float m_opacity;
     float m_iconSize;
     Spectrum m_iconColor;
     counted_ptr<FadeRange> m_fadeRange;

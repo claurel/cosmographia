@@ -19,7 +19,8 @@ using namespace std;
   */
 HierarchicalTiledMap::HierarchicalTiledMap(TextureMapLoader* loader, unsigned int tileSize) :
     m_loader(loader),
-    m_tileSize(tileSize)
+    m_tileSize(tileSize),
+    m_tileBorderFraction(0.0f)
 {
 }
 
@@ -47,10 +48,10 @@ HierarchicalTiledMap::tile(unsigned int level, unsigned int x, unsigned int y)
 {
     TextureSubrect r;
     r.texture = NULL;
-    r.u0 = 0.0f;
-    r.v0 = 0.0f;
-    r.u1 = 1.0f;
-    r.v1 = 1.0f;
+    r.u0 = m_tileBorderFraction;
+    r.v0 = m_tileBorderFraction;
+    r.u1 = 1.0f - m_tileBorderFraction;
+    r.v1 = 1.0f - m_tileBorderFraction;
 
     int testLevel = int(level);
     unsigned int testX = x;
@@ -107,8 +108,8 @@ HierarchicalTiledMap::tile(unsigned int level, unsigned int x, unsigned int y)
             float vExtent = (r.v1 - r.v0) * 0.5f;
 
             unsigned int mask = (1 << (level - (unsigned int) testLevel)) - 1;
-            r.u0 = uExtent * (x & mask);
-            r.v0 = vExtent * (y & mask);
+            r.u0 = m_tileBorderFraction + uExtent * (x & mask);
+            r.v0 = m_tileBorderFraction + vExtent * (y & mask);
 
             r.u1 = r.u0 + uExtent;
             r.v1 = r.v0 + vExtent;

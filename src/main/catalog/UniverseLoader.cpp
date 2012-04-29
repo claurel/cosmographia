@@ -38,6 +38,8 @@
 #include "../vext/StripParticleGenerator.h"
 #include "../vext/ArcStripParticleGenerator.h"
 #include "../vext/PathRelativeTextureLoader.h"
+#include "../vext/NameTemplateTiledMap.h"
+#include "../vext/CompositeTrajectory.h"
 #include "../astro/Rotation.h"
 #include "../Viewpoint.h"
 #include <vesta/Units.h>
@@ -1228,6 +1230,99 @@ UniverseLoader::loadLinearCombinationTrajectory(const QVariantMap& map)
 
 
 vesta::Trajectory*
+UniverseLoader::loadCompositeTrajectory(const QVariantMap& map)
+{
+    QVariant segmentsVar = map.value("segments");
+    QVariant startTimeVar = map.value("startTime");
+
+    bool ok = false;
+    double startTime = dateValue(startTimeVar, &ok);
+    if (!ok)
+    {
+        errorMessage("Invalid startTime specified for composite trajectory");
+        return NULL;
+    }
+
+    if (segmentsVar.type() != QVariant::List)
+    {
+        errorMessage("Segments in composite trajectory must be an array");
+        return NULL;
+    }
+
+    QVariantList segmentList = segmentsVar.toList();
+    if (segmentList.isEmpty())
+    {
+        errorMessage("Composite trajectory must contain at least one segment");
+        return NULL;
+    }
+
+    std::vector<counted_ptr<Trajectory> > segments;
+    std::vector<double> durations;
+
+    double lastEndTime = startTime;
+
+    foreach (QVariant v, segmentList)
+    {
+        if (v.type() != QVariant::Map)
+        {
+            errorMessage("Invalid segment in segments list.");
+            return NULL;
+        }
+
+        QVariantMap segmentMap = v.toMap();
+
+        QVariant trajectoryVar = segmentMap.value("trajectory");
+        QVariant endTimeVar = segmentMap.value("endTime");
+
+        if (trajectoryVar.type() != QVariant::Map)
+        {
+            errorMessage("Bad or missing trajectory for composite trajectory segment");
+            return NULL;
+        }
+
+        double endTime = dateValue(endTimeVar, &ok);
+        if (!ok)
+        {
+            errorMessage("Bad or missing endTime for composite trajectory segment");
+            return NULL;
+        }
+
+        if (endTime <= startTime)
+        {
+            errorMessage("End time of composite trajectory segment must be after start time");
+            return NULL;
+        }
+
+        if (endTime <= lastEndTime)
+        {
+            errorMessage("End time of composite trajectory segment must be after previous segment's");
+            return NULL;
+        }
+        double duration = endTime - lastEndTime;
+        lastEndTime = endTime;
+
+        Trajectory* trajectory = loadTrajectory(trajectoryVar.toMap());
+        if (!trajectory)
+        {
+            return NULL;
+        }
+
+        segments.push_back(counted_ptr<vesta::Trajectory>(trajectory));
+        durations.push_back(duration);
+    }
+
+    // Made it through all that without errors; now actually create the composite trajectory
+    // First convert the list of counted pointers to a list of plain pointers
+    std::vector<Trajectory*> segmentPtrs;
+    for (unsigned int i = 0; i < segments.size(); ++i)
+    {
+        segmentPtrs.push_back(segments[i].ptr());
+    }
+
+    return CompositeTrajectory::Create(segmentPtrs, durations, startTime);
+}
+
+vesta::Trajectory*
 UniverseLoader::loadTrajectory(const QVariantMap& map)
 {
     QVariant typeData = map.value("type");
@@ -1268,6 +1363,10 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     else if (type == "LinearCombination")
     {
         return loadLinearCombinationTrajectory(map);
+    }
+    else if (type == "Composite")
+    {
+        return loadCompositeTrajectory(map);
     }
     else
     {
@@ -2006,11 +2105,14 @@ UniverseLoader::loadChronology(const QVariantList& list,
 
 
 static TiledMap*
-loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
+loadTiledMap(const QVariantMap& map, PathRelativeTextureLoader* textureLoader)
 {
     QString type = map.value("type").toString();
     if (type == "WMS")
     {
+#ifdef VESTA_OGLES2
+        return NULL;
+#else
         QVariant layerVar = map.value("layer");
         QVariant levelCountVar = map.value("levelCount");
         QVariant tileSizeVar = map.value("tileSize");
@@ -2042,9 +2144,13 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
         tileSize = std::max(128, std::min(8192, tileSize));
 
         return new WMSTiledMap(textureLoader, layer, tileSize, levelCount);
+#endif
     }
     else if (type == "MultiWMS")
     {
+#ifdef VESTA_OGLES2
+        return NULL;
+#else
         QVariant baseLayerVar = map.value("baseLayer");
         QVariant baseLevelCountVar = map.value("baseLevelCount");
         QVariant detailLayerVar = map.value("detailLayer");
@@ -2120,6 +2226,55 @@ loadTiledMap(const QVariantMap& map, TextureMapLoader* textureLoader)
         tileSize = std::max(128, std::min(8192, tileSize));
 
         return new MultiWMSTiledMap(textureLoader, topLayer, baseLayer, baseLevelCount, detailLayer, detailLevelCount, tileSize);
+#endif
+    }
+    else if (type == "NameTemplate")
+    {
+        QVariant templateNameVar = map.value("template");
+        QVariant tileSizeVar = map.value("tileSize");
+        QVariant levelCountVar = map.value("levelCount");
+        QVariant borderThicknessVar = map.value("tileBorderThickness");
+
+        if (!templateNameVar.isValid())
+        {
+            qDebug() << "Missing template for NameTemplate tiled texture";
+            return NULL;
+        }
+
+        if (!tileSizeVar.canConvert(QVariant::UInt))
+        {
+            qDebug() << "Bad or missing tileSize for NameTemplate tiled texture";
+            return NULL;
+        }
+
+        if (!levelCountVar.canConvert(QVariant::UInt))
+        {
+            qDebug() << "Bad or missing level count for NameTemplate tiled texture";
+            return NULL;
+        }
+
+        float borderThickness = 0.0f;
+        if (borderThicknessVar.isValid())
+        {
+            bool ok = false;
+            borderThickness = borderThicknessVar.toFloat(&ok);
+            if (!ok)
+            {
+                qDebug() << "NameTemplate tiled texture has invalid border thickness.";
+                return NULL;
+            }
+        }
+        // Enforce some limits on tile size and level count
+        unsigned int levelCount = std::max(1u, std::min(16u, levelCountVar.toUInt()));
+        unsigned int tileSize = std::max(128u, std::min(8192u, tileSizeVar.toUInt()));
+
+        QString templateName = templateNameVar.toString();
+        templateName = QString::fromUtf8(textureLoader->searchPath().c_str()) + QString("/") + templateName;
+
+        NameTemplateTiledMap* tiledMap = new NameTemplateTiledMap(textureLoader, templateName.toUtf8().data(), tileSize, levelCount);
+        tiledMap->setTileBorderFraction(borderThickness);
+
+        return tiledMap;
     }
     else
     {

@@ -59,7 +59,7 @@ NameTemplateTiledMap::isValidTileAddress(unsigned int level, unsigned int column
 
 
 bool 
-NameTemplateTiledMap::tileResourceExists(const std::string& resourceId)
+NameTemplateTiledMap::tileResourceExists(const std::string& /* resourceId */)
 {
     return true;
 }

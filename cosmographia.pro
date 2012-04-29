@@ -61,7 +61,9 @@ APP_SOURCES = \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/geometry/MultiLabelGeometry.cpp \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.cpp \
+    $$MAIN_PATH/vext/CompositeTrajectory.cpp \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
+    $$MAIN_PATH/vext/NameTemplateTiledMap.cpp \
     $$MAIN_PATH/vext/PathRelativeTextureLoader.cpp \
     $$MAIN_PATH/vext/SimpleRotationModel.cpp \
     $$MAIN_PATH/compatibility/CatalogParser.cpp \
@@ -123,7 +125,9 @@ APP_HEADERS = \
     $$MAIN_PATH/geometry/MultiLabelGeometry.h \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
+    $$MAIN_PATH/vext/CompositeTrajectory.h \
     $$MAIN_PATH/vext/LocalTiledMap.h \
+    $$MAIN_PATH/vext/NameTemplateTiledMap.h \
     $$MAIN_PATH/vext/PathRelativeTextureLoader.h \
     $$MAIN_PATH/vext/SimpleRotationModel.h \
     $$MAIN_PATH/vext/StripParticleGenerator.h \

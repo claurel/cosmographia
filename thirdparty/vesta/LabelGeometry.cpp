@@ -1,5 +1,5 @@
 /*
- * $Revision: 597 $ $Date: 2011-03-31 09:25:53 -0700 (Thu, 31 Mar 2011) $
+ * $Revision: 671 $ $Date: 2012-04-28 18:42:13 -0700 (Sat, 28 Apr 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -34,6 +34,7 @@ LabelGeometry::LabelGeometry(const std::string& text, TextureFont* font, const S
     m_fadeSize(1.0f)
 {
     setFixedApparentSize(true);
+    //setClippingPolicy(ZeroExtent);
 }
 
 
@@ -53,7 +54,7 @@ LabelGeometry::render(RenderContext& rc, double /* clock */) const
         labelOffset.x() = std::floor(m_iconSize / 2.0f) + 1.0f;
     }
 
-    float opacity = 0.99f;
+    float opacity = 0.99f * m_opacity;
     if (m_fadeRange.isValid())
     {
         float cameraDistance = rc.modelview().translation().norm();

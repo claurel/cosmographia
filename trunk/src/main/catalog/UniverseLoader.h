@@ -125,6 +125,7 @@ private:
     vesta::Trajectory* loadFixedPointTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadFixedSphericalTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadLinearCombinationTrajectory(const QVariantMap& info);
+    vesta::Trajectory* loadCompositeTrajectory(const QVariantMap& info);
 
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadBuiltinRotationModel(const QVariantMap& info);

@@ -1,5 +1,5 @@
 /*
- * $Revision: 671 $ $Date: 2012-04-28 18:42:13 -0700 (Sat, 28 Apr 2012) $
+ * $Revision: 672 $ $Date: 2012-04-30 21:09:59 -0700 (Mon, 30 Apr 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -29,6 +29,7 @@ LabelGeometry::LabelGeometry(const std::string& text, TextureFont* font, const S
     m_text(text),
     m_font(counted_ptr<TextureFont>(font)),
     m_color(color),
+    m_opacity(1.0f),
     m_iconSize(iconSize),
     m_iconColor(Spectrum::White()),
     m_fadeSize(1.0f)

@@ -2476,19 +2476,31 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
     }
 
     QVariant cloudMapVar = map.value("cloudMap");
-    if (cloudMapVar.type() == QVariant::String)
+    if (cloudMapVar.isValid() && m_textureLoader.isValid())
     {
-        TextureProperties cloudMapProps;
-        cloudMapProps.addressS = TextureProperties::Wrap;
-        cloudMapProps.addressT = TextureProperties::Clamp;
-
-        QString cloudMapBase = cloudMapVar.toString();
-        if (m_textureLoader.isValid())
+        if (cloudMapVar.type() == QVariant::String)
         {
-            TextureMap* cloudTex = m_textureLoader->loadTexture(cloudMapBase.toUtf8().data(), cloudMapProps);
+            TextureProperties cloudMapProps;
+            cloudMapProps.addressS = TextureProperties::Wrap;
+            cloudMapProps.addressT = TextureProperties::Clamp;
+
+            QString cloudMapName = cloudMapVar.toString();
+            TextureMap* cloudTex = m_textureLoader->loadTexture(cloudMapName.toUtf8().data(), cloudMapProps);
             world->setCloudMap(cloudTex);
-            world->setCloudAltitude(6.0f);
         }
+        else if (cloudMapVar.type() == QVariant::Map)
+        {
+            TiledMap* tiledMap = loadTiledMap(cloudMapVar.toMap(), m_textureLoader.ptr());
+            if (tiledMap)
+            {
+#ifdef VESTA_OGLES2
+                // TODO: Enable support in desktop version
+                world->setCloudMap(tiledMap);
+#endif
+            }
+        }
+
+        world->setCloudAltitude(6.0f);
     }
 
     QVariant atmosphereVar = map.value("atmosphere");

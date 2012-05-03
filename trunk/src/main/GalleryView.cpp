@@ -20,6 +20,7 @@
 #include <vesta/VertexSpec.h>
 #include <vesta/Units.h>
 #include <vesta/PlanarProjection.h>
+#include <vesta/glhelp/GLShaderProgram.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <cmath>
@@ -42,13 +43,15 @@ GalleryView::GalleryView() :
     m_opacity(0.0f),
     m_rows(4),
     m_columns(10),
+    m_scale(1.0f),
     m_cameraFov(float(toRadians(45.0))),
     m_galleryRadius(50.0f),
     m_galleryAngle(float(toRadians(60.0f))),
     m_galleryHeightScale(1.3f),
     m_tileSpacing(0.1f),
     m_selectedTileIndex(-1),
-    m_hoverTileIndex(-1)
+    m_hoverTileIndex(-1),
+    m_initialized(false)
 {
 }
 
@@ -156,6 +159,16 @@ drawRoundRectangle(float width, float height, float radius, float opacity)
     }
 
     unsigned int stride = sizeof(vertices[0]);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, vertices[0].position.data());
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, vertices[0].texCoord.data());
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, indices);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+
+    /*
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, stride, reinterpret_cast<const char*>(vertices));
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -174,6 +187,7 @@ drawRoundRectangle(float width, float height, float radius, float opacity)
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    */
 }
 
 
@@ -190,7 +204,6 @@ static float chordLength(float theta)
 {
     return 2.0f * sin(theta * 0.5f);
 }
-
 
 Eigen::Vector3f
 GalleryView::tilePosition(const GalleryTile& tile)
@@ -209,11 +222,12 @@ GalleryView::tilePosition(const GalleryTile& tile)
 void
 GalleryView::renderTile(const Viewport& viewport,
                         const Matrix4f& projectionMat,
+                        const Matrix4f& viewMat,
                         const GalleryTile& tile,
                         bool isSelected)
 {
     const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
-    const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
+    const float centerOffset = (1.0f / m_scale) * (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
 
     const float tileFraction = 1.0f / (1.0f + m_tileSpacing);
     const float tileScale = 0.5f * tileFraction * m_galleryRadius * chordLength(m_galleryAngle / m_columns);
@@ -236,20 +250,29 @@ GalleryView::renderTile(const Viewport& viewport,
 
     Vector3f tilePos = tilePosition(tile);
 
-    glPushMatrix();
+    /*
     glTranslatef(tilePos.x(), tilePos.y(), tilePos.z());
     glRotatef(-(toDegrees(theta) + 90.0f), 0.0f, 1.0f, 0.0f);
     glScalef(scaleFactor, scaleFactor, scaleFactor);
+    */
+    Transform3f modelTransform = Translation3f(tilePos) * AngleAxisf(-(theta + PI / 2.0f), Vector3f::UnitY()) * Scaling3f(scaleFactor);
+    Matrix4f mv = viewMat * modelTransform.matrix();
+    Matrix4f mvp = projectionMat * mv;
+
+    m_tileShader->bind();
+    m_tileShader->setSampler("baseTex", 0);
+    m_tileShader->setConstant("mvp", mvp);
+    m_tileShader->setConstant("color", Vector4f(1.0f, 1.0f, 1.0f, alpha));
 
     if (tile.texture.isValid() && tile.texture->makeResident())
     {
         glBindTexture(GL_TEXTURE_2D, tile.texture->id());
-        glColor4f(1.0f, 1.0f, 1.0f, alpha);
         drawRoundRectangle(2.0f, 2.0f, 0.3f, alpha);
     }
 
-    glPopMatrix();
+    glUseProgram(0);
 
+#ifndef VESTA_OGLES2
     if (tile.hover > 0.0f)
     {
         Transform3f projectionXform(projectionMat);
@@ -260,6 +283,7 @@ GalleryView::renderTile(const Viewport& viewport,
         Vector2f screenPos((projPosition.x() * 0.5f + 0.5f) * viewport.width(),
                            (projPosition.y() * 0.5f + 0.5f) * viewport.height());
 
+#if 0
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         glLoadIdentity();
@@ -268,6 +292,15 @@ GalleryView::renderTile(const Viewport& viewport,
         glPushMatrix();
         glLoadIdentity();
         glTranslatef(0.125f, 0.125f, 0);
+#endif
+        Matrix4f textProjectionMat = PlanarProjection::CreateOrthographic2D(0.0f, viewport.width(), 0.0f, viewport.height()).matrix();
+        Matrix4f modelViewMat = Transform3f(Translation3f(Vector3f(0.125f, 0.125f, 0.0f))).matrix();
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadMatrixf(textProjectionMat.data());
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadMatrixf(modelViewMat.data());
 
         if (m_font.isValid())
         {
@@ -281,14 +314,27 @@ GalleryView::renderTile(const Viewport& viewport,
         glPopMatrix();
         glMatrixMode(GL_MODELVIEW);
     }
+#endif
 }
 
 
 void
 GalleryView::render(const Viewport& viewport)
 {
+    if (!m_initialized)
+    {
+        m_initialized = true;
+        initGL();
+    }
+
+    if (m_tileShader.isNull())
+    {
+        // Shader creation failed; nothing we can do
+        return;
+    }
+
     const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
-    const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
+    const float centerOffset = (1.0f / m_scale) * (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
 
     if (m_opacity <= 0.0f)
     {
@@ -296,16 +342,11 @@ GalleryView::render(const Viewport& viewport)
     }
 
     PlanarProjection projectionMat = PlanarProjection::CreatePerspective(m_cameraFov, viewport.aspectRatio(), 1.0f, 1000.0f);
+    Matrix4f viewMat = Transform3f(Translation3f(0.0f, 0.0f, -centerOffset)).matrix();
 
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadMatrixf(projectionMat.matrix().data());
-    glMatrixMode(GL_MODELVIEW);
-
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -centerOffset);
-
+#ifndef VESTA_OGLES2
     glEnable(GL_TEXTURE_2D);
+#endif
 
     // First, draw all tiles except the selected one
     for (int tileIndex = 0; tileIndex < int(m_tiles.size()); ++tileIndex)
@@ -313,7 +354,7 @@ GalleryView::render(const Viewport& viewport)
         if (tileIndex != m_selectedTileIndex)
         {
             const GalleryTile& tile = m_tiles[tileIndex];
-            renderTile(viewport, projectionMat.matrix(), tile, false);
+            renderTile(viewport, projectionMat.matrix(), viewMat, tile, false);
         }
     }
 
@@ -322,14 +363,8 @@ GalleryView::render(const Viewport& viewport)
     // the solar system and drawing the gallery tiles.)
     if (m_selectedTileIndex >= 0 && m_selectedTileIndex < int(m_tiles.size()))
     {
-        renderTile(viewport, projectionMat.matrix(), m_tiles[m_selectedTileIndex], true);
+        renderTile(viewport, projectionMat.matrix(), viewMat, m_tiles[m_selectedTileIndex], true);
     }
-
-    glPopMatrix();
-
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
 }
 
 
@@ -462,7 +497,7 @@ GalleryView::pickTile(const Viewport& viewport, int x, int y)
     Vector3f direction = Vector3f(h * viewport.aspectRatio() * p.x(), h * p.y(), -1.0).normalized();
 
     const float viewPlaneWidth = 0.8f * m_galleryRadius * chordLength(m_galleryAngle);
-    const float centerOffset = (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
+    const float centerOffset = (1.0f / m_scale) * (viewPlaneWidth / 2.0f) / tan(m_cameraFov / 2.0f) - m_galleryRadius * cos(m_galleryAngle / 2.0f);
 
     const float tileFraction = 1.0f / (1.0f + m_tileSpacing);
     const float tileScale = 0.5f * tileFraction * m_galleryRadius * chordLength(m_galleryAngle / m_columns);
@@ -496,3 +531,76 @@ GalleryView::pickTile(const Viewport& viewport, int x, int y)
     return pickedTileIndex;
 }
 
+
+/** Allocate OpenGL resources required to draw tiles.
+ */
+void
+GalleryView::initGL()
+{
+    // Simple shader for drawing transformed, textured geometry.
+    const char* vertexShaderSource =
+#ifndef VESTA_OGLES2
+    "#define lowp\n"
+    "#define highp\n"
+#endif
+    "attribute vec4 position;\n"
+    "attribute vec2 texCoord;\n"
+    "uniform mat4 mvp;\n"
+    "uniform vec4 color;\n"
+    "varying lowp vec4 vertexColor;\n"
+    "varying highp vec2 v_texCoord;\n"
+    "void main()\n"
+    "{\n"
+    "    vertexColor = color;\n"
+    "    v_texCoord = texCoord;\n"
+    "    gl_Position = mvp * position;\n"
+    "}\n";
+
+    const char* fragmentShaderSource =
+#ifndef VESTA_OGLES2
+    "#define lowp\n"
+    "#define highp\n"
+#endif
+    "varying lowp vec4 vertexColor;\n"
+    "varying highp vec2 v_texCoord;\n"
+    "uniform sampler2D baseTex;\n"
+    "void main()\n"
+    "{\n"
+    "    gl_FragColor = vertexColor * texture2D(baseTex, v_texCoord);\n"
+    "}\n";
+
+    GLShader* vertexShader = new GLShader(GLShader::VertexStage);
+    if (!vertexShader->compile(vertexShaderSource))
+    {
+        std::cerr << "Error message(s):\n";
+        std::cerr << vertexShader->compileLog().c_str() << std::endl;
+        delete vertexShader;
+    }
+
+    GLShader* fragmentShader = new GLShader(GLShader::FragmentStage);
+    if (!fragmentShader->compile(fragmentShaderSource))
+    {
+        std::cerr << "Error message(s):\n";
+        std::cerr << fragmentShader->compileLog().c_str() << std::endl;
+        delete fragmentShader;
+    }
+
+    m_tileShader = new GLShaderProgram();
+    m_tileShader->addShader(vertexShader);
+    m_tileShader->addShader(fragmentShader);
+
+    // Bind vertex attributes
+    m_tileShader->bindAttribute("position", 0);
+    m_tileShader->bindAttribute("texCoord", 1);
+
+    m_tileShader->link();
+}
+
+
+/** Release OpenGL resources. */
+void
+GalleryView::finishGL()
+{
+    m_tileShader = NULL;
+    m_textShader = NULL;
+}

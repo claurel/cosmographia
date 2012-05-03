@@ -28,6 +28,7 @@
 namespace vesta
 {
     class PlanarProjection;
+    class GLShaderProgram;
 }
 
 class GalleryView
@@ -78,6 +79,22 @@ public:
     {
         m_font = font;
     }
+    
+    void setGridSize(unsigned int columns, unsigned int rows)
+    {
+        m_columns = columns;
+        m_rows = rows;
+    }
+
+    void setScale(float scale)
+    {
+        m_scale = scale;
+    }
+    
+    float opacity() const
+    {
+        return m_opacity;
+    }
 
 private:
     struct GalleryTile
@@ -97,9 +114,16 @@ private:
 
     vesta::PlanarProjection camera() const;
     Eigen::Vector3f tilePosition(const GalleryTile& tile);
-    void renderTile(const vesta::Viewport& viewport, const Eigen::Matrix4f& projectionMat, const GalleryTile& tile, bool isSelected);
+    void renderTile(const vesta::Viewport& viewport,
+                    const Eigen::Matrix4f& projectionMat,
+                    const Eigen::Matrix4f& viewMat,
+                    const GalleryTile& tile,
+                    bool isSelected);
 
     int pickTile(const vesta::Viewport& viewport, int x, int y);
+
+    void initGL();
+    void finishGL();
 
 private:
     std::vector<GalleryTile> m_tiles;
@@ -110,6 +134,7 @@ private:
     unsigned int m_rows;
     unsigned int m_columns;
 
+    float m_scale;
     float m_cameraFov;
     float m_galleryRadius;
     float m_galleryAngle;
@@ -120,6 +145,9 @@ private:
     int m_hoverTileIndex;
 
     vesta::counted_ptr<vesta::TextureFont> m_font;
+    vesta::counted_ptr<vesta::GLShaderProgram> m_tileShader;
+    vesta::counted_ptr<vesta::GLShaderProgram> m_textShader;
+    bool m_initialized;
 };
 
 #endif // _GALLERY_VIEW_H_

@@ -2475,6 +2475,37 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         world->setEmissive(emissiveVar.toBool());
     }
 
+    // Specular color and power (mainly used for ocean reflections)
+    QVariant specularColorVar = map.value("specularColor");
+    QVariant specularPowerVar = map.value("specularPower");
+    float specularPower = 0.0f;
+    Spectrum specularColor = Spectrum::Black();
+
+    if (specularPowerVar.isValid())
+    {
+        if (specularPowerVar.canConvert(QVariant::Double))
+        {
+            specularPower = specularPowerVar.toFloat();
+        }
+        else
+        {
+            errorMessage("Invalid specular power given for globe geometry.");
+            delete world;
+            return NULL;
+        }
+    }
+
+    if (specularColorVar.isValid())
+    {
+        specularColor = colorValue(specularColorVar, Spectrum(1.0f, 1.0f, 1.0f));
+    }
+
+    if (!(specularColor == Spectrum::Black()) && specularPower > 0.0f)
+    {
+        world->setSpecularReflectance(specularColor);
+        world->setSpecularPower(specularPower);
+    }
+
     QVariant cloudMapVar = map.value("cloudMap");
     if (cloudMapVar.isValid() && m_textureLoader.isValid())
     {

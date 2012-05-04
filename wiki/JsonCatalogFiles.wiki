@@ -112,6 +112,15 @@ The size of the mesh can be specified in two ways. If the _size_ property is pre
 
 == Globe ==
 
+ * radius
+ * radii - 3-vector; may be provided instead of radius for non-spherical bodies
+ * baseMap - texture (may be tiled)
+ * normalMap
+ * cloudMap - texture (may be tiled)
+ * specularPower - float
+ * specularColor - color
+ * emissive - boolean
+
 {{{
 "geometry" :
 {

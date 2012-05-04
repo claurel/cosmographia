@@ -2142,7 +2142,7 @@ loadTiledMap(const QVariantMap& map, PathRelativeTextureLoader* textureLoader)
         // Enforce some limits on tile size and level count
         levelCount = std::max(1, std::min(16, levelCount));
         tileSize = std::max(128, std::min(8192, tileSize));
-
+        
         return new WMSTiledMap(textureLoader, layer, tileSize, levelCount);
 #endif
     }
@@ -2267,6 +2267,10 @@ loadTiledMap(const QVariantMap& map, PathRelativeTextureLoader* textureLoader)
         // Enforce some limits on tile size and level count
         unsigned int levelCount = std::max(1u, std::min(16u, levelCountVar.toUInt()));
         unsigned int tileSize = std::max(128u, std::min(8192u, tileSizeVar.toUInt()));
+
+        // Adjust tile size to improve sharpness. Reporting a smaller tile size
+        // means that transitions will occur earlier
+        tileSize = (tileSize * 3) / 5;
 
         QString templateName = templateNameVar.toString();
         templateName = QString::fromUtf8(textureLoader->searchPath().c_str()) + QString("/") + templateName;

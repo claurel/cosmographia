@@ -222,7 +222,7 @@ LoadBinaryAstorbFile(const QString& fileName)
   * ascending node       (32-bit float, degrees)
   * arg. of periapsis    (32-bit float, degrees)
   * mean anomaly         (32-bit float, degrees)
-  * mean motion          (32-bit float, Julian date TT)
+  * mean motion          (32-bit float, degrees per Julian day)
   * epoch                (64-bit double, Julian date TT)
   */
 KeplerianSwarm*

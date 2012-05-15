@@ -484,6 +484,7 @@ The arcs property can be used to create bodies with complex trajectories with mu
 = Label Properties =
 
  * color - the color of the label (defaults to white)
+ * fadeSize - controls the distance at which the label is hidden
 
 Example:
 {{{
@@ -492,6 +493,8 @@ Example:
     "color" : "#ff0000"
 }
 }}}
+
+Cosmographia automatically hides some labels in order to avoid drawing too much clutter onscreen. For example, the labels for moons are not shown when the camera is positioned far away from the planet they orbit. The default fadeSize for an object is the approximate radius of a sphere that contains its trajectory. To delay fading, set fadeSize to a value larger than the objects mean distance to its central body.
 
 
 = Trajectory Plot Properties =

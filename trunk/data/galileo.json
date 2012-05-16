@@ -1,0 +1,90 @@
+{
+"version": "1.0",
+"name": "Galileo mission to Jupiter",
+
+"items" :
+[
+{
+    "name": "Galileo", 
+    "class": "spacecraft",
+
+    "label": {
+        "color": "#d0d0d0"
+    },
+
+    "trajectoryPlot": {
+        "fade": 0.5,
+        "duration": "1 y"
+    }, 
+
+    "startTime" : "1989-10-19 02:47:00",
+
+
+    "arcs" : [
+      {
+        "center": "Sun",
+        "trajectoryFrame": "EclipticJ2000", 
+        "trajectory" :
+        {
+          "type" : "InterpolatedStates",
+          "source" : "trajectories/galileo-cruise.xyzv"
+        },
+
+        "bodyFrame": {
+          "primaryAxis": "z", 
+          "secondaryAxis": "x", 
+          "type": "TwoVector", 
+          "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "Galileo"
+          }, 
+          "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "Galileo"
+          }
+        },
+
+        "endTime" : "1995-11-20 23:30:00"
+      },
+
+      {
+        "center": "Jupiter",
+        "trajectoryFrame": "EclipticJ2000", 
+        "trajectory" :
+        {
+          "type" : "InterpolatedStates",
+          "source" : "trajectories/galileo-orbit.xyzv"
+        },
+
+        "bodyFrame": {
+          "primaryAxis": "z", 
+          "secondaryAxis": "x", 
+          "type": "TwoVector", 
+          "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "Galileo"
+          }, 
+          "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "Galileo"
+          }
+        },
+
+        "endTime" : "2003-09-21 18:55:00"
+     }
+    ],
+
+    "geometry": {
+        "source": "models/galileo.cmod", 
+        "type": "Mesh", 
+        "size": 0.003
+    }
+}
+
+]
+}
+

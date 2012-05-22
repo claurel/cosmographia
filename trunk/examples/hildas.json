@@ -13,7 +13,7 @@
               "type" : "KeplerianSwarm",
               "format" : "binary",
               "source" : "hildas.dat",
-              "particleSize" : 3.0,
+              "particleSize" : 5.0,
               "color" : "#ff3311",
               "opacity" : 1.0
           }

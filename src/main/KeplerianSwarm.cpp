@@ -103,6 +103,7 @@ static const char* SwarmFragmentShaderSource =
 #else
 
 static const char* SwarmVertexShaderSource =
+"#version 120                                    \n"
 "uniform float time;              \n"
 "uniform float pointSize;         \n"
 "uniform vec4 color;              \n"
@@ -137,10 +138,13 @@ static const char* SwarmVertexShaderSource =
 ;
 
 static const char* SwarmFragmentShaderSource =
+"#version 120                                    \n"
 "varying vec4 pointColor;                        \n"
 "void main()                                     \n"
 "{                                               \n"
-"    gl_FragColor = pointColor;                  \n"
+"    vec2 v = gl_PointCoord - vec2(0.5, 0.5); \n"
+"    float opacity = 1.0 - dot(v, v) * 4.0; \n"
+"    gl_FragColor = vec4(pointColor.rgb, opacity * pointColor.a);\n"
 "}                                               \n"
 ;
 
@@ -157,7 +161,9 @@ KeplerianSwarm::KeplerianSwarm() :
     m_fadeSize(250.0f),
     m_shaderCompiled(false)
 {
+#ifndef VESTA_OGLES2
     setClippingPolicy(PreventClipping);
+#endif
 
     VertexAttribute posNormTexAttributes[] = {
         VertexAttribute(VertexAttribute::Position,     VertexAttribute::Float3),
@@ -247,9 +253,12 @@ KeplerianSwarm::render(RenderContext& rc, double clock) const
             m_swarmShader->setConstant("color", Vector4f(m_color.red(), m_color.green(), m_color.blue(), effectiveOpacity));
 #ifdef VESTA_OGLES2
             m_swarmShader->setConstant("vesta_ModelViewProjectionMatrix", (rc.projection() * rc.modelview()).matrix());                                                             
-#endif
-
             rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::Points, m_objects.size()));
+#else
+            glEnable(GL_POINT_SPRITE);
+            rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::Points, m_objects.size()));
+            glDisable(GL_POINT_SPRITE);
+#endif
             rc.unbindVertexBuffer();
 
             rc.disableCustomShader();

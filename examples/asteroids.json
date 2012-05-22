@@ -13,7 +13,7 @@
               "type" : "KeplerianSwarm",
               "format" : "astorb",
               "source" : "astorb_5000.dat",
-              "particleSize" : 2.0,
+              "particleSize" : 4.0,
               "color" : "#aa8855",
               "opacity" : 1.0
           }

@@ -13,7 +13,7 @@
               "type" : "KeplerianSwarm",
               "format" : "binary",
               "source" : "allasteroids.dat",
-              "particleSize" : 1.0,
+              "particleSize" : 2.0,
               "color" : "#aa8855",
               "opacity" : 0.5
           }

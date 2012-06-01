@@ -2761,6 +2761,26 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
         }
     }
 
+    float fadeSize = 50.0f;
+    QVariant fadeSizeVar = map.value("fadeSize");
+    if (fadeSizeVar.isValid())
+    {
+        if (fadeSizeVar.canConvert(QVariant::Double))
+        {
+            fadeSize = fadeSizeVar.toFloat();
+        }
+    }
+
+    float fullSizeDistance = 1.0e12f;
+    QVariant fullSizeDistanceVar = map.value("fullSizeDistance");
+    if (fullSizeDistanceVar.isValid())
+    {
+        if (fullSizeDistanceVar.canConvert(QVariant::Double))
+        {
+            fullSizeDistance = fullSizeDistanceVar.toFloat();
+        }
+    }
+
     Spectrum color = colorValue(colorVar, Spectrum::White());
     float opacity = float(doubleValue(opacityVar, 1.0));
 
@@ -2788,6 +2808,8 @@ UniverseLoader::loadSwarmGeometry(const QVariantMap& map)
         swarm->setColor(color);
         swarm->setOpacity(opacity);
         swarm->setPointSize(particleSize);
+        swarm->setFadeSize(fadeSize);
+        //swarm->setFullSizeDistance(fullSizeDistance);
     }
 
     return swarm;
@@ -4042,7 +4064,9 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                                  UniverseCatalog* catalog,
                                  unsigned int requireDepth)
 {
+#ifdef DEBUG
     qDebug() << "Loading catalog " << contents["name"].toString();
+#endif
     m_currentBodyName = "";
 
     QStringList bodyNames;

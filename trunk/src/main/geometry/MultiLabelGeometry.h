@@ -40,6 +40,11 @@ public:
 
     virtual float apparentSize() const;
 
+    unsigned int labelCount() const
+    {
+        return m_labels.size();
+    }
+
     vesta::LabelGeometry* label(unsigned int index) const;
     double startTime(unsigned int index) const;
     void addLabel(double startTime, vesta::LabelGeometry* label);

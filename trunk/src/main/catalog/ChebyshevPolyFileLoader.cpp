@@ -48,7 +48,7 @@ LoadChebyshevPolyFile(const QString& fileName)
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "Unable to open Chebyshev polynomialy trajectory file " << fileName;
+        qDebug() << "Unable to open Chebyshev polynomial trajectory file " << fileName;
         return NULL;
     }
 
@@ -79,10 +79,12 @@ LoadChebyshevPolyFile(const QString& fileName)
         return NULL;
     }
 
+#if 0
     qDebug() << "Chebyshev file " << fileName << ": "
              << recordCount << " records, "
              << " degree " << degree
              << ", interval " << intervalLength / 86400.0 << " days";
+#endif
 
     unsigned int recordSize = 3 * (degree + 1);
     unsigned int coeffCount = recordSize * recordCount;

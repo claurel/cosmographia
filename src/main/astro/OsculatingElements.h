@@ -24,4 +24,7 @@
 vesta::OrbitalElements
 CalculateOsculatingElements(const vesta::StateVector& state, double gm, double epoch);
 
+vesta::StateVector
+ElementsToStateVector(const vesta::OrbitalElements& el, double t);
+
 #endif // _ASTRO_OSCULATING_ELEMENTS_H_

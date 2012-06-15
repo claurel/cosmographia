@@ -95,6 +95,27 @@ CalculateOsculatingElements(const StateVector& state, double gm, double epoch)
 }
 
 
+StateVector
+ElementsToStateVector(const OrbitalElements& el, double t)
+{
+    double e = el.eccentricity;
+    double M = el.meanAnomalyAtEpoch + el.meanMotion * (t - el.epoch);
+    double E = OrbitalElements::eccentricAnomaly(e, M);
+    double sinE = sin(E);
+    double cosE = cos(E);
+    double w = sqrt(1.0 - e * e);
+
+    double semiMajorAxis = el.periapsisDistance / (1.0 - e);
+    Vector3d r(semiMajorAxis * (cosE - e), semiMajorAxis * w * sinE, 0.0);
+
+    double edot = el.meanMotion / (1 - e * cosE);
+    Vector3d v(-semiMajorAxis * sinE * edot, semiMajorAxis * w * cosE * edot, 0.0);
+
+    Quaterniond q(OrbitalElements::orbitOrientation(el.inclination, el.longitudeOfAscendingNode, el.argumentOfPeriapsis));
+    return StateVector(q * r, q * v);
+}
+
+
 #if UNIT_TEST
 void TestOsculatingElements()
 {

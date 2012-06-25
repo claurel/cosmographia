@@ -81,6 +81,8 @@ ChebyshevPolyTrajectory::~ChebyshevPolyTrajectory()
 StateVector
 ChebyshevPolyTrajectory::state(double tdbSec) const
 {
+    tdbSec = max(startTime(), min(endTime(), tdbSec));
+
     int granuleIndex = int((tdbSec - m_startTime) / m_granuleLength);
     double granuleStartTime = m_startTime + m_granuleLength * granuleIndex;
 

@@ -1,5 +1,5 @@
 /*
- * $Revision: 595 $ $Date: 2011-03-30 16:35:39 -0700 (Wed, 30 Mar 2011) $
+ * $Revision: 676 $ $Date: 2012-05-22 17:48:11 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -15,8 +15,43 @@
 using namespace vesta;
 using namespace std;
 
+// Print information about which shaders are created by the generator
+#define DUMP_SHADER_USAGE 0
+
+// Print the source of each shader generated
 #define DUMP_SHADER_SOURCE 0
 
+// Desktop system generally have enough GPU power to permit turning
+// on fragment lighting all the time. On mobile GPUs, favor speed
+// by using vertex lighting when possible.
+#ifdef VESTA_OGLES2
+#define ALLOW_VERTEX_LIT_SHADERS 1
+#else
+#define ALLOW_VERTEX_LIT_SHADERS 0
+#endif
+
+#ifdef VESTA_OGLES2
+const char* ShaderBuilder::PositionAttribute  = "vesta_Position";
+const char* ShaderBuilder::NormalAttribute    = "vesta_Normal";
+const char* ShaderBuilder::ColorAttribute     = "vesta_Color";
+const char* ShaderBuilder::TexCoordAttribute  = "vesta_TexCoord0";
+const char* ShaderBuilder::TangentAttribute   = "vesta_Tangent";
+
+static const char* HighPrec   = "highp";
+static const char* MediumPrec = "mediump";
+static const char* LowPrec    = "lowp";
+
+#else
+const char* ShaderBuilder::PositionAttribute  = "gl_Vertex";
+const char* ShaderBuilder::NormalAttribute    = "gl_Normal";
+const char* ShaderBuilder::ColorAttribute     = "gl_Color";
+const char* ShaderBuilder::TexCoordAttribute  = "gl_MultiTexCoord0";
+const char* ShaderBuilder::TangentAttribute   = "vesta_Tangent";
+
+static const char* HighPrec   = "";
+static const char* MediumPrec = "";
+static const char* LowPrec    = "";
+#endif
 
 ShaderBuilder ShaderBuilder::s_GLSLBuilder;
 
@@ -115,27 +150,41 @@ static void declareShadowSamplers(ostream& out, const ShaderInfo& shaderInfo)
     }
 }
 
-static void declareVarying(ostream& vertexOut, ostream& fragOut, const char* type, const char* name)
+static void declareVarying(ostream& vertexOut, ostream& fragOut, const char* type, const char* name, const char* precision = HighPrec)
 {
-    vertexOut << "varying " << type << " " << name << ";" << endl;
-    fragOut   << "varying " << type << " " << name << ";" << endl;
+    vertexOut << "varying " << precision << " " << type << " " << name << ";" << endl;
+    fragOut   << "varying " << precision << " " << type << " " << name << ";" << endl;
 }
 
-static void declareVaryingArray(ostream& vertexOut, ostream& fragOut, const char* type, const char* name, unsigned int count)
+static void declareVaryingArray(ostream& vertexOut, ostream& fragOut, const char* type, const char* name, unsigned int count, const char* precision = HighPrec)
 {
-    vertexOut << "varying " << type << " " << name << "[" << count << "];" << endl;
-    fragOut   << "varying " << type << " " << name << "[" << count << "];" << endl;
+    vertexOut << "varying " << precision << " " << type << " " << name << "[" << count << "];" << endl;
+    fragOut   << "varying " << precision << " " << type << " " << name << "[" << count << "];" << endl;
 }
 
-static void declareUniform(ostream& out, const char* type, const char* name)
+static void declareUniform(ostream& out, const char* type, const char* name, const char* precision = HighPrec)
 {
-    out << "uniform " << type << " " << name << ";" << endl;
+    out << "uniform " << precision << " " << type << " " << name << ";" << endl;
 }
 
-static void declareUniformArray(ostream& out, const char* type, const char* name, unsigned int count)
+static void declareUniformArray(ostream& out, const char* type, const char* name, unsigned int count, const char* precision = HighPrec)
 {
-    out << "uniform " << type << " " << name << "[" << count << "];" << endl;
+    out << "uniform " << precision << " " << type << " " << name << "[" << count << "];" << endl;
 }
+
+static void declareAttribute(ostream& out, const char* type, const char* name)
+{
+    out << "attribute " << type << " " << name << ";" << endl;
+}
+
+
+static void declareTransformations(ostream& out)
+{
+#ifdef VESTA_OGLES2
+    declareUniform(out, "mat4", "vesta_ModelViewProjectionMatrix");
+#endif
+}
+
 
 static void declarePCFShadowFunc(ostream& out)
 {
@@ -188,8 +237,14 @@ static void declareRingShadowFunc(ostream& out)
     out << "float ringShadow(vec4 shadowCoord, vec2 ringRadii)" << endl;
     out << "{" << endl;
     out << "    float x = length(shadowCoord.xy);" << endl;
+#ifdef VESTA_OGLES2
+    out << "    x = (x - ringRadii.x) * ringRadii.y;" << endl;
+    out << "    float m = 1.0 - step(0.5, abs(x - 0.5));" << endl;
+    out << "    return shadowCoord.z < 0.0 ? 1.0 : 1.0 - (texture2D(ringShadowTex, vec2(x, 0.0)).a * m);" << endl;
+#else
     out << "    x = (x - ringRadii.x) * ringRadii.y;" << endl;
     out << "    return shadowCoord.z < 0.0 ? 1.0 : 1.0 - texture2D(ringShadowTex, vec2(x, 0.0)).a;" << endl;
+#endif
     out << "}" << endl;
     out << endl;
 }
@@ -413,17 +468,36 @@ static void declareHelperFunctions(ostream& fragment, const ShaderInfo& shaderIn
 
 static void generateUnlitShader(ostream& vertex, ostream& fragment, const ShaderInfo& shaderInfo)
 {
+    declareTransformations(vertex);
+    // Declare attributes
+#ifdef VESTA_OGLES2
+    declareAttribute(vertex, "vec4", ShaderBuilder::PositionAttribute);
+    if (shaderInfo.hasVertexColors() != 0)
+    {
+        declareAttribute(vertex, "vec4", ShaderBuilder::ColorAttribute);
+    }
+    if (shaderInfo.hasTextureCoord())
+    {
+        declareAttribute(vertex, "vec2", ShaderBuilder::TexCoordAttribute);
+    }
+#endif
+
     vertex << "void main()" << endl;
     vertex << "{" << endl;
     if (shaderInfo.hasTextureCoord())
     {
-        vertex << "    texCoord = gl_MultiTexCoord0.xy;" << endl;
+        vertex << "    texCoord = " << ShaderBuilder::TexCoordAttribute << ".xy;" << endl;
     }
     if (shaderInfo.hasVertexColors() != 0)
     {
-        vertex << "    vertexColor = gl_Color;" << endl;
+        vertex << "    vertexColor = " << ShaderBuilder::ColorAttribute << ";" << endl;
     }
+
+#ifdef VESTA_OGLES2
+    vertex << "    gl_Position = vesta_ModelViewProjectionMatrix * " << ShaderBuilder::PositionAttribute << ";" << endl;
+#else
     vertex << "    gl_Position = ftransform();" << endl;
+#endif
     vertex << "}" << endl;
 
     declareSamplers(fragment, shaderInfo.textures() & ShaderInfo::DiffuseTexture);
@@ -473,8 +547,10 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
 
     bool usesPosition = isViewDependent || hasLocalLightSources;
 
+    declareTransformations(vertex);
+
     // Interpolated variables
-    declareVarying(vertex, fragment, "vec3", "normal");   // surface normal
+    declareVarying(vertex, fragment, "vec3", "normal", MediumPrec);   // surface normal
     if (usesPosition)
     {
         declareVarying(vertex, fragment, "vec3", "position"); // position in local space
@@ -483,17 +559,27 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
             fragment << "vec3 nposition = normalize(position);" << endl;
         }
     }
+
+    // Declare attributes
+#ifdef VESTA_OGLES2
+    declareAttribute(vertex, "vec4", ShaderBuilder::PositionAttribute);
+    declareAttribute(vertex, "vec3", ShaderBuilder::NormalAttribute);
+    if (shaderInfo.hasTextureCoord())
+    {
+        declareAttribute(vertex, "vec2", ShaderBuilder::TexCoordAttribute);
+    }
+#endif
     if (hasTangents)
     {
-        vertex << "attribute vec3 vtxTangent;" << endl;
-        declareVarying(vertex, fragment, "vec3", "tangent");   // surface tangent
+        declareAttribute(vertex, "vec3", ShaderBuilder::TangentAttribute);
+        declareVarying(vertex, fragment, "vec3", "tangent", MediumPrec);   // surface tangent
     }
 
     // Fragment shader constants
     declareSamplers(fragment, shaderInfo.textures());
-    declareUniform(fragment, "vec3", "color");
-    declareUniform(fragment, "float", "opacity");
-    declareUniform(fragment, "vec3", "ambientLight");
+    declareUniform(fragment, "vec3", "color", MediumPrec);
+    declareUniform(fragment, "float", "opacity", MediumPrec);
+    declareUniform(fragment, "vec3", "ambientLight", MediumPrec);
 
     if (shaderInfo.hasShadows() || shaderInfo.hasOmniShadows() || shaderInfo.hasRingShadows())
     {
@@ -572,7 +658,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     vertex << "{" << endl;
     if (shaderInfo.hasTextureCoord())
     {
-        vertex << "    texCoord = gl_MultiTexCoord0.xy;" << endl;
+        vertex << "    texCoord = " << ShaderBuilder::TexCoordAttribute << ".xy;" << endl;
     }
     if (shaderInfo.hasVertexColors() != 0)
     {
@@ -580,13 +666,13 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     }
     if (hasTangents)
     {
-        vertex << "    tangent = vtxTangent;" << endl;
+        vertex << "    tangent = " << ShaderBuilder::TangentAttribute << ";" << endl;
     }
-    vertex << "    normal = gl_Normal;" << endl;
+    vertex << "    normal = " << ShaderBuilder::NormalAttribute << ";" << endl;
     if (usesPosition)
     {
         // Note that this is the model space position
-        vertex << "    position = gl_Vertex.xyz;" << endl;
+        vertex << "    position = " << ShaderBuilder::PositionAttribute << ".xyz;" << endl;
     }
 
     // Output shadow coordinates for shaders that have shadows
@@ -594,7 +680,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     {
         for (unsigned int i = 0; i < shaderInfo.shadowCount(); ++i)
         {
-            vertex << "    shadowCoord[" << i << "] = shadowMatrix[" << i << "] * gl_Vertex;" << endl;
+            vertex << "    shadowCoord[" << i << "] = shadowMatrix[" << i << "] * " << ShaderBuilder::PositionAttribute << ";" << endl;
         }
     }
 
@@ -603,7 +689,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     {
         for (unsigned int i = 0; i < shaderInfo.eclipseShadowCount(); ++i)
         {
-            vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * gl_Vertex;" << endl;
+            vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * " << ShaderBuilder::PositionAttribute << ";" << endl;
         }
     }
 
@@ -613,13 +699,17 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         unsigned int ringShadowCount = 1;
         for (unsigned int i = 0; i < ringShadowCount; ++i)
         {
-            vertex << "    ringShadowCoord[" << i << "] = ringShadowMatrix[" << i << "] * gl_Vertex;" << endl;
+            vertex << "    ringShadowCoord[" << i << "] = ringShadowMatrix[" << i << "] * " << ShaderBuilder::PositionAttribute << ";" << endl;
         }
     }
 
 
     // Position is always required
+#ifdef VESTA_OGLES2
+    vertex << "    gl_Position = vesta_ModelViewProjectionMatrix * " << ShaderBuilder::PositionAttribute << ";" << endl;
+#else
     vertex << "    gl_Position = ftransform();" << endl;
+#endif
 
     vertex << "}" << endl;
 
@@ -748,7 +838,14 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
             // a normal map from being lit when they should be shadowed by
             // the geometry. If shadows are enabled, this is handled by the
             // shadow map.
+#ifndef VESTA_OGLES2
             fragment << "        float shadow = clamp(dot(Ngeom, " << lightDirection << ") * 8.0, 0.0, 1.0);\n";
+#else
+            // The iOS shader compiler breaks when the line above is used. This workaround disables
+            // self-shadowing.
+            // TODO: Come up with an expression for self shadowing that doesn't break the compiler
+            fragment << "        float shadow = 1.0;\n";
+#endif
         }
         else
         {
@@ -882,6 +979,18 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
 // used only for rendering planetary rings.
 static void generateParticulateShader(ostream& vertex, ostream& fragment, const ShaderInfo& shaderInfo)
 {
+    // Declare attributes
+#ifdef VESTA_OGLES2
+    declareAttribute(vertex, "vec4", ShaderBuilder::PositionAttribute);
+    declareAttribute(vertex, "vec3", ShaderBuilder::NormalAttribute);
+    if (shaderInfo.hasTextureCoord())
+    {
+        declareAttribute(vertex, "vec2", ShaderBuilder::TexCoordAttribute);
+    }
+#endif
+
+    declareTransformations(vertex);
+
     // Interpolated variables
     declareVarying(vertex, fragment, "vec3", "position"); // position in local space
 
@@ -935,7 +1044,7 @@ static void generateParticulateShader(ostream& vertex, ostream& fragment, const 
     vertex << "{" << endl;
     if (shaderInfo.hasTextureCoord())
     {
-        vertex << "    texCoord = gl_MultiTexCoord0.xy;" << endl;
+        vertex << "    texCoord = " << ShaderBuilder::TexCoordAttribute << ".xy;" << endl;
     }
     if (shaderInfo.hasVertexColors() != 0)
     {
@@ -943,14 +1052,14 @@ static void generateParticulateShader(ostream& vertex, ostream& fragment, const 
     }
 
     // Note that this is the model space position
-    vertex << "    position = gl_Vertex.xyz;" << endl;
+    vertex << "    position = " << ShaderBuilder::PositionAttribute << ".xyz;" << endl;
 
     // Output shadow coordinates for shaders that have shadows
     if (shaderInfo.hasShadows())
     {
         for (unsigned int i = 0; i < shaderInfo.shadowCount(); ++i)
         {
-            vertex << "    shadowCoord[" << i << "] = shadowMatrix[" << i << "] * gl_Vertex;" << endl;
+            vertex << "    shadowCoord[" << i << "] = shadowMatrix[" << i << "] * " << ShaderBuilder::PositionAttribute << ";" << endl;
         }
     }
 
@@ -959,12 +1068,16 @@ static void generateParticulateShader(ostream& vertex, ostream& fragment, const 
     {
         for (unsigned int i = 0; i < shaderInfo.eclipseShadowCount(); ++i)
         {
-            vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * gl_Vertex;" << endl;
+            vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * " << ShaderBuilder::PositionAttribute << ";" << endl;
         }
     }
 
     // Position is always required
+#ifdef VESTA_OGLES2
+    vertex << "    gl_Position = vesta_ModelViewProjectionMatrix * " << ShaderBuilder::PositionAttribute << ";" << endl;
+#else
     vertex << "    gl_Position = ftransform();" << endl;
+#endif
 
     vertex << "}" << endl;
 
@@ -1082,6 +1195,315 @@ static void generateParticulateShader(ostream& vertex, ostream& fragment, const 
 }
 
 
+static bool LoadHandTunedShader(ostringstream& vertex, ostringstream& fragment, const ShaderInfo& info)
+{
+    if (info.directionalLightCount() != 1 || info.pointLightCount() != 0)
+    {
+        // All of our hand-tuned shaders are for a single directional light source:
+        //   * Unlit shaders are handle pretty well already by the shader generator
+        //   * Some common multi-light shaders could be optimized, but they're not
+        //     as common as the single light case
+        return false;
+    }
+    
+    if (info.hasVertexColors())
+    {
+        // No hand-tuned vertex color shaders
+        return false;
+    }
+    
+    bool hasAnyShadows = info.hasEclipseShadows() || info.hasRingShadows() || info.hasShadows();
+    
+    if (info.reflectanceModel() == ShaderInfo::Lambert)
+    {
+        if (!hasAnyShadows && info.textures() == ShaderInfo::DiffuseTexture)
+        {
+            vertex << "// *** Hand-tuned vertex shader ***\n";
+            fragment << "// *** Hand-tuned fragment shader ***\n";
+            
+            declareTransformations(vertex);
+            // Declare attributes
+#ifdef VESTA_OGLES2
+            declareAttribute(vertex, "vec4", ShaderBuilder::PositionAttribute);
+            declareAttribute(vertex, "vec3", ShaderBuilder::NormalAttribute);
+            if (info.hasVertexColors() != 0)
+            {
+                declareAttribute(vertex, "vec4", ShaderBuilder::ColorAttribute);
+            }
+            if (info.hasTextureCoord())
+            {
+                declareAttribute(vertex, "vec2", ShaderBuilder::TexCoordAttribute);
+            }
+#endif
+            
+            // Vertex shader lighting properties
+            declareUniformArray(vertex, "vec3", "lightPosition", info.totalLightCount());
+            declareUniformArray(vertex, "vec3", "lightColor", info.totalLightCount());
+            declareUniform(vertex, "vec3", "ambientLight");
+            
+            // Vertex shader material properties
+            declareUniform(vertex, "vec3", "color");
+            declareUniform(vertex, "float", "opacity");
+            
+            declareVarying(vertex, fragment, "vec4", "diffuseColor", LowPrec);
+            declareSamplers(fragment, info.textures() & ShaderInfo::DiffuseTexture);
+            
+            vertex <<
+            "void main()\n"
+            "{\n"
+            "    vec3 lightColorSum = max(0.0, dot(vesta_Normal, lightPosition[0])) * lightColor[0] + ambientLight;\n"
+            "    diffuseColor.rgb = lightColorSum * color;\n"
+            "    diffuseColor.a = opacity;\n"
+            "    texCoord = vesta_TexCoord0.xy;\n"
+            "    gl_Position = vesta_ModelViewProjectionMatrix * vesta_Position;\n"
+            "}\n";
+            fragment <<
+            "void main()\n"
+            "{\n"
+            "    gl_FragColor = diffuseColor * texture2D(diffuseTex, texCoord);\n"
+            "}\n";
+            
+            return true;
+        }
+    }
+    
+    // Didn't find a hand-tuned shader
+    return false;
+}
+
+
+static bool LoadVertexLitShader(ostringstream& vertex, ostringstream& fragment, const ShaderInfo& info)
+{
+    if (info.directionalLightCount() != 1 || info.pointLightCount() != 0)
+    {
+        // All of our vertex shaders are for a single directional light source:
+        //   * Unlit shaders are handle pretty well already by the shader generator
+        //   * Some common multi-light shaders could be optimized, but they're not
+        //     as common as the single light case
+        return false;
+    }
+    
+    if (info.hasVertexColors())
+    {
+        // No hand-tuned vertex color shaders
+        return false;
+    }
+    
+    if (info.textures() != ShaderInfo::DiffuseTexture)
+    {
+        // Just diffuse texture supported right now
+        return false;
+    }
+    
+    if (info.reflectanceModel() != ShaderInfo::Lambert &&
+        info.reflectanceModel() != ShaderInfo::BlinnPhong)
+    {
+        return false;
+    }
+    
+    bool isViewDependent = info.hasScattering() || info.reflectanceModel() == ShaderInfo::BlinnPhong;
+    bool hasAnyShadows = info.hasEclipseShadows() || info.hasRingShadows() || info.hasShadows();
+    
+    if (info.hasShadows())
+    {
+        return false;
+    }
+    
+    // This is a temporary workaround so that fragment lighting is used for Blinn-Phong
+    // except for planets. With planets, the geometry is tessellated enough that artifacts
+    // from linear interpolation of specular lighting are minimal. Wither general geometry,
+    // we'll prefer the quality advantage of fragmen lighting.
+    if (info.reflectanceModel() == ShaderInfo::BlinnPhong && !info.hasSpecularMaskInDiffuseAlpha())
+    {
+        return false;
+    }
+    
+    vertex <<   "// *** Vertex lit vertex shader ***\n";
+    fragment << "// *** Vertex lit fragment shader ***\n";
+    
+    declareTransformations(vertex);
+    
+    // Declare attributes
+#ifdef VESTA_OGLES2
+    declareAttribute(vertex, "vec4", ShaderBuilder::PositionAttribute);
+    declareAttribute(vertex, "vec3", ShaderBuilder::NormalAttribute);
+    if (info.hasVertexColors() != 0)
+    {
+        declareAttribute(vertex, "vec4", ShaderBuilder::ColorAttribute);
+    }
+    if (info.hasTextureCoord())
+    {
+        declareAttribute(vertex, "vec2", ShaderBuilder::TexCoordAttribute);
+    }
+#endif
+
+    // Vertex shader lighting properties
+    declareUniformArray(vertex, "vec3", "lightPosition", info.totalLightCount());
+    declareUniformArray(vertex, "vec3", "lightColor", info.totalLightCount());
+    
+    if (hasAnyShadows)
+    {
+        declareUniform(fragment, "vec3", "ambientLight");
+    }
+    else
+    {
+        declareUniform(vertex, "vec3", "ambientLight");
+    }
+    
+    if (isViewDependent)
+    {
+        declareUniform(vertex, "vec3", "eyePosition");
+    }
+    
+    // Universal material properties
+    declareUniform(vertex, "vec3", "color");
+    declareUniform(fragment, "float", "opacity");
+
+    if (info.reflectanceModel() == ShaderInfo::BlinnPhong)
+    {
+        // Blinn-phong model contants
+        declareUniform(vertex, "vec3", "specularColor");
+        declareUniform(vertex, "float", "phongExponent");
+    }
+
+    declareVarying(vertex, fragment, "vec4", "v_diffuseColor", LowPrec);
+    if (info.reflectanceModel() == ShaderInfo::BlinnPhong)
+    {
+        declareVarying(vertex, fragment, "vec3", "v_specularColor", LowPrec);        
+    }
+    
+    declareSamplers(fragment, info.textures());
+    declareShadowSamplers(fragment, info);
+    
+    // Shadows
+    if (info.hasEclipseShadows())
+    {
+        unsigned int count = info.eclipseShadowCount();
+        declareUniformArray(vertex, "mat4", "eclipseShadowMatrix", count);
+        declareUniformArray(fragment, "vec2", "eclipseShadowSlopes", count);
+        declareVaryingArray(vertex, fragment, "vec4", "eclipseShadowCoord", count);
+    }
+        
+    if (info.hasRingShadows())
+    {
+        unsigned int count = 1;
+        declareUniformArray(vertex, "mat4", "ringShadowMatrix", count);
+        declareUniformArray(fragment, "vec2", "ringShadowRadii", count);
+        // Ring shadow texture
+        declareVaryingArray(vertex, fragment, "vec4", "ringShadowCoord", count);
+    }
+
+    declareHelperFunctions(fragment, info);
+            
+    vertex << "void main()\n";
+    vertex << "{\n";
+    
+    if (isViewDependent)
+    {
+        vertex << "    vec3 V = normalize(eyePosition - vesta_Position.xyz);\n";
+    }
+    
+    string diffuseTerm = "max(0.0, dot(vesta_Normal, lightPosition[0])) * lightColor[0]";
+    if (hasAnyShadows)
+    {
+        // With shadows, the ambient term needs to be handled in the fragment shader
+        vertex << "    vec3 lightColorSum = " << diffuseTerm << ";\n";        
+    }
+    else 
+    {
+        vertex << "    vec3 lightColorSum = " << diffuseTerm << " + ambientLight;\n";        
+    }
+    
+    vertex << "    v_diffuseColor.rgb = lightColorSum * color;\n";
+    vertex << "    v_diffuseColor.a = 1.0;\n";
+    
+    if (info.reflectanceModel() == ShaderInfo::BlinnPhong)
+    {
+        vertex << "    vec3 H = normalize(lightPosition[0] + V);\n";
+        vertex << "    float s = pow(max(0.0, dot(H, vesta_Normal)), phongExponent);\n";
+        vertex << "    v_specularColor = s * specularColor * lightColor[0];\n";        
+    }
+    
+    // Output shadow coordinates for shaders that have eclipse shadows
+    if (info.hasEclipseShadows())
+    {
+        for (unsigned int i = 0; i < info.eclipseShadowCount(); ++i)
+        {
+            vertex << "    eclipseShadowCoord[" << i << "] = eclipseShadowMatrix[" << i << "] * vesta_Position;" << endl;
+        }
+    }
+
+    // Output shadow coordinates for shaders that have eclipse shadows
+    if (info.hasRingShadows())
+    {
+        unsigned int ringShadowCount = 1;
+        for (unsigned int i = 0; i < ringShadowCount; ++i)
+        {
+            vertex << "    ringShadowCoord[" << i << "] = ringShadowMatrix[" << i << "] * vesta_Position;" << endl;
+        }
+    }
+    
+    vertex << "    texCoord = vesta_TexCoord0.xy;\n";
+    vertex << "    gl_Position = vesta_ModelViewProjectionMatrix * vesta_Position;\n";
+    
+    vertex << "}\n";
+
+    fragment
+    << "void main()\n"
+    << "{\n";
+
+    // Handle shadows (if any)
+    if (hasAnyShadows)
+    {
+        fragment << "    mediump float shadow = 1.0;\n";
+    }
+    
+    for (unsigned int i = 0; i < info.eclipseShadowCount(); ++i)
+    {
+        fragment << "    shadow *= eclipseShadow(eclipseShadowCoord[" << i << "], eclipseShadowSlopes[" << i << "]);" << endl;
+    }
+
+    unsigned int ringShadowCount = info.hasRingShadows() ? 1 : 0;
+    for (unsigned int i = 0; i < ringShadowCount; ++i)
+    {
+        fragment << "        shadow *= ringShadow(ringShadowCoord[" << i << "], ringShadowRadii[" << i << "]);" << endl;
+    }
+
+    string specularColor = "v_specularColor";
+    if (info.hasSpecularMaskInDiffuseAlpha())
+    {
+        specularColor = "(texColor.a * v_specularColor)";
+    }
+    if (hasAnyShadows)
+    {
+        specularColor = specularColor + " * shadow";
+    }
+    
+    string diffuseColor = "v_diffuseColor.rgb";
+    if (hasAnyShadows)
+    {
+        diffuseColor = "(v_diffuseColor.rgb * shadow + ambientLight)";
+    }
+    
+    if (info.reflectanceModel() == ShaderInfo::Lambert)
+    {
+        fragment
+        << "    lowp vec4 texColor = texture2D(diffuseTex, texCoord);\n"
+        << "    gl_FragColor = texColor * vec4(" << diffuseColor << ", opacity);\n";
+    }
+    else
+    {
+        fragment
+        << "    lowp vec4 texColor = texture2D(diffuseTex, texCoord);\n"
+        << "    gl_FragColor = vec4(texColor.rgb * " << diffuseColor << " + " << specularColor << ", opacity);\n";
+    }         
+    
+    fragment << "}\n";
+
+    return true;
+}
+
+
 GLShaderProgram*
 ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
 {
@@ -1091,6 +1513,10 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
     // Version header (disabled for now)
     // fragment << "#version 120" << endl;
 
+#ifdef VESTA_OGLES2
+    fragment << "precision mediump float;" << endl;
+#endif
+
     if (shaderInfo.hasTextureCoord())
     {
         declareVarying(vertex, fragment, "vec2", "texCoord");
@@ -1098,23 +1524,32 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
 
     if (shaderInfo.hasVertexColors())
     {
-        declareVarying(vertex, fragment, "vec4", "vertexColor");
+        declareVarying(vertex, fragment, "vec4", "vertexColor", LowPrec);
     }
 
-    //if (shaderInfo.totalLightCount() == 0 || shaderInfo.reflectanceModel() == ShaderInfo::Emissive)
-    if (shaderInfo.reflectanceModel() == ShaderInfo::Emissive)
+    // Try loading a vertex lit shader first. If that fails, use the
+    // shader generator to produce a shader that does lighting at the
+    // fragment level. Some shaders--such as those involving a normal
+    // map--require fragment lighting.
+#if ALLOW_VERTEX_LIT_SHADERS
+    if (!LoadVertexLitShader(vertex, fragment, shaderInfo))
+#endif
     {
-        generateUnlitShader(vertex, fragment, shaderInfo);
-    }
-    else if (shaderInfo.reflectanceModel() == ShaderInfo::Particulate)
-    {
-        generateParticulateShader(vertex, fragment, shaderInfo);
-    }
-    else
-    {
-        generateBlinnPhongShader(vertex, fragment, shaderInfo);
+        if (shaderInfo.reflectanceModel() == ShaderInfo::Emissive)
+        {
+            generateUnlitShader(vertex, fragment, shaderInfo);
+        }
+        else if (shaderInfo.reflectanceModel() == ShaderInfo::Particulate)
+        {
+            generateParticulateShader(vertex, fragment, shaderInfo);
+        }
+        else
+        {
+            generateBlinnPhongShader(vertex, fragment, shaderInfo);
+        }
     }
 
+#if DUMP_SHADER_USAGE
     VESTA_LOG("Creating shader:  model: %u, textures 0x%x, lights: %u/%u, shadows: %u/%u/%u/%u, scattering: %d, fresnel: %d, vertexColors: %d",
               (int) shaderInfo.reflectanceModel(),
               shaderInfo.textures(),
@@ -1124,7 +1559,13 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
               shaderInfo.hasScattering() ? 1 : 0,
               shaderInfo.hasFresnelFalloff() ? 1 : 0,
               shaderInfo.hasVertexColors() ? 1 : 0);
+#endif
 
+#if DUMP_SHADER_SOURCE
+    VESTA_LOG("Vertex shader source:\n%s", vertex.str().c_str());
+    VESTA_LOG("Fragment shader source:\n%s", fragment.str().c_str());
+#endif
+    
     // Compile the vertex shader
     GLShader* vertexShader = new GLShader(GLShader::VertexStage);
     if (!vertexShader->compile(vertex.str()))
@@ -1156,20 +1597,32 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
         VESTA_LOG("Vertex shader compile messages:\n%s", fragmentShader->compileLog().c_str());
     }
 
-#if DUMP_SHADER_SOURCE
-    VESTA_LOG("Vertex shader source:\n%s", vertex.str().c_str());
-    VESTA_LOG("Fragment shader source:\n%s", fragment.str().c_str());
-#endif
-
     // Attach the vertex and fragment shaders
     GLShaderProgram* shaderProgram = new GLShaderProgram();
     shaderProgram->addShader(vertexShader);
     shaderProgram->addShader(fragmentShader);
 
     // Bind vertex attributes
+#ifdef VESTA_OGLES2
+    shaderProgram->bindAttribute(PositionAttribute, PositionAttributeLocation);
+    if (shaderInfo.reflectanceModel() != ShaderInfo::Emissive)
+    {
+        shaderProgram->bindAttribute(NormalAttribute, NormalAttributeLocation);
+    }
+
+    if (shaderInfo.hasTextureCoord())
+    {
+        shaderProgram->bindAttribute(TexCoordAttribute, TexCoordAttributeLocation);
+    }
+    
+    if (shaderInfo.hasVertexColors())
+    {
+        shaderProgram->bindAttribute(ColorAttribute, ColorAttributeLocation);
+    }
+#endif
     if (shaderInfo.hasTexture(ShaderInfo::NormalTexture))
     {
-        shaderProgram->bindAttribute("vtxTangent", TangentAttributeLocation);
+        shaderProgram->bindAttribute(TangentAttribute, TangentAttributeLocation);
     }
 
     // Link the shader program

@@ -1,5 +1,5 @@
 /*
- * $Revision: 672 $ $Date: 2012-04-30 21:09:59 -0700 (Mon, 30 Apr 2012) $
+ * $Revision: 682 $ $Date: 2012-06-19 17:34:46 -0700 (Tue, 19 Jun 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -32,10 +32,11 @@ LabelGeometry::LabelGeometry(const std::string& text, TextureFont* font, const S
     m_opacity(1.0f),
     m_iconSize(iconSize),
     m_iconColor(Spectrum::White()),
-    m_fadeSize(1.0f)
+    m_fadeSize(1.0f),
+    m_pickSizeAdjustment(0.0f)
 {
     setFixedApparentSize(true);
-    //setClippingPolicy(ZeroExtent);
+    setClippingPolicy(ZeroExtent);
 }
 
 

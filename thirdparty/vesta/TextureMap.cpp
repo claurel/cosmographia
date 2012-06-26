@@ -1,5 +1,5 @@
 /*
- * $Revision: 621 $ $Date: 2011-08-29 13:17:00 -0700 (Mon, 29 Aug 2011) $
+ * $Revision: 677 $ $Date: 2012-05-22 17:56:53 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -11,7 +11,7 @@
 #include "TextureMap.h"
 #include "TextureMapLoader.h"
 #include "Debug.h"
-#include <GL/glew.h>
+#include "OGLHeaders.h"
 #include <cassert>
 #include <algorithm>
 
@@ -29,20 +29,97 @@ struct VestaFormatInfo
 };
 
 
+#ifdef VESTA_OGLES2
+
+// Fake some GLEW state
+#define GLEW_ARB_texture_compression      GL_TRUE
+#define GLEW_EXT_texture_compression_s3tc GL_FALSE
+#define GLEW_EXT_texture_sRGB             GL_FALSE
+#define GLEW_ARB_texture_float            GL_FALSE
+#define GLEW_ARB_depth_buffer_float       GL_FALSE
+#define GLEW_ARB_texture_rg               GL_FALSE
+
+#ifdef GL_EXT_texture_filter_anisotropic
+#define GLEW_EXT_texture_filter_anisotropic GL_TRUE
+#else
+#define GLEW_EXT_texture_filter_anisotropic GL_FALSE
+#endif
+
+#ifdef GL_APPLE_texture_format_BGRA8888
+#define GLEW_EXT_bgra GL_TRUE
+#else
+#define GLEW_EXT_bgra GL_FALSE
+#endif
+
+// Replace ARB extensions
+#define glCompressedTexImage2DARB glCompressedTexImage2D
+
+// Assume no S3TC/DXT compressed textures
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0
+#define GL_COMPRESSED_SRGB_S3TC_DXT1_EXT 0
+#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT 0
+#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT 0
+
+#define GL_RGBA8 GL_RGBA
+#define GL_RGB8 GL_RGB
+
+// Swapped channel formats
+#ifndef GL_BGRA
+#define GL_BGRA GL_RGBA
+#endif
+
+#ifndef GL_BGR
+#define GL_BGR GL_RGB
+#endif
+
+// Floating point formats
+#define GL_R32F               0
+#define GL_RG32F              0
+#define GL_RGB32F             0
+#define GL_RGBA32F            0
+#define GL_R16F               0
+#define GL_RG16F              0
+#define GL_RGB16F             0
+#define GL_RGBA16F            0
+
+// One- and two- channel formats
+#define GL_RED                0
+#define GL_RG                 0
+
+// sRGB formats not supported
+#define GL_SRGB8_EXT          0
+#define GL_SRGB8_ALPHA8_EXT   0
+
+// Depth formats
+#define GL_DEPTH_COMPONENT24 GL_DEPTH_COMPONENT24_OES
+#define GL_DEPTH_COMPONENT32 0
+#define GL_DEPTH_COMPONENT32F 0
+
+#endif
+
+#ifndef GL_IMG_texture_compression_pvrtc
+#define GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG                      0x8C00
+#define GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG                      0x8C01
+#define GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG                     0x8C02
+#define GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG                     0x8C03
+#endif
+
 // Table containing mappings from VESTA formats to OpenGL formats
 static struct VestaFormatInfo FormatInfo[] =
 {
     { TextureMap::R8G8B8A8,      GL_RGBA,     GL_RGBA8,            4, "R8G8B8A8" },
-    { TextureMap::B8G8R8A8,      GL_BGRA_EXT, GL_RGBA8,            4, "B8G8R8A8" },
+    { TextureMap::B8G8R8A8,      GL_BGRA,     GL_RGBA8,            4, "B8G8R8A8" },
     { TextureMap::R8G8B8,        GL_RGB,      GL_RGB8,             3, "R8G8B8" },
-    { TextureMap::B8G8R8,        GL_BGR_EXT,  GL_RGB8,             3, "B8G8R8" },
+    { TextureMap::B8G8R8,        GL_BGR,      GL_RGB8,             3, "B8G8R8" },
     { TextureMap::DXT1,          GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, 8, "DXT1" },
     { TextureMap::DXT3,          GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 16, "DXT3" },
     { TextureMap::DXT5,          GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, 16, "DXT5" },
-    { TextureMap::RGB16F,        GL_RGB,      GL_RGB16F_ARB,       6, "RGB16F" },
-    { TextureMap::RGBA16F,       GL_RGBA,     GL_RGBA16F_ARB,      8, "RGBA16F" },
-    { TextureMap::RGB32F,        GL_RGB,      GL_RGB32F_ARB,      12, "RGB32F" },
-    { TextureMap::RGBA32F,       GL_RGBA,     GL_RGBA32F_ARB,     16, "RGBA32F" },
+    { TextureMap::RGB16F,        GL_RGB,      GL_RGB16F,           6, "RGB16F" },
+    { TextureMap::RGBA16F,       GL_RGBA,     GL_RGBA16F,          8, "RGBA16F" },
+    { TextureMap::RGB32F,        GL_RGB,      GL_RGB32F,          12, "RGB32F" },
+    { TextureMap::RGBA32F,       GL_RGBA,     GL_RGBA32F,         16, "RGBA32F" },
     { TextureMap::R16F,          GL_RED,      GL_R16F,             2, "R16F" },
     { TextureMap::R32F,          GL_RED,      GL_R32F,             4, "R32F" },
     { TextureMap::RG16F,         GL_RG,       GL_RG16F,            4, "RG16F" },
@@ -56,6 +133,10 @@ static struct VestaFormatInfo FormatInfo[] =
     { TextureMap::Depth16,       GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, 2, "Depth16" },
     { TextureMap::Depth32,       GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32, 4, "Depth32" },
     { TextureMap::Depth32F,      GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT32F, 4, "Depth32F" },
+    { TextureMap::PVRTC_RGB_2BIT, GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, 4, "PVRTC RGB 2" },
+    { TextureMap::PVRTC_RGB_4BIT, GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, 4, "PVRTC RGB 4" },
+    { TextureMap::PVRTC_RGBA_2BIT, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, 4, "PVRTC RGBA 2" },
+    { TextureMap::PVRTC_RGBA_4BIT, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, 4, "PVRTC RGBA 4" }
 };
 
 
@@ -115,7 +196,7 @@ ToGlWrap(TextureProperties::AddressMode addressMode)
     case TextureProperties::Wrap:
         return GL_REPEAT;
     case TextureProperties::Clamp:
-        return GL_CLAMP_TO_EDGE_EXT;
+        return GL_CLAMP_TO_EDGE;
     default:
         return 0;
     }
@@ -332,9 +413,26 @@ TextureMap::generate(const unsigned char imageData[],
     {
         if (m_properties.maxMipmapLevel < 1000)
         {
+#ifdef VESTA_OGLES2
+#ifdef GL_APPLE_texture_max_level
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL_APPLE, m_properties.maxMipmapLevel);
+#endif
+#else
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, m_properties.maxMipmapLevel);
+#endif
         }
 
+#ifdef VESTA_OGLES2
+        glTexImage2D(GL_TEXTURE_2D,
+                     0,
+                     (GLint) glInternalFormat,
+                     width, height,
+                     0,
+                     glImageFormat,
+                     GL_UNSIGNED_BYTE,
+                     imageData);        
+        glGenerateMipmap(GL_TEXTURE_2D);
+#else
         if (GLEW_EXT_framebuffer_object)
         {
             // Fast path uses glGenerateMipmap() when driver/hardware supports it.
@@ -360,6 +458,8 @@ TextureMap::generate(const unsigned char imageData[],
                               GL_UNSIGNED_BYTE,
                               imageData);
         }
+#endif
+
 
         // A complete mipmap chain uses about 1/3 more memory
         m_memoryUsage += m_memoryUsage / 3;
@@ -536,12 +636,14 @@ static void ApplyTextureProperties(const TextureProperties& properties,
 
     setTextureFiltering(target, properties);
 
+#ifndef VESTA_OGLES2
     if (properties.usage == TextureProperties::DepthTexture)
     {
         glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
         glTexParameteri(target, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         glTexParameteri(target, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
     }
+#endif
 }
 
 
@@ -562,32 +664,44 @@ TextureMap::applyProperties(const TextureProperties& properties)
 unsigned int
 TextureMap::MipmapLevelSize(ImageFormat format, unsigned int width, unsigned int height)
 {
-    unsigned int blockWidth = 1;
-    unsigned int blockHeight = 1;
-    switch (format)
+    // Special calculation required for Power VR compressed texture formats
+    if (format == PVRTC_RGB_2BIT || format == PVRTC_RGBA_2BIT)
     {
-    case DXT1:
-    case DXT1_sRGB:
-        blockWidth = 4;
-        blockHeight = 4;
-        break;
-
-    case DXT3:
-    case DXT5:
-    case DXT3_sRGB:
-    case DXT5_sRGB:
-        blockWidth = 4;
-        blockHeight = 4;
-        break;
-
-    default:
-        break;
+        return (max(width, 16u) * max(height, 8u) * 2 + 7) / 8;
     }
+    else if (format == PVRTC_RGB_4BIT || format == PVRTC_RGBA_4BIT)
+    {
+        return (max(width, 8u) * max(height, 8u) * 4 + 7) / 8;
+    }
+    else
+    {
+        unsigned int blockWidth = 1;
+        unsigned int blockHeight = 1;
+        switch (format)
+        {
+        case DXT1:
+        case DXT1_sRGB:
+            blockWidth = 4;
+            blockHeight = 4;
+            break;
 
-    unsigned int widthBlocks = (width + blockWidth - 1) / blockWidth;
-    unsigned int heightBlocks = (height + blockHeight - 1) / blockHeight;
+        case DXT3:
+        case DXT5:
+        case DXT3_sRGB:
+        case DXT5_sRGB:
+            blockWidth = 4;
+            blockHeight = 4;
+            break;
 
-    return widthBlocks * heightBlocks * BytesPerPixel(format);
+        default:
+            break;
+        }
+
+        unsigned int widthBlocks = (width + blockWidth - 1) / blockWidth;
+        unsigned int heightBlocks = (height + blockHeight - 1) / blockHeight;
+
+        return widthBlocks * heightBlocks * BytesPerPixel(format);
+    }
 }
 
 
@@ -667,6 +781,11 @@ TextureMap::IsFormatSupported(ImageFormat format)
     bool dxtSupported = GLEW_EXT_texture_compression_s3tc == GL_TRUE;
     bool srgbSupported = GLEW_EXT_texture_sRGB == GL_TRUE;
     bool floatSupported = GLEW_ARB_texture_float == GL_TRUE;
+    bool pvrtcSupported = false;
+#ifdef VESTA_OGLES2
+    // TODO: Shouldn't assume that PVRTC is supported on all devices
+    pvrtcSupported = true;
+#endif
 
     switch (format)
     {
@@ -704,13 +823,33 @@ TextureMap::IsFormatSupported(ImageFormat format)
     case DXT5_sRGB:
         return dxtSupported && srgbSupported;
 
+#ifdef VESTA_OGLES2
+    // TODO: Should check for OES_depth_texture
+    case Depth16:
+        return true;
+    case Depth24:
+#ifdef GL_OES_depth24
+        return true;
+#else
+        return false
+#endif
+    case Depth32:
+        return false;
+#else
     case Depth16:
     case Depth24:
     case Depth32:
         return GLEW_VERSION_1_4 == GL_TRUE;
+#endif
 
     case Depth32F:
         return GLEW_ARB_depth_buffer_float == GL_TRUE;
+
+    case PVRTC_RGB_2BIT:
+    case PVRTC_RGB_4BIT:
+    case PVRTC_RGBA_2BIT:
+    case PVRTC_RGBA_4BIT:
+        return pvrtcSupported;
 
     default:
         return false;
@@ -758,7 +897,11 @@ TextureMap::CreateDepthTexture(unsigned int width, unsigned int height, ImageFor
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
     {
+#ifdef VESTA_OGLES2
+        const char* errorMessage = "Depth texture error";
+#else
         const GLubyte* errorMessage = gluErrorString(errorCode);
+#endif
         if (errorMessage)
         {
             VESTA_WARNING("OpenGL error occurred when creating depth texture: %s", errorMessage);
@@ -813,21 +956,25 @@ TextureMap::CreateCubeMap(unsigned int size, ImageFormat format)
         return NULL;
     }
 
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, cubeMapId);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
 
     // Set the dimensions for all faces
     for (int i = 0; i < 6; ++i)
     {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + i, 0, ToGlInternalFormat(format), size, size, 0, ToGlFormat(format), GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, ToGlInternalFormat(format), size, size, 0, ToGlFormat(format), GL_UNSIGNED_BYTE, NULL);
     }
 
     // Unbind it
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
     {
+#ifdef VESTA_OGLES2
+        const char* errorMessage = "Cube map error";
+#else
         const GLubyte* errorMessage = gluErrorString(errorCode);
+#endif
         if (errorMessage)
         {
             VESTA_WARNING("OpenGL error occurred when creating cube map texture: %s", errorMessage);
@@ -844,9 +991,9 @@ TextureMap::CreateCubeMap(unsigned int size, ImageFormat format)
     TextureMap* tex = new TextureMap(cubeMapId, texProps);
     if (tex)
     {
-        glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, tex->id());
-        ApplyTextureProperties(texProps, GL_TEXTURE_CUBE_MAP_ARB);
-        glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, 0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, tex->id());
+        ApplyTextureProperties(texProps, GL_TEXTURE_CUBE_MAP);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
     return tex;

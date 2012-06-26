@@ -147,6 +147,7 @@ VectorMapLayer::~VectorMapLayer()
 static void
 drawGreatCircleArc(const Vector3f& v0, const Vector3f& v1, unsigned int subdivision)
 {
+#ifndef VESTA_OGLES2
     float d = 1.0f / subdivision;
 
     glBegin(GL_LINE_STRIP);
@@ -168,12 +169,14 @@ drawGreatCircleArc(const Vector3f& v0, const Vector3f& v1, unsigned int subdivis
     v = v1 * scale;
     glVertex3fv(v.data());
     glEnd();
+#endif
 }
 
 
 static void
 drawConstantBearingArc(float lon0, float lat0, float lon1, float lat1, unsigned int subdivision)
 {
+#ifndef VESTA_OGLES2
     float d = 1.0f / subdivision;
     float dlat = lat1 - lat0;
     float dlon = lon1 - lon0;
@@ -189,6 +192,7 @@ drawConstantBearingArc(float lon0, float lat0, float lon1, float lat1, unsigned 
     }
     glVertex3f(cos(lon1) * cos(lat1), sin(lon1) * cos(lat1), sin(lat1));
     glEnd();
+#endif
 }
 
 
@@ -197,6 +201,7 @@ drawConstantBearingArc(float lon0, float lat0, float lon1, float lat1, unsigned 
 static void
 drawGreatCircleArcUniform(const Vector3f& v0, const Vector3f& v1)
 {
+#ifndef VESTA_OGLES2
     glBegin(GL_LINE_STRIP);
 
     float cosArc = v0.dot(v1);
@@ -214,6 +219,7 @@ drawGreatCircleArcUniform(const Vector3f& v0, const Vector3f& v1)
     }
     glVertex3fv(v1.data());
     glEnd();
+#endif
 }
 
 
@@ -324,6 +330,7 @@ VectorMapLayer::addElement(MapElement* e)
 void
 VectorMapLayer::renderTile(RenderContext& rc, const WorldGeometry* /* world */, const QuadtreeTile* tile) const
 {
+#ifndef VESTA_OGLES2
     rc.setVertexInfo(VertexSpec::PositionColor);
 
     Material simpleMaterial;
@@ -382,6 +389,7 @@ VectorMapLayer::renderTile(RenderContext& rc, const WorldGeometry* /* world */, 
     }
 
     glDisable(GL_BLEND);
+#endif
 }
 
 
@@ -451,6 +459,7 @@ MapPolygon::MapPolygon(MapLineString* border) :
 void
 MapPolygon::render(float west, float south, float east, float north) const
 {
+#ifndef VESTA_OGLES2
     if (m_border.isNull())
     {
         return;
@@ -466,6 +475,7 @@ MapPolygon::render(float west, float south, float east, float north) const
         }
         glEnd();
     }
+#endif
 }
 
 

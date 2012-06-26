@@ -1,5 +1,5 @@
 /*
- * $Revision: 614 $ $Date: 2011-06-09 12:01:42 -0700 (Thu, 09 Jun 2011) $
+ * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -163,6 +163,7 @@ public:
     }
 
     void setCloudMap(TextureMap* cloudMap);
+    void setCloudMap(TiledMap* cloudMap);
 
     /** Get the altitude (in km) of the cloud layer above surface of the planet.
       */
@@ -297,6 +298,7 @@ private:
     float m_specularPower;
 
     counted_ptr<TextureMap> m_cloudMap;
+    counted_ptr<TiledMap> m_tiledCloudMap;
     float m_cloudAltitude;
 
     QuadtreeTileAllocator* m_tileAllocator;

@@ -11,6 +11,7 @@
 #include "GlareOverlay.h"
 #include "OGLHeaders.h"
 #include "Units.h"
+#include "PrimitiveBatch.h"
 #include <algorithm>
 
 using namespace vesta;
@@ -28,6 +29,12 @@ GlareOverlay::GlareOverlay() :
 bool
 GlareOverlay::initialize()
 {
+#ifdef VESTA_OGLES2
+    // On OpenGL ES 2.0, we use a simplified glare model that
+    // doesn't require occlusion queries. No need to allocate
+    // anything, just report success.
+    return true;
+#else
     if (!GLEW_ARB_occlusion_query)
     {
         // Extension isn't supported
@@ -50,11 +57,13 @@ GlareOverlay::initialize()
     }
 
     return true;
+#endif
 }
 
 
 GlareOverlay::~GlareOverlay()
 {
+#ifndef VESTA_OGLES2
     // Clean up free (inactive) queries
     for (unsigned int i = 0; i < m_freeOcclusionQueries.size(); ++i)
     {
@@ -73,6 +82,7 @@ GlareOverlay::~GlareOverlay()
             glDeleteQueriesARB(1, &iter->m_occlusionQuery);
         }
     }
+#endif
 }
 
 
@@ -83,6 +93,7 @@ GlareOverlay::~GlareOverlay()
 void
 GlareOverlay::adjustBrightness()
 {
+#ifndef VESTA_OGLES2
     // The glare overlay uses occlusion queries to detect which light sources
     // are directly visible to the viewer. The result of an occlusion query is
     // not immediately available because the query is queued in the OpenGL command
@@ -132,12 +143,32 @@ GlareOverlay::adjustBrightness()
             iter->m_brightness = max(0.0f, min(1.0f, iter->m_brightness + adjustment));
         }
     }
+#endif
 }
 
 
 void
 GlareOverlay::trackGlare(RenderContext& rc, const LightSource* lightSource, const Vector3f& glarePosition, float lightRadius)
 {
+#ifdef VESTA_OGLES2
+    // Occlusion queries aren't supported on OpenGL ES 2.0, so we'll just
+    // draw the glare geometry instead of the occlusion test geometry.
+
+    // Enforce the minimum pixel size
+    float distance = glarePosition.norm();
+    float sizeInPixels = lightRadius * 8.0f / (distance * rc.pixelSize());
+    sizeInPixels = max(sizeInPixels, m_glareSize);
+    
+    Material material;
+    material.setDiffuse(Spectrum::Black());
+    material.setEmission(Spectrum::White());
+    material.setBlendMode(Material::AdditiveBlend);
+    material.setOpacity(0.99f);
+    material.setBaseTexture(lightSource->glareTexture());
+    rc.bindMaterial(&material);
+    
+    drawGlareGeometry(rc, glarePosition, sizeInPixels * rc.pixelSize() * distance);
+#else
     GlareItem* item = NULL;
     bool busy = false;
     for (vector<GlareItem>::iterator iter = m_activeGlareItems.begin(); iter != m_activeGlareItems.end(); ++iter)
@@ -180,12 +211,14 @@ GlareOverlay::trackGlare(RenderContext& rc, const LightSource* lightSource, cons
         drawOcclusionTestGeometry(rc, glarePosition, sizeInPixels * rc.pixelSize() * distance);
         glEndQueryARB(GL_SAMPLES_PASSED_ARB);
     }
+#endif
 }
 
 
 void
 GlareOverlay::renderGlare(RenderContext& rc, const LightSource* lightSource, const Vector3f& glarePosition, float lightRadius)
 {
+#ifndef VESTA_OGLES2
     GlareItem* item = NULL;
     for (vector<GlareItem>::iterator iter = m_activeGlareItems.begin(); iter != m_activeGlareItems.end(); ++iter)
     {
@@ -219,12 +252,14 @@ GlareOverlay::renderGlare(RenderContext& rc, const LightSource* lightSource, con
             glDisable(GL_BLEND);
         }
     }
+#endif
 }
 
 
 void
 GlareOverlay::drawOcclusionTestGeometry(RenderContext& /* rc */, const Vector3f& position, float lightRadius)
 {
+#ifndef VESTA_OGLES2
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glBegin(GL_TRIANGLE_FAN);
@@ -238,18 +273,47 @@ GlareOverlay::drawOcclusionTestGeometry(RenderContext& /* rc */, const Vector3f&
     }
     glEnd();
     glDisable(GL_BLEND);
+#endif
 }
 
 
 void
-GlareOverlay::drawGlareGeometry(RenderContext& /* rc */, const Vector3f& position, float glareRadius)
+GlareOverlay::drawGlareGeometry(RenderContext& rc, const Vector3f& position, float glareRadius)
 {
+    const unsigned int sliceCount = 30;
+#ifdef VESTA_OGLES2
+    const unsigned int vertexCount = sliceCount + 2;
+    float vertexData[vertexCount * 5];
+
+    vertexData[0] = position.x();
+    vertexData[1] = position.y();
+    vertexData[2] = position.z();
+    vertexData[3] = 0.5f;
+    vertexData[4] = 0.5f;
+    
+    for (unsigned int j = 0; j <= sliceCount; ++j)
+    {
+        float theta = float(j) / float(sliceCount) * 2.0f * float(PI);
+        float s = sin(theta);
+        float c = cos(theta);
+        Vector3f v = position + Vector3f(c, s, 0.0f) * glareRadius;
+        Vector2f texCoord(0.5f + 0.5f * c, 0.5f + 0.5f * s);
+        unsigned int baseIndex = (j + 1) * 5;
+        vertexData[baseIndex + 0] = v.x();
+        vertexData[baseIndex + 1] = v.y();
+        vertexData[baseIndex + 2] = v.z();
+        vertexData[baseIndex + 3] = texCoord.x();
+        vertexData[baseIndex + 4] = texCoord.y();
+    }
+    
+    rc.bindVertexArray(VertexSpec::PositionTex, vertexData, VertexSpec::PositionTex.size());
+    rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::TriangleFan, sliceCount, 0));
+#else
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glBegin(GL_TRIANGLE_FAN);
     glTexCoord2f(0.5f, 0.5f);
     glVertex3fv(position.data());
-    const unsigned int sliceCount = 30;
     for (unsigned int j = 0; j <= sliceCount; ++j)
     {
         float theta = float(j) / float(sliceCount) * 2.0f * float(PI);
@@ -261,6 +325,7 @@ GlareOverlay::drawGlareGeometry(RenderContext& /* rc */, const Vector3f& positio
     }
     glEnd();
     glEnable(GL_DEPTH_TEST);
+#endif
 }
 
 

@@ -28,12 +28,21 @@
 using namespace vesta;
 using namespace std;
 
+#ifdef VESTA_OGLES2
+#define glGetUniformLocationARB glGetUniformLocation
+#define glBindAttribLocationARB glBindAttribLocation
+#endif
+
 
 GLShaderProgram::GLShaderProgram() :
     m_handle(0),
     m_isLinked(false)
 {
+#ifdef VESTA_OGLES2
+    m_handle = glCreateProgram();
+#else
     m_handle = glCreateProgramObjectARB();
+#endif
 }
 
 
@@ -41,7 +50,11 @@ GLShaderProgram::~GLShaderProgram()
 {
     if (m_handle != 0)
     {
+#ifdef VESTA_OGLES2
+        glDeleteProgram(m_handle);
+#else
         glDeleteObjectARB(m_handle);
+#endif
     }
 }
 
@@ -71,7 +84,7 @@ GLShaderProgram::link()
     if (m_isLinked)
     {
         // Oops--already linked
-        return false;
+        //return false;
     }
 
     if (m_vertexShader.isNull() || m_fragmentShader.isNull())
@@ -89,13 +102,19 @@ GLShaderProgram::link()
         return false;
     }
 
+    GLint status = 0;
+    
+#ifdef VESTA_OGLES2
+    glAttachShader(m_handle, m_vertexShader->glHandle());
+    glAttachShader(m_handle, m_fragmentShader->glHandle());
+    glLinkProgram(m_handle);
+    glGetProgramiv(m_handle, GL_LINK_STATUS, &status);
+#else
     glAttachObjectARB(m_handle, m_vertexShader->glHandle());
     glAttachObjectARB(m_handle, m_fragmentShader->glHandle());
     glLinkProgramARB(m_handle);
-
-    // Query the link status
-    GLint status = 0;
     glGetObjectParameterivARB(m_handle, GL_OBJECT_LINK_STATUS_ARB, &status);
+#endif
 
     if (status == GL_TRUE)
     {
@@ -105,12 +124,20 @@ GLShaderProgram::link()
     // Get the log of error and warning messages and store it with
     // this shader objects.
     GLint length = 0;
+#ifdef VESTA_OGLES2
+    glGetProgramiv(m_handle, GL_INFO_LOG_LENGTH, &length);
+#else
     glGetObjectParameterivARB(m_handle, GL_OBJECT_INFO_LOG_LENGTH_ARB, &length);
+#endif
     if (length > 0)
     {
         GLsizei charCount = 0;
         char* linkLogChars = new char[length];
+#ifdef VESTA_OGLES2
+        glGetProgramInfoLog(m_handle, length, &charCount, linkLogChars);
+#else
         glGetInfoLogARB(m_handle, length, &charCount, linkLogChars);
+#endif
 
         m_log = string(linkLogChars, charCount);
         delete[] linkLogChars;

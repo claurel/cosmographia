@@ -1,5 +1,5 @@
 /*
- * $Revision: 475 $ $Date: 2010-08-31 08:09:34 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 657 $ $Date: 2012-03-23 01:01:30 -0700 (Fri, 23 Mar 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -53,9 +53,14 @@ public:
         return m_secondary.ptr();
     }
 
+    void setVelocityAlligned(bool v) {
+        m_velocityAlligned = v;
+    }
+
 private:
     counted_ptr<Entity> m_primary;
     counted_ptr<Entity> m_secondary;
+    bool m_velocityAlligned;
 };
 
 }

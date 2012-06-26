@@ -10,6 +10,7 @@
 
 #include "ConstellationsLayer.h"
 #include "RenderContext.h"
+#include "GeometryBuffer.h"
 
 using namespace vesta;
 using namespace Eigen;
@@ -696,15 +697,15 @@ ConstellationsLayer::~ConstellationsLayer()
 void
 ConstellationsLayer::render(RenderContext& rc)
 {
-    rc.setVertexInfo(VertexSpec::Position);
-
     Material material;
     material.setDiffuse(m_diagramColor);
     rc.bindMaterial(&material);
     glDepthMask(GL_FALSE);
     glLineWidth(1.0f);
 
-    glBegin(GL_LINES);
+    GeometryBuffer geo(&rc);
+
+    geo.beginLines();
 
     for (unsigned int i = 0; i < m_segments.size() / 2; ++i)
     {
@@ -722,12 +723,12 @@ ConstellationsLayer::render(RenderContext& rc)
             float gap = gapLength / segmentLength;
             v0 += dv * gap;
             v1 -= dv * gap;
-            glVertex3fv(v0.data());
-            glVertex3fv(v1.data());
+            geo.vertex(v0);
+            geo.vertex(v1);
         }
     }
 
-    glEnd();
+    geo.end();
 }
 
 

@@ -76,7 +76,11 @@ public:
 
     void bind() const
     {
+#ifdef VESTA_OGLES2
+        glUseProgram(m_handle);
+#else
         glUseProgramObjectARB(m_handle);
+#endif
     }
 
     void bindAttribute(const char* name, int location);

@@ -1,5 +1,5 @@
 /*
- * $Revision: 622 $ $Date: 2011-09-21 16:03:59 -0700 (Wed, 21 Sep 2011) $
+ * $Revision: 673 $ $Date: 2012-05-22 16:02:39 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -318,7 +318,7 @@ MeshGeometry::mergeSubmeshes()
         unmerged = nonmatches;
     }
 
-    VESTA_LOG("Merged %d submeshes into %d", m_submeshes.size(), merged.size());
+    //VESTA_LOG("Merged %d submeshes into %d", m_submeshes.size(), merged.size());
 
     m_submeshes = merged;
     setMeshChanged();
@@ -501,7 +501,7 @@ MeshGeometry::mergeMaterials()
     bool reducedMaterialCount = mergedMaterials.size() < m_materials.size();
     if (reducedMaterialCount)
     {
-        VESTA_LOG("Merge materials reduced from %d to %d", m_materials.size(), uniqueCount);
+        //VESTA_LOG("Merge materials reduced from %d to %d", m_materials.size(), uniqueCount);
         m_materials = mergedMaterials;
     }
 
@@ -562,7 +562,7 @@ MeshGeometry::realize() const
         unsigned int size = submesh->vertices()->stride() * submesh->vertices()->count();
         if (size > VertexBufferSizeThreshold)
         {
-            vertexBuffer = new GLVertexBuffer(size, GL_STATIC_DRAW_ARB, submesh->vertices()->data());
+            vertexBuffer = new GLVertexBuffer(size, GL_STATIC_DRAW, submesh->vertices()->data());
             if (!vertexBuffer->isValid())
             {
                 delete vertexBuffer;

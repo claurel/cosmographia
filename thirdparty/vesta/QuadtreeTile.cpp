@@ -645,6 +645,7 @@ QuadtreeTile::renderWorldLayer(RenderContext& rc, const WorldGeometry* world, co
 }
 
 
+// Draw a patch with an ordinary texture
 void
 QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
 {
@@ -673,6 +674,16 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
     float du = m_extent / float(TileSubdivision);
     float dv = m_extent / float(TileSubdivision);
 
+    // Precompute a trig table for this patch
+    float sines[TileSubdivision + 1];
+    float cosines[TileSubdivision + 1];
+    for (unsigned int i = 0; i <= TileSubdivision; ++i)
+    {
+        float lon = lonWest + i * dlon;
+        sines[i] = sin(lon);
+        cosines[i] = cos(lon);
+    }
+
     for (unsigned int i = 0; i <= TileSubdivision; ++i)
     {
         float v = m_southwest.y() + i * dv;
@@ -686,13 +697,12 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
             {
                 unsigned int vertexStart = vertexStride * vertexIndex;
 
-                float lon = lonWest + j * dlon;
                 float u = m_southwest.x() + j * du;
 
-                float cosLon = cos(lon);
-                float sinLon = sin(lon);
+                float cosLon = cosines[j];
+                float sinLon = sines[j];
 
-                Vector3f p(cosLat * cos(lon), cosLat * sin(lon), sinLat);
+                Vector3f p(cosLat * cosLon, cosLat * sinLon, sinLat);
 
                 // Position
                 vertexData[vertexStart + 0]  = p.x();
@@ -722,10 +732,9 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
             {
                 unsigned int vertexStart = vertexStride * vertexIndex;
 
-                float lon = lonWest + j * dlon;
                 float u = m_southwest.x() + j * du;
 
-                Vector3f p(cosLat * cos(lon), cosLat * sin(lon), sinLat);
+                Vector3f p(cosLat * cosines[j], cosLat * sines[j], sinLat);
                 vertexData[vertexStart + 0] = p.x();
                 vertexData[vertexStart + 1] = p.y();
                 vertexData[vertexStart + 2] = p.z();
@@ -744,10 +753,9 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
             {
                 unsigned int vertexStart = vertexStride * vertexIndex;
 
-                float lon = lonWest + j * dlon;
                 float u = m_southwest.x() + j * du;
 
-                Vector3f p(cosLat * cos(lon), cosLat * sin(lon), sinLat);
+                Vector3f p(cosLat * cosines[j], cosLat * sines[j], sinLat);
                 vertexData[vertexStart + 0] = p.x();
                 vertexData[vertexStart + 1] = p.y();
                 vertexData[vertexStart + 2] = p.z();
@@ -776,6 +784,7 @@ QuadtreeTile::drawPatch(RenderContext& rc, unsigned int features) const
 }
 
 
+// Draw a patch with a tiled texture map
 void
 QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap, unsigned int features) const
 {

@@ -160,7 +160,7 @@ getSpectrum(const vector<string>& tokens, Spectrum& s)
 //
 // It is not valid for a single geometry element to mix different vertex
 // types.
-ObjLoader::ObjVertexType
+static ObjLoader::ObjVertexType
 getVertexType(const std::string vertex)
 {
     int positionIndex = 0;
@@ -256,7 +256,8 @@ getFace(const std::vector<std::string> tokens,
 
 
 // Split a string into substrings at whitespace boundaries
-void tokenize(const string& s, vector<string>& tokens)
+static void 
+tokenize(const string& s, vector<string>& tokens)
 {
     tokens.clear();
 
@@ -278,7 +279,7 @@ void tokenize(const string& s, vector<string>& tokens)
 
 // Convert a one-based .obj vertex index into a zero-based index that can
 // be used in VESTA. Return -1 if the index is invalid.
-int
+static int
 convertIndex(int objIndex, int maxIndex)
 {
     if (objIndex > 0)

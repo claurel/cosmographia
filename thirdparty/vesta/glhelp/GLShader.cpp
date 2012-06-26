@@ -26,6 +26,18 @@
 using namespace vesta;
 using namespace std;
 
+#ifdef VESTA_OGLES2
+#define glDeleteObjectARB glDeleteObject
+//#define glCreateShaderObjectARB glCreateShaderObject
+#define glShaderSourceARB glShaderSource
+#define glCompileShaderARB glCompileShader
+
+#define GL_VERTEX_SHADER_ARB GL_VERTEX_SHADER
+#define GL_FRAGMENT_SHADER_ARB GL_FRAGMENT_SHADER
+#define GL_OBJECT_INFO_LOG_LENGTH_ARB GL_OBJECT_INFO_LOG_LENGTH
+#endif
+
+
 
 GLShader::GLShader(ShaderStage stage) :
     m_stage(stage),
@@ -39,7 +51,11 @@ GLShader::~GLShader()
 {
     if (m_handle != 0)
     {
+#ifdef VESTA_OGLES2
+        glDeleteShader(m_handle);
+#else
         glDeleteObjectARB(m_handle);
+#endif
     }
 }
 
@@ -58,6 +74,16 @@ GLShader::compile(const string& source)
         return false;
     }
 
+#ifdef VESTA_OGLES2
+    if (stage() == VertexStage)
+    {
+        m_handle = glCreateShader(GL_VERTEX_SHADER);
+    }
+    else if (stage() == FragmentStage)
+    {
+        m_handle = glCreateShader(GL_FRAGMENT_SHADER);
+    }
+#else
     if (stage() == VertexStage)
     {
         m_handle = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
@@ -66,7 +92,8 @@ GLShader::compile(const string& source)
     {
         m_handle = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
     }
-
+#endif
+    
     if (m_handle == 0)
     {
         // Unable to generate a shader object handle
@@ -82,12 +109,20 @@ GLShader::compile(const string& source)
     // Get the log of error and warning messages and store it with
     // this shader objects.
     GLint length = 0;
+#ifdef VESTA_OGLES2
+    glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &length);
+#else
     glGetObjectParameterivARB(m_handle, GL_OBJECT_INFO_LOG_LENGTH_ARB, &length);
+#endif
     if (length > 0)
     {
         GLsizei charCount = 0;
         char* compileLogChars = new char[length];
+#ifdef VESTA_OGLES2
+        glGetShaderInfoLog(m_handle, length, &charCount, compileLogChars);
+#else
         glGetInfoLogARB(m_handle, length, &charCount, compileLogChars);
+#endif
 
         m_compileLog = string(compileLogChars, charCount);
         delete[] compileLogChars;
@@ -95,7 +130,11 @@ GLShader::compile(const string& source)
 
     // Find out whether the compilation was successful
     GLint status = GL_FALSE;
+#ifdef VESTA_OGLES2
+    glGetShaderiv(m_handle, GL_COMPILE_STATUS, &status);
+#else
     glGetObjectParameterivARB(m_handle, GL_OBJECT_COMPILE_STATUS_ARB, &status);
+#endif
 
     m_isCompiled = status == GL_TRUE;
 

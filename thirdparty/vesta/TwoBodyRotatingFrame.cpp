@@ -1,5 +1,5 @@
 /*
- * $Revision: 223 $ $Date: 2010-03-30 05:44:44 -0700 (Tue, 30 Mar 2010) $
+ * $Revision: 657 $ $Date: 2012-03-23 01:01:30 -0700 (Fri, 23 Mar 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -21,6 +21,7 @@ TwoBodyRotatingFrame::TwoBodyRotatingFrame(Entity* primary, Entity* secondary) :
     m_primary(primary),
     m_secondary(secondary)
 {
+        m_velocityAlligned = true;
 }
 
 
@@ -53,11 +54,22 @@ TwoBodyRotatingFrame::orientation(double t) const
     Vector3d xAxis = state.position().normalized();
     Vector3d v = state.velocity().normalized();
 
-    // z-axis normal to both the x-axis and the velocity vector
-    Vector3d zAxis = xAxis.cross(v);
-    if (zAxis.isZero())
-    {
-        return Quaterniond::Identity();
+    Vector3d zAxis;
+    if (m_velocityAlligned) {
+        // z-axis normal to both the x-axis and the velocity vector
+        zAxis = xAxis.cross(v);
+        if (zAxis.isZero())
+        {
+            return Quaterniond::Identity();
+        }
+    }
+    else {
+        // z-axis normal to both the x-axis and the z axis of the primary
+        zAxis = xAxis.cross(m_primary->orientation(t) * Vector3d::UnitX());
+        if (zAxis.isZero())
+        {
+            return Quaterniond::Identity();
+        }
     }
 
     zAxis.normalize();

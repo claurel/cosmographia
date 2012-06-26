@@ -1,5 +1,5 @@
 /*
- * $Revision: 567 $ $Date: 2011-02-24 13:28:02 -0800 (Thu, 24 Feb 2011) $
+ * $Revision: 674 $ $Date: 2012-05-22 16:35:37 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -50,6 +50,7 @@ TrajectoryGeometry::~TrajectoryGeometry()
 void
 TrajectoryGeometry::render(RenderContext& rc, double clock) const
 {
+#ifndef VESTA_OGLES2
     if (!m_curvePlot)
     {
         return;
@@ -144,6 +145,7 @@ TrajectoryGeometry::render(RenderContext& rc, double clock) const
     glLineWidth(1.0f);
 
     rc.popModelView();
+#endif
 }
 
 
@@ -156,6 +158,7 @@ TrajectoryGeometry::render(RenderContext& rc, double clock) const
 void
 TrajectoryGeometry::addSample(double t, const StateVector& s)
 {
+#ifndef VESTA_OGLES2
     if (!m_curvePlot)
     {
         m_curvePlot = new CurvePlot();
@@ -178,6 +181,7 @@ TrajectoryGeometry::addSample(double t, const StateVector& s)
         m_boundingRadius = std::max(m_boundingRadius, s.position().norm());
         m_endTime = t;
     }
+#endif
 }
 
 
@@ -186,6 +190,7 @@ TrajectoryGeometry::addSample(double t, const StateVector& s)
 void
 TrajectoryGeometry::clearSamples()
 {
+#ifndef VESTA_OGLES2
     // Throw out the previous trajectory
     if (m_curvePlot)
     {
@@ -196,6 +201,7 @@ TrajectoryGeometry::clearSamples()
     m_boundingRadius = 0.0;
     m_startTime = 0.0;
     m_endTime = 0.0;
+#endif
 }
 
 
@@ -269,6 +275,7 @@ TrajectoryGeometry::updateSamples(const Trajectory* trajectory, double startTime
 void
 TrajectoryGeometry::computeSamples(const TrajectoryPlotGenerator* generator, double startTime, double endTime, unsigned int steps)
 {
+#ifndef VESTA_OGLES2
     // Abort if we're asked to use a null generator
     if (!generator)
     {
@@ -302,6 +309,7 @@ TrajectoryGeometry::computeSamples(const TrajectoryPlotGenerator* generator, dou
     // Adjust the bounding radius slightly to prevent culling when the
     // trajectory lies barely inside the view frustum.
     m_boundingRadius *= 1.1;
+#endif
 }
 
 
@@ -311,6 +319,7 @@ TrajectoryGeometry::computeSamples(const TrajectoryPlotGenerator* generator, dou
 void
 TrajectoryGeometry::updateSamples(const TrajectoryPlotGenerator* generator, double startTime, double endTime, unsigned int steps)
 {
+#ifndef VESTA_OGLES2
     // Abort if we're asked to use a null generator
     if (!generator)
     {
@@ -375,4 +384,5 @@ TrajectoryGeometry::updateSamples(const TrajectoryPlotGenerator* generator, doub
 
     m_startTime = windowStartTime;
     m_endTime = windowEndTime;
+#endif
 }

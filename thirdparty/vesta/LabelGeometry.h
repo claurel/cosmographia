@@ -1,5 +1,5 @@
 /*
- * $Revision: 671 $ $Date: 2012-04-28 18:42:13 -0700 (Sat, 28 Apr 2012) $
+ * $Revision: 682 $ $Date: 2012-06-19 17:34:46 -0700 (Tue, 19 Jun 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -162,6 +162,25 @@ public:
     {
         m_fadeSize = fadeSize;
     }
+    
+    /** Get the pick size adjustment in pixels. A positive value will make it easier
+     *  for a user to click on or touch the label.
+     */
+    float pickSizeAdjustment() const
+    {
+        return m_pickSizeAdjustment;
+    }
+    
+    /** Set the pick size adjustment in pixels. A positive value will make it easier
+     *  for a user to click on or touch the label. But, too large a size will generate
+     *  false positives. The appropriate adjustment depends on the pointing device used.
+     *  A size adjustment of zero is appropriate for a mouse, but a positive value should
+     *  be used for touch screens.
+     */
+    void setPickSizeAdjustment(float pixels)
+    {
+        m_pickSizeAdjustment = pixels;
+    }
 
 private:
     std::string m_text;
@@ -173,6 +192,7 @@ private:
     Spectrum m_iconColor;
     counted_ptr<FadeRange> m_fadeRange;
     float m_fadeSize;
+    float m_pickSizeAdjustment;
 };
 
 }

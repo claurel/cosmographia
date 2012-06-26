@@ -24,7 +24,7 @@
 #ifndef _VESTA_GL_FRAMEBUFFER_H_
 #define _VESTA_GL_FRAMEBUFFER_H_
 
-#include <GL/glew.h>
+#include "../OGLHeaders.h"
 #include "../Object.h"
 
 

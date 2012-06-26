@@ -1,5 +1,5 @@
 /*
- * $Revision: 558 $ $Date: 2010-11-17 03:20:58 -0800 (Wed, 17 Nov 2010) $
+ * $Revision: 670 $ $Date: 2012-04-27 15:43:49 -0700 (Fri, 27 Apr 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -190,7 +190,7 @@ StarCatalog::findStarIdentifier(v_uint32 id)
     match.identifier = id;
 
     vector<StarRecord>::const_iterator pos = lower_bound(m_starData.begin(), m_starData.end(), match, StarIdPredicate());
-    if (pos == m_starData.end())
+    if (pos == m_starData.end() || pos->identifier != id)
     {
         return NULL;
     }

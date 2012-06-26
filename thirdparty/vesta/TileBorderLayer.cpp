@@ -35,6 +35,7 @@ TileBorderLayer::~TileBorderLayer()
 static void
 drawParallel(float lat, float lon0, float lon1)
 {
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     float cosLat = cos(lat);
     float sinLat = sin(lat);
 
@@ -47,12 +48,14 @@ drawParallel(float lat, float lon0, float lon1)
         glVertex3fv(v.data());
     }
     glEnd();
+#endif
 }
 
 
 static void
 drawMeridian(float lon, float lat0, float lat1)
 {
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     float cosLon = cos(lon);
     float sinLon = sin(lon);
 
@@ -66,6 +69,7 @@ drawMeridian(float lon, float lat0, float lat1)
         glVertex3fv(v.data());
     }
     glEnd();
+#endif
 }
 
 

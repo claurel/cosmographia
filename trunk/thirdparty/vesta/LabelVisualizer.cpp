@@ -49,11 +49,13 @@ LabelVisualizer::handleRayPick(const PickContext* pc, const Eigen::Vector3d& pic
         }
     }
 
+    float pickAdjust = m_label->pickSizeAdjustment();
+    
     double cosAngle = pc->pickDirection().dot(-pickOrigin.normalized());
     if (cosAngle > 0.0)
     {
         // Return true if the label marker was clicked
-        if (cosAngle >= 1.0 || acos(cosAngle) < m_label->apparentSize() / 2.0 * pc->pixelAngle())
+        if (cosAngle >= 1.0 || acos(cosAngle) < (m_label->apparentSize() / 2.0 + pickAdjust) * pc->pixelAngle())
         {
             return true;
         }
@@ -74,9 +76,9 @@ LabelVisualizer::handleRayPick(const PickContext* pc, const Eigen::Vector3d& pic
 
         if (m_label->font())
         {
-            if (y > 0.0f && y < m_label->font()->maxAscent())
+            if (y > -pickAdjust && y < m_label->font()->maxAscent() + pickAdjust)
             {
-                if (x > 0.0f && x < m_label->font()->textWidth(m_label->text()))
+                if (x > -pickAdjust && x < m_label->font()->textWidth(m_label->text()) + pickAdjust)
                 {
                     return true;
                 }

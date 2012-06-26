@@ -1,4 +1,4 @@
-// GLBufferObject.cpp
+	// GLBufferObject.cpp
 //
 // Copyright (C) 2010 Chris Laurel <claurel@gmail.com>
 //
@@ -135,7 +135,11 @@ GLBufferObject::map(GLenum access)
     else
     {
         bind();
+#ifdef VESTA_OGLES2
+        data = glMapBufferOES(m_target, access);
+#else
         data = glMapBuffer(m_target, access);
+#endif
         m_isMapped = true;
     }
 
@@ -158,7 +162,11 @@ GLBufferObject::unmap()
     else
     {
         bind();
+#ifdef VESTA_OGLES2
+        bool lost = glUnmapBufferOES(m_target) == GL_FALSE;
+#else
         bool lost = glUnmapBuffer(m_target) == GL_FALSE;
+#endif
         m_isMapped = false;
 
         return !lost;
@@ -169,11 +177,17 @@ GLBufferObject::unmap()
 /** Map a vertex buffer for read-only access. Returns a pointer to the
   *  buffer contents mapped into memory or null if there was an error.
   *  map() returns null if the buffer is already mapped.
+  *
+  *  NOTE: This function will always fail on platforms with OpenGL ES
   */
 const void*
 GLBufferObject::mapReadOnly()
 {
+#ifdef VESTA_OGLES2
+    return NULL;
+#else
     return map(GL_READ_ONLY);
+#endif
 }
 
 
@@ -198,18 +212,28 @@ GLBufferObject::mapWriteOnly(bool discardContents)
         // preserved.
         glBufferData(m_target, m_size, NULL, m_usage);
     }
+#ifdef VESTA_OGLES2
+    return map(GL_WRITE_ONLY_OES);
+#else
     return map(GL_WRITE_ONLY);
+#endif
 }
 
 
 /** Map a vertex buffer for read-write access. Returns a pointer to the
   *  buffer contents mapped into memory or null if there was an error.
   *  map() returns null if the buffer is already mapped.
+  *
+  *  NOTE: This function will always fail on platforms with OpenGL ES
   */
 void*
 GLBufferObject::mapReadWrite()
 {
+#ifdef VESTA_OGLES2
+    return NULL;
+#else
     return map(GL_READ_WRITE);
+#endif
 }
 
 
@@ -227,5 +251,10 @@ GLBufferObject::supported()
     // functions would need to be changed to their ARB equivalents if we relied this test.
     //return GLEW_ARB_vertex_buffer_object == GL_TRUE;
 
+#ifdef VESTA_OGLES2
+    // TODO: Should check for OES_mapbuffer
+    return true;
+#else
     return GLEW_VERSION_1_5 == GL_TRUE;
+#endif
 }

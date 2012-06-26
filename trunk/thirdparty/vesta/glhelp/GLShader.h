@@ -25,8 +25,13 @@
 #define _VESTA_GL_SHADER_H_
 
 #include "../Object.h"
-#include <GL/glew.h>
+#include "../OGLHeaders.h"
 #include <string>
+
+// GLhandle type not present in OpenGL ES
+#if defined(VESTA_OGLES2)
+#define GLhandleARB GLuint
+#endif
 
 namespace vesta
 {

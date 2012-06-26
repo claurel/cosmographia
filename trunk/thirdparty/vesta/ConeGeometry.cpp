@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 668 $ $Date: 2012-04-24 12:40:30 -0700 (Tue, 24 Apr 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -12,7 +12,7 @@
 #include "RenderContext.h"
 #include "Material.h"
 #include "Units.h"
-#include "GL/glew.h"
+#include "OGLHeaders.h"
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>

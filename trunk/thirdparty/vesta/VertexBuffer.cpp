@@ -128,6 +128,30 @@ VertexBuffer*
 VertexBuffer::Create(unsigned int size, UsagePattern usage, const void* data)
 {
     GLenum glUsage = GL_STATIC_DRAW;
+#ifdef VESTA_OGLES2
+    switch (usage)
+    {
+    case StaticDraw:
+        glUsage = GL_STATIC_DRAW;
+        break;
+    case StreamDraw:
+        glUsage = GL_STREAM_DRAW;
+        break;
+    case DynamicDraw:
+        glUsage = GL_DYNAMIC_DRAW;
+        break;
+    case StaticRead:
+    case StreamRead:
+    case DynamicRead:
+        VESTA_WARNING("'Read' usage pattern not supported for buffers in OpenGL ES");
+        return NULL;
+    case StaticCopy:
+    case StreamCopy:
+    case DynamicCopy:
+        VESTA_WARNING("'Copy' usage pattern not supported for buffers in OpenGL ES");
+        return NULL;
+    }
+#else
     switch (usage)
     {
     case StaticDraw:
@@ -158,6 +182,7 @@ VertexBuffer::Create(unsigned int size, UsagePattern usage, const void* data)
         glUsage = GL_DYNAMIC_COPY;
         break;
     }
+#endif
 
     VertexBuffer* vb = NULL;
 

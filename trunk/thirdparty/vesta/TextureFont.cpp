@@ -1,5 +1,5 @@
 /*
- * $Revision: 638 $ $Date: 2012-01-26 14:36:47 -0800 (Thu, 26 Jan 2012) $
+ * $Revision: 675 $ $Date: 2012-05-22 17:17:55 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -13,7 +13,7 @@
 #include "Debug.h"
 #include "internal/InputDataStream.h"
 #include "internal/DefaultFont.h"
-#include <GL/glew.h>
+#include "OGLHeaders.h"
 #include <algorithm>
 
 using namespace vesta;
@@ -67,12 +67,16 @@ TextureFont::lookupGlyph(wchar_t ch) const
 
 /** Render a string of text at the specified starting poisition. The string encoding
   * is assumed to be Latin-1 (ISO 8859-1).
+  *
+  * Note that this method will not draw anything on systems with OpenGL ES 2.0 (typically mobile
+  * devices.) For compatibility with all systems, use renderStringToBuffer instead.
   */
 Vector2f
 TextureFont::render(const string& text, const Vector2f& startPosition) const
 {
     Vector2f currentPosition = startPosition;
 
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     glBegin(GL_QUADS);
     for (unsigned int i = 0; i < text.length(); ++i)
     {
@@ -97,6 +101,7 @@ TextureFont::render(const string& text, const Vector2f& startPosition) const
         }
     }
     glEnd();
+#endif
 
     return currentPosition;
 }
@@ -109,12 +114,16 @@ static inline unsigned int lower6bits(char c)
 
 
 /** Render a string of UTF-8 encoded text at the specified starting position.
-  */
+ *
+ *  Note that this method will not draw anything on systems with OpenGL ES 2.0 (typically mobile
+ *  devices.) For compatibility with all systems, use renderStringToBuffer instead.
+ */
 Vector2f
 TextureFont::renderUtf8(const string& text, const Vector2f& startPosition) const
 {
     Vector2f currentPosition = startPosition;
 
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     glBegin(GL_QUADS);
     unsigned int i = 0;
 
@@ -215,15 +224,25 @@ TextureFont::renderUtf8(const string& text, const Vector2f& startPosition) const
         i += decodeBytes;
     }
     glEnd();
-
+#endif
+    
     return currentPosition;
 }
 
 
-/** Render a string at the specified starting position. The string encoding is specified as a parameter.
+/** Render a string at the specified starting position. The string encoding is specified as a .
+  * parameter. The position at the end of the string is returned in order to make it possible
+  * to place strings next to each other.
+  *
+  * Note that this method will not draw anything on systems with OpenGL ES 2.0 (typically mobile
+  * devices.) For compatibility with all systems, use renderStringToBuffer instead.
+  *
+  * \return position immediately after final character in string
   */
 Vector2f
-TextureFont::renderEncodedString(const string &text, const Eigen::Vector2f &startPosition, Encoding encoding) const
+TextureFont::renderEncodedString(const string& text,
+                                 const Eigen::Vector2f& startPosition,
+                                 Encoding encoding) const
 {
     switch (encoding)
     {
@@ -237,6 +256,302 @@ TextureFont::renderEncodedString(const string &text, const Eigen::Vector2f &star
         VESTA_WARNING("Unknown string encoding.");
         return startPosition;
     }
+}
+
+
+/** Fill a buffer with vertices for a string of glyphs from this
+ *  font. If there is not enough room in the buffer, not all of
+ *  the characters in the string will be output.
+ *
+ * \return position immediately after final character in string
+ */
+Vector2f
+TextureFont::renderStringToBuffer(const std::string& text,
+                                  const Eigen::Vector2f &startPosition,
+                                  Encoding encoding,
+                                  char* vertexData,
+                                  unsigned int vertexDataSize,
+                                  unsigned int* verticesUsed) const
+{
+    if (vertexData == NULL)
+    {
+        return startPosition;
+    }
+    
+    switch (encoding)
+    {
+    // ASCII and Latin-1 are currently treated as identical encodings
+    case Ascii:
+    case Latin1:
+        return renderLatin1ToBuffer(text, startPosition, vertexData, vertexDataSize, verticesUsed);
+    case Utf8:
+        return renderUtf8ToBuffer(text, startPosition, vertexData, vertexDataSize, verticesUsed);
+    default:
+        VESTA_WARNING("Unknown string encoding.");
+        return startPosition;
+    }
+}
+
+
+static inline void
+OutputPositionTexVertexToBuffer(float x,
+                                float y,
+                                const Vector2f& texCoord,
+                                float* buffer)
+{
+    buffer[0] = x;
+    buffer[1] = y;
+    buffer[2] = 0.0f;
+    buffer[3] = texCoord.x();
+    buffer[4] = texCoord.y();
+}
+
+
+static const unsigned int VERTEX_SIZE_FLOATS = 5;
+static const unsigned int VERTEX_SIZE = VERTEX_SIZE_FLOATS * sizeof(float);
+static const unsigned int VERTEX_COUNT_PER_GLYPH = 6;
+static const unsigned int GLYPH_SIZE = VERTEX_SIZE * VERTEX_COUNT_PER_GLYPH;
+static const unsigned int GLYPH_SIZE_FLOATS = GLYPH_SIZE / sizeof(float);
+
+static void
+OutputGlyphToBuffer(const TextureFont::Glyph& glyph,
+                    const Vector2f& position,
+                    float* buffer)
+{
+    float left = position.x();
+    float bottom = position.y();
+    float right = position.x() + glyph.size.x();
+    float top = position.y() + glyph.size.y();
+
+    OutputPositionTexVertexToBuffer(left,  bottom, glyph.textureCoords[0], buffer);
+    OutputPositionTexVertexToBuffer(right, bottom, glyph.textureCoords[1], buffer + VERTEX_SIZE_FLOATS * 1);
+    OutputPositionTexVertexToBuffer(right, top,    glyph.textureCoords[2], buffer + VERTEX_SIZE_FLOATS * 2);
+
+    OutputPositionTexVertexToBuffer(left,  bottom, glyph.textureCoords[0], buffer + VERTEX_SIZE_FLOATS * 3);
+    OutputPositionTexVertexToBuffer(right, top,    glyph.textureCoords[2], buffer + VERTEX_SIZE_FLOATS * 4);
+    OutputPositionTexVertexToBuffer(left,  top,    glyph.textureCoords[3], buffer + VERTEX_SIZE_FLOATS * 5);
+}
+
+
+// Private method that performs the actual work of drawing glyphs
+Vector2f
+TextureFont::renderUtf8ToBuffer(const std::string& text,
+                                const Eigen::Vector2f& startPosition,
+                                char* vertexData,
+                                unsigned int vertexDataSize,
+                                unsigned int* vertexCount) const
+{
+    Vector2f currentPosition = startPosition;
+    unsigned int glyphCount = 0;
+    unsigned int maxGlyphs = 0x10000000;
+
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
+    if (vertexData)
+    {
+        maxGlyphs = vertexDataSize / GLYPH_SIZE;
+    }
+    else
+    {
+        glBegin(GL_QUADS);
+    }
+#endif
+    unsigned int i = 0;
+
+    while (i < text.length() && glyphCount < maxGlyphs)
+    {
+        unsigned char byte0 = text[i];
+        unsigned int decodeBytes = 0;
+
+        if (byte0 < 0x80)
+        {
+            decodeBytes = 1;
+        }
+        else if ((byte0 & 0xe0) == 0xc0)
+        {
+            decodeBytes = 2;
+        }
+        else if ((byte0 & 0xf0) == 0xe0)
+        {
+            decodeBytes = 3;
+        }
+        else if ((byte0 & 0xf8) == 0xf0)
+        {
+            decodeBytes = 4;
+        }
+        else if ((byte0 & 0xfc) == 0xf8)
+        {
+            decodeBytes = 5;
+        }
+        else if ((byte0 & 0xfe) == 0xfc)
+        {
+            decodeBytes = 6;
+        }
+
+        if (decodeBytes == 0 || i + decodeBytes > text.length())
+        {
+            // Invalid UTF-8 encoding
+            break;
+        }
+
+        unsigned int glyphId = 0;
+        switch (decodeBytes)
+        {
+        case 1:
+            glyphId = byte0;
+            break;
+        case 2:
+            glyphId = ((byte0 & 0x1f) << 6) |
+                      lower6bits(text[i + 1]);
+            break;
+        case 3:
+            glyphId = ((byte0 & 0x0f) << 12) |
+                      (lower6bits(text[i + 1]) << 6) |
+                      lower6bits(text[i + 2]);
+            break;
+        case 4:
+            glyphId = ((byte0 & 0x07) << 18) |
+                      (lower6bits(text[i + 1]) << 12) |
+                      (lower6bits(text[i + 2]) << 6)  |
+                      lower6bits(text[i + 3]);
+            break;
+        case 5:
+            glyphId = ((byte0 & 0x03) << 24) |
+                      (lower6bits(text[i + 1]) << 18) |
+                      (lower6bits(text[i + 2]) << 12) |
+                      (lower6bits(text[i + 3]) << 6)  |
+                      lower6bits(text[i + 4]);
+            break;
+        case 6:
+            glyphId = ((byte0 & 0x01) << 30)    |
+                      (lower6bits(text[i + 1]) << 24) |
+                      (lower6bits(text[i + 2]) << 18) |
+                      (lower6bits(text[i + 3]) << 12) |
+                      (lower6bits(text[i + 4]) << 6)  |
+                      lower6bits(text[i + 5]);
+            break;
+        default:
+            break;
+        }
+
+        const Glyph* glyph = lookupGlyph(glyphId);
+
+        if (glyph)
+        {
+            Vector2f p = currentPosition + glyph->offset;
+
+            if (vertexData)
+            {
+                OutputGlyphToBuffer(*glyph, p, reinterpret_cast<float*>(vertexData) + GLYPH_SIZE_FLOATS * glyphCount);
+            }
+            else
+            {
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
+                glTexCoord2fv(glyph->textureCoords[0].data());
+                glVertex2f(p.x(), p.y());
+                glTexCoord2fv(glyph->textureCoords[1].data());
+                glVertex2f(p.x() + glyph->size.x(), p.y());
+                glTexCoord2fv(glyph->textureCoords[2].data());
+                glVertex2f(p.x() + glyph->size.x(), p.y() + glyph->size.y());
+                glTexCoord2fv(glyph->textureCoords[3].data());
+                glVertex2f(p.x(), p.y() + glyph->size.y());
+#endif
+            }
+
+            currentPosition.x() += glyph->advance;
+            ++glyphCount;
+        }
+
+        i += decodeBytes;
+    }
+
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
+    if (!vertexData)
+    {
+        glEnd();
+    }
+#endif
+
+    if (vertexCount)
+    {
+        *vertexCount = VERTEX_COUNT_PER_GLYPH * glyphCount;
+    }
+
+    return currentPosition;
+}
+
+
+// Private method that performs the actual work of drawing glyphs
+Vector2f
+TextureFont::renderLatin1ToBuffer(const std::string& text,
+                                  const Eigen::Vector2f& startPosition,
+                                  char* vertexData,
+                                  unsigned int vertexDataSize,
+                                  unsigned int* vertexCount) const
+{
+    Vector2f currentPosition = startPosition;
+    unsigned int glyphCount = 0;
+    unsigned int maxGlyphs = 0x10000000;
+    
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
+    if (vertexData)
+    {
+        maxGlyphs = vertexDataSize / GLYPH_SIZE;
+    }
+    else
+    {
+        glBegin(GL_QUADS);
+    }
+#endif
+    unsigned int i = 0;
+    
+    while (i < text.length() && glyphCount < maxGlyphs)
+    {
+        // The cast to unsigned char is critical for glyph lookup to work correctly;
+        // otherwise, extended characters will generate negative indices.
+        const Glyph* glyph = lookupGlyph((unsigned char) text[i]);
+        
+        if (glyph)
+        {
+            Vector2f p = currentPosition + glyph->offset;
+            
+            if (vertexData)
+            {
+                OutputGlyphToBuffer(*glyph, p, reinterpret_cast<float*>(vertexData) + GLYPH_SIZE_FLOATS * glyphCount);
+            }
+            else
+            {
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
+                glTexCoord2fv(glyph->textureCoords[0].data());
+                glVertex2f(p.x(), p.y());
+                glTexCoord2fv(glyph->textureCoords[1].data());
+                glVertex2f(p.x() + glyph->size.x(), p.y());
+                glTexCoord2fv(glyph->textureCoords[2].data());
+                glVertex2f(p.x() + glyph->size.x(), p.y() + glyph->size.y());
+                glTexCoord2fv(glyph->textureCoords[3].data());
+                glVertex2f(p.x(), p.y() + glyph->size.y());
+#endif
+            }
+            
+            currentPosition.x() += glyph->advance;
+            ++glyphCount;
+        }
+        
+        i++;
+    }
+    
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
+    if (!vertexData)
+    {
+        glEnd();
+    }
+#endif
+    
+    if (vertexCount)
+    {
+        *vertexCount = VERTEX_COUNT_PER_GLYPH * glyphCount;
+    }
+    
+    return currentPosition;
 }
 
 

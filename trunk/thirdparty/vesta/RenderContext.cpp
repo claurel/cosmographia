@@ -1,5 +1,5 @@
 /*
- * $Revision: 609 $ $Date: 2011-04-29 12:30:42 -0700 (Fri, 29 Apr 2011) $
+ * $Revision: 676 $ $Date: 2012-05-22 17:48:11 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -119,6 +119,9 @@ RenderContext::Environment::Environment() :
 
 static bool InitGL()
 {
+#ifdef VESTA_OGLES2
+    return true;
+#else
     // Intialize all OpenGL extensions
     if (glewInit() != GLEW_OK)
     {
@@ -129,6 +132,7 @@ static bool InitGL()
     {
         return true;
     }
+#endif
 }
 
 
@@ -194,6 +198,9 @@ RenderContext::GetHardwareCapability()
 
     if (m_glInitialized)
     {
+#ifdef VESTA_OGLES2
+        return GLSL1;
+#else
         if (GLEW_ARB_shading_language_100 && GLEW_ARB_shader_objects)
         {
             // TODO: query and parse GL_SHADING_LANGUAGE_VERSION to discover
@@ -204,6 +211,7 @@ RenderContext::GetHardwareCapability()
         {
             return FixedFunction;
         }
+#endif
     }
     else
     {
@@ -246,12 +254,14 @@ RenderContext::RenderContext(ShaderCapability capability) :
 
 RenderContext::~RenderContext()
 {
+#ifndef VESTA_OGLES2
     if (m_modelViewStackDepth > 0)
     {
         glMatrixMode(GL_MODELVIEW);
         for (unsigned int i = 0; i < m_modelViewStackDepth; ++i)
             glPopMatrix();
     }
+#endif
 
     delete m_particleBuffer;
     delete[] m_vertexStream;
@@ -263,6 +273,7 @@ RenderContext::createGLResources()
 {
     if (m_shaderCapability != FixedFunction)
     {
+#ifndef VESTA_OGLES2
         // Create special purpose shaders.
 
         // Camera distance shader is used for rendering cubic shadow maps
@@ -272,6 +283,7 @@ RenderContext::createGLResources()
         {
             VESTA_WARNING("Error creating camera distance shader for shadow mapping.");
         }
+#endif
     }
 
     m_vertexStreamBuffer = VertexBuffer::Create(0x40000, VertexBuffer::StreamDraw, NULL);
@@ -309,8 +321,10 @@ RenderContext::pushModelView()
         m_matrixStack[m_modelViewStackDepth] = m_matrixStack[m_modelViewStackDepth - 1];
     }
 
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
+#endif
 
     invalidateModelViewMatrix();
 }
@@ -325,8 +339,10 @@ RenderContext::popModelView()
         m_modelViewStackDepth--;
     }
 
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
+#endif
 
     invalidateModelViewMatrix();
 }
@@ -337,8 +353,10 @@ RenderContext::popModelView()
 void
 RenderContext::identityModelView()
 {
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+#endif
     m_matrixStack[m_modelViewStackDepth] = Transform3f::Identity();
 
     invalidateModelViewMatrix();
@@ -348,8 +366,10 @@ RenderContext::identityModelView()
 void
 RenderContext::translateModelView(const Vector3f& v)
 {
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glTranslatef(v.x(), v.y(), v.z());
+#endif
     m_matrixStack[m_modelViewStackDepth] = m_matrixStack[m_modelViewStackDepth] * Translation3f(v);
 
     invalidateModelViewMatrix();
@@ -359,8 +379,10 @@ RenderContext::translateModelView(const Vector3f& v)
 void
 RenderContext::rotateModelView(const Quaternionf& q)
 {
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glMultMatrixf(Transform3f(q).data());
+#endif
     m_matrixStack[m_modelViewStackDepth] = m_matrixStack[m_modelViewStackDepth] * q;
 
     invalidateModelViewMatrix();
@@ -370,8 +392,10 @@ RenderContext::rotateModelView(const Quaternionf& q)
 void
 RenderContext::scaleModelView(const Vector3f& v)
 {
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glScalef(v.x(), v.y(), v.z());
+#endif
     m_matrixStack[m_modelViewStackDepth] = m_matrixStack[m_modelViewStackDepth] * Scaling3f(v);
 
     invalidateModelViewMatrix();
@@ -381,8 +405,10 @@ RenderContext::scaleModelView(const Vector3f& v)
 void
 RenderContext::setModelView(const Matrix4f& m)
 {
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(m.data());
+#endif
     m_matrixStack[m_modelViewStackDepth] = m;
 
     invalidateModelViewMatrix();
@@ -427,9 +453,11 @@ RenderContext::popProjection()
     if (m_projectionStackDepth > 0)
     {
         m_projectionStackDepth--;
+#ifndef VESTA_OGLES2
         glMatrixMode(GL_PROJECTION);
         glLoadMatrixf(m_projectionStack[m_projectionStackDepth].data());
         glMatrixMode(GL_MODELVIEW);
+#endif
     }
 }
 
@@ -440,10 +468,11 @@ void
 RenderContext::setProjection(const PlanarProjection& projection)
 {
     m_projectionStack[m_projectionStackDepth].matrix() = projection.matrix();
-
+#ifndef VESTA_OGLES2
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(m_projectionStack[m_projectionStackDepth].matrix().data());
     glMatrixMode(GL_MODELVIEW);
+#endif
     m_frustumStack[m_projectionStackDepth] = projection.frustum();
 }
 
@@ -475,9 +504,14 @@ RenderContext::bindVertexArray(const VertexSpec& spec, const void* vertexData, u
     if (positionAttr.format() != VertexAttribute::Float3)
         return;
 
+#ifdef VESTA_OGLES2
+    glEnableVertexAttribArray(ShaderBuilder::PositionAttributeLocation);
+    glVertexAttribPointer(ShaderBuilder::PositionAttributeLocation, 3, GL_FLOAT, GL_FALSE, stride,
+                          data + spec.attributeOffset(positionIndex));
+#else
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, stride, data + spec.attributeOffset(positionIndex));
-
+#endif
 
     // Normals
     m_vertexInfo.hasNormals = false;
@@ -486,15 +520,25 @@ RenderContext::bindVertexArray(const VertexSpec& spec, const void* vertexData, u
         VertexAttribute normalAttr = spec.attribute(normalIndex);
         if (normalAttr.format() == VertexAttribute::Float3)
         {
+#ifdef VESTA_OGLES2
+            glEnableVertexAttribArray(ShaderBuilder::NormalAttributeLocation);
+            glVertexAttribPointer(ShaderBuilder::NormalAttributeLocation, 3, GL_FLOAT, GL_FALSE, stride,
+                                  data + spec.attributeOffset(normalIndex));
+#else
             glEnableClientState(GL_NORMAL_ARRAY);
             glNormalPointer(GL_FLOAT, stride, data + spec.attributeOffset(normalIndex));
+#endif
             m_vertexInfo.hasNormals = true;
         }
     }
 
     if (!m_vertexInfo.hasNormals)
     {
+#ifdef VESTA_OGLES2
+        glDisableVertexAttribArray(ShaderBuilder::NormalAttributeLocation);
+#else
         glDisableClientState(GL_NORMAL_ARRAY);
+#endif
     }
 
     // Texture coordinates
@@ -514,15 +558,26 @@ RenderContext::bindVertexArray(const VertexSpec& spec, const void* vertexData, u
 
         if (formatSize != 0)
         {
+#ifdef VESTA_OGLES2
+            glEnableVertexAttribArray(ShaderBuilder::TexCoordAttributeLocation);
+            glVertexAttribPointer(ShaderBuilder::TexCoordAttributeLocation,
+                                  formatSize, GL_FLOAT, GL_FALSE, stride,
+                                  data + spec.attributeOffset(texCoordIndex));
+#else
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             glTexCoordPointer(formatSize, GL_FLOAT, stride, data + spec.attributeOffset(texCoordIndex));
+#endif
             m_vertexInfo.hasTexCoords = true;
         }
     }
 
     if (!m_vertexInfo.hasTexCoords)
     {
+#ifdef VESTA_OGLES2
+        glDisableVertexAttribArray(ShaderBuilder::TexCoordAttributeLocation);
+#else
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
     }
 
     // Vertex colors
@@ -543,15 +598,25 @@ RenderContext::bindVertexArray(const VertexSpec& spec, const void* vertexData, u
 
         if (formatSize != 0)
         {
+#ifdef VESTA_OGLES2
+            glEnableVertexAttribArray(ShaderBuilder::ColorAttributeLocation);
+            glVertexAttribPointer(ShaderBuilder::ColorAttributeLocation, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride,
+                                  data + spec.attributeOffset(colorIndex));
+#else
             glEnableClientState(GL_COLOR_ARRAY);
             glColorPointer(formatSize, formatType, stride, data + spec.attributeOffset(colorIndex));
+#endif
             m_vertexInfo.hasColors = true;
         }
     }
 
     if (!m_vertexInfo.hasColors)
     {
+#ifdef VESTA_OGLES2
+        glDisableVertexAttribArray(ShaderBuilder::ColorAttributeLocation);
+#else
         glDisableClientState(GL_COLOR_ARRAY);
+#endif
     }
 
     // Tangents
@@ -563,16 +628,26 @@ RenderContext::bindVertexArray(const VertexSpec& spec, const void* vertexData, u
             VertexAttribute tangentAttr = spec.attribute(tangentIndex);
             if (tangentAttr.format() == VertexAttribute::Float3)
             {
+#ifdef VESTA_OGLES2
+                glEnableVertexAttribArray(ShaderBuilder::TangentAttributeLocation);
+                glVertexAttribPointer(ShaderBuilder::TangentAttributeLocation, 3, GL_FLOAT, GL_FALSE, stride,
+                                      data + spec.attributeOffset(tangentIndex));
+#else
                 glEnableVertexAttribArrayARB(ShaderBuilder::TangentAttributeLocation);
                 glVertexAttribPointerARB(ShaderBuilder::TangentAttributeLocation,
                                          3, GL_FLOAT, GL_FALSE, stride, data + spec.attributeOffset(tangentIndex));
+#endif
                 m_vertexInfo.hasTangents = true;
             }
         }
 
         if (!m_vertexInfo.hasTangents)
         {
+#ifdef VESTA_OGLES2
+            glDisableVertexAttribArray(ShaderBuilder::TangentAttributeLocation);
+#else
             glDisableVertexAttribArrayARB(ShaderBuilder::TangentAttributeLocation);
+#endif
         }
     }
 
@@ -619,13 +694,22 @@ RenderContext::unbindVertexBuffer()
 void
 RenderContext::unbindVertexArray()
 {
+#ifdef VESTA_OGLES2
+    glDisableVertexAttribArray(ShaderBuilder::PositionAttributeLocation);
+    glDisableVertexAttribArray(ShaderBuilder::NormalAttributeLocation);
+    glDisableVertexAttribArray(ShaderBuilder::TexCoordAttributeLocation);
+    glDisableVertexAttribArray(ShaderBuilder::ColorAttributeLocation);
+    glDisableVertexAttribArray(ShaderBuilder::TangentAttributeLocation);
+#else
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
     if (m_shaderCapability != FixedFunction)
     {
         glDisableVertexAttribArrayARB(ShaderBuilder::TangentAttributeLocation);
     }
+#endif
     m_vertexInfo.hasColors = false;
     m_vertexInfo.hasNormals = false;
     m_vertexInfo.hasTexCoords = false;
@@ -777,6 +861,7 @@ static void setBlendMode(const Material* material)
 void
 RenderContext::setFixedFunctionMaterial(const Material* material)
 {
+#ifndef VESTA_OGLES2
     if (!m_vertexInfo.hasNormals)
     {
         glDisable(GL_LIGHTING);
@@ -859,6 +944,7 @@ RenderContext::setFixedFunctionMaterial(const Material* material)
     glPopMatrix();
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, m_environment.m_ambientLight.data());
+#endif // VESTA_OGLES2
 }
 
 
@@ -1079,7 +1165,7 @@ RenderContext::setShaderMaterial(const Material* material)
     if (shaderInfo.hasTexture(ShaderInfo::ReflectionTexture))
     {
         glActiveTexture(GL_TEXTURE0 + ReflectionTextureUnit);
-        glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, m_environment.m_environmentMap->id());
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_environment.m_environmentMap->id());
         glActiveTexture(GL_TEXTURE0);
         shader->setSampler("reflectionTex", ReflectionTextureUnit);
 
@@ -1207,13 +1293,14 @@ RenderContext::setShaderMaterial(const Material* material)
             {
                 unsigned int texUnit = OmniShadowTextureUnits[i];
                 glActiveTexture(GL_TEXTURE0 + texUnit);
-                glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, m_environment.m_omniShadowMaps[i]->id());
+                glBindTexture(GL_TEXTURE_CUBE_MAP, m_environment.m_omniShadowMaps[i]->id());
                 glActiveTexture(GL_TEXTURE0);
                 shader->setSampler(OmniShadowSamplerNames[i], texUnit);
             }
         }
     }
 
+#ifndef VESTA_OGLES2
     if (shaderInfo.hasScattering())
     {
         Vector3f Br = m_environment.m_scattering.rayleighCoeff;
@@ -1240,6 +1327,7 @@ RenderContext::setShaderMaterial(const Material* material)
             shader->setSampler("scatterTex", ScatterTextureUnit);
         }
     }
+#endif // VESTA_OGLES2
 
     setBlendMode(material);
 }
@@ -1262,7 +1350,7 @@ RenderContext::updateShaderState()
             if (m_customShader.isValid())
             {
                 // Ignore the custom shader if we're in a special output mode
-                if (m_rendererOutput != FragmentColor)
+                if (m_rendererOutput == FragmentColor)
                 {
                     m_customShader->bind();
                 }
@@ -1289,6 +1377,14 @@ RenderContext::updateShaderTransformConstants()
     if (!m_modelViewMatrixCurrent)
     {
         m_modelViewMatrixCurrent = true;
+
+#ifdef VESTA_OGLES2
+        if (!m_customShader.isValid())
+        {
+            m_currentShader->setConstant("vesta_ModelViewProjectionMatrix", (projection() * modelview()).matrix());
+        }
+#endif
+
         if (m_shaderCapability != FixedFunction && m_rendererOutput == FragmentColor)
         {
             // The shadow matrices must be updated whenever the modelview matrix changes; they are
@@ -1350,7 +1446,7 @@ RenderContext::invalidateShaderState()
 
 /** Set the vertex information flags from
  *  a vertex specification. This is used by various methods
- *  that use immedate mode rendering instead of setting a vertex
+ *  that use immediate mode rendering instead of setting a vertex
  *  array. This code will eventually be revised to used vertex
  *  arrays exclusively.
  */
@@ -1611,11 +1707,16 @@ RenderContext::setScatteringParameters(const ScatteringParameters& params)
 void
 RenderContext::setSphericalGeometryHint(bool enabled)
 {
+    // Ignore this hint when using OpenGL ES 2.0; on mobile GPUs, we can't afford
+    // the extra shader instructions, and the quality improvement is very modest
+    // unless scattering atmospheres are enabled.
+#ifndef VESTA_OGLES2
     if (enabled != m_environment.m_sphericalGeometry)
     {
         m_environment.m_sphericalGeometry = enabled;
         invalidateShaderState();
     }
+#endif
 }
 
 
@@ -1650,6 +1751,24 @@ RenderContext::drawBillboard(const Vector3f& position, float size)
 
     Matrix3f m = m_matrixStack[m_modelViewStackDepth].linear().transpose();
 
+
+#ifdef VESTA_NO_IMMEDIATE_MODE_3D
+    struct BillboardVertex
+    {
+        Vector3f position;
+        Vector2f texCoord;
+    };
+
+    BillboardVertex vertexData[4];
+    for (int i = 0; i < 4; i++)
+    {
+        vertexData[i].position = position + (m * billboardVertices[i]) * size;
+        vertexData[i].texCoord = billboardTexCoords[i];
+    }
+    bindVertexArray(VertexSpec::PositionTex, vertexData, sizeof(BillboardVertex));
+    updateShaderState();
+    drawPrimitives(PrimitiveBatch(PrimitiveBatch::TriangleFan, 2, 0));
+#else
     for (int i = 0; i < 4; i++)
     {
         billboardVertices[i] = m * billboardVertices[i];
@@ -1666,6 +1785,7 @@ RenderContext::drawBillboard(const Vector3f& position, float size)
         glVertex3fv(v.data());
     }
     glEnd();
+#endif
 }
 
 
@@ -1731,7 +1851,54 @@ RenderContext::drawEncodedText(const Vector3f& position,
     // any objects in front of it.
     translateModelView(position + Vector3f(0.125f, 0.125f, -ndc.z()));
 
+#ifdef VESTA_NO_IMMEDIATE_MODE_3D
+#ifndef USE_VERTEX_BUFFER_OBJECT_FOR_TEXT
+    char vertexData[4096];
+    unsigned int vertexCount = 0;
+    font->renderStringToBuffer(text,
+                               Vector2f(std::floor(p.x() * m_viewportWidth + 0.5f), std::floor(p.y() * m_viewportHeight + 0.5f)),
+                               encoding,
+                               vertexData,
+                               sizeof(vertexData),
+                               &vertexCount);
+    if (vertexCount > 0)
+    {
+        const VertexSpec& vspec = VertexSpec::PositionTex;
+        bindVertexArray(vspec, vertexData, vspec.size());
+        drawPrimitives(PrimitiveBatch(PrimitiveBatch::Triangles, vertexCount / 3, 0));
+        unbindVertexArray();
+    }
+#else
+    // This version uses the vertex stream buffer. Unfortunately, on some systems this is is slower
+    // than simply writing to a system memory array. With the PowerVR driver, there is a dramatic
+    // slowdown when more than eight labels are onscreen. This is almost certainly due to exhausting
+    // the vertex buffer renaming chain. When several small primitive batches can't be aggregated, it is
+    // better to let the driver copy from system memory.
+    char* vertexData = reinterpret_cast<char*>(vertexStreamBuffer()->mapWriteOnly());
+    if (vertexData)
+    {
+        unsigned int vertexCount = 0;
+        font->renderStringToBuffer(text,
+                                   Vector2f(std::floor(p.x() * m_viewportWidth + 0.5f), std::floor(p.y() * m_viewportHeight + 0.5f)),
+                                   encoding,
+                                   vertexData,
+                                   vertexStreamBuffer()->size(),
+                                   &vertexCount);
+ 
+        vertexStreamBuffer()->unmap();
+        if (vertexCount > 0)
+        {
+            const VertexSpec& vspec = VertexSpec::PositionTex;
+            bindVertexBuffer(vspec, vertexStreamBuffer(), vspec.size());
+            drawPrimitives(PrimitiveBatch(PrimitiveBatch::Triangles, vertexCount / 3, 0));
+            unbindVertexBuffer();
+        }
+    }
+#endif // USE_VERTEX_BUFFER_OBJECT_FOR_TEXT
+    
+#else // VESTA_NO_IMMEDIATE_MODE_3D
     font->renderEncodedString(text, Vector2f(std::floor(p.x() * m_viewportWidth + 0.5f), std::floor(p.y() * m_viewportHeight + 0.5f)), encoding);
+#endif    
 
     popModelView();
     popProjection();
@@ -1745,6 +1912,7 @@ RenderContext::drawCone(float apexAngle,
                         float opacity,
                         unsigned int radialSubdivision, unsigned int axialSubdivision)
 {
+#ifndef VESTA_OGLES2
     const float twoPi = (float) (2 * PI);
     float slope = std::tan(apexAngle / 2.0f);
     float height = axis.norm();
@@ -1788,6 +1956,7 @@ RenderContext::drawCone(float apexAngle,
     }
 
     popModelView();
+#endif
 }
 
 
@@ -1799,6 +1968,7 @@ RenderContext::drawCircle(float radius,
                           float opacity,
                           unsigned int subdivision)
 {
+#ifndef VESTA_OGLES2
     const float twoPi = (float) (2 * PI);
 
     pushModelView();
@@ -1823,12 +1993,14 @@ RenderContext::drawCircle(float radius,
     glEnd();
 
     popModelView();
+#endif
 }
 
 
 void
 RenderContext::drawBox(const Vector3f& sideLengths, const Spectrum& color)
 {
+#ifndef VESTA_OGLES2
     setVertexInfo(VertexSpec::Position);
 
     Material material;
@@ -1862,6 +2034,7 @@ RenderContext::drawBox(const Vector3f& sideLengths, const Spectrum& color)
     glVertex3f(-half.x(),  half.y(),  half.z());
     glVertex3f(-half.x(),  half.y(),  -half.z());
     glEnd();
+#endif
 }
 
 
@@ -1926,7 +2099,9 @@ public:
         }
 
         m_rc->bindVertexArray(ParticleVertexSpec, m_vertexStream, ParticleVertexSpec.size());
+#ifndef VESTA_OGLES2
         glDrawArrays(GL_QUADS, 0, particles.size() * 4);
+#endif
     }
 
 private:
@@ -2001,7 +2176,9 @@ public:
         }
 
         m_rc->bindVertexArray(ParticleVertexSpec, m_vertexStream, ParticleVertexSpec.size());
+#ifndef VESTA_OGLES2
         glDrawArrays(GL_QUADS, 0, particles.size() * 4);
+#endif
     }
 
 private:
@@ -2015,7 +2192,9 @@ private:
 void
 RenderContext::drawParticles(ParticleEmitter* emitter, double clock)
 {
+#ifndef VESTA_NO_FIXED_FUNCTION_3D
     glDisable(GL_LIGHTING);
+#endif
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -2046,7 +2225,9 @@ RenderContext::drawParticles(ParticleEmitter* emitter, double clock)
         //glDisable(GL_POINT_SPRITE_ARB);
     }
 
+#ifndef VESTA_NO_FIXED_FUNCTION_3D
     glEnable(GL_LIGHTING);
+#endif
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
@@ -2059,7 +2240,11 @@ RenderContext::unbindShader()
 {
     if (m_shaderCapability != FixedFunction)
     {
+#ifdef VESTA_OGLES2
+        glUseProgram(0);
+#else
         glUseProgramObjectARB(0);
+#endif
     }
 }
 

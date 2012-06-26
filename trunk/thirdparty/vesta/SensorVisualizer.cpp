@@ -15,7 +15,7 @@
 #include "Units.h"
 #include "Intersect.h"
 #include "Debug.h"
-#include "GL/glew.h"
+#include "OGLHeaders.h"
 #include <vector>
 #include <algorithm>
 

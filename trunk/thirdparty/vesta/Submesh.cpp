@@ -1,5 +1,5 @@
 /*
- * $Revision: 622 $ $Date: 2011-09-21 16:03:59 -0700 (Wed, 21 Sep 2011) $
+ * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -917,7 +917,7 @@ Submesh::mergeMaterials()
         }
     }
 
-    VESTA_LOG("mergeMaterials: reduced batch count from %d to %d", m_primitiveBatches.size(), mergedBatches.size());
+    //VESTA_LOG("mergeMaterials: reduced batch count from %d to %d", m_primitiveBatches.size(), mergedBatches.size());
 
     m_primitiveBatches = mergedBatches;
     m_materials = mergedMaterials;

@@ -1,5 +1,5 @@
 /*
- * $Revision: 477 $ $Date: 2010-08-31 11:49:37 -0700 (Tue, 31 Aug 2010) $
+ * $Revision: 658 $ $Date: 2012-03-23 01:08:30 -0700 (Fri, 23 Mar 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -36,6 +36,8 @@ public:
     virtual bool isOpaque() const { return false; }
 
     void addEmitter(ParticleEmitter* emitter, TextureMap* particleTexture);
+
+    ParticleEmitter* emitter(int index);
 
 private:
     std::vector< counted_ptr<ParticleEmitter> > m_emitters;

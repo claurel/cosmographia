@@ -1,5 +1,5 @@
 /*
- * $Revision: 572 $ $Date: 2011-03-16 15:28:27 -0700 (Wed, 16 Mar 2011) $
+ * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -56,6 +56,13 @@ public:
           * has a very large spatial extent (e.g. trajectory plots.)
           */
         SplitToPreventClipping,
+        
+        /** Object is effectively a point, with no spatial extent. The renderer will
+         *  make sure that it is not placed exactly on the near or far plane of
+         *  a frustum, where it is likely to be clipped by the GPU. This is the
+         *  appropriate policy for labeled points and some billboards.
+         */
+        ZeroExtent,
     };
 
     Geometry() :

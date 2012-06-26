@@ -1,5 +1,5 @@
 /*
- * $Revision: 623 $ $Date: 2011-09-26 13:34:12 -0700 (Mon, 26 Sep 2011) $
+ * $Revision: 675 $ $Date: 2012-05-22 17:17:55 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -13,8 +13,8 @@
 
 #include "Object.h"
 #include "TextureMap.h"
+#include "OGLHeaders.h"
 #include <Eigen/Core>
-#include <GL/glew.h>
 #include <string>
 #include <vector>
 
@@ -23,6 +23,7 @@ namespace vesta
 {
 
 class DataChunk;
+class VertexBuffer;
 
 class TextureFont : public Object
 {
@@ -55,6 +56,13 @@ public:
     Eigen::Vector2f renderEncodedString(const std::string& text,
                                         const Eigen::Vector2f& startPosition,
                                         Encoding encoding) const;
+    Eigen::Vector2f renderStringToBuffer(const std::string& text,
+                                         const Eigen::Vector2f& startPosition,
+                                         Encoding encoding,
+                                         char* vertexData = NULL,
+                                         unsigned int vertexDataSize = 0,
+                                         unsigned int* vertexCount = NULL) const;
+
 
     float textWidth(const std::string& text) const;
     float textAscent(const std::string& text) const;
@@ -78,6 +86,18 @@ public:
 
     static TextureFont* LoadTxf(const DataChunk* data);
     static TextureFont* GetDefaultFont();
+
+private:
+    Eigen::Vector2f renderLatin1ToBuffer(const std::string& text,
+                                         const Eigen::Vector2f& startPosition,
+                                         char* vertexData,
+                                         unsigned int vertexDataSize,
+                                         unsigned int* vertexCount) const;
+    Eigen::Vector2f renderUtf8ToBuffer(const std::string& text,
+                                       const Eigen::Vector2f& startPosition,
+                                       char* vertexData,
+                                       unsigned int vertexDataSize,
+                                       unsigned int* vertexCount) const;
 
 private:
     counted_ptr<TextureMap> m_glyphTexture;

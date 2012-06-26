@@ -157,6 +157,7 @@ void
 MultiConeSensorGeometry::render(RenderContext& rc,
                                 double currentTime) const
 {
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     Material material;
     material.setOpacity(m_opacity);
 
@@ -340,6 +341,7 @@ MultiConeSensorGeometry::render(RenderContext& rc,
 
         rc.popModelView();
     }
+#endif
 }
 
 

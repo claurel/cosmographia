@@ -69,9 +69,9 @@ CubeMapFramebuffer::CreateCubicReflectionMap(unsigned int size, TextureMap::Imag
             return NULL;
         }
 
-        fb->m_fb->attachTarget(GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + i, cubeMap->id());
-        GLenum status = fb->m_fb->attachTarget(GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, depthTex->id());
-        if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+        fb->m_fb->attachTarget(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMap->id());
+        GLenum status = fb->m_fb->attachTarget(GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex->id());
+        if (status != GL_FRAMEBUFFER_COMPLETE)
         {
             delete fb;
             delete cubeMapFb;
@@ -113,8 +113,8 @@ CubeMapFramebuffer::CreateCubicShadowMap(unsigned int size)
             return NULL;
         }
 
-        GLenum status = fb->m_fb->attachTarget(GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + i, cubeMap->id());
-        if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+        GLenum status = fb->m_fb->attachTarget(GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubeMap->id());
+        if (status != GL_FRAMEBUFFER_COMPLETE)
         {
             delete fb;
             delete cubeMapFb;
@@ -174,5 +174,9 @@ CubeMapFramebuffer::CreateCubicShadowMap(unsigned int size)
 bool
 CubeMapFramebuffer::supported()
 {
+#if RENDERER == OGLES2
+    return true;
+#else
     return GLFramebuffer::supported() && GLEW_ARB_texture_cube_map;
+#endif
 }

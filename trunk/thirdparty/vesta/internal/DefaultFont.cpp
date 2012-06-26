@@ -1117,7 +1117,8 @@ static const char* DefaultFontData[] = {
 };
 
 
-unsigned int decodeHexDigit(char c)
+static unsigned int 
+decodeHexDigit(char c)
 {
     if (c >= '0' && c <= '9')
     {

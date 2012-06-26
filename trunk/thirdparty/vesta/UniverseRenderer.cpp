@@ -1,5 +1,5 @@
 /*
- * $Revision: 656 $ $Date: 2012-02-29 14:56:26 -0800 (Wed, 29 Feb 2012) $
+ * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -22,6 +22,7 @@
 #include "CubeMapFramebuffer.h"
 #include "TextureFont.h"
 #include "GlareOverlay.h"
+#include "LabelGeometry.h"
 #include "glhelp/GLFramebuffer.h"
 #include "Units.h"
 #include "internal/EclipseShadowVolumeSet.h"
@@ -32,6 +33,13 @@ using namespace vesta;
 using namespace Eigen;
 using namespace std;
 
+#ifdef VESTA_OGLES2
+// glDepthRange is called glDepthRangef in OpenGL ES
+static void glDepthRange(float n, float f)
+{
+    glDepthRangef(n, f);
+}
+#endif
 
 // Renderer debug settings
 #define DEBUG_SHADOW_MAP      0
@@ -110,7 +118,11 @@ UniverseRenderer::shadowsSupported() const
 bool
 UniverseRenderer::omniShadowsSupported() const
 {
+#ifdef VESTA_OGLES2
+    return false;
+#else 
     return shadowsSupported() && GLEW_ARB_texture_cube_map == GL_TRUE && GLEW_ARB_texture_rg;
+#endif
 }
 
 
@@ -299,7 +311,7 @@ UniverseRenderer::initializeOmniShadowMaps(unsigned int shadowMapSize, unsigned 
 
     // Constrain the shadow map size to the maximum size permitted by the hardware
     GLint maxTexSize = 0;
-    glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE_ARB, &maxTexSize);
+    glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &maxTexSize);
     shadowMapSize = min((unsigned int) maxTexSize, shadowMapSize);
 
     m_omniShadowMaps.clear();
@@ -574,7 +586,9 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
         glFrontFace(GL_CW);
     }
 
+#ifndef VESTA_OGLES2
     glShadeModel(GL_SMOOTH);
+#endif
     glEnable(GL_CULL_FACE);
 
     m_renderContext->setCameraOrientation(cameraOrientation.cast<float>());
@@ -608,7 +622,9 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
 
         for (vector<SkyLayer*>::const_iterator iter = visibleLayers.begin(); iter != visibleLayers.end(); ++iter)
         {
+#ifndef VESTA_NO_FIXED_FUNCTION_3D
             glDisable(GL_LIGHTING);
+#endif
             (*iter)->render(*m_renderContext);
         }
     }
@@ -616,9 +632,11 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
+#ifndef VESTA_NO_FIXED_FUNCTION_3D
     // Fixed function state setup
     glEnable(GL_NORMALIZE);
     glEnable(GL_LIGHTING);
+#endif
 
     m_renderContext->setActiveLightCount(1);
     m_renderContext->setAmbientLight(m_ambientLight);
@@ -756,12 +774,12 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
             if (i == 0)
             {
                 // This is the farthest span
-                m_mergedDepthBufferSpans[i].farDistance *= 1.01f;
+                m_mergedDepthBufferSpans[i].farDistance *= 1.05f;
             }
             else if (m_mergedDepthBufferSpans[i - 1].itemCount == 0)
             {
-                // Expand this span if the adjacent span is empty
-                float newFarDistance = m_mergedDepthBufferSpans[i].farDistance * 1.01f;
+                // Expand this span if the more distant span is empty
+                float newFarDistance = m_mergedDepthBufferSpans[i].farDistance * 1.05f;
                 if (newFarDistance < m_mergedDepthBufferSpans[i - 1].farDistance)
                 {
                     m_mergedDepthBufferSpans[i].farDistance = newFarDistance;
@@ -969,7 +987,12 @@ UniverseRenderer::renderLightGlare(GlareOverlay* glareOverlay)
         spanRange /= (float) m_mergedDepthBufferSpans.size();
     }
 
+#ifndef VESTA_OGLES2
+    // Disable color writes for occlusion queries. (For OpenGL ES 2.0,
+    // we don't use occlusion queries and actually draw the glare geometry
+    // at this time.)
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+#endif
     glDepthMask(GL_FALSE);
 
     // Track light sources
@@ -1155,8 +1178,13 @@ UniverseRenderer::addVisibleItem(const Entity* entity,
     case Geometry::SplitToPreventClipping:
         nearDistance = std::max(nearDistance, MinimumNearPlaneDistance);
         break;
+            
+    case Geometry::ZeroExtent:
+        nearDistance = std::max(nearDistance * 0.98f, MinimumNearDistance);
+        farDistance = farDistance * 1.02f;
+        break;
     }
-
+    
     // ...but make sure that the near plane of the view frustum doesn't
     // intersect the object's geometry. Note that if nearDistance is greater
     // farDistance, it means that the object lies outside the view frustum.
@@ -1428,7 +1456,7 @@ beginCubicShadowRendering()
 
 // Restore GL state after shadow rendering. Shadow rendering
 // affects the render target, color mask, and culling state.
-void
+static void
 finishShadowRendering(Framebuffer* renderSurface, bool colorMask[])
 {
     if (renderSurface)
@@ -1909,8 +1937,15 @@ UniverseRenderer::setupEclipseShadows(const VisibleItem &item)
                         shadowTransform = shadowShear * shadowTransform * Transform3f(Translation3f(-shadowCenter)).matrix() * invCameraTransform;
                         m_renderContext->setRingShadowMatrix(0, shadowTransform, rings->innerRadius() / rings->outerRadius());
                         m_renderContext->setRingShadowTexture(0, rings->texture());
+#ifdef VESTA_OGLES2
+                        // Temporary workaround for apparent shader issues on iOS
+                        if (item.geometry && item.geometry->isEllipsoidal() && item.geometry->ellipsoid().semiAxes().x() > 10000.0f)
+                            m_renderContext->setRingShadowCount(1);
+#else
                         m_renderContext->setRingShadowCount(1);
+#endif
 
+#ifndef VESTA_OGLES2
                         // Force the border color of ring textures to transparent in order to avoid
                         // mipmapping artifacts.
                         glBindTexture(GL_TEXTURE_2D, rings->texture()->id());
@@ -1918,6 +1953,7 @@ UniverseRenderer::setupEclipseShadows(const VisibleItem &item)
                         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, transparent);
                         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER_ARB);
                         glBindTexture(GL_TEXTURE_2D, 0);
+#endif
                     }
                 }
                 else

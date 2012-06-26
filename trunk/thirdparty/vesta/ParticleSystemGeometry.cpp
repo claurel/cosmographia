@@ -1,5 +1,5 @@
 /*
- * $Revision: 607 $ $Date: 2011-04-16 13:45:21 -0700 (Sat, 16 Apr 2011) $
+ * $Revision: 658 $ $Date: 2012-03-23 01:08:30 -0700 (Fri, 23 Mar 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -69,3 +69,7 @@ ParticleSystemGeometry::addEmitter(ParticleEmitter* emitter, TextureMap* particl
     m_particleTextures.push_back(counted_ptr<TextureMap>(particleTexture));
 }
 
+ParticleEmitter* ParticleSystemGeometry::emitter(int index)
+{
+    return m_emitters[index].ptr();
+}

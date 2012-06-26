@@ -1,5 +1,5 @@
 /*
- * $Revision: 418 $ $Date: 2010-08-10 09:07:36 -0700 (Tue, 10 Aug 2010) $
+ * $Revision: 674 $ $Date: 2012-05-22 16:35:37 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -10,9 +10,10 @@
 
 #include "CelestialCoordinateGrid.h"
 #include "RenderContext.h"
+#include "GeometryBuffer.h"
 #include "Material.h"
 #include "Units.h"
-#include <GL/glew.h>
+#include "OGLHeaders.h"
 #include <cmath>
 
 using namespace vesta;
@@ -59,6 +60,8 @@ CelestialCoordinateGrid::render(RenderContext& rc)
         latitudeSteps = 2;
     }
 
+    GeometryBuffer geo(&rc);
+
     // Draw the meridians
     for (unsigned int i = 0; i < longitudeSteps; ++i)
     {
@@ -66,16 +69,16 @@ CelestialCoordinateGrid::render(RenderContext& rc)
         double cosPhi = std::cos(phi);
         double sinPhi = std::sin(phi);
 
-        glBegin(GL_LINE_STRIP);
+        geo.beginLineStrip();
         for (unsigned int j = 0; j <= circleSubdivisions; ++j)
         {
             double theta = PI * ((double) j / (double) circleSubdivisions - 0.5);
             double sinTheta = std::sin(theta);
             double cosTheta = std::cos(theta);
             Vector3d v(cosPhi * cosTheta, sinPhi * cosTheta, sinTheta);
-            glVertex3dv(v.data());
+            geo.vertex(v);
         }
-        glEnd();
+        geo.end();
     }
 
     // Draw the parallels
@@ -85,16 +88,16 @@ CelestialCoordinateGrid::render(RenderContext& rc)
         double cosTheta = std::cos(theta);
         double sinTheta = std::sin(theta);
 
-        glBegin(GL_LINE_LOOP);
-        for (unsigned int j = 0; j < circleSubdivisions; ++j)
+        geo.beginLineStrip();
+        for (unsigned int j = 0; j <= circleSubdivisions; ++j)
         {
             double phi = 2.0 * PI * (double) j / (double) circleSubdivisions;
             double sinPhi = std::sin(phi);
             double cosPhi = std::cos(phi);
             Vector3d v(cosPhi * cosTheta, sinPhi * cosTheta, sinTheta);
-            glVertex3dv(v.data());
+            geo.vertex(v);
         }
-        glEnd();
+        geo.end();
     }
 
     rc.popModelView();

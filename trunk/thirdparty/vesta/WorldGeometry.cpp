@@ -1,5 +1,5 @@
 /*
- * $Revision: 614 $ $Date: 2011-06-09 12:01:42 -0700 (Thu, 09 Jun 2011) $
+ * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -395,7 +395,7 @@ WorldGeometry::render(RenderContext& rc, double clock) const
     // Set vertex info for cloud layer rendering
     rc.setVertexInfo(VertexSpec::PositionNormalTex);
 
-    if (!m_cloudMap.isNull() && ms_cloudLayersVisible)
+    if ((m_cloudMap.isValid() || m_tiledCloudMap.isValid()) && ms_cloudLayersVisible)
     {
         float scale = 1.0f + m_cloudAltitude / maxRadius();
 
@@ -406,8 +406,6 @@ WorldGeometry::render(RenderContext& rc, double clock) const
         cloudMaterial.setOpacity(1.0f);
         cloudMaterial.setBlendMode(Material::AlphaBlend);
         cloudMaterial.setDiffuse(Spectrum(1.0f, 1.0f, 1.0f));
-        cloudMaterial.setBaseTexture(m_cloudMap.ptr());
-        rc.bindMaterial(&cloudMaterial);
 
         // Draw the inside of the cloud layer if the viewer is below the clouds.
         // Instead of the actual viewer height above the surface, use the distance
@@ -420,28 +418,39 @@ WorldGeometry::render(RenderContext& rc, double clock) const
             glCullFace(GL_FRONT);
         }
 
+        Vector3f cloudSemiAxes = m_ellipsoidAxes * 0.5f * scale;
+        
+        QuadtreeTile* westHemi = NULL;
+        QuadtreeTile* eastHemi = NULL;
+        initQuadtree(cloudSemiAxes, &westHemi, &eastHemi);
+        
+        // Adjust the distance of the far plane.
+        float maxCloudDistance = CloudShellDistance(eyePosition, m_ellipsoidAxes, m_cloudAltitude);
+        farDistance = max(viewFrustum.nearZ, min(maxCloudDistance, viewFrustum.farZ));
+        cullingPlanes.planes[5].coeffs() = modelviewTranspose * Vector4f(0.0f, 0.0f,  1.0f, farDistance);
+        
+        float splitThreshold = rc.pixelSize() * MaxTileSquareSize * QuadtreeTile::TileSubdivision;
+        westHemi->tessellate(eyePosition, cullingPlanes, cloudSemiAxes, splitThreshold, rc.pixelSize());
+        eastHemi->tessellate(eyePosition, cullingPlanes, cloudSemiAxes, splitThreshold, rc.pixelSize());
+        
         // Only draw the cloud layer if the cloud texture is resident; otherwise, the cloud
         // layer is drawn as an opaque shell until texture loading is complete.
-        m_cloudMap->makeResident();
-        if (m_cloudMap->isResident())
+        if (m_tiledCloudMap.isValid())
         {
-            Vector3f cloudSemiAxes = m_ellipsoidAxes * 0.5f * scale;
+            westHemi->render(rc, cloudMaterial, m_tiledCloudMap.ptr(), QuadtreeTile::Normals);
+            eastHemi->render(rc, cloudMaterial, m_tiledCloudMap.ptr(), QuadtreeTile::Normals);
+        }
+        else if (m_cloudMap.isValid())
+        {
+            m_cloudMap->makeResident();
+            if (m_cloudMap->isResident())
+            {
+                cloudMaterial.setBaseTexture(m_cloudMap.ptr());
+                rc.bindMaterial(&cloudMaterial);
 
-            QuadtreeTile* westHemi = NULL;
-            QuadtreeTile* eastHemi = NULL;
-            initQuadtree(cloudSemiAxes, &westHemi, &eastHemi);
-
-            // Adjust the distance of the far plane.
-            float maxCloudDistance = CloudShellDistance(eyePosition, m_ellipsoidAxes, m_cloudAltitude);
-            farDistance = max(viewFrustum.nearZ, min(maxCloudDistance, viewFrustum.farZ));
-            cullingPlanes.planes[5].coeffs() = modelviewTranspose * Vector4f(0.0f, 0.0f,  1.0f, farDistance);
-
-            float splitThreshold = rc.pixelSize() * MaxTileSquareSize * QuadtreeTile::TileSubdivision;
-            westHemi->tessellate(eyePosition, cullingPlanes, cloudSemiAxes, splitThreshold, rc.pixelSize());
-            eastHemi->tessellate(eyePosition, cullingPlanes, cloudSemiAxes, splitThreshold, rc.pixelSize());
-
-            westHemi->render(rc, QuadtreeTile::Normals);
-            eastHemi->render(rc, QuadtreeTile::Normals);
+                westHemi->render(rc, QuadtreeTile::Normals);
+                eastHemi->render(rc, QuadtreeTile::Normals);
+            }
         }
         glCullFace(GL_BACK);
 
@@ -850,6 +859,8 @@ WorldGeometry::renderSphere(RenderContext& rc, int subdivisions) const
 void
 WorldGeometry::renderSphere(RenderContext& /* rc */, int subdivisions) const
 {
+    // Not available without immediate mode 3D
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     //VertexBuffer* vb = rc.vertexStreamBuffer();
 
     float lastSinPhi = -1.0f;
@@ -941,12 +952,15 @@ WorldGeometry::renderSphere(RenderContext& /* rc */, int subdivisions) const
         lastTexT = texT;
     }
 #endif
+#endif
 }
 
 
 void
 WorldGeometry::renderNormalMappedSphere(RenderContext& /* rc */, int subdivisions) const
 {
+    // Not available without immediate mode
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     float lastSinPhi = -1.0f;
     float lastCosPhi = 0.0f;
     float lastTexT = 1.0f;
@@ -1002,6 +1016,7 @@ WorldGeometry::renderNormalMappedSphere(RenderContext& /* rc */, int subdivision
         lastCosPhi = cosPhi;
         lastTexT = texT;
     }
+#endif
 }
 
 
@@ -1014,6 +1029,7 @@ WorldGeometry::renderBand(int subdivisions,
                           float tStart,
                           float tEnd) const
 {
+#ifndef VESTA_NO_IMMEDIATE_MODE_3D
     double lonStep = PI / (subdivisions * 2);
     float invLonRange = (float) (1.0 / (lonEnd - lonStart));
     int startLonStep = (int) floor(lonStart / lonStep) + 1;
@@ -1067,6 +1083,7 @@ WorldGeometry::renderBand(int subdivisions,
     glVertex3fv(v0.data());
 
     glEnd();
+#endif
 }
 
 
@@ -1117,7 +1134,7 @@ WorldGeometry::boundingSphereRadius() const
         atmosphereHeight = m_atmosphere->transparentHeight();
     }
 
-    if (m_cloudMap.isValid() && ms_cloudLayersVisible)
+    if ((m_cloudMap.isValid() || m_tiledCloudMap.isValid()) && ms_cloudLayersVisible)
     {
         atmosphereHeight = max(atmosphereHeight, m_cloudAltitude);
     }
@@ -1345,6 +1362,16 @@ void
 WorldGeometry::setCloudMap(TextureMap* cloudMap)
 {
     m_cloudMap = cloudMap;
+}
+
+
+/** Set the tiled texture map used for the cloud layer. Clouds are only drawn
+ *  when a cloud map has been assigned.
+ */
+void
+WorldGeometry::setCloudMap(TiledMap* cloudMap)
+{
+    m_tiledCloudMap = cloudMap;
 }
 
 

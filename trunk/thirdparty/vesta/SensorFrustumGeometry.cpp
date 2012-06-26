@@ -51,6 +51,7 @@ void
 SensorFrustumGeometry::render(RenderContext& rc,
                               double currentTime) const
 {
+#ifndef VESTA_OGLES2
     Material material;
     material.setDiffuse(m_color);
     material.setOpacity(m_opacity);
@@ -206,4 +207,5 @@ SensorFrustumGeometry::render(RenderContext& rc,
 
         rc.popModelView();
     }
+#endif
 }

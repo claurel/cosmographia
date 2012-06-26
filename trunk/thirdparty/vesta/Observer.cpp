@@ -1,5 +1,5 @@
 /*
- * $Revision: 565 $ $Date: 2011-02-15 16:00:43 -0800 (Tue, 15 Feb 2011) $
+ * $Revision: 681 $ $Date: 2012-06-19 17:16:36 -0700 (Tue, 19 Jun 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -114,6 +114,7 @@ void
 Observer::setOrientation(const Quaterniond& orientation)
 {
     m_orientation = orientation;
+    m_orientation.normalize();
 }
 
 

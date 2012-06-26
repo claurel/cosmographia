@@ -26,6 +26,24 @@
 
 using namespace vesta;
 
+#ifdef VESTA_OGLES2
+#define glGenFramebuffersEXT glGenFramebuffers
+#define glBindFramebufferEXT glBindFramebuffer
+#define glDeleteFramebuffersEXT glDeleteFramebuffers
+#define glFramebufferTexture2DEXT glFramebufferTexture2D
+#define glCheckFramebufferStatusEXT glCheckFramebufferStatus
+#define GL_FRAMEBUFFER_EXT GL_FRAMEBUFFER
+#define GL_COLOR_ATTACHMENT0_EXT GL_COLOR_ATTACHMENT0
+#define GL_DEPTH_ATTACHMENT_EXT GL_DEPTH_ATTACHMENT
+#define GL_FRAMEBUFFER_UNSUPPORTED_EXT GL_FRAMEBUFFER_UNSUPPORTED
+#define GL_FRAMEBUFFER_COMPLETE_EXT GL_FRAMEBUFFER_COMPLETE
+#endif
+
+
+#ifdef VESTA_OGLES2
+static void glDrawBuffer(GLenum /* mode */ ) {}
+#endif
+
 
 GLFramebuffer::GLFramebuffer(unsigned int width, unsigned int height) :
     m_fboHandle(0),
@@ -47,8 +65,10 @@ GLFramebuffer::GLFramebuffer(unsigned int width, unsigned int height) :
             if (m_fboHandle != 0)
             {
                 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fboHandle);
+#ifndef VESTA_OGLES2
                 glDrawBuffer(GL_NONE);
                 glReadBuffer(GL_NONE);
+#endif
                 glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
             }
         }
@@ -168,7 +188,7 @@ GLFramebuffer::detachDepthTarget()
     if (m_fboHandle != 0)
     {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fboHandle);
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, 0, 0);
+        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     }
 }
@@ -218,6 +238,17 @@ GLFramebuffer::createDepthTexture()
 {
     GLuint depthTexId = 0;
 
+#ifdef VESTA_OGLES2
+    glGenRenderbuffers(1, &depthTexId);
+    if (depthTexId == 0)
+    {
+        VESTA_WARNING("Failed to create depth render buffer handle.");
+        return 0;
+    }
+    
+    glBindRenderbuffer(GL_RENDERBUFFER, depthTexId);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24_OES, m_width, m_height);
+#else
     glGenTextures(1, &depthTexId);
     if (depthTexId == 0)
     {
@@ -245,11 +276,16 @@ GLFramebuffer::createDepthTexture()
 
     // Unbind it
     glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 
     GLenum errorCode = glGetError();
     if (errorCode != GL_NO_ERROR)
     {
+#ifdef VESTA_OGLES2
+        const char* errorMessage = "Framebuffer error";
+#else
         const GLubyte* errorMessage = gluErrorString(errorCode);
+#endif
         if (errorMessage)
         {
             VESTA_WARNING("OpenGL error occurred when creating depth texture: %s", errorMessage);
@@ -285,5 +321,9 @@ GLFramebuffer::unbind()
 bool
 GLFramebuffer::supported()
 {
+#ifdef VESTA_OGLES2
+    return true;
+#else
     return GLEW_EXT_framebuffer_object;
+#endif
 }

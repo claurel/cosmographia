@@ -1,5 +1,5 @@
 /*
- * $Revision: 621 $ $Date: 2011-08-29 13:17:00 -0700 (Mon, 29 Aug 2011) $
+ * $Revision: 677 $ $Date: 2012-05-22 17:56:53 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -129,8 +129,12 @@ public:
         Depth16       = 21,
         Depth32       = 22,
         Depth32F      = 23,
-        FormatCount   = 24,
-        InvalidFormat = -1,
+        PVRTC_RGB_2BIT  = 24,
+        PVRTC_RGB_4BIT  = 25,
+        PVRTC_RGBA_2BIT = 26,
+        PVRTC_RGBA_4BIT = 27,
+        FormatCount     = 28,
+        InvalidFormat   = -1,
     };
 
     unsigned int id() const

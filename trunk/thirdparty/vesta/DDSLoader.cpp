@@ -11,7 +11,7 @@
 #include "DDSLoader.h"
 #include "IntegerTypes.h"
 #include "Debug.h"
-#include "GL/glew.h"
+#include "OGLHeaders.h"
 #include <algorithm>
 
 using namespace vesta;

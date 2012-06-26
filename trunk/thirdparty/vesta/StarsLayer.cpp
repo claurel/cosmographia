@@ -11,6 +11,7 @@
 #include "StarsLayer.h"
 #include "RenderContext.h"
 #include "OGLHeaders.h"
+#include "ShaderBuilder.h"
 #include "Debug.h"
 #include "glhelp/GLVertexBuffer.h"
 #include "glhelp/GLShaderProgram.h"
@@ -37,7 +38,7 @@ using namespace std;
 // Before fragment color is generated, it is mapped from linear to sRGB color space.
 // This mapping is unecessary if the EXT_framebuffer_sSRGB extension is enabled.
 //
-// In order to keep the per-vertex storage at 32 bytes, the following layout is used:
+// In order to keep the per-vertex storage at 16 bytes, the following layout is used:
 //   x - 32-bit float
 //   y - 32-bit float
 //   magnitude - 32-bit float
@@ -46,6 +47,65 @@ using namespace std;
 // Since the stars lie on a sphere, the z coordinate is computed as sqrt(1-x^2-y^2);
 // the sign of z is actually stored in the alpha channel of the color.
 
+#ifdef VESTA_OGLES2
+static const char* StarVertexShaderSource =
+"attribute vec3 vesta_Position;\n"
+"attribute vec4 vesta_Color;\n"
+"uniform mat4 vesta_ModelViewProjectionMatrix;\n"
+"uniform vec2 viewportSize;       \n"
+"uniform vec2 viewportCoord;      \n"
+"varying vec2 pointCenter;        \n"
+"varying vec4 color;              \n"
+"varying float brightness;        \n"
+"uniform float Llim;              \n"
+"uniform float Lsat;              \n"
+"uniform float magScale;          \n"
+"uniform float sigma2;            \n"
+"uniform highp float glareFalloff;      \n"
+"uniform highp float glareBrightness;   \n"
+"uniform float exposure;          \n"
+"uniform float thresholdBrightness;\n"
+"void main()                      \n"
+"{                                \n"
+"    vec4 position = vec4(vesta_Position, 1.0);                                  \n"
+"    float appMag = position.z;                                               \n"
+"    position.z = sqrt(1.0 - dot(position.xy, position.xy)) * sign(vesta_Color.a - 0.5);\n"
+"    vec4 projectedPosition = vesta_ModelViewProjectionMatrix * position;        \n"
+"    vec2 devicePosition = projectedPosition.xy / projectedPosition.w;        \n"
+"    pointCenter = (devicePosition * 0.5 + vec2(0.5, 0.5)) * viewportSize + viewportCoord;    \n"
+"    color = vesta_Color;                                                        \n"
+"    float b = pow(2.512, -appMag * magScale);\n"
+"    float r2 = -log(thresholdBrightness / (exposure * b)) * 2.0 * sigma2;          \n"
+"    float rGlare2 = (exposure * glareBrightness * b / thresholdBrightness - 1.0) / glareFalloff;     \n"
+"    gl_PointSize = 2.0 * sqrt(max(r2, rGlare2));                             \n"
+
+"    brightness = b;                                                          \n"
+"    gl_Position = projectedPosition;                                         \n"
+"}                                \n";
+
+// Note that most of the uniform, varying, and temporary variables must
+// be high precision; otherwise the PowerVR shader compiler aggressively
+// reduces precision even in places where it's actually required.
+static const char* StarFragmentShaderSource =
+"varying lowp vec4 color;                        \n"
+"varying highp vec2 pointCenter;                 \n"
+"varying highp float brightness;                 \n"
+"uniform highp float sigma2;                     \n"
+"uniform highp float glareFalloff;             \n"
+"uniform highp float glareBrightness;          \n"
+"uniform highp float exposure;                   \n"
+
+"void main()                                     \n"
+"{                                               \n"
+"    highp vec2 offset = gl_FragCoord.xy - pointCenter;          \n"
+"    highp float r2 = dot(offset, offset);                       \n"
+"    highp float b = exp(-r2 / (2.0 * sigma2));                \n"
+"    b += glareBrightness / (glareFalloff * pow(r2, 1.5) + 1.0) * 0.5;     \n"
+"    gl_FragColor = vec4(linearToSRGB(b * exposure * color.rgb * brightness), 1.0);   \n"
+"}                                                               \n"
+;
+
+#else
 static const char* StarVertexShaderSource =
 "uniform vec2 viewportSize;       \n"
 "uniform vec2 viewportCoord;      \n"
@@ -99,8 +159,25 @@ static const char* StarFragmentShaderSource =
 "    gl_FragColor = vec4(linearToSRGB(b * exposure * color.rgb * brightness), 1.0);   \n"
 "}                                                               \n"
 ;
+#endif
 
+#ifdef VESTA_OGLES2
+static const char* LinearToSRGBSource =
+"mediump vec3 linearToSRGB(mediump vec3 c)               \n"
+"{                                                    \n"
+"    mediump vec3 linear = 12.92 * c;                 \n"
+"    mediump vec3 nonlinear = (1.0 + 0.055) * pow(c, vec3(1.0 / 2.4)) - vec3(0.055);\n"
+"    return mix(linear, nonlinear, step(vec3(0.0031308), c));\n"
+"}                                               \n"
+;
 
+static const char* PassthroughSRGBSource =
+"highp vec3 linearToSRGB(highp vec3 c)          \n"
+"{                                               \n"
+"    return c;                                   \n"
+"}                                               \n"
+;
+#else
 static const char* LinearToSRGBSource =
 "vec3 linearToSRGB(vec3 c)                       \n"
 "{                                               \n"
@@ -116,6 +193,8 @@ static const char* PassthroughSRGBSource =
 "    return c;                                   \n"
 "}                                               \n"
 ;
+#endif
+
 
 
 
@@ -336,6 +415,15 @@ StarsLayer::render(RenderContext& rc)
         fragmentShaderSource = string(LinearToSRGBSource) + StarFragmentShaderSource;
         m_starShaderSRGB = GLShaderProgram::CreateShaderProgram(StarVertexShaderSource, fragmentShaderSource);
 
+#ifdef VESTA_OGLES2
+        if (m_starShaderSRGB.isValid())
+        {
+            m_starShaderSRGB->bindAttribute(ShaderBuilder::PositionAttribute, ShaderBuilder::PositionAttributeLocation);
+            m_starShaderSRGB->bindAttribute(ShaderBuilder::ColorAttribute, ShaderBuilder::ColorAttributeLocation);
+            m_starShaderSRGB->link();
+        }
+#endif
+        
         m_starShaderCompiled = true;
     }
 
@@ -366,7 +454,11 @@ StarsLayer::render(RenderContext& rc)
                          m_starShader.isValid() &&
                          m_starShaderSRGB.isValid() &&
                          m_vertexBuffer.isValid();
+#ifdef VESTA_OGLES2
+    bool enableSRGBExt = false;
+#else
     bool enableSRGBExt = GLEW_EXT_framebuffer_sRGB == GL_TRUE;
+#endif
 
     Material starMaterial;
     starMaterial.setDiffuse(Spectrum(1.0f, 1.0f, 1.0f));
@@ -388,7 +480,9 @@ StarsLayer::render(RenderContext& rc)
         if (enableSRGBExt)
         {
             rc.enableCustomShader(starShader);
+#ifndef VESTA_OGLES2
             glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+#endif
         }
         else
         {
@@ -422,15 +516,23 @@ StarsLayer::render(RenderContext& rc)
         starShader->setConstant("exposure", pow(2.512f, magScale * saturationMag));
         starShader->setConstant("magScale", magScale);
 
+#ifdef VESTA_OGLES2
+        starShader->setConstant("vesta_ModelViewProjectionMatrix", (rc.projection() * rc.modelview()).matrix());
+#endif
+        
+#ifndef VESTA_OGLES2
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_ARB);
         if (GLEW_ARB_multisample)
         {
             glDisable(GL_MULTISAMPLE_ARB);
         }
+#endif
     }
     else
     {
+#ifndef VESTA_OGLES2
         glPointSize(2.0f);
+#endif
     }
 
     rc.drawPrimitives(PrimitiveBatch(PrimitiveBatch::Points, m_starCatalog->size()));
@@ -440,6 +542,7 @@ StarsLayer::render(RenderContext& rc)
     if (useStarShader)
     {
         rc.disableCustomShader();
+#ifndef VESTA_OGLES2
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_ARB);
         if (GLEW_ARB_multisample)
         {
@@ -450,6 +553,7 @@ StarsLayer::render(RenderContext& rc)
         {
             glDisable(GL_FRAMEBUFFER_SRGB_EXT);
         }
+#endif
     }
 }
 

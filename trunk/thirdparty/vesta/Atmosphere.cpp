@@ -1,5 +1,5 @@
 /*
- * $Revision: 615 $ $Date: 2011-06-22 12:02:16 -0700 (Wed, 22 Jun 2011) $
+ * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -16,7 +16,7 @@
 #include "DataChunk.h"
 #include "internal/InputDataStream.h"
 #include "internal/OutputDataStream.h"
-#include <GL/glew.h>
+#include "OGLHeaders.h"
 #include <Eigen/Array>
 #include <cmath>
 
@@ -212,6 +212,9 @@ Atmosphere::generateTextures()
 void
 Atmosphere::generateTransmittanceTexture()
 {
+    // Precomputed atmospheric scattering requires features not available in
+    // Open GL ES 2.0
+#ifndef VESTA_OGLES2
     unsigned int tableSize = m_transmittanceHeightSamples * m_transmittanceViewAngleSamples;
     if (tableSize < 1)
     {
@@ -264,12 +267,16 @@ Atmosphere::generateTransmittanceTexture()
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 }
 
 
 void
 Atmosphere::generateInscatterTexture()
 {
+    // Precomputed atmospheric scattering requires features not available in
+    // Open GL ES 2.0
+#ifndef VESTA_OGLES2
     GLuint scatterTexId = 0;
     glGenTextures(1, &scatterTexId);
     glBindTexture(GL_TEXTURE_3D, scatterTexId);
@@ -303,6 +310,7 @@ Atmosphere::generateInscatterTexture()
     m_scatterTexture = new TextureMap(scatterTexId, TextureProperties(TextureProperties::Clamp));
 
     glBindTexture(GL_TEXTURE_3D, 0);
+#endif
 }
 
 

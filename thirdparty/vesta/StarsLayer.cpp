@@ -132,7 +132,7 @@ static const char* StarVertexShaderSource =
 "    float b = pow(2.512, -appMag * magScale);\n"
 "    float r2 = -log(thresholdBrightness / (exposure * b)) * 2.0 * sigma2;          \n"
 "    float rGlare2 = (exposure * glareBrightness * b / thresholdBrightness - 1.0) / glareFalloff;     \n"
-"    gl_PointSize = 2.0 * sqrt(max(r2, rGlare2));                             \n"
+"    gl_PointSize = 2.0 * sqrt(max(r2, max(0.25, rGlare2)));                   \n"
 
 "    brightness = b;                                                          \n"
 "    gl_Position = projectedPosition;                                         \n"

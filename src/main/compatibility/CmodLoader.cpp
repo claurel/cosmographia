@@ -64,6 +64,33 @@ CmodLoader::loadMaterial()
         CmodToken token = readCmodToken();
         switch (token)
         {
+        case CmodIlluminationModel:
+        {
+            qDebug("Illum model!");
+            quint16 illum = 0;
+            *m_inputStream >> illum;
+
+            switch (illum)
+            {
+            case 0:
+                material->setBrdf(Material::Lambert);
+                break;
+            case 2:
+                qDebug("reflective!");
+                material->setBrdf(Material::BlinnPhongReflective);
+                break;
+            case 1:
+                // Lunar-lambert model currently unsupported; just treat
+                // it as purely Lambertian now
+                material->setBrdf(Material::Lambert);
+                break;
+            default:
+                setError("Unknown illumination model");
+                break;
+            }
+        }
+        break;
+
         case CmodDiffuse:
         {
             Spectrum diffuseColor;

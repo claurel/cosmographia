@@ -60,6 +60,7 @@ private:
         CmodVertices       = 1013,
         CmodEmissive       = 1014,
         CmodBlend          = 1015,
+        CmodIlluminationModel = 1016,
         CmodInvalidToken   = 0,
     };
 
@@ -73,6 +74,14 @@ private:
         CmodUint32         = 6,
         CmodColor          = 7,
         CmodInvalidType    = 0,
+    };
+
+    enum CmodIlluminationModelType
+    {
+        CmodBlinnPhong     = 0,
+        CmodLunarLambert   = 1,
+        CmodReflective     = 2,
+        CmodInvalidIlluminationModel = -1,
     };
 
     void setError(const QString& errorMessage);

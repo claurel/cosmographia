@@ -19,6 +19,7 @@
 #define _TLE_TRAJECTORY_H_
 
 #include <vesta/Trajectory.h>
+#include <vesta/OrbitalElements.h>
 #include <noradtle/norad.h>
 
 
@@ -42,13 +43,22 @@ public:
 
     void copy(TleTrajectory* other);
 
+    void setKeplerianApproximationLimit(double tsec);
+
     static TleTrajectory* Create(const std::string& line1, const std::string& line2);
+
+private:
+    vesta::StateVector tleState(double tsec) const;
 
 private:
     tle_t* m_tle;
     double m_epoch;
     int m_ephemerisType;
     double m_satParams[N_SAT_PARAMS];
+
+    double m_keplerianApproxLimit;
+    vesta::OrbitalElements m_keplerianBefore;
+    vesta::OrbitalElements m_keplerianAfter;
 };
 
 #endif // _TLE_TRAJECTORY_H_

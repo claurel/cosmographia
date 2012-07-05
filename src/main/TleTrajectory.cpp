@@ -16,6 +16,7 @@
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
 #include "TleTrajectory.h"
+#include "astro/OsculatingElements.h"
 #include <vesta/Units.h>
 #include <vesta/GregorianDate.h>
 #include <vesta/Debug.h>
@@ -23,9 +24,13 @@
 using namespace vesta;
 using namespace Eigen;
 
+static const double EARTH_GM = 398600.4418;
+
+
 
 TleTrajectory::TleTrajectory(tle_t* tle) :
-    m_tle(tle)
+    m_tle(tle),
+    m_keplerianApproxLimit(daysToSeconds(3652500))
 {
     // Select the ephemeris type. At the moment, we don't use
     // SGP8 or SDP8
@@ -67,6 +72,9 @@ TleTrajectory::TleTrajectory(tle_t* tle) :
     calendarDate.setTimeScale(TimeScale_UTC);
 
     m_epoch = calendarDate.toTDBSec();
+
+    // Switch to a Keplerian approximation outside of a year from the epoch
+    setKeplerianApproximationLimit(daysToSeconds(365));
 }
 
 
@@ -78,6 +86,24 @@ TleTrajectory::~TleTrajectory()
 
 StateVector
 TleTrajectory::state(double tsec) const
+{
+    if (tsec < m_epoch - m_keplerianApproxLimit)
+    {
+        return ElementsToStateVector(m_keplerianBefore, tsec);
+    }
+    else if (tsec > m_epoch + m_keplerianApproxLimit)
+    {
+        return ElementsToStateVector(m_keplerianAfter, tsec);
+    }
+    else
+    {
+        return tleState(tsec);
+    }
+}
+
+
+StateVector
+TleTrajectory::tleState(double tsec) const
 {
     // Convert time to minutes past epoch
     double tmin = (tsec - m_epoch) / 60.0;
@@ -173,6 +199,9 @@ TleTrajectory::copy(TleTrajectory* other)
     {
         *m_tle = *other->m_tle;
         m_epoch = other->m_epoch;
+        m_keplerianApproxLimit = other->m_keplerianApproxLimit;
+        m_keplerianBefore = other->m_keplerianBefore;
+        m_keplerianAfter = other->m_keplerianAfter;
         m_ephemerisType = other->m_ephemerisType;
         for (unsigned int i = 0; i < sizeof(m_satParams) / sizeof(m_satParams[0]); ++i)
         {
@@ -180,3 +209,34 @@ TleTrajectory::copy(TleTrajectory* other)
         }
     }
 }
+
+
+/** Set the time from the TLE epoch at which a pure Keplerian
+  * approximation will be used instead of SGP4. This is useful when we
+  * have just a single TLE set for a long-lived object. Using SGP4 for a
+  * time span of a decade will often give a trajectory that intersects
+  * the Earth. Using a Keplerian trajectory instead doesn't give an accurate
+  * position but the approximate semimajoraxis, inclination, and eccentricity
+  * of the orbit will be preserved.
+  */
+void
+TleTrajectory::setKeplerianApproximationLimit(double tsec)
+{
+    StateVector s0 = tleState(m_epoch - tsec);
+    StateVector s1 = tleState(m_epoch + tsec);
+    m_keplerianBefore = CalculateOsculatingElements(s0, EARTH_GM, m_epoch - tsec);
+    m_keplerianAfter  = CalculateOsculatingElements(s1, EARTH_GM, m_epoch + tsec);
+
+    /*
+    // Testing code
+    s0 = tleState(m_epoch - tsec);
+    s1 = tleState(m_epoch + tsec);
+    StateVector t0 = ElementsToStateVector(m_keplerianBefore, m_epoch - tsec);
+    StateVector t1 = ElementsToStateVector(m_keplerianAfter, m_epoch + tsec);
+    std::cerr << "before rdiff: " << (s0.position() - t0.position()).norm() << ", vdiff: " << (s0.velocity() - t0.velocity()).norm() << std::endl;
+    std::cerr << "after rdiff: " << (s1.position() - t1.position()).norm() << ", vdiff: " << (s1.velocity() - t1.velocity()).norm() << std::endl;
+    */
+
+    m_keplerianApproxLimit = tsec;
+}
+

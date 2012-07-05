@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
+#define TEST_SIMPLE_TRAJECTORY 0
+
 #include <cmath>
 
 #include <vesta/OGLHeaders.h>
@@ -32,6 +34,7 @@
 #include "TwoVectorFrame.h"
 #include "MultiWMSTiledMap.h"
 #include "MultiLabelVisualizer.h"
+#include "geometry/SimpleTrajectoryGeometry.h"
 #include "geometry/FeatureLabelSetGeometry.h"
 
 #include "NumberFormat.h"
@@ -135,7 +138,7 @@ static const double StatusMessageDuration = 2.5;
 
 static const float CenterMarkerSize = 10.0f;
 
-static const bool ShowTimeInVideos = false;
+static const bool ShowTimeInVideos = true;
 
 
 static TextureProperties SkyLayerTextureProperties()
@@ -332,6 +335,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_markers = new MarkerLayer();
 
     m_galleryView = new GalleryView();
+    m_galleryView->setGridSize(10, 4);
+    m_galleryView->setScale(1.0f);
     m_galleryView->setFont(m_textFont.ptr());
 
     // Enable multisample antialiasing if its enabled in the settings
@@ -1376,6 +1381,7 @@ void UniverseView::paintGL()
 
         // Set the near clip plane distance to 1km so that only distant objects are drawn
         // into the reflection map.
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         m_renderer->renderCubeMap(NULL, reflectionCenter, m_reflectionMap.ptr(), 1.0f);
 
         // Generate mipmaps
@@ -2210,6 +2216,36 @@ UniverseView::constrainViewerPosition(double maxRange)
 }
 
 
+#if TEST_SIMPLE_TRAJECTORY
+class BasicTrajectoryPlotGenerator : public vesta::TrajectoryPlotGenerator
+{
+public:
+    BasicTrajectoryPlotGenerator(const Trajectory* trajectory) :
+        m_trajectory(trajectory)
+    {
+    }
+
+    StateVector state(double t) const
+    {
+        return m_trajectory->state(t);
+    }
+
+    double startTime() const
+    {
+        return m_trajectory->startTime();
+    }
+
+    double endTime() const
+    {
+        return m_trajectory->endTime();
+    }
+
+private:
+    const Trajectory* m_trajectory;
+};
+#endif
+
+
 void
 UniverseView::updateTrajectoryPlots()
 {
@@ -2217,7 +2253,11 @@ UniverseView::updateTrajectoryPlots()
          iter != m_trajectoryPlots.end(); ++iter)
     {
         Visualizer* vis = iter->visualizer.ptr();
+#if TEST_SIMPLE_TRAJECTORY
+        SimpleTrajectoryGeometry* plot = dynamic_cast<SimpleTrajectoryGeometry*>(vis->geometry());
+#else
         TrajectoryGeometry* plot = dynamic_cast<TrajectoryGeometry*>(vis->geometry());
+#endif
 
         if (iter->generator)
         {
@@ -2227,10 +2267,16 @@ UniverseView::updateTrajectoryPlots()
         {
             double startTime = m_simulationTime - plot->windowDuration() + plot->windowLead();
             double endTime = m_simulationTime + plot->windowLead();
+
             startTime = max(startTime, iter->trajectory->startTime());
             endTime = min(endTime, iter->trajectory->endTime());
 
+#if TEST_SIMPLE_TRAJECTORY
+            BasicTrajectoryPlotGenerator gen(iter->trajectory.ptr());
+            plot->updateSamples(&gen, m_simulationTime - plot->windowDuration(), m_simulationTime, iter->sampleCount);
+#else
             plot->updateSamples(iter->trajectory.ptr(), startTime, endTime, iter->sampleCount);
+#endif
         }
     }
 }
@@ -2871,7 +2917,11 @@ UniverseView::plotTrajectory(Entity* body, const BodyInfo* info)
     string visName = TrajectoryVisualizerName(body);
     Visualizer* oldVisualizer = arc->center()->visualizer(visName);
 
+#if TEST_SIMPLE_TRAJECTORY
+    SimpleTrajectoryGeometry* plot = new SimpleTrajectoryGeometry();
+#else
     TrajectoryGeometry* plot = new TrajectoryGeometry();
+#endif
     Visualizer* visualizer = new Visualizer(plot);
 
     plot->setFrame(arc->trajectoryFrame());

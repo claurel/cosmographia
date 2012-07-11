@@ -48,6 +48,7 @@ APP_SOURCES = \
     $$MAIN_PATH/astro/Gust86.cpp \
     $$MAIN_PATH/astro/IAULunarRotationModel.cpp \
     $$MAIN_PATH/astro/Nutation.cpp \
+    $$MAIN_PATH/astro/OsculatingElements.cpp \
     $$MAIN_PATH/astro/Precession.cpp \
     $$MAIN_PATH/astro/L1.cpp \
     $$MAIN_PATH/astro/MarsSat.cpp \
@@ -60,6 +61,7 @@ APP_SOURCES = \
     $$MAIN_PATH/geometry/FeatureLabelSetGeometry.cpp \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/geometry/MultiLabelGeometry.cpp \
+    $$MAIN_PATH/geometry/SimpleTrajectoryGeometry.cpp \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.cpp \
     $$MAIN_PATH/vext/CompositeTrajectory.cpp \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
@@ -111,6 +113,7 @@ APP_HEADERS = \
     $$MAIN_PATH/astro/IAULunarRotationModel.h \
     $$MAIN_PATH/astro/MarsSat.h \
     $$MAIN_PATH/astro/Nutation.h \
+    $$MAIN_PATH/astro/OsculatingElements.h \
     $$MAIN_PATH/astro/Precession.h \
     $$MAIN_PATH/astro/Rotation.h \
     $$MAIN_PATH/astro/L1.h \
@@ -123,6 +126,7 @@ APP_HEADERS = \
     $$MAIN_PATH/geometry/FeatureLabelSetGeometry.h \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.h \
     $$MAIN_PATH/geometry/MultiLabelGeometry.h \
+    $$MAIN_PATH/geometry/SimpleTrajectoryGeometry.h \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
     $$MAIN_PATH/vext/CompositeTrajectory.h \
@@ -751,10 +755,15 @@ macx {
         data/models/jas_solr.png \
         data/models/jas_brsh.png \
         data/models/cassini.cmod \
+        data/models/galileo.cmod \
+        data/models/galileo_tex_01.dds \
+        data/models/galileo_tex_02.dds \
         data/models/voyager.cmod \
         data/models/voyager-tex1.dds \
         data/models/voyager-tex2.dds \
-        data/models/iss.cmod \
+        data/models/near.cmod \
+        data/models/near-tex-01.dds \
+        data/models/foil_n.dds \
         data/models/hst.cmod \
         data/models/hbltel_1.jpg \
         data/models/hbltel_2.jpg \
@@ -763,6 +772,42 @@ macx {
         data/models/hbltel_w.jpg
 
     QMAKE_BUNDLE_DATA += MODELS
+
+    ISSFILES.path = Contents/Resources/data/models/iss
+    ISSFILES.files = \
+        data/models/iss/iss.cmod \
+        data/models/iss/d_ring.jpg \
+        data/models/iss/graple.jpg \
+        data/models/iss/iss_dc.jpg \
+        data/models/iss/iss_dcs.jpg \
+        data/models/iss/issb.jpg \
+        data/models/iss/issb2.jpg \
+        data/models/iss/issb3.jpg \
+        data/models/iss/issb4.jpg \
+        data/models/iss/issbso.jpg \
+        data/models/iss/issbso2.jpg \
+        data/models/iss/isscov2.jpg \
+        data/models/iss/isscover.jpg \
+        data/models/iss/isscup.jpg \
+        data/models/iss/issdish.jpg \
+        data/models/iss/issdot.jpg \
+        data/models/iss/isshand.jpg \
+        data/models/iss/issins.jpg \
+        data/models/iss/issku.jpg \
+        data/models/iss/issku1.jpg \
+        data/models/iss/issku2.jpg \
+        data/models/iss/issmod.jpg \
+        data/models/iss/issp2.jpg \
+        data/models/iss/isspanel.jpg \
+        data/models/iss/issrad.jpg \
+        data/models/iss/issred.jpg \
+        data/models/iss/isssolar.jpg \
+        data/models/iss/isssolar.png \
+        data/models/iss/isszmod.jpg \
+        data/models/iss/metalcon.jpg \
+        data/models/iss/questcov.jpg
+
+    QMAKE_BUNDLE_DATA += ISSFILES
 
     DAWNFILES.path = Contents/Resources/data/models/dawn
     DAWNFILES.files = \
@@ -790,8 +835,12 @@ macx {
         data/trajectories/dawn-cruise1.xyzv \
         data/trajectories/dawn-vesta-orbit.xyzv \
         data/trajectories/dawn-cruise2.xyzv \
+        data/trajectories/galileo-cruise.xyzv \
+        data/trajectories/galileo-orbit.xyzv \
         data/trajectories/voyager1.xyzv \
-        data/trajectories/voyager2.xyzv
+        data/trajectories/voyager2.xyzv \
+        data/trajectories/near-cruise.xyzv \
+        data/trajectories/near-eros-orbit.xyzv
 
     QMAKE_BUNDLE_DATA += TRAJECTORIES
 
@@ -815,8 +864,10 @@ macx {
         data/kuiperbelt.json \
         data/scattereddisc.json \
         data/cassini.json \
+        data/galileo.json \
         data/voyager.json \
         data/dawn.json \
+        data/near.json \
         data/earthorbiting.json \
         data/iss.json \
         data/hst.json \
@@ -900,6 +951,7 @@ macx {
         data/help/amalthea.html \
         data/help/io.html \
         data/help/europa.html \
+        data/help/galileo.html \
         data/help/ganymede.html \
         data/help/callisto.html \
         data/help/saturn.html \
@@ -950,6 +1002,7 @@ macx {
         data/help/voyager1.html \
         data/help/voyager2.html \
         data/help/dawn.html \
+        data/help/near.html \
         data/help/hubble.html \
         data/help/iss.html \
         data/help/jupiter.jpg \

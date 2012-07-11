@@ -6,6 +6,7 @@
      [
         {
           "name" : "ISS",
+          "class" : "spacecraft",
 
           "label" : { "color" : [ 0.9, 0.9, 0.9 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
@@ -18,22 +19,22 @@
           {
               "type" : "TLE",
               "name" : "ISS (ZARYA)",
-              "line1" : "1 25544U 98067A   12159.45626170  .00012040  00000-0  17489-3 0  7053",
-              "line2" : "2 25544  51.6366 171.0598 0010424  40.4484 107.8589 15.56196284776493",
+              "line1" : "1 25544U 98067A   11302.89537947 -.00001521  00000-0 -12123-4 0  3379",
+              "line2" : "2 25544  51.6410 202.6756 0022234 357.4073  93.7398 15.59244431741941",
               "source" : "http://celestrak.com/NORAD/elements/visual.txt"
           },
 
           "bodyFrame" :
           {
               "type" : "TwoVector",
-              "primaryAxis" : "x",
+              "primaryAxis" : "-y",
               "primary" :
               {
                   "type" : "RelativePosition",
                   "observer" : "ISS",
                   "target" : "Earth"
               },
-              "secondaryAxis" : "-y",
+              "secondaryAxis" : "z",
               "secondary" :
               {
                   "type" : "RelativeVelocity",
@@ -46,7 +47,8 @@
           {
               "type" : "Mesh",
               "size" : 0.1,
-              "source" : "models/iss.cmod"
+              "meshOffset" : [ -1.4, 0, 0.75 ],
+              "source" : "models/iss/iss.cmod"
           }
         }
 

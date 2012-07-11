@@ -91,88 +91,65 @@
           "label" : { "color" : [ 0.8, 0.8, 0.9 ] },
           "trajectoryPlot" : { "fade" : 0.3 },
 
-          "startTime" : "1800-01-01",
-
           "mass" : "1.08022e20 kg",
 
-          "arcs" : [
-            {
-              "center" : "Saturn",
+          "center" : "Saturn",
 
-              "endTime" : "2000-01-02",
-
-              "trajectoryFrame" : "EquatorJ2000",
-              "trajectory" :
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+            "type" : "Composite",
+            "startTime" : "1800-01-01",
+            "segments" : [
               {
-                "type" : "Builtin",
-                "name" : "Enceladus"
-              },
-              "bodyFrame" : "EquatorJ2000",
-              "rotationModel" :
-              {
-                "type" : "Uniform",
-                "period" : "1.370218083712283d",
-                "inclination" : 6.48,
-                "ascendingNode" : 130.66,
-                "meridianAngle" : 2.82
-              }
-            },
-            {
-              "center" : "Saturn",
-
-              "endTime" : "2019-12-31",
-
-              "trajectoryFrame" : "EquatorJ2000",
-
-              "trajectory" :
-              {
-                "type" : "LinearCombination",
-                "period" : "1.370218083712283d",
-                "weights" : [ 1.0, -1.0 ],
-                "trajectories" : [
-                {
-                  "type": "ChebyshevPoly",
-                  "source": "enceladus.cheb"
-                },
-                {
-                  "type": "ChebyshevPoly",
-                  "source": "saturn.cheb"
+                "endTime" : "2000-01-02",
+                "trajectory" : {
+                  "type" : "Builtin",
+                  "name" : "Enceladus"
                 }
-                ]
               },
-              "bodyFrame" : "EquatorJ2000",
-              "rotationModel" :
+              
               {
-                "type" : "Uniform",
-                "period" : "1.370218083712283d",
-                "inclination" : 6.48,
-                "ascendingNode" : 130.66,
-                "meridianAngle" : 2.82
-              }
-            },
-            {
-              "center" : "Saturn",
-
-              "endTime" : "2099-12-31",
-
-              "trajectoryFrame" : "EquatorJ2000",
-              "trajectory" :
-              {
-                "type" : "Builtin",
-                "name" : "Enceladus"
+                "endTime" : "2019-12-31",
+                "trajectory" :
+                {
+                  "type" : "LinearCombination",
+                  "period" : "1.370218083712283d",
+                  "weights" : [ 1.0, -1.0 ],
+                  "trajectories" : [
+                  {
+                    "type": "ChebyshevPoly",
+                    "source": "enceladus.cheb"
+                  },
+                  {
+                    "type": "ChebyshevPoly",
+                    "source": "saturn.cheb"
+                  }
+                  ]
+                }
               },
-              "bodyFrame" : "EquatorJ2000",
-              "rotationModel" :
-              {
-                "type" : "Uniform",
-                "period" : "1.370218083712283d",
-                "inclination" : 6.48,
-                "ascendingNode" : 130.66,
-                "meridianAngle" : 2.82
-              }
-            }
-          ],
 
+              {
+                "endTime" : "2099-12-31",
+                "trajectory" :
+                {
+                  "type" : "Builtin",
+                  "name" : "Enceladus"
+                }
+              }
+            ]
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+            "type" : "Uniform",
+            "period" : "1.370218083712283d",
+            "inclination" : 6.48,
+            "ascendingNode" : 130.66,
+            "meridianAngle" : 2.82
+          },
+          
           "geometry" :
           {
               "type" : "Globe",
@@ -220,83 +197,62 @@
 
           "mass" : "1.095452e21 kg",
 
-          "startTime" : "1800-01-01",
-          "arcs" : [
-            {
-              "center" : "Saturn",
+          "center" : "Saturn",
 
-              "endTime" : "2000-01-02",
-
-              "trajectoryFrame" : "EquatorJ2000",
-              "trajectory" :
+          "trajectoryFrame" : "EquatorJ2000",
+          "trajectory" :
+          {
+            "type" : "Composite",
+            "startTime" : "1800-01-01",
+            "segments" : [
               {
-                "type" : "Builtin",
-                "name" : "Dione"
-              },
-              "bodyFrame" : "EquatorJ2000",
-              "rotationModel" :
-              {
-                "type" : "Uniform",
-                "period" : "2.736915552552733d",
-                "inclination" : 6.48,
-                "ascendingNode" : 130.66,
-                "meridianAngle" : 357.00
-              }
-            },
-            {
-              "center" : "Saturn",
-
-              "endTime" : "2019-12-31",
-
-              "trajectoryFrame" : "EquatorJ2000",
-              "trajectory" :
-              {
-                "type" : "LinearCombination",
-                "period" : "2.736915552552733d",
-                "weights" : [ 1.0, -1.0 ],
-                "trajectories" : [
-                {
-                  "type": "ChebyshevPoly",
-                  "source": "dione.cheb"
-                },
-                {
-                  "type": "ChebyshevPoly",
-                  "source": "saturn.cheb"
+                "endTime" : "2000-01-02",
+                "trajectory" : {
+                  "type" : "Builtin",
+                  "name" : "Dione"
                 }
-                ]
               },
-              "bodyFrame" : "EquatorJ2000",
-              "rotationModel" :
+              
               {
-                "type" : "Uniform",
-                "period" : "2.736915552552733d",
-                "inclination" : 6.48,
-                "ascendingNode" : 130.66,
-                "meridianAngle" : 357.00
-              }
-            },
-            {
-              "center" : "Saturn",
-
-              "endTime" : "2099-12-31",
-
-              "trajectoryFrame" : "EquatorJ2000",
-              "trajectory" :
-              {
-                "type" : "Builtin",
-                "name" : "Dione"
+                "endTime" : "2019-12-31",
+                "trajectory" :
+                {
+                  "type" : "LinearCombination",
+                  "period" : "2.736915552552733d",
+                  "weights" : [ 1.0, -1.0 ],
+                  "trajectories" : [
+                  {
+                    "type": "ChebyshevPoly",
+                    "source": "dione.cheb"
+                  },
+                  {
+                    "type": "ChebyshevPoly",
+                    "source": "saturn.cheb"
+                  }
+                  ]
+                }
               },
-              "bodyFrame" : "EquatorJ2000",
-              "rotationModel" :
+
               {
-                "type" : "Uniform",
-                "period" : "2.736915552552733d",
-                "inclination" : 6.48,
-                "ascendingNode" : 130.66,
-                "meridianAngle" : 357.00
+                "endTime" : "2099-12-31",
+                "trajectory" :
+                {
+                  "type" : "Builtin",
+                  "name" : "Dione"
+                }
               }
-            }
-          ],
+            ]
+          },
+
+          "bodyFrame" : "EquatorJ2000",
+          "rotationModel" :
+          {
+            "type" : "Uniform",
+            "period" : "2.736915552552733d",
+            "inclination" : 6.48,
+            "ascendingNode" : 130.66,
+            "meridianAngle" : 357.00
+          },
 
           "geometry" :
           {

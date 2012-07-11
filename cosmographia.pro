@@ -769,7 +769,9 @@ macx {
         data/models/hbltel_2.jpg \
         data/models/hbltel_3.jpg \
         data/models/hbltel_4.jpg \
-        data/models/hbltel_w.jpg
+        data/models/hbltel_w.jpg \
+        data/models/msl-cruise.cmod \
+        data/models/msl-solar.dds
 
     QMAKE_BUNDLE_DATA += MODELS
 
@@ -840,7 +842,9 @@ macx {
         data/trajectories/voyager1.xyzv \
         data/trajectories/voyager2.xyzv \
         data/trajectories/near-cruise.xyzv \
-        data/trajectories/near-eros-orbit.xyzv
+        data/trajectories/near-eros-orbit.xyzv \
+        data/trajectories/msl-cruise.xyzv \
+        data/trajectories/msl-edl.xyzv
 
     QMAKE_BUNDLE_DATA += TRAJECTORIES
 
@@ -871,6 +875,7 @@ macx {
         data/earthorbiting.json \
         data/iss.json \
         data/hst.json \
+        data/msl.json \
         data/mercury-features.json \
         data/venus-features.json \
         data/moon-features.json \
@@ -1005,6 +1010,8 @@ macx {
         data/help/near.html \
         data/help/hubble.html \
         data/help/iss.html \
+        data/help/galileo.html \
+        data/help/msl.html \
         data/help/jupiter.jpg \
         data/help/PIA01971.jpg \
         data/help/hyperion.jpg \

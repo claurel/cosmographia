@@ -1,0 +1,89 @@
+{
+"version": "1.0",
+"name": "Mars Science Laboratory",
+
+"items" :
+[
+{
+    "name": "MSL", 
+    "class": "spacecraft",
+
+    "label": {
+        "color": "#d0d0d0"
+    },
+    "trajectoryPlot": {
+        "fade": 0.5,
+        "duration": "0.75 y"
+    }, 
+
+    "startTime" : "2011-11-26 15:52:13",
+
+    "arcs" : [
+    {
+    "center": "Sun",
+
+    "trajectoryFrame": "EclipticJ2000", 
+    "trajectory" :
+    {
+        "type" : "InterpolatedStates",
+        "source" : "trajectories/msl-cruise.xyzv"
+    },
+
+    "bodyFrame": {
+        "primaryAxis": "z", 
+        "secondaryAxis": "x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }
+    },
+    "endTime" : "2012-08-06 04:01:00"
+    },
+
+    {
+    "center": "Mars",
+
+    "trajectoryFrame": { "type" : "BodyFixed", "body": "Mars" },
+    "trajectory" :
+    {
+        "type" : "InterpolatedStates",
+        "source" : "trajectories/msl-edl.xyzv"
+    },
+
+    "bodyFrame": {
+        "primaryAxis": "z", 
+        "secondaryAxis": "x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "MSL"
+        }
+    },
+    "endTime" : "2015-08-06 05:29:01"
+    }
+
+    ],
+
+    "geometry": {
+        "source": "models/msl-cruise.cmod", 
+        "type": "Mesh", 
+        "size": 0.003
+    }
+}
+
+]
+}
+

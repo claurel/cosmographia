@@ -1,0 +1,104 @@
+{
+"version": "1.0",
+"name": "Juno Mission",
+
+"items" :
+[
+{
+    "name": "Juno", 
+    "class": "spacecraft",
+
+    "label": {
+        "color": "#d0d0d0"
+    },
+    "trajectoryPlot": {
+        "fade": 0.5,
+        "duration": "0.75 y"
+    }, 
+
+    "startTime" : "2011-08-05 17:19:18",
+
+    "arcs" : [
+    {
+    "center": "Sun",
+
+    "trajectoryFrame": "EclipticJ2000", 
+    "trajectory" :
+    {
+        "type" : "InterpolatedStates",
+        "source" : "juno-cruise.xyzv"
+    },
+
+    "bodyFrame": {
+        "primaryAxis": "z", 
+        "secondaryAxis": "x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Sun", 
+            "observer": "Juno"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Sun", 
+            "observer": "Juno"
+        }
+    },
+
+    "rotationModel" :
+    {
+        "type": "Uniform",
+        "period": "64s"
+    },
+
+    "endTime" : "2016-07-04 00:00:00"
+    },
+
+    {
+    "center": "Jupiter",
+
+    "trajectoryFrame": "EclipticJ2000",
+    "trajectory" :
+    {
+        "type" : "InterpolatedStates",
+        "source" : "juno-orbit.xyzv"
+    },
+
+    "bodyFrame": {
+        "primaryAxis": "z", 
+        "secondaryAxis": "x", 
+        "type": "TwoVector", 
+        "primary": {
+            "type": "RelativePosition", 
+            "target": "Mars", 
+            "observer": "Juno"
+        }, 
+        "secondary": {
+            "type": "RelativeVelocity", 
+            "target": "Mars", 
+            "observer": "Juno"
+        }
+    },
+
+    "rotationModel" :
+    {
+        "type": "Uniform",
+        "period": "64s"
+    },
+
+    "endTime" : "2017-10-16 19:34:01"
+    }
+
+    ],
+
+    "geometry": {
+        "source": "juno.cmod", 
+        "type": "Mesh", 
+        "size": 0.01,
+        "meshRotation": [ 0.70711, 0.70711, 0, 0 ]
+    }
+}
+
+]
+}
+

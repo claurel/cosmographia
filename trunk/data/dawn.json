@@ -40,7 +40,7 @@
             },
             {
               "center" : "Vesta",
-              "endTime" : "2012-07-31 12:00:00",
+              "endTime" : "2012-08-26 12:00:00",
               "trajectoryFrame" : "EclipticJ2000",
               "trajectory" : 
              {
@@ -50,7 +50,7 @@
             },
             {
               "center" : "Sun",
-              "endTime" : "2015-01-31 00:00:00",
+              "endTime" : "2015-03-26 12:00:00",
               "trajectoryFrame" : "EclipticJ2000",
               "trajectory" :
               {

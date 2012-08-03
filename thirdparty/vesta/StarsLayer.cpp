@@ -492,8 +492,8 @@ StarsLayer::render(RenderContext& rc)
         starShader->bind();
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
-        float viewportX = viewport[0];
-        float viewportY = viewport[1];
+        float viewportX = static_cast<float>(viewport[0]);
+        float viewportY = static_cast<float>(viewport[1]);
         Vector2f viewportCoord(viewportX, viewportY);
         Vector2f viewportSize(rc.viewportWidth(), rc.viewportHeight());
         starShader->setConstant("viewportSize", viewportSize);
@@ -509,7 +509,7 @@ StarsLayer::render(RenderContext& rc)
         // so that stars at the saturation magnitude will be rendered as full
         // brightness pixels.
         float visibilityThreshold = 1.0f / 255.0f;
-        float logMVisThreshold = log(visibilityThreshold) / log(2.512);
+        float logMVisThreshold = log(visibilityThreshold) / log(2.512f);
         float saturationMag = m_limitingMagnitude - 4.5f; //+ logMVisThreshold;
         float magScale = (logMVisThreshold) / (saturationMag - m_limitingMagnitude);
         starShader->setConstant("thresholdBrightness", visibilityThreshold);

@@ -1,5 +1,5 @@
 /*
- * $Revision: 670 $ $Date: 2012-04-27 15:43:49 -0700 (Fri, 27 Apr 2012) $
+ * $Revision: 684 $ $Date: 2012-07-16 21:12:16 -0700 (Mon, 16 Jul 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -41,14 +41,14 @@ StarCatalog::~StarCatalog()
 // metallicity is Fe/H
 static float BVColorIndexToTeff(float bv, float metallicity = 0.0f, float logG = 0.0f)
 {
-    const float c0 = 3.939654;
-    const float c1 = -0.395361;
-    const float c2 = 0.2082113;
-    const float c3 = -0.0604097;
-    const float f1 = 0.027153;
-    const float f2 = 0.005036;
-    const float g1 = 0.007367;
-    const float h1 = -0.01069;
+    const float c0 = 3.939654f;
+    const float c1 = -0.395361f;
+    const float c2 = 0.2082113f;
+    const float c3 = -0.0604097f;
+    const float f1 = 0.027153f;
+    const float f2 = 0.005036f;
+    const float g1 = 0.007367f;
+    const float h1 = -0.01069f;
 
     float logT = c0 + c1 * bv + c2 * bv * bv + c3 * bv * bv * bv +
                  f1 * metallicity + f2 * metallicity * metallicity +
@@ -76,7 +76,7 @@ static Vector2f planckianLocus(float T)
     float x;
     if (T < 4000.0f)
     {
-        x = -0.266162 * t3 - 0.2343580f * t2 + 0.8776956f * t + 0.179910f;
+        x = -0.266162f * t3 - 0.2343580f * t2 + 0.8776956f * t + 0.179910f;
     }
     else
     {
@@ -90,7 +90,7 @@ static Vector2f planckianLocus(float T)
     if (T < 2222)
     {
         // Valid from 1667K - 2222K
-        y = -1.1063814f * x3 - 1.3481102 * x2  + 2.18555832f * x - 0.20219683f;
+        y = -1.1063814f * x3 - 1.3481102f * x2  + 2.18555832f * x - 0.20219683f;
     }
     else if (T < 4000)
     {

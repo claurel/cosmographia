@@ -1,5 +1,5 @@
 /*
- * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
+ * $Revision: 685 $ $Date: 2012-08-03 12:54:39 -0700 (Fri, 03 Aug 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -134,7 +134,17 @@ public:
         return m_normalMap.ptr();
     }
 
+    /** Get the tiled normal map.
+      *
+      * \see normalMap()
+      */
+    TiledMap* tiledNormalMap() const
+    {
+        return m_tiledNormalMap.ptr();
+    }
+
     void setNormalMap(TextureMap* normalMap);
+    void setNormalMap(TiledMap* normalMap);
 
     void addLayer(MapLayer* layer);
     void removeLayer(unsigned int index);
@@ -288,6 +298,7 @@ private:
     counted_ptr<TextureMap> m_baseMap;
     counted_ptr<TextureMap> m_normalMap;
     counted_ptr<TiledMap> m_baseTiledMap;
+    counted_ptr<TiledMap> m_tiledNormalMap;
     counted_ptr<Material> m_material;
     counted_ptr<Atmosphere> m_atmosphere;
     counted_ptr<PlanetaryRings> m_ringSystem;

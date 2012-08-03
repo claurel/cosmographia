@@ -67,7 +67,7 @@ Spectrum::LinearSRGBtoXYZ(const Spectrum& srgb)
 
 static float fromLinearSRGB(float x)
 {
-    return x < 0.0031308f ? 12.92f * x : 1.055 * pow(x, 1.0f / 2.4f) - 0.055f;
+    return x < 0.0031308f ? 12.92f * x : 1.055f * pow(x, 1.0f / 2.4f) - 0.055f;
 }
 
 

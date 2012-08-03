@@ -1,5 +1,5 @@
 /*
- * $Revision: 624 $ $Date: 2011-09-26 14:20:33 -0700 (Mon, 26 Sep 2011) $
+ * $Revision: 684 $ $Date: 2012-07-16 21:12:16 -0700 (Mon, 16 Jul 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -117,7 +117,7 @@ Universe::pickObject(double t,
 
     pc.setPickOrigin(pickOrigin);
     pc.setPickDirection(pickDirection);
-    pc.setPixelAngle(pixelAngle);
+    pc.setPixelAngle(static_cast<float>(pixelAngle));
 
     return pickObject(&pc, t, result);
 }
@@ -158,7 +158,7 @@ Universe::pickViewportObject(double t,
 
     double fovY = projection.fovY();
     double pixelAngle = fovY / viewport.height();
-    pc.setPixelAngle(pixelAngle);
+    pc.setPixelAngle(static_cast<float>(pixelAngle));
 
     // Get the click point in normalized device coordinaes
     Vector2d ndc = Vector2d((pickPoint.x() - viewport.x()) / viewport.width(),

@@ -2458,18 +2458,28 @@ UniverseLoader::loadGlobeGeometry(const QVariantMap& map)
         }
     }
 
-    if (map.contains("normalMap"))
+    QVariant normalMapVar = map.value("normalMap");
+    if (normalMapVar.type() == QVariant::String)
     {
+
         TextureProperties normalMapProps;
         normalMapProps.addressS = TextureProperties::Wrap;
         normalMapProps.addressT = TextureProperties::Clamp;
         normalMapProps.usage = TextureProperties::CompressedNormalMap;
 
-        QString normalMapBase = map.value("normalMap").toString();
+        QString normalMapBase = normalMapVar.toString();
         if (m_textureLoader.isValid())
         {
             TextureMap* normalTex = m_textureLoader->loadTexture(normalMapBase.toUtf8().data(), normalMapProps);
             world->setNormalMap(normalTex);
+        }
+    }
+    else if (normalMapVar.type() == QVariant::Map)
+    {
+        TiledMap* tiledMap = loadTiledMap(normalMapVar.toMap(), m_textureLoader.ptr());
+        if (tiledMap)
+        {
+            world->setNormalMap(tiledMap);
         }
     }
 

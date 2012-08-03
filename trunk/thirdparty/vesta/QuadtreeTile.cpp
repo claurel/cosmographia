@@ -578,6 +578,26 @@ QuadtreeTile::render(RenderContext& rc, Material& material, TiledMap* baseTextur
 
 
 void
+QuadtreeTile::render(RenderContext& rc, Material& material, TiledMap* baseTexture, TiledMap* normalTexture) const
+{
+    if (!m_isCulled)
+    {
+        if (hasChildren())
+        {
+            for (unsigned int i = 0; i < 4; ++i)
+            {
+                m_children[i]->render(rc, material, baseTexture, normalTexture);
+            }
+        }
+        else
+        {
+            drawPatch(rc, material, baseTexture, normalTexture);
+        }
+    }
+}
+
+
+void
 QuadtreeTile::render(RenderContext& rc, const MapLayer& layer, unsigned int features) const
 {
     if (!m_isCulled)
@@ -802,7 +822,7 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
     float dlon = tileArc / float(TileSubdivision);
     float dlat = tileArc / float(TileSubdivision);
 
-    unsigned int tileSize = baseMap->tileSize();
+    float tileSize = static_cast<float>(baseMap->tileSize());
 
     unsigned int mapLevel = m_level;
     unsigned int mapColumn = m_column;
@@ -907,6 +927,151 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
 }
 
 
+// Draw a patch with a tiled base texture and normal map
+void
+QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap, TiledMap* normalMap) const
+{
+    const unsigned int MaxVertexSize = 11;
+    unsigned int vertexStride = 11;
+
+    const unsigned int vertexCount = (TileSubdivision + 1) * (TileSubdivision + 1);
+
+    float vertexData[vertexCount * MaxVertexSize];
+    unsigned int vertexIndex = 0;
+
+    float tileArc = float(PI) * m_extent;
+    float lonWest = float(PI) * m_southwest.x();
+    float latSouth = float(PI) * m_southwest.y();
+    float dlon = tileArc / float(TileSubdivision);
+    float dlat = tileArc / float(TileSubdivision);
+
+    float tileSize = static_cast<float>(baseMap->tileSize());
+
+    unsigned int mapLevel = m_level;
+    unsigned int mapColumn = m_column;
+    unsigned int mapRow = m_row;
+
+    // If the projected size in pixels of the tile is less than the number texels
+    // in the tile, then we can use a lower resolution version of the tile.
+    if (m_approxPixelSize < tileSize)
+    {
+        unsigned int n = tileSize / m_approxPixelSize;
+        while (n > 0 && mapLevel > 0)
+        {
+            n >>= 1;
+            mapColumn >>= 1;
+            mapRow >>= 1;
+            mapLevel--;
+        }
+    }
+
+    float u0;
+    float v0;
+    float du;
+    float dv;
+
+    TiledMap::TextureSubrect baseRect = baseMap->tile(mapLevel, mapColumn, mapRow);
+    TiledMap::TextureSubrect normalMapRect = normalMap->tile(mapLevel, mapColumn, mapRow);
+
+    // We need to have the same texture coordinates for all textures. If we have
+    // a more detailed tile for one of the textures,
+    float baseUExt = baseRect.u1 - baseRect.u0;
+    float normalMapUExt = normalMapRect.u1 - normalMapRect.u0;
+    if (baseUExt > normalMapUExt)
+    {
+        while (mapLevel > 0 && baseUExt > normalMapUExt)
+        {
+            mapColumn >>= 1;
+            mapRow >>= 1;
+            mapLevel--;
+            baseRect = baseMap->tile(mapLevel, mapColumn, mapRow);
+            baseUExt = baseRect.u1 - baseRect.u0;
+        }
+    }
+    else if (normalMapUExt < baseUExt)
+    {
+        while (mapLevel > 0 && normalMapUExt > baseUExt)
+        {
+            mapColumn >>= 1;
+            mapRow >>= 1;
+            mapLevel--;
+            normalMapRect = normalMap->tile(mapLevel, mapColumn, mapRow);
+            normalMapUExt = normalMapRect.u1 - normalMapRect.u0;
+        }
+    }
+
+    if (mapLevel >= m_level)
+    {
+        u0 = baseRect.u0;
+        v0 = baseRect.v0;
+        du = (baseRect.u1 - baseRect.u0) / float(TileSubdivision);
+        dv = (baseRect.v1 - baseRect.v0) / float(TileSubdivision);
+    }
+    else
+    {
+        unsigned int log2Scale = m_level - mapLevel;
+        float scale = 1.0f / float(1 << log2Scale);
+        unsigned int mask = (1 << log2Scale) - 1;
+
+        float uExt = (baseRect.u1 - baseRect.u0) * scale;
+        float vExt = (baseRect.v1 - baseRect.v0) * scale;
+
+        u0 = baseRect.u0 + uExt * (m_column & mask);
+        v0 = baseRect.v0 + vExt * (m_row & mask);
+        du = uExt / float(TileSubdivision);
+        dv = vExt / float(TileSubdivision);
+    }
+
+    // Precompute a trig table for this patch
+    float sines[TileSubdivision + 1];
+    float cosines[TileSubdivision + 1];
+    for (unsigned int i = 0; i <= TileSubdivision; ++i)
+    {
+        float lon = lonWest + i * dlon;
+        sines[i] = sin(lon);
+        cosines[i] = cos(lon);
+    }
+
+    for (unsigned int i = 0; i <= TileSubdivision; ++i)
+    {
+        float v = v0 + i * dv;
+        float lat = latSouth + i * dlat;
+        float cosLat = cos(lat);
+        float sinLat = sin(lat);
+
+        for (unsigned int j = 0; j <= TileSubdivision; ++j)
+        {
+            unsigned int vertexStart = vertexStride * vertexIndex;
+
+            float u = u0 + j * du;
+
+            Vector3f p(cosLat * cosines[j], cosLat * sines[j], sinLat);
+            vertexData[vertexStart + 0] = p.x();
+            vertexData[vertexStart + 1] = p.y();
+            vertexData[vertexStart + 2] = p.z();
+            vertexData[vertexStart + 3] = p.x();
+            vertexData[vertexStart + 4] = p.y();
+            vertexData[vertexStart + 5] = p.z();
+            vertexData[vertexStart + 6] = u;
+            vertexData[vertexStart + 7] = 1.0f - v;
+            vertexData[vertexStart + 8]  = -sines[j];
+            vertexData[vertexStart + 9]  = cosines[j];
+            vertexData[vertexStart + 10] = 0.0f;
+
+            ++vertexIndex;
+        }
+    }
+
+    material.setBaseTexture(baseRect.texture);
+    material.setNormalTexture(normalMapRect.texture);
+    rc.bindMaterial(&material);
+
+    rc.bindVertexArray(PositionNormalTexTangent, vertexData, vertexStride * 4);
+
+    drawTriangles(rc);
+}
+
+
 inline void setVertex(float* vertexData, const Vector3f& p, float u, float v)
 {
     vertexData[0] = p.x();
@@ -938,7 +1103,7 @@ mapLayerRow(const MapLayer& layer,
 
     if (westEdge)
     {
-        float lon = layer.box().west();
+        float lon = static_cast<float>(layer.box().west());
         Vector3f p(cosLat * cos(lon), cosLat * sin(lon), sinLat);
         setVertex(vertexData + vertexStride * vertexIndex, p, 0.0f, v);
 
@@ -958,7 +1123,7 @@ mapLayerRow(const MapLayer& layer,
 
     if (eastEdge)
     {
-        float lon = layer.box().east();
+        float lon = static_cast<float>(layer.box().east());
         Vector3f p(cosLat * cos(lon), cosLat * sin(lon), sinLat);
         setVertex(vertexData + vertexStride * vertexIndex, p, 1.0f, v);
 
@@ -989,12 +1154,12 @@ QuadtreeTile::drawPatch(RenderContext& rc, const MapLayer& layer, unsigned int f
     float dlon = tileArc / float(TileSubdivision);
     float dlat = tileArc / float(TileSubdivision);
 
-    float layerLonExtent = layer.box().east() - layer.box().west();
-    float layerLatExtent = layer.box().north() - layer.box().south();
+    float layerLonExtent = static_cast<float>(layer.box().east() - layer.box().west());
+    float layerLatExtent = static_cast<float>(layer.box().north() - layer.box().south());
 
     // Compute texture coordinate starting points and steps
-    float u0 = (lonWest - layer.box().west()) / layerLonExtent;
-    float v0 = (latSouth - layer.box().south()) / layerLatExtent;
+    float u0 = static_cast<float>(lonWest - layer.box().west()) / layerLonExtent;
+    float v0 = static_cast<float>(latSouth - layer.box().south()) / layerLatExtent;
     float du = tileArc / layerLonExtent / TileSubdivision;
     float dv = tileArc / layerLatExtent / TileSubdivision;
 
@@ -1008,7 +1173,7 @@ QuadtreeTile::drawPatch(RenderContext& rc, const MapLayer& layer, unsigned int f
     unsigned int startColumn = 0;
     if (lonWest < layer.box().west())
     {
-        startColumn = ceil((layer.box().west() - lonWest) / tileArc * TileSubdivision);
+        startColumn = static_cast<unsigned int>(ceil((layer.box().west() - lonWest) / tileArc * TileSubdivision));
         westEdge = true;
     }
 

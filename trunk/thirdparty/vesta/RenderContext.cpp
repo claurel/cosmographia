@@ -1,5 +1,5 @@
 /*
- * $Revision: 676 $ $Date: 2012-05-22 17:48:11 -0700 (Tue, 22 May 2012) $
+ * $Revision: 684 $ $Date: 2012-07-16 21:12:16 -0700 (Mon, 16 Jul 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -928,7 +928,7 @@ RenderContext::setFixedFunctionMaterial(const Material* material)
         // and the rest are local light sources. Set w for the light position appropriately:
         // OpenGL treats light sources with w == 0 as directional.
         bool isLocal = light.type == PointLight;
-        lightPosition.w() = isLocal ? 1.0f : 0.0;
+        lightPosition.w() = isLocal ? 1.0f : 0.0f;
 
         glLightfv(GL_LIGHT0 + lightIndex, GL_POSITION, lightPosition.data());
         glLightfv(GL_LIGHT0 + lightIndex, GL_DIFFUSE, light.color.data());

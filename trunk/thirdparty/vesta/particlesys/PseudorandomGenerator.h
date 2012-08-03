@@ -54,7 +54,7 @@ public:
         m_seed = 25214903917ULL * m_seed + 11;
 
         // Use only the middle 32-bits
-        return (m_seed & 0x0000ffffffff0000ULL) >> 16;
+        return static_cast<v_uint32>((m_seed & 0x0000ffffffff0000ULL) >> 16);
     }
 
     /** Return a random floating point value in [ 0, 1 )

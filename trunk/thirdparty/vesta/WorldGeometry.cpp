@@ -1,5 +1,5 @@
 /*
- * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
+ * $Revision: 685 $ $Date: 2012-08-03 12:54:39 -0700 (Fri, 03 Aug 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -324,10 +324,17 @@ WorldGeometry::render(RenderContext& rc, double clock) const
         westHemi->render(rc, tileFeatures);
         eastHemi->render(rc, tileFeatures);
     }
-    else
+    else if (m_tiledNormalMap.isNull())
     {
+        // Tiled base map, but no tiled normal map
         westHemi->render(rc, material, m_baseTiledMap.ptr(), QuadtreeTile::Normals);
         eastHemi->render(rc, material, m_baseTiledMap.ptr(), QuadtreeTile::Normals);
+    }
+    else
+    {
+        // We have tiled base and tiled normal maps
+        westHemi->render(rc, material, m_baseTiledMap.ptr(), m_tiledNormalMap.ptr());
+        eastHemi->render(rc, material, m_baseTiledMap.ptr(), m_tiledNormalMap.ptr());
     }
 
     // TODO: replace this with more general WorldLayers mechanism
@@ -1259,6 +1266,16 @@ void
 WorldGeometry::setNormalMap(TextureMap* normalMap)
 {
     m_normalMap = normalMap;
+}
+
+
+/** Set a tiled map as the global normal map. The tiled normal
+  * map will only be used if the base texture is also tiled.
+  */
+void
+WorldGeometry::setNormalMap(TiledMap* normalMap)
+{
+    m_tiledNormalMap = normalMap;
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * $Revision: 567 $ $Date: 2011-02-24 13:28:02 -0800 (Thu, 24 Feb 2011) $
+ * $Revision: 684 $ $Date: 2012-07-16 21:12:16 -0700 (Mon, 16 Jul 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -55,7 +55,7 @@ public:
 
     float boundingSphereRadius() const
     {
-        return m_boundingRadius;
+        return static_cast<float>(m_boundingRadius);
     }
 
     virtual bool isOpaque() const

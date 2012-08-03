@@ -1,5 +1,5 @@
 /*
- * $Revision: 678 $ $Date: 2012-05-22 17:59:22 -0700 (Tue, 22 May 2012) $
+ * $Revision: 684 $ $Date: 2012-07-16 21:12:16 -0700 (Mon, 16 Jul 2012) $
  *
  * Copyright by Astos Solutions GmbH, Germany
  *
@@ -47,10 +47,10 @@ static void glDepthRange(float n, float f)
 #define DEBUG_DEPTH_SPANS     0
 
 const float UniverseRenderer::MinimumNearDistance = 0.00001f;  // 1 centimeter
-const float UniverseRenderer::MaximumFarDistance = 1.0e12; // one trillion km (~6700 AU)
+const float UniverseRenderer::MaximumFarDistance = 1.0e12f; // one trillion km (~6700 AU)
 
 static const float MinimumNearPlaneDistance = 0.00001f;  // 1 centimeter
-static const float MaximumFarPlaneDistance = 1.0e12; // one trillion km (~6700 AU)
+static const float MaximumFarPlaneDistance = 1.0e12f; // one trillion km (~6700 AU)
 static const float MinimumNearFarRatio = 0.001f;
 static const float PreferredNearFarRatio = 0.002f;
 
@@ -929,7 +929,7 @@ UniverseRenderer::renderView(const LightingEnvironment* lighting,
     return renderView(lighting,
                       observer->absolutePosition(m_currentTime),
                       observer->absoluteOrientation(m_currentTime),
-                      PlanarProjection::CreatePerspective(fieldOfView, viewport.aspectRatio(), MinimumNearPlaneDistance, MaximumFarPlaneDistance),
+                      PlanarProjection::CreatePerspective(static_cast<float>(fieldOfView), viewport.aspectRatio(), MinimumNearPlaneDistance, MaximumFarPlaneDistance),
                       viewport,
                       renderSurface);
 }
@@ -1258,7 +1258,8 @@ UniverseRenderer::renderCubeMap(const LightingEnvironment* lighting,
     Viewport viewport(cubeMap->size(), cubeMap->size());
     PlanarProjection cubeFaceProjection = PlanarProjection::CreatePerspectiveLH(float(toRadians(90.0)),
                                                                                 1.0f,
-                                                                                nearDistance, farDistance);
+                                                                                static_cast<float>(nearDistance), 
+																				static_cast<float>(farDistance));
 
     for (int face = 0; face < 6; ++face)
     {
@@ -1965,7 +1966,7 @@ UniverseRenderer::setupEclipseShadows(const VisibleItem &item)
 
                     // In order to avoid precision problems, we'll scale the z-axis so that its length is closer to
                     // the range of the x- and y-axis lengths
-                    float zscale = shadow.projection.v0().norm();
+                    float zscale = static_cast<float>(shadow.projection.v0().norm());
 
                     Matrix3f shadowRotation;
                     shadowRotation << shadow.projection.v0().cast<float>() / float(shadow.projection.v0().squaredNorm()),

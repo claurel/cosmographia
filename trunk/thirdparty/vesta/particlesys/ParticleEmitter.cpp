@@ -159,8 +159,8 @@ ParticleEmitter::generateParticles(double simulationTime,
         }
 
         // Calculate particle position as p0 + v0*t + (1/2)at^2
-        particle.velocity = v0 + age * m_force;
-        particle.position = p0 + age * (v0 + (age * 0.5f) * m_force);
+        particle.velocity = v0 + static_cast<float>(age) * m_force;
+        particle.position = p0 + static_cast<float>(age) * (v0 + (static_cast<float>(age) * 0.5f) * m_force);
 
         // Rotation (if enabled)
         // TODO
@@ -202,7 +202,7 @@ ParticleEmitter::boundingRadius() const
     // is completely described by a quadratic.
     float maxSpeed = m_generator->maxSpeed() + m_velocityVariation;
     return m_generator->maxDistanceFromOrigin() +
-           m_particleLifetime * maxSpeed +
-           0.5f * (m_particleLifetime * m_particleLifetime) * m_force.norm();
+           static_cast<float>(m_particleLifetime) * maxSpeed +
+           0.5f * static_cast<float>(m_particleLifetime * m_particleLifetime) * m_force.norm();
 }
 

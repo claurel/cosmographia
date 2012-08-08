@@ -764,6 +764,12 @@ macx {
         data/models/voyager.cmod \
         data/models/voyager-tex1.dds \
         data/models/voyager-tex2.dds \
+        data/models/pioneer10.cmod \
+        data/models/pioneer-box_n.dds \
+        data/models/pioneer-dish.dds \
+        data/models/pioneer-tex-1.dds \
+        data/models/pioneer-tex-2.dds \
+        data/models/pioneer-tex-black.dds \
         data/models/near.cmod \
         data/models/near-tex-01.dds \
         data/models/foil_n.dds \
@@ -844,6 +850,8 @@ macx {
         data/trajectories/galileo-orbit.xyzv \
         data/trajectories/voyager1.xyzv \
         data/trajectories/voyager2.xyzv \
+        data/trajectories/pioneer10.xyzv \
+        data/trajectories/pioneer11.xyzv \
         data/trajectories/near-cruise.xyzv \
         data/trajectories/near-eros-orbit.xyzv \
         data/trajectories/msl-cruise.xyzv \
@@ -873,6 +881,7 @@ macx {
         data/cassini.json \
         data/galileo.json \
         data/voyager.json \
+        data/pioneer.json \
         data/dawn.json \
         data/near.json \
         data/earthorbiting.json \

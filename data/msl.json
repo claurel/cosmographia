@@ -62,13 +62,13 @@
         "secondaryAxis": "x", 
         "type": "TwoVector", 
         "primary": {
-            "type": "RelativePosition", 
-            "target": "Sun", 
+            "type": "RelativeVelocity", 
+            "target": "Mars", 
             "observer": "MSL"
         }, 
         "secondary": {
-            "type": "RelativeVelocity", 
-            "target": "Sun", 
+            "type": "RelativePosition", 
+            "target": "Mars", 
             "observer": "MSL"
         }
     },

@@ -1,0 +1,104 @@
+{
+     "version": "1.0",
+     "name": "Pioneer 10 and 11",
+
+     "items" :
+     [
+        {
+          "name" : "Pioneer 10",
+
+          "label" : { "color" : "#d0d0d0" },
+          "trajectoryPlot" :
+          {
+              "duration" : "5 y",
+              "fade" : 0.5
+          },
+
+          "infoSource" : "help:pioneer10",
+
+          "startTime" : "1972-03-03 02:04:43",
+          "endTime" : "2030-01-01 00:00:00",
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "trajectories/pioneer10.xyzv"
+          },
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "-z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Pioneer 10",
+                  "target" : "Sun"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Pioneer 10",
+                  "target" : "Sun"
+              }
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/pioneer10.cmod"
+          }
+        },
+
+        {
+          "name" : "Pioneer 11",
+
+          "label" : { "color" : "#d0d0d0" },
+          "trajectoryPlot" :
+          {
+              "duration" : "5 y",
+              "fade" : 0.5
+          },
+
+          "infoSource" : "help:pioneer10",
+
+          "startTime" : "1973-04-06 02:25:45",
+          "endTime" : "2030-01-01 00:00:00",
+
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "trajectories/pioneer11.xyzv"
+          },
+          "bodyFrame" :
+          {
+              "type" : "TwoVector",
+              "primaryAxis" : "-z",
+              "primary" :
+              {
+                  "type" : "RelativePosition",
+                  "observer" : "Pioneer 11",
+                  "target" : "Sun"
+              },
+              "secondaryAxis" : "-x",
+              "secondary" :
+              {
+                  "type" : "RelativeVelocity",
+                  "observer" : "Pioneer 11",
+                  "target" : "Sun"
+              }
+          },
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.005,
+              "source" : "models/pioneer10.cmod"
+          }
+        }
+
+    ]
+}

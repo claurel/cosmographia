@@ -24,6 +24,7 @@
         "near.json",
         "msl.json",
         "earthorbiting.json",
+        "pioneer.json",
         "mercury-features.json",
         "venus-features.json",
         "mars-features.json",

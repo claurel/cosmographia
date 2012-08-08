@@ -105,6 +105,44 @@
               "duration" : "1 y",
               "fade" : 0.5
           }
+        },
+
+        {
+          "name" : "Huygens",
+
+          "startTime" : "1997-10-15 09:27:00",
+
+          "arcs" : [
+            {
+              "center" : "Cassini",
+
+              "trajectoryFrame" :
+              {
+                  "type" : "BodyFixed",
+                  "body" : "Cassini"
+              },
+              "trajectory" :
+              {
+                "type" : "FixedPoint",
+                "position" : [ 0.001, 0, -0.00068 ]
+              },
+              
+              "bodyFrame" :
+              {
+                  "type" : "BodyFixed",
+                  "body" : "Cassini"
+              },
+
+              "endTime" : "2004-12-25 02:01:05.183"
+            }
+          ],
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 0.001,
+              "source" : "models/huygens.cmod"
+          }
         }
     ]
 }

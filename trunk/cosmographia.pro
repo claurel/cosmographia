@@ -755,6 +755,7 @@ macx {
         data/models/jas_solr.png \
         data/models/jas_brsh.png \
         data/models/cassini.cmod \
+        data/models/huygens.cmod \
         data/models/foil_n_2.dds \
         data/models/cassini-dish.dds \
         data/models/cassini-tex-1.dds \

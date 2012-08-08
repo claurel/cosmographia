@@ -18,11 +18,23 @@
                 "type" : "InterpolatedStates",
                 "source" : "trajectories/cassini-cruise.xyzv"
               },
-              "rotationModel" :
-              {
-                "type" : "Fixed",
-                "quaternion" : [ 0.707, 0.707, 0.0, 0.0 ]
+
+              "bodyFrame": {
+                "primaryAxis": "z", 
+                "secondaryAxis": "x", 
+                "type": "TwoVector", 
+                "primary": {
+                  "type": "RelativePosition", 
+                  "target": "Earth", 
+                  "observer": "Cassini"
+                }, 
+                "secondary": {
+                  "type" : "ConstantVector",
+                  "frame" : "EclipticJ2000",
+                  "direction" : [ 0, 0, 1 ]
+                }
               },
+
               "endTime" : 2453177.0424
             },
             {
@@ -33,13 +45,25 @@
                 "type" : "InterpolatedStates",
                 "source" : "trajectories/cassini-orbit.xyzv"
               },
-              "rotationModel" :
-              {
-                "type" : "Fixed",
-                "quaternion" : [ 0.707, 0.707, 0.0, 0.0 ]
+              "bodyFrame": {
+                "primaryAxis": "z", 
+                "secondaryAxis": "x", 
+                "type": "TwoVector", 
+                "primary": {
+                  "type": "RelativePosition", 
+                  "target": "Earth", 
+                  "observer": "Cassini"
+                }, 
+                "secondary": {
+                  "type" : "ConstantVector",
+                  "frame" : "EclipticJ2000",
+                  "direction" : [ 0, 0, 1 ]
+                }
               },
+
               "endTime" : 2455387.0
             },
+
             {
               "center" : "Saturn",
               "trajectoryFrame" : "EclipticJ2000",
@@ -48,11 +72,22 @@
                 "type" : "InterpolatedStates",
                 "source" : "trajectories/cassini-solstice.xyzv"
               },
-              "rotationModel" :
-              {
-                "type" : "Fixed",
-                "quaternion" : [ 0.707, 0.707, 0.0, 0.0 ]
+              "bodyFrame": {
+                "primaryAxis": "z", 
+                "secondaryAxis": "x", 
+                "type": "TwoVector", 
+                "primary": {
+                  "type": "RelativePosition", 
+                  "target": "Earth", 
+                  "observer": "Cassini"
+                }, 
+                "secondary": {
+                  "type" : "ConstantVector",
+                  "frame" : "EclipticJ2000",
+                  "direction" : [ 0, 0, 1 ]
+                }
               },
+
               "endTime" : 2458018.0
             }
           ],

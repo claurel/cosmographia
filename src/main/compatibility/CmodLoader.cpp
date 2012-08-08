@@ -66,7 +66,6 @@ CmodLoader::loadMaterial()
         {
         case CmodIlluminationModel:
         {
-            qDebug("Illum model!");
             quint16 illum = 0;
             *m_inputStream >> illum;
 
@@ -76,7 +75,6 @@ CmodLoader::loadMaterial()
                 material->setBrdf(Material::Lambert);
                 break;
             case 2:
-                qDebug("reflective!");
                 material->setBrdf(Material::BlinnPhongReflective);
                 break;
             case 1:

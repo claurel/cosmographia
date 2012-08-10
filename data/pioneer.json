@@ -6,6 +6,7 @@
      [
         {
           "name" : "Pioneer 10",
+          "class" : "spacecraft",          
 
           "label" : { "color" : "#d0d0d0" },
           "trajectoryPlot" :
@@ -34,14 +35,14 @@
               {
                   "type" : "RelativePosition",
                   "observer" : "Pioneer 10",
-                  "target" : "Sun"
+                  "target" : "Earth"
               },
               "secondaryAxis" : "-x",
               "secondary" :
               {
-                  "type" : "RelativeVelocity",
-                  "observer" : "Pioneer 10",
-                  "target" : "Sun"
+                  "type" : "ConstantVector",
+                  "frame" : "EclipticJ2000",
+                  "direction" : [ 0, 0, 1 ]
               }
           },
           "geometry" :
@@ -54,6 +55,7 @@
 
         {
           "name" : "Pioneer 11",
+          "class" : "spacecraft",
 
           "label" : { "color" : "#d0d0d0" },
           "trajectoryPlot" :
@@ -62,7 +64,7 @@
               "fade" : 0.5
           },
 
-          "infoSource" : "help:pioneer10",
+          "infoSource" : "help:pioneer11",
 
           "startTime" : "1973-04-06 02:25:45",
           "endTime" : "2030-01-01 00:00:00",
@@ -82,14 +84,14 @@
               {
                   "type" : "RelativePosition",
                   "observer" : "Pioneer 11",
-                  "target" : "Sun"
+                  "target" : "Earth"
               },
               "secondaryAxis" : "-x",
               "secondary" :
               {
-                  "type" : "RelativeVelocity",
-                  "observer" : "Pioneer 11",
-                  "target" : "Sun"
+                  "type" : "ConstantVector",
+                  "frame" : "EclipticJ2000",
+                  "direction" : [ 0, 0, 1 ]
               }
           },
           "geometry" :

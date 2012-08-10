@@ -6,6 +6,7 @@
      [
         {
           "name" : "NEAR",
+          "class" : "spacecraft",          
 
           "startTime" : "1996-05-31 00:00:00",
           "arcs" : [

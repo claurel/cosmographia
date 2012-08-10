@@ -6,6 +6,7 @@
      [
         {
           "name" : "Cassini",
+          "class" : "spacecraft",          
 
           "startTime" : "1997-10-15 09:27:00",
 

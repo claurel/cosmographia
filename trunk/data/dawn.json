@@ -6,6 +6,7 @@
      [
         {
           "name" : "Dawn",
+          "class" : "spacecraft",
 
           "startTime" : "2007-09-17 12:40:50",
 

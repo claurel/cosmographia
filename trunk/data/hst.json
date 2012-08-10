@@ -6,6 +6,7 @@
      [
         {
           "name" : "Hubble",
+          "class" : "spacecraft",          
 
           "label" : { "color" : [ 0.9, 0.9, 0.9 ] },
           "trajectoryPlot" : { "fade" : 0.3 },

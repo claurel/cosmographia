@@ -2277,6 +2277,10 @@ loadTiledMap(const QVariantMap& map, PathRelativeTextureLoader* textureLoader)
 
         NameTemplateTiledMap* tiledMap = new NameTemplateTiledMap(textureLoader, templateName.toUtf8().data(), tileSize, levelCount);
         tiledMap->setTileBorderFraction(borderThickness);
+        if (templateName.toLower().endsWith(".dds") || templateName.toLower().endsWith(".dxt5nm"))
+        {
+            tiledMap->setTextureUsage(TextureProperties::CompressedNormalMap);
+        }
 
         return tiledMap;
     }

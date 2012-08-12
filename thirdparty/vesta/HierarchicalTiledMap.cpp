@@ -78,6 +78,7 @@ HierarchicalTiledMap::tile(unsigned int level, unsigned int x, unsigned int y)
                 {
                     TextureProperties props(TextureProperties::Clamp);
                     props.maxAnisotropy = 16;
+                    props.usage = textureUsage();
 
                     tileTexture = m_loader->loadTexture(resourceId, props);
                     m_tiles[tileId] = counted_ptr<TextureMap>(tileTexture);

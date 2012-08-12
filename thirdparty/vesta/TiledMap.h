@@ -34,7 +34,8 @@ public:
         float v1;
     };
 
-    TiledMap()
+    TiledMap() :
+        m_textureUsage(TextureProperties::ColorTexture)
     {
     }
 
@@ -64,6 +65,19 @@ public:
     {
         return 0;
     }
+
+    TextureProperties::TextureUsage textureUsage() const
+    {
+        return m_textureUsage;
+    }
+
+    void setTextureUsage(TextureProperties::TextureUsage usage)
+    {
+        m_textureUsage = usage;
+    }
+
+private:
+    TextureProperties::TextureUsage m_textureUsage;
 };
 
 }

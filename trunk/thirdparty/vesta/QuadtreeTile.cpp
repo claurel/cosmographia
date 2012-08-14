@@ -988,7 +988,7 @@ QuadtreeTile::drawPatch(RenderContext& rc, Material& material, TiledMap* baseMap
             baseUExt = baseRect.u1 - baseRect.u0;
         }
     }
-    else if (normalMapUExt < baseUExt)
+    else if (normalMapUExt > baseUExt)
     {
         while (mapLevel > 0 && normalMapUExt > baseUExt)
         {

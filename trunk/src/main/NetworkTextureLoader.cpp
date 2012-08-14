@@ -150,11 +150,17 @@ NetworkTextureLoader::setSearchPath(const std::string& path)
 std::string
 NetworkTextureLoader::resolveResourceName(const std::string& resourceName)
 {
+    bool isWindowsAbsolutePath = false;
+#ifdef Q_OS_WIN
+    QRegExp driveLetterPattern("[A-Z]:", Qt::CaseInsensitive);
+    isWindowsAbsolutePath = driveLetterPattern.indexIn(QString::fromUtf8(resourceName.c_str()), 0) == 0;
+#endif
+
     if (resourceName.length() >= 4 && resourceName.substr(0, 4) == "wms:")
     {
         return resourceName;
     }
-    else if (!resourceName.empty() && (resourceName.at(0) == ':' || resourceName.at(0) == '/'))
+    else if (!resourceName.empty() && (resourceName.at(0) == ':' || resourceName.at(0) == '/' || isWindowsAbsolutePath))
     {
         // Either a Qt internal resource (prefix ':') or an absolute path (prefix '/')
         // Don't prepend the search path, just use the resource name

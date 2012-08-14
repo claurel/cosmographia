@@ -31,8 +31,18 @@
           {
               "type" : "Globe",
               "radius" : 3389,
-              "baseMap" : "textures/mars.dds",
-              "normalMap" : "textures/mars-normal.dds",
+              "baseMap" : {
+                  "type" : "NameTemplate",
+                  "template" : "textures/mars/mars_%level_%column_%row.dds",
+                  "levelCount" : 4,
+                  "tileSize" : 512
+              },
+              "normalMap" : {
+                  "type" : "NameTemplate",
+                  "template" : "textures/mars/marsnormal_%level_%column_%row.dds",
+                  "levelCount" : 4,
+                  "tileSize" : 512
+              },
               "atmosphere" : "mars.atmscat"
           }
         },

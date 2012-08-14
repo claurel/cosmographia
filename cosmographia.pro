@@ -661,8 +661,6 @@ macx {
         data/textures/mercury.dds \
         data/textures/venus.dds \
         data/textures/venus-clouds.jpg \
-        data/textures/mars.dds \
-        data/textures/mars-normal.dds \
         data/textures/jupiter.dds \
         data/textures/saturn.jpg \
         data/textures/uranus.jpg \
@@ -1019,6 +1017,8 @@ macx {
         data/help/cassini.html \
         data/help/voyager1.html \
         data/help/voyager2.html \
+        data/help/pioneer10.html \
+        data/help/pioneer11.html \
         data/help/dawn.html \
         data/help/near.html \
         data/help/hubble.html \
@@ -1113,6 +1113,17 @@ macx {
 
     QMAKE_BUNDLE_DATA += GALLERY
 
+    # Scan directories for files for Mac bundle
+    MARS_TILES_DIR = data/textures/mars
+    FILES = $$system(ls $$MARS_TILES_DIR)
+    MARS_TILES = $$join(FILES, " $$MARS_TILES_DIR/", $$MARS_TILES_DIR/)
+
+    MARS_TEXTURE.path = Contents/Resources/data/textures/mars
+    MARS_TEXTURE.files = $$MARS_TILES
+
+    # Add all texture tiles
+    QMAKE_BUNDLE_DATA += \
+        MARS_TEXTURE
 
     QMAKE_LFLAGS += -framework CoreFoundation
 }

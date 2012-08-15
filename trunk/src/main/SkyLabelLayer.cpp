@@ -69,7 +69,7 @@ SkyLabelLayer::render(vesta::RenderContext& rc)
 
                 rc.pushModelView();
                 rc.translateModelView(label.position);
-                rc.drawText(Vector3f::Zero(), label.text, m_font.ptr(), color, m_opacity);
+                rc.drawEncodedText(Vector3f::Zero(), label.text, m_font.ptr(), TextureFont::Utf8, color, m_opacity);
                 rc.popModelView();
             }
         }

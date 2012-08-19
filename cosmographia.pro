@@ -778,7 +778,9 @@ macx {
         data/models/hbltel_3.jpg \
         data/models/hbltel_4.jpg \
         data/models/hbltel_w.jpg \
-        data/models/msl-cruise.cmod \
+        data/models/msl-cruise-stage.cmod \
+        data/models/msl-heatshield.cmod \
+        data/models/msl-backshell.cmod \
         data/models/msl-solar.dds
 
     QMAKE_BUNDLE_DATA += MODELS

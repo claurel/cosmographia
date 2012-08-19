@@ -44,7 +44,7 @@
             "observer": "MSL"
         }
     },
-    "endTime" : "2012-08-06 04:01:00"
+    "endTime" : "2012-08-06 04:00:00"
     },
 
     {
@@ -72,13 +72,89 @@
             "observer": "MSL"
         }
     },
-    "endTime" : "2015-08-06 05:29:01"
+    "endTime" : "2015-08-06 05:19:04"
     }
 
     ],
 
     "geometry": {
-        "source": "models/msl-cruise.cmod", 
+       "type" : "TimeSwitched",
+       "sequence" : [
+       {
+         "startTime" : "2011-11-26 15:52:13",
+         "geometry" :
+         {
+           "type" : "Mesh",
+           "source": "models/msl-backshell.cmod", 
+           "size": 0.003
+         }
+       },
+       {
+         "startTime" : "2012-08-06 05:19:04"
+       }
+      ]
+    }
+},
+
+{
+    "name": "MSL Cruise Stage", 
+    "class": "spacecraft",
+
+    "label": {
+        "color": "#ffff00"
+    },
+
+    "startTime" : "2011-11-26 15:52:13",
+
+    "arcs" : [
+      {
+        "center": "MSL",
+        "endTime" : "2012-08-06 05:01:06",
+        "trajectoryFrame": { "type" : "BodyFixed", "body" : "MSL" },
+        "trajectory" :
+        {
+          "type" : "FixedPoint",
+          "position" : [ 0, 0, 0 ]
+        },
+
+        "bodyFrame": { "type" : "BodyFixed", "body" : "MSL" }
+      }
+    ],
+
+    "geometry": {
+        "source": "models/msl-cruise-stage.cmod", 
+        "type": "Mesh", 
+        "size": 0.003
+    }
+},
+
+{
+    "name": "MSL Heat Shield", 
+    "class": "spacecraft",
+
+    "label": {
+        "color": "#ffff00"
+    },
+
+    "startTime" : "2011-11-26 15:52:13",
+
+    "arcs" : [
+      {
+        "center": "MSL",
+        "endTime" : "2012-08-06 05:16:06",
+        "trajectoryFrame": { "type" : "BodyFixed", "body" : "MSL" },
+        "trajectory" :
+        {
+          "type" : "FixedPoint",
+          "position" : [ 0, 0, 0 ]
+        },
+
+        "bodyFrame": { "type" : "BodyFixed", "body" : "MSL" }
+      }
+    ],
+
+    "geometry": {
+        "source": "models/msl-heatshield.cmod", 
         "type": "Mesh", 
         "size": 0.003
     }

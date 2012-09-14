@@ -20,6 +20,12 @@
 
 #include <vesta/Geometry.h>
 
+namespace vesta
+{
+    class WorldGeometry;
+    class GLShaderProgram;
+}
+
 
 class StarGlobeGeometry : public vesta::Geometry
 {
@@ -29,32 +35,28 @@ public:
     StarGlobeGeometry();
     virtual ~StarGlobeGeometry();
 
-    void render(vesta::RenderContext& rc, double clock);
+    void render(vesta::RenderContext& rc, double clock) const;
 
     virtual float boundingSphereRadius() const;
 
-    void setEllipsoidAxes(const Eigen::Vector3f& axes)
-    {
-        m_ellipsoidAxes = axes;
-    }
-
-    Eigen::Vector3f ellipsoidAxes() const
-    {
-        return m_ellipsoidAxes;
-    }
+    void setEllipsoidAxes(const Eigen::Vector3f& axes);
+    Eigen::Vector3f ellipsoidAxes() const;
 
     virtual bool isEllipsoidal() const
     {
         return true;
     }
 
-    virtual vesta::AlignedEllipsoid ellipsoid() const
-    {
-        return vesta::AlignedEllipsoid(m_ellipsoidAxes.cast<double>() * 0.5);
-    }
+    virtual vesta::AlignedEllipsoid ellipsoid() const;
 
 private:
     Eigen::Vector3f m_ellipsoidAxes;
+    vesta::counted_ptr<vesta::WorldGeometry> m_globe;
+
+    // These are only mutable because render() is const; need to
+    // change this.
+    static vesta::counted_ptr<vesta::GLShaderProgram> ms_starShader;
+    static bool ms_shaderCompiled;
 };
 
 #endif // _STAR_GLOBE_GEOMETRY_H_

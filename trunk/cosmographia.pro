@@ -3,6 +3,7 @@
 TEMPLATE = app
 TARGET = Cosmographia
 DESTDIR = build
+OBJECTS_DIR = obj
 
 QT += opengl
 QT += network
@@ -62,6 +63,7 @@ APP_SOURCES = \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.cpp \
     $$MAIN_PATH/geometry/MultiLabelGeometry.cpp \
     $$MAIN_PATH/geometry/SimpleTrajectoryGeometry.cpp \
+    $$MAIN_PATH/geometry/StarGlobeGeometry.cpp \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.cpp \
     $$MAIN_PATH/vext/CompositeTrajectory.cpp \
     $$MAIN_PATH/vext/LocalTiledMap.cpp \
@@ -127,6 +129,7 @@ APP_HEADERS = \
     $$MAIN_PATH/geometry/MeshInstanceGeometry.h \
     $$MAIN_PATH/geometry/MultiLabelGeometry.h \
     $$MAIN_PATH/geometry/SimpleTrajectoryGeometry.h \
+    $$MAIN_PATH/geometry/StarGlobeGeometry.h \
     $$MAIN_PATH/geometry/TimeSwitchedGeometry.h \
     $$MAIN_PATH/vext/ArcStripParticleGenerator.h \
     $$MAIN_PATH/vext/CompositeTrajectory.h \
@@ -644,6 +647,11 @@ win32-msvc2008|win32-msvc2010 {
 
     # Necessary to avoid linker warnings when not building lib3ds as a library
     DEFINES += LIB3DSAPI=" "
+}
+
+unix:!macx {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += glu
 }
 
 macx {

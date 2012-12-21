@@ -1,0 +1,44 @@
+{
+  "version": "1.0",
+  "name": "Asteroid 4179 Toutatis",
+  
+  "items" :
+  [
+     {
+         "name" : "Toutatis",
+         "class" : "asteroid",
+         "label" : { "color" : "#aa8855" },
+         "trajectoryPlot": { "fade": 0.3 },
+         "center": "Sun",
+         "trajectoryFrame": "EclipticJ2000",
+         "trajectory": {
+           "type": "Keplerian",
+           "epoch": "2013-01-08T00:00:00",
+           "period": "4.03350116335y",
+           "semiMajorAxis": "2.53389214au",
+           "eccentricity": 0.63007669,
+           "inclination": 0.44708,
+           "ascendingNode": 124.348389,
+           "argumentOfPeriapsis": 278.762495,
+           "meanAnomaly": 13.025416
+         },
+         "bodyFrame": "EquatorJ2000",
+         "rotationModel" :
+         {
+             "type" : "Uniform",
+             "period" : "5.38d",
+             "inclination" : 8,
+             "ascendingNode" : 85,
+             "meridianAngle" : 247,
+             "epoch" : 2445386.907620
+         },
+
+         "geometry": {
+           "source": "smallbodies/toutatis.cmod",
+           "type": "Mesh",
+           "meshRotation" : [0.707, 0.707, 0, 0 ]
+         }
+      }
+  ]
+}
+

@@ -140,6 +140,114 @@ static const float CenterMarkerSize = 10.0f;
 
 static const bool ShowTimeInVideos = true;
 
+#ifdef LEO3D_SUPPORT
+#include <LeoAPI.h>
+
+class Leo3DState
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+    Leo3DState() :
+        context(0),
+        m_lastBirdOrientation(Quaterniond::Identity()),
+        m_lastBirdPosition(Vector3d::Zero()),
+        m_birdOrientationChange(Quaterniond::Identity()),
+        m_birdPositionChange(Vector3d::Zero())
+    {}
+
+    LGLContext context;
+
+    void updateInputDeviceState()
+    {
+        bool birdVisibleNow = leoIsBirdVisible();
+        bool birdSmallButtonPressed = leoGetSmallButtonState();
+
+        if (!birdVisibleNow)
+        {
+            m_birdOrientationChange = Quaterniond::Identity();
+            m_birdPositionChange = Vector3d::Zero();
+        }
+        else
+        {
+            double x = 0.0;
+            double y = 0.0;
+            double z = 0.0;
+            double xr = 0.0;
+            double yr = 0.0;
+            double zr = 0.0;
+
+            leoGetBirdPosition(&x, &y, &z, &xr, &yr, &zr);
+
+            Quaterniond q(AngleAxisd(zr, Vector3d::UnitZ()) *
+                          AngleAxisd(yr, Vector3d::UnitY()) *
+                          AngleAxisd(xr, Vector3d::UnitX()));
+            Vector3d r(x, y, z);
+
+            if (birdSmallButtonPressed)
+            {
+                if (!m_birdSmallButtonWasPressed)
+                {
+                    m_birdOrientationChange = Quaterniond::Identity();
+                    m_birdPositionChange = Vector3d::Zero();
+                }
+                else
+                {
+                    m_birdPositionChange = r - m_lastBirdPosition;
+                    m_birdOrientationChange = q * m_lastBirdOrientation.conjugate();
+                }
+
+                m_lastBirdOrientation = q;
+                m_lastBirdPosition = r;
+            }
+            else
+            {
+                m_birdOrientationChange = Quaterniond::Identity();
+                m_birdPositionChange = Vector3d::Zero();
+            }
+        }
+
+        m_birdWasVisible = birdVisibleNow;
+        m_birdSmallButtonWasPressed = birdSmallButtonPressed;
+    }
+
+    Quaterniond birdOrientationChange() const
+    {
+        return m_birdOrientationChange;
+    }
+
+    Vector3d birdPositionChange() const
+    {
+        return m_birdPositionChange;
+    }
+
+    bool birdBigButton() const
+    {
+        return false;
+    }
+
+    bool birdSmallButton() const
+    {
+        return m_birdSmallButtonWasPressed;
+    }
+
+    Quaterniond birdOrientation() const
+    {
+        return m_lastBirdOrientation;
+    }
+
+private:
+    Quaterniond m_lastBirdOrientation;
+    Vector3d m_lastBirdPosition;
+
+    bool m_birdWasVisible;
+    bool m_birdSmallButtonWasPressed;
+
+    Quaterniond m_birdOrientationChange;
+    Vector3d m_birdPositionChange;
+};
+
+#endif
 
 static TextureProperties SkyLayerTextureProperties()
 {
@@ -317,7 +425,8 @@ UniverseView::UniverseView(QWidget *parent, Universe* universe, UniverseCatalog*
     m_statusUpdateTime(0.0),
     m_markers(NULL),
     m_galleryView(NULL),
-    m_earthMapMonth(1)
+    m_earthMapMonth(1),
+    m_leoState(NULL)
 {
     setAutoFillBackground(false);
     setMouseTracking(true);
@@ -545,6 +654,34 @@ void UniverseView::initializeGL()
     {
         qCritical("Creating renderer failed because OpenGL couldn't be initialized.");
     }
+
+#ifdef LEO3D_SUPPORT
+    bool leoOk = leoInitialize();
+    if (leoOk)
+    {
+        qDebug() << "Leonar3do initialized!";
+
+        if (leoIsConnected())
+        {
+            lglInitialize();
+            qDebug() << "Leonar3do connected.";
+            m_leoState = new Leo3DState();
+            qDebug() << "Creating Leonar3do GL Context";
+            m_leoState->context = lglCreateContext(NULL, NULL);
+
+            // DEBUGGING ONLY--REMOVE THIS LINE
+            //m_leoState = NULL;
+        }
+        else
+        {
+            qDebug() << "Leonar3do not connected";
+        }
+    }
+    else
+    {
+        qDebug() << "Failed to initialize Leonar3do system.";
+    }
+#endif
 
     m_spacecraftIcon->makeResident();
 
@@ -1425,6 +1562,15 @@ void UniverseView::paintGL()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
+#ifdef LEO3D_SUPPORT
+    if (m_leoState)
+    {
+        double leoProjection[16];
+        //unsigned int leoCount = lglGetRenderCount(m_leoState->context);
+        lglStartRender(m_leoState->context, 0, leoProjection);
+    }
+#endif
+
     if (m_stereoMode != Mono)
     {
         Quaterniond cameraOrientation = m_observer->absoluteOrientation(m_simulationTime);
@@ -1451,7 +1597,27 @@ void UniverseView::paintGL()
         Vector3d leftEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * -eyeSeparation);
         Vector3d rightEyePosition = cameraPosition + cameraOrientation * (Vector3d::UnitX() * eyeSeparation);
 
-        if (m_stereoMode == SideBySide)
+        bool leo3dStereo = m_leoState != NULL;
+
+        if (leo3dStereo)
+        {
+#if LEO3D_SUPPORT
+            PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + frustumOffset, x + frustumOffset, -y, y, nearDistance, farDistance);
+            PlanarProjection rightProjection(PlanarProjection::Perspective, -x - frustumOffset, x - frustumOffset, -y, y, nearDistance, farDistance);
+
+            Viewport halfHeightViewport(mainViewport.width(), mainViewport.height() / 2.0f);
+            m_renderer->renderView(&lighting, rightEyePosition, cameraOrientation, rightProjection, halfHeightViewport);
+
+            double projection[16];
+            lglStartRender(m_leoState->context, 1, projection);
+            m_renderer->renderView(&lighting, leftEyePosition, cameraOrientation, leftProjection, halfHeightViewport);
+
+            LGLProjection projParams;
+            lglGetProjection(m_leoState->context, 1, &projParams);
+            qDebug() << "bottom right: " << projParams.rbX << "," << projParams.rbY << "     top left: " << projParams.ltX << "," << projParams.ltY;
+#endif
+        }
+        else if (m_stereoMode == SideBySide)
         {
             x *= 0.5f;
             PlanarProjection leftProjection(PlanarProjection::Perspective,  -x + frustumOffset, x + frustumOffset, -y, y, nearDistance, farDistance);
@@ -1493,6 +1659,13 @@ void UniverseView::paintGL()
             m_renderer->renderLightGlare(m_glareOverlay.ptr());
         }
     }
+
+#ifdef LEO3D_SUPPORT
+    if (m_leoState)
+    {
+        lglFinishRender(m_leoState->context);
+    }
+#endif
 
     if (m_wireframe)
     {
@@ -2441,6 +2614,47 @@ UniverseView::tick()
         m_controller->pitch(-dt * KeyboardRotationAcceleration);
     }
 
+#ifdef LEO3D_SUPPORT
+    if (m_leoState)
+    {
+        m_leoState->updateInputDeviceState();
+
+        // View
+        //m_controller->observer()->rotate(m_leoState->birdOrientationChange().conjugate());
+        //m_controller->observer()->orbit(m_leoState->birdOrientationChange().conjugate());
+
+        if (m_leoState->birdSmallButton())
+        {
+            float rotationScale = 1.0f;
+
+            // Reduce rotation speed when the center object is a planet and the
+            // observer is close to the surface of the planet.
+            Entity* center = m_observer->center();
+            if (center && center->geometry())
+            {
+                if (center->geometry()->isEllipsoidal())
+                {
+                    double r = center->geometry()->ellipsoid().semiMajorAxisLength();
+                    double distance = m_observer->position().norm() - r;
+                    rotationScale = distance / (r * 0.1f);
+                    rotationScale = min(1.0f, max(0.0f, rotationScale));
+                }
+            }
+
+            AngleAxisd aa = m_leoState->birdOrientation().conjugate();
+            m_controller->applyOrbitTorque(aa.axis() * (rotationScale * aa.angle() * 0.2));
+
+            //float clickZoom = 1.03f;
+            //float clickCount = event->delta() / 120.0f;
+            double zoomFactor = std::pow(2.0, -m_leoState->birdPositionChange().z() / 100.0);
+
+            m_controller->dolly(zoomFactor);
+
+        }
+
+    }
+#endif
+
     m_controller->tick(dt);
 
     if (m_observerAction.isValid())
@@ -3328,6 +3542,12 @@ void
 UniverseView::setStereoMode(StereoMode stereoMode)
 {
     m_stereoMode = stereoMode;
+#ifdef LEO3D_SUPPORT
+    if (m_leoState)
+    {
+        leoSetStereo(m_stereoMode != Mono);
+    }
+#endif
 }
 
 

@@ -42,6 +42,8 @@ class GalleryView;
 
 class QGraphicsScene;
 
+class Leo3DState;
+
 namespace vesta
 {
     class UniverseRenderer;
@@ -495,6 +497,8 @@ private:
     GalleryView* m_galleryView;
 
     int m_earthMapMonth;
+
+    Leo3DState* m_leoState;
 };
 
 #endif // _UNIVERSE_VIEW_H_

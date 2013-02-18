@@ -1,0 +1,75 @@
+{
+     "version": "1.0",
+     "name": "2012 Naked Eye Comets",
+
+     "items" :
+     [
+        {
+          "name" : "C/2011 L4 (PANSTARRS)",
+          "label" : { "color" : "#22eeff" },
+          "trajectoryPlot": {
+              "fade" : 0.5,
+              "duration" : "50y"
+	      }, 
+
+          "startTime" : "1960-01-01",
+          "endTime" : "2060-01-01",
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "panstarrs.xyzv"
+          },
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "3h",
+              "inclination" : 30,
+              "ascendingNode" : 120,
+              "meridianAngle" : 280
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 1.0,
+              "source" : "../smallbodies/churyumov.obj"
+          }
+        },
+
+        {
+          "name" : "C/2012 S1 (ISON)",
+          "label" : { "color" : "#22eeff" },
+          "trajectoryPlot": {
+              "fade" : 0.5,
+              "duration" : "50y"
+	      }, 
+
+          "startTime" : "1960-01-01",
+          "endTime" : "2060-01-01",
+          "center" : "Sun",
+          "trajectoryFrame" : "EclipticJ2000",
+          "trajectory" :
+          {
+              "type" : "InterpolatedStates",
+              "source" : "ison.xyzv"
+          },
+          "rotationModel" :
+          {
+              "type" : "Uniform",
+              "period" : "3h",
+              "inclination" : 30,
+              "ascendingNode" : 120,
+              "meridianAngle" : 280
+          },
+
+          "geometry" :
+          {
+              "type" : "Mesh",
+              "size" : 2.0,
+              "source" : "../smallbodies/churyumov.obj"
+          }
+        }
+    ]
+}

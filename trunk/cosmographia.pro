@@ -964,7 +964,10 @@ macx {
         data/help/how.html \
         data/help/code.html \
         data/help/datasources.html \
-        data/help/announcement.html \
+        data/help/announcement.html
+
+storedeploy {
+    HELPFILES.files += \
         data/help/sun.html \
         data/help/mercury.html \
         data/help/venus.html \
@@ -1042,10 +1045,13 @@ macx {
         data/help/miranda.jpg \
         data/help/vesta_dawn_20110714.jpg \
         data/help/lutetia.jpg
+}
 
     QMAKE_BUNDLE_DATA += HELPFILES
 
     ADDONS.path = Contents/Resources/data/addons
+
+storedeploy {
     ADDONS.files = \
         data/addons/aurora.json \
         data/addons/gaussian.jpg \
@@ -1074,6 +1080,7 @@ macx {
         data/addons/debris.json \
         data/addons/iridium33.kep \
         data/addons/cosmos2251.kep
+}
 
     QMAKE_BUNDLE_DATA += ADDONS
 
@@ -1130,6 +1137,13 @@ macx {
 
     MARS_TEXTURE.path = Contents/Resources/data/textures/mars
     MARS_TEXTURE.files = $$MARS_TILES
+#    MARS_TEXTURE.files = \
+#        data/textures/mars/mars_0_0_0.dds \
+#        data/textures/mars/mars_0_1_0.dds \
+#        data/textures/mars/mars_1_0_1.dds \
+#        data/textures/mars/mars_1_0_0.dds \
+#        data/textures/mars/mars_1_1_0.dds \
+#        data/textures/mars/mars_1_1_1.dds
 
     # Add all texture tiles
     QMAKE_BUNDLE_DATA += \

@@ -1109,8 +1109,8 @@ UniverseLoader::loadTleTrajectory(const QVariantMap& info)
         }
     }
 
-    counted_ptr<TleTrajectory> tleTrajectory(TleTrajectory::Create(line1.toAscii().data(),
-                                                                   line2.toAscii().data()));
+    counted_ptr<TleTrajectory> tleTrajectory(TleTrajectory::Create(line1.toLatin1().data(),
+                                                                   line2.toLatin1().data()));
     if (tleTrajectory.isNull())
     {
         errorMessage(QString("Invalid TLE data for '%1'").arg(name));
@@ -4466,8 +4466,8 @@ UniverseLoader::processUpdates()
         {
             // Create a temporary TLE trajectory from the data and use it to udpate the trajectory in
             // the cache.
-            counted_ptr<TleTrajectory> tempTle(TleTrajectory::Create(tleData.line1.toAscii().data(),
-                                                                     tleData.line2.toAscii().data()));
+            counted_ptr<TleTrajectory> tempTle(TleTrajectory::Create(tleData.line1.toLatin1().data(),
+                                                                     tleData.line2.toLatin1().data()));
             if (tempTle.isValid())
             {
                 trajectory->copy(tempTle.ptr());

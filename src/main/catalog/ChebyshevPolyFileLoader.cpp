@@ -61,7 +61,7 @@ LoadChebyshevPolyFile(const QString& fileName)
 
     char header[8];
     in.readRawData(header, sizeof(header));
-    if (QString::fromAscii(header, sizeof(header)) != ChebyshevPolyFileHeader)
+    if (QString::fromLatin1(header, sizeof(header)) != ChebyshevPolyFileHeader)
     {
         qDebug() << "File " << fileName << " is not a Chebyshev polynomial trajectory file.";
         return NULL;

@@ -77,7 +77,7 @@ LoadAstorbFile(const QString& fileName)
             if (provisionalDesignation.indexIn(name) == 0)
             {
                 double year = name.mid(0, 4).toDouble();
-                double halfMonth = name.at(5).toAscii() - 'A';
+                double halfMonth = name.at(5).toLatin1() - 'A';
                 discoveryTime = (year - 2000.0) * 365.25 + halfMonth * (365.25 / 24.0);
                 discoveryTime *= 86400.0;
             }

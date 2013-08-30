@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Cosmographia. If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef _SIMPLE_TRAJECTORY_GEOMETRY_H_
+#define _SIMPLE_TRAJECTORY_GEOMETRY_H_
+
 #include <vesta/TrajectoryGeometry.h>
 #include <Eigen/Core>
 #include <deque>
@@ -164,4 +167,5 @@ private:
     mutable std::vector<TrajectoryVertex> m_vertexData;
 };
 
+#endif // _SIMPLE_TRAJECTORY_GEOMETRY_H_
 

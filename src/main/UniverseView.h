@@ -416,6 +416,7 @@ private:
     bool m_mouseClickEventProcessed;
     bool m_mouseMoveEventProcessed;
     bool m_sceneHadFocus;
+    bool m_glInitialized;
 
     vesta::counted_ptr<vesta::Universe> m_universe;
     UniverseCatalog* m_catalog;

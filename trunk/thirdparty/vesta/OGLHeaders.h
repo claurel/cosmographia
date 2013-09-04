@@ -20,7 +20,9 @@
 
 #else
 
+#if !defined(__gl_h_) && !defined(__GL_H__)
 #include <GL/glew.h>
+#endif
 
 #if 0
 #ifdef _WIN32

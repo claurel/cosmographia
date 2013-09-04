@@ -604,7 +604,7 @@ CmodLoader::loadMesh()
         return NULL;
     }
 
-    QString header = QString::fromAscii(headerData, sizeof(headerData));
+    QString header = QString::fromLatin1(headerData, sizeof(headerData));
     if (header == "#celmodel__ascii")
     {
         setError("ASCII cmod files are not supported");

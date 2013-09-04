@@ -76,7 +76,8 @@ WMSRequester::WMSRequester(QObject* parent) :
 {
     m_networkManager = new QNetworkAccessManager(this);
     QNetworkDiskCache* cache = new QNetworkDiskCache(this);
-    cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
+    //cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation));
+    cache->setCacheDirectory(QStandardPaths::locate(QStandardPaths::CacheLocation, ""));
     m_networkManager->setCache(cache);
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processTile(QNetworkReply*)));
 }
@@ -407,7 +408,8 @@ WMSRequester::addSurfaceDefinition(const QString& name,
 QString
 WMSRequester::tileFileName(const QString& tileName, const QString& surfaceName)
 {
-    QString cacheDirName = QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/wms_tiles";
+    //QString cacheDirName = QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/wms_tiles";
+    QString cacheDirName = QStandardPaths::locate(QStandardPaths::CacheLocation, "wms_tiles", QStandardPaths::LocateDirectory);
     return QString("%1/%2/%3.png").arg(cacheDirName).arg(surfaceName).arg(tileName);
 }
 

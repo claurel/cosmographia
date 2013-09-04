@@ -54,11 +54,22 @@
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
 #include <algorithm>
+#include <QAction>
+#include <QMenu>
+#include <QMenuBar>
+#include <QComboBox>
+#include <QLabel>
+#include <QCompleter>
+#include <QDialog>
+#include <QMessageBox>
+#include <QApplication>
+#include <QFileDialog>
+#include <QTextEdit>
 #include <QDateTimeEdit>
 #include <QBoxLayout>
 #include <QStackedLayout>
 #include <QDialogButtonBox>
-
+#include <QDesktopServices>
 #include <QNetworkDiskCache>
 #include <QNetworkRequest>
 #include <QDeclarativeEngine>
@@ -583,6 +594,43 @@ createSunRelativeTrajectory(const JPLEphemeris* eph, JPLEphemeris::JplObjectId i
 }
 
 
+static QString cacheFilePath(const QString& fileName)
+{
+#if 0
+    return QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/catalog";
+#else
+    return QStandardPaths::locate(QStandardPaths::CacheLocation, fileName, QStandardPaths::LocateFile);
+#endif
+}
+
+static QString cacheDirectoryPath(const QString& subdirName)
+{
+#if 0
+    return QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/catalog";
+#else
+    return QStandardPaths::locate(QStandardPaths::CacheLocation, subdirName, QStandardPaths::LocateDirectory);
+#endif
+}
+
+static QString pictureFilePath(const QString& fileName)
+{
+#if 0
+    return QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/" + fileName;
+#else
+    return QStandardPaths::locate(QStandardPaths::PicturesLocation, fileName, QStandardPaths::LocateFile);
+#endif
+}
+
+static QString documentFilePath(const QString& fileName)
+{
+#if 0
+    return QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/" + fileName;
+#else
+    return QStandardPaths::locate(QStandardPaths::DocumentsLocation, fileName, QStandardPaths::LocateFile);
+#endif
+}
+
+
 /** Perform once-per-run initialization, such as loading planetary ephemerides.
   */
 void
@@ -678,7 +726,8 @@ Cosmographia::initialize()
     // since it currently is used just for TLEs, it's not a problem now.
     m_networkManager = new QNetworkAccessManager();
     QNetworkDiskCache* cache = new QNetworkDiskCache();    
-    cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/catalog");
+    //cache->setCacheDirectory(QDesktopServices::storageLocation(QDesktopServices::CacheLocation) + "/catalog");
+    cache->setCacheDirectory(cacheDirectoryPath("catalog"));
     m_networkManager->setCache(cache);
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processReceivedResource(QNetworkReply*)));
 
@@ -1007,7 +1056,8 @@ Cosmographia::saveScreenShot()
 {
     QImage screenShot = m_view3d->grabFrameBuffer(false);
 
-    QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/image.png";
+    //QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/image.png";
+    QString defaultFileName = pictureFilePath("image.png");
     QString saveFileName = QFileDialog::getSaveFileName(this, "Save Image As...", defaultFileName, "*.png *.jpg *.webm *.mov *.ogg");
     if (!saveFileName.isEmpty())
     {
@@ -1193,7 +1243,8 @@ Cosmographia::recordVideo()
         QString defaultExtension = "mpeg";
         QString extensions = "Video (*.mkv *.mpeg *.avi)";
 #endif
-        QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/cosmo." + defaultExtension;
+        //QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation) + "/cosmo." + defaultExtension;
+        QString defaultFileName = pictureFilePath("/cosmo." + defaultExtension);
         QString saveFileName = QFileDialog::getSaveFileName(this, "Save Video As...", defaultFileName, extensions);
 
         QSize videoDimensions(640, 480);
@@ -1229,7 +1280,8 @@ void
 Cosmographia::loadCatalog()
 {
     QSettings settings;
-    QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
+    //QString defaultFileName = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/cosmo.json";
+    QString defaultFileName = documentFilePath("cosmo.json");
     defaultFileName = settings.value("SolarSystemDir", defaultFileName).toString();
 
     QString solarSystemFileName = QFileDialog::getOpenFileName(this, "Load Catalog", defaultFileName, "Catalog Files (*.json *.ssc)");
@@ -1269,7 +1321,7 @@ Cosmographia::copyStateUrlToClipboard()
     if (m_view3d)
     {
         QByteArray url = m_view3d->getStateUrl().toEncoded();
-        QApplication::clipboard()->setText(QString::fromAscii(url.data()));
+        QApplication::clipboard()->setText(QString::fromLatin1(url.data()));
         m_view3d->setStatusMessage(tr("Copied viewpoint URL to clipboard"));
     }
 }

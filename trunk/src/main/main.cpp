@@ -21,7 +21,7 @@
 #include <QDebug>
 #include <QDesktopServices>
 
-#ifdef Q_WS_MAC
+#if defined(Q_WS_MAC) || defined(Q_OS_MAC)
 #include <CoreFoundation/CFBundle.h>
 #endif
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     // don't know exactly where the executable will be run from.
     QString dataPath;
     bool foundData = true;
-#ifdef Q_WS_MAC
+#if defined(Q_WS_MAC) || defined(Q_OS_MAC)
     // On the Mac, load resources from the app bundle. We first check for a directory
     // in a location relative to the executable. If that fails, we'll use the Core
     // Foundation bundle functions as recommended in the Qt docs. The first technique

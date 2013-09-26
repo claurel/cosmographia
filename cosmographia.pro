@@ -533,6 +533,7 @@ INCLUDEPATH += thirdparty/glew thirdparty/curveplot thirdparty
 #CONFIG += nomenu
 #CONFIG += storedeploy
 #CONFIG += lua
+#CONFIG += spice
 
 lua {
     message("Building with Lua scripting support")
@@ -562,6 +563,15 @@ storedeploy {
     QMAKE_INFO_PLIST = resources/Info.plist
     QMAKE_MAC_SDK = /Developer/SDKs/MacOSX10.6.sdk
     DEFINES += MAS_DEPLOY
+}
+
+spice {
+    SPICE_HEADER_PATH = /Users/claurel/dev/spice/mac64/cspice/include
+    SPICE_LIB_PATH = /Users/claurel/dev/spice/mac64/cspice/lib
+    INCLUDEPATH += $$SPICE_HEADER_PATH
+    DEFINES += SPICE_ENABLED
+    SOURCES += $$MAIN_PATH/spice/SpiceTrajectory.cpp $$MAIN_PATH/spice/SpiceRotationModel.cpp
+    LIBS += $$SPICE_LIB_PATH/cspice.a
 }
 
 nomenu {

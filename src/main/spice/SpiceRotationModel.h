@@ -30,13 +30,15 @@
 class SpiceRotationModel : public vesta::RotationModel
 {
 public:
-    SpiceRotationModel();
+    SpiceRotationModel(const char* fromFrame, const char* toFrame);
     ~SpiceRotationModel();
 
     virtual Eigen::Quaterniond orientation(double tdbSec) const;
     virtual Eigen::Vector3d angularVelocity(double tdbSec) const;
 
 private:
+    std::string m_fromFrame;
+    std::string m_toFrame;
 };
 
 #endif // _SPICE_ROTATION_MODEL_H_

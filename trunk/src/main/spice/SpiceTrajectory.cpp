@@ -24,14 +24,16 @@
 
 #include "SpiceTrajectory.h"
 #include <algorithm>
+#include <iostream>
 
 using namespace vesta;
 using namespace Eigen;
+using namespace std;
 
 
-SpiceTrajectory::SpiceTrajectory(SpiceInt targetID, SpiceInt observerID, const char* spiceFrame) :
+SpiceTrajectory::SpiceTrajectory(SpiceInt targetID, SpiceInt centerID, const char* spiceFrame) :
     m_targetID(targetID),
-    m_observerID(observerID),
+    m_centerID(centerID),
     m_spiceFrame(spiceFrame),
     m_period(0.0)
 {
@@ -51,11 +53,11 @@ SpiceTrajectory::state(double tdbSec) const
 
     SpiceDouble sv[6];
     SpiceDouble lightTime;
-    spkgeo_c(m_targetId, et, spiceFrame.c_str(), m_centerID, sv, &lightTime);
+    spkgeo_c(m_targetID, et, m_spiceFrame.c_str(), m_centerID, sv, &lightTime);
     if (failed_c())
     {
-        char errorMsg[1024];
-        getmsg_c("long", sizeof(errorMsg), errorMsg);
+        char errorMessage[1024];
+        getmsg_c("long", sizeof(errorMessage), errorMessage);
         cerr << errorMessage << std::endl;
         reset_c();
         return StateVector(Vector3d::Zero(), Vector3d::Zero());
@@ -88,4 +90,11 @@ bool
 SpiceTrajectory::isPeriodic() const
 {
     return m_period > 0.0;
+}
+
+
+double
+SpiceTrajectory::boundingSphereRadius() const
+{
+    return 1.0e12;
 }

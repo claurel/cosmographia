@@ -23,6 +23,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SpiceRotationModel.h"
+#include <SpiceUsr.h>
 
 using namespace vesta;
 using namespace Eigen;
@@ -47,19 +48,22 @@ SpiceRotationModel::orientation(double tdbSec) const
     double et = tdbSec;
     SpiceDouble transform[3][3];
 
-    pxform_c(m_fromFrame.c_str(), m_toFrame, et, transform);
+    pxform_c(m_fromFrame.c_str(), m_toFrame.c_str(), et, transform);
     if (!failed_c())
     {
-        Matrix3d R = Matrix3d(transform);
+        Matrix3d R;
+        R << transform[0][0], transform[0][1], transform[0][2],
+             transform[1][0], transform[1][1], transform[1][2],
+             transform[2][0], transform[2][1], transform[2][2];
         return Quaterniond(R);
     }
     else
     {
-        char errorMsg[1024];
-        getmsg_c("long", sizeof(errorMsg), errorMsg);
+        char errorMessage[1024];
+        getmsg_c("long", sizeof(errorMessage), errorMessage);
         cerr << errorMessage << std::endl;
         reset_c();
-        return Quaternion::Identity();
+        return Quaterniond::Identity();
     }
 }
 
@@ -70,7 +74,7 @@ SpiceRotationModel::angularVelocity(double tdbSec) const
     double et = tdbSec;
     SpiceDouble transform[6][6];
 
-    sxform_c(m_fromFrame.c_str(), m_toFrame, et, transform);
+    sxform_c(m_fromFrame.c_str(), m_toFrame.c_str(), et, transform);
     if (!failed_c())
     {
         // Extract the angular velocity vector from the state transform matrix
@@ -94,8 +98,8 @@ SpiceRotationModel::angularVelocity(double tdbSec) const
     }
     else
     {
-        char errorMsg[1024];
-        getmsg_c("long", sizeof(errorMsg), errorMsg);
+        char errorMessage[1024];
+        getmsg_c("long", sizeof(errorMessage), errorMessage);
         cerr << errorMessage << std::endl;
         reset_c();
         return Vector3d::Zero();

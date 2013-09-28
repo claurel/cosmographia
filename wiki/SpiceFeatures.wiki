@@ -1,0 +1,35 @@
+#summary Support for SPICE within Cosmographia
+
+= Introduction =
+
+Support for JPL's SPICE system in Cosmographia is currently in development
+
+= Building =
+
+At the current time, SPICE support is disabled in the default build. It can be turned on by uncommenting one line in the project file (cosmographia.pro):
+
+{{{
+CONFIG += spice
+}}}
+
+= SPICE Trajectories =
+
+A Cosmographia trajectory may be linked to the position of a SPICE object.
+
+{{{
+"trajectory" :
+{
+    "type" : "Spice",
+    "target" : "Ymir",
+    "center" : "Saturn",
+    "frame" : "ECLIPJ2000"
+}
+}}}
+
+  * The target and center properties may be a recognized SPICE name or a NAIF integer code
+  * The frame is a string giving the name of either a built-in inertial frame, or a frame defined in a SPICE frame kernel
+  * If the frame is omitted, it defaults to EME J2000
+
+= SPICE Rotation Model = 
+
+A Cosmographia rotation model may be linked to a named SPICE frame.

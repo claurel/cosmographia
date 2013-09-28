@@ -126,6 +126,7 @@ private:
     vesta::Trajectory* loadFixedSphericalTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadLinearCombinationTrajectory(const QVariantMap& info);
     vesta::Trajectory* loadCompositeTrajectory(const QVariantMap& info);
+    vesta::Trajectory* loadSpiceTrajectory(const QVariantMap& info);
 
     vesta::RotationModel* loadRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadBuiltinRotationModel(const QVariantMap& info);
@@ -133,6 +134,7 @@ private:
     vesta::RotationModel* loadInterpolatedRotationModel(const QVariantMap& info);
     vesta::RotationModel* loadFixedRotationModel(const QVariantMap& map);
     vesta::RotationModel* loadFixedEulerRotationModel(const QVariantMap& map);
+    vesta::RotationModel* loadSpiceRotationModel(const QVariantMap& info);
 
     vesta::Visualizer* loadVisualizer(const QVariantMap& info,
                                       const UniverseCatalog* catalog);

@@ -69,6 +69,11 @@
 #include <vesta/Units.h>
 #include <vesta/GregorianDate.h>
 
+#ifdef SPICE_ENABLED
+#include "../spice/SpiceTrajectory.h"
+#include "../spice/SpiceRotationModel.h"
+#endif
+
 #include <vesta/particlesys/ParticleEmitter.h>
 #include <vesta/particlesys/PointGenerator.h>
 #include <vesta/particlesys/BoxGenerator.h>
@@ -1322,6 +1327,83 @@ UniverseLoader::loadCompositeTrajectory(const QVariantMap& map)
     return CompositeTrajectory::Create(segmentPtrs, durations, startTime);
 }
 
+
+#ifdef SPICE_ENABLED
+bool getNAIFCode(const QVariant& v, SpiceInt* code)
+{
+    bool isInteger = false;
+    int integerCode = v.toInt(&isInteger);
+
+    if (isInteger)
+    {
+        *code = integerCode;
+        return true;
+    }
+    else if (v.canConvert(QVariant::String))
+    {
+        SpiceBoolean found = SPICEFALSE;
+        bodn2c_c(v.toString().toLatin1().data(), code, &found);
+        return found == SPICETRUE;
+    }
+    else
+    {
+        return false;
+    }
+}
+#endif
+
+vesta::Trajectory*
+UniverseLoader::loadSpiceTrajectory(const QVariantMap& map)
+{
+#ifndef SPICE_ENABLED
+    errorMessage("SPICE support unavailable in this version of Cosmographia.");
+    return NULL;
+#else
+    QVariant targetVar = map.value("target");
+    QVariant centerVar = map.value("center");
+    QVariant frameVar = map.value("frame");
+
+    QString spiceFrame = "J2000";
+    if (!frameVar.isNull())
+    {
+        spiceFrame = frameVar.toString();
+    }
+
+    if (targetVar.isNull())
+    {
+        errorMessage("Target missing in SPICE trajectory.");
+        return NULL;
+    }
+
+    if (centerVar.isNull())
+    {
+        errorMessage("Center missing in SPICE trajectory.");
+        return NULL;
+    }
+
+    SpiceInt targetID = 0;
+    SpiceInt centerID = 0;
+
+    if (!getNAIFCode(targetVar, &targetID))
+    {
+        errorMessage("Unknown target '" + targetVar.toString() + "' for SPICE trajectory.");
+        return NULL;
+    }
+
+    if (!getNAIFCode(centerVar, &centerID))
+    {
+        errorMessage("Unknown center '" + centerVar.toString() + "' for SPICE trajectory.");
+        return NULL;
+    }
+
+    SpiceTrajectory* trajectory = new SpiceTrajectory(targetID, centerID, spiceFrame.toLatin1().data());
+
+    return trajectory;
+#endif
+}
+
+
+
 vesta::Trajectory*
 UniverseLoader::loadTrajectory(const QVariantMap& map)
 {
@@ -1367,6 +1449,10 @@ UniverseLoader::loadTrajectory(const QVariantMap& map)
     else if (type == "Composite")
     {
         return loadCompositeTrajectory(map);
+    }
+    else if (type == "Spice")
+    {
+        return loadSpiceTrajectory(map);
     }
     else
     {
@@ -1475,6 +1561,18 @@ UniverseLoader::loadFixedEulerRotationModel(const QVariantMap& map)
     }
 
     return new FixedRotationModel(q);
+}
+
+
+vesta::RotationModel*
+UniverseLoader::loadSpiceRotationModel(const QVariantMap &info)
+{
+#ifndef SPICE_ENABLED
+    errorMessage("SPICE support unavailable in this version of Cosmographia.");
+    return NULL;
+#else
+    return NULL;
+#endif
 }
 
 
@@ -1588,6 +1686,10 @@ UniverseLoader::loadRotationModel(const QVariantMap& map)
     else if (type == "Interpolated")
     {
         return loadInterpolatedRotationModel(map);
+    }
+    else if (type == "Spice")
+    {
+        return loadSpiceRotationModel(map);
     }
     else
     {

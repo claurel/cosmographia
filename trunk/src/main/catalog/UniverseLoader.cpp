@@ -3990,7 +3990,7 @@ UniverseLoader::loadBodyInfo(const QVariantMap& item)
 }
 
 
-QStringList
+CatalogContents*
 UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                                  UniverseCatalog* catalog)
 {
@@ -3998,13 +3998,15 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
 }
 
 
-QStringList
+CatalogContents*
 UniverseLoader::loadCatalogFile(const QString& fileName,
                                 UniverseCatalog* catalog)
 {
     if (fileName.toLower().endsWith(".ssc"))
     {
-        return loadSSC(fileName, catalog, 0);
+        QStringList spiceKernels;
+        QStringList bodyNames = loadSSC(fileName, catalog, 0);
+        return new CatalogContents(bodyNames, spiceKernels);
     }
     else
     {
@@ -4083,7 +4085,9 @@ UniverseLoader::loadSSC(const QString& fileName,
     contents.insert("version", "1.0");
     contents.insert("items", items);
 
-    bodyNames = loadCatalogItems(contents, catalog, requireDepth + 1);
+    CatalogContents* catalogContents = loadCatalogItems(contents, catalog, requireDepth + 1);
+    bodyNames = catalogContents->bodyNames();
+    delete catalogContents;
 
     // Restore search paths
     setDataSearchPath(saveDataSearchPath);
@@ -4100,14 +4104,13 @@ UniverseLoader::loadSSC(const QString& fileName,
 }
 
 
-QStringList
+CatalogContents*
 UniverseLoader::loadCatalogFile(const QString& fileName,
                                 UniverseCatalog* catalog,
                                 unsigned int requireDepth)
 {
-    QStringList bodyNames;
-
     QString path = dataFileName(fileName);
+    CatalogContents* contents = new CatalogContents();
 
     QFileInfo info(path);
     path = info.canonicalFilePath();
@@ -4115,20 +4118,20 @@ UniverseLoader::loadCatalogFile(const QString& fileName,
     if (m_loadedCatalogFiles.contains(path))
     {
         // File is already loaded
-        return bodyNames;
+        return contents;
     }
 
     if (requireDepth > 10)
     {
         errorMessage("'require' is nested too deeply (recursive requires?)");
-        return bodyNames;
+        return contents;
     }
 
     QFile catalogFile(path);
     if (!catalogFile.open(QIODevice::ReadOnly))
     {
         errorMessage(QString("Cannot open required file %1").arg(path));
-        return bodyNames;
+        return contents;
     }
 
     // Strip single-line C++ style comments from the JSON text. This is a
@@ -4147,14 +4150,14 @@ UniverseLoader::loadCatalogFile(const QString& fileName,
     if (!parseOk)
     {
         errorMessage(QString("Error in %1, line %2: %3").arg(path).arg(parser.errorLine()).arg(parser.errorString()));
-        return bodyNames;
+        return contents;
     }
 
-    QVariantMap contents = result.toMap();
-    if (contents.empty())
+    QVariantMap contentsMap = result.toMap();
+    if (contentsMap.empty())
     {
-        errorMessage("Solar system file is empty.");
-        return bodyNames;
+        errorMessage("Solar system catalog is empty.");
+        return contents;
     }
 
     // Save search paths
@@ -4165,18 +4168,19 @@ UniverseLoader::loadCatalogFile(const QString& fileName,
     setDataSearchPath(searchPath);
     setModelSearchPath(searchPath);
 
-    bodyNames = loadCatalogItems(contents, catalog, requireDepth + 1);
+    delete contents;
+    contents = loadCatalogItems(contentsMap, catalog, requireDepth + 1);
 
     // Restore search paths
     setDataSearchPath(saveDataSearchPath);
     setModelSearchPath(saveModelSearchPath);
 
-    return bodyNames;
+    return contents;
 }
 
 
-QStringList
-UniverseLoader::loadCatalogItems(const QVariantMap& contents,
+CatalogContents*
+UniverseLoader::loadCatalogItems(const QVariantMap& contentsMap,
                                  UniverseCatalog* catalog,
                                  unsigned int requireDepth)
 {
@@ -4185,25 +4189,25 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
 #endif
     m_currentBodyName = "";
 
-    QStringList bodyNames;
+    CatalogContents* contents = new CatalogContents();
 
     // Validate the file version (must be 1.0 right now)
-    QVariant versionVar = contents.value("version");
+    QVariant versionVar = contentsMap.value("version");
     if (!versionVar.isValid())
     {
         errorMessage("Version missing from catalog file");
-        return bodyNames;
+        return contents;
     }
     else if (versionVar.toString() != "1.0")
     {
         qDebug() << versionVar;
         errorMessage(QString("Unsupported catalog file version %1 (only version 1.0 allowed)").arg(versionVar.toString()));
-        return bodyNames;
+        return contents;
     }
 
-    if (contents.contains("require"))
+    if (contentsMap.contains("require"))
     {
-        QVariant requireVar = contents.value("require");
+        QVariant requireVar = contentsMap.value("require");
         if (requireVar.type() == QVariant::List)
         {
             QVariantList requireList = requireVar.toList();
@@ -4214,11 +4218,15 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                     QString fileName = v.toString();
                     if (fileName.toLower().endsWith(".ssc"))
                     {
+                        QStringList bodyNames = contents->bodyNames();
                         bodyNames << loadSSC(fileName, catalog, requireDepth);
+                        contents->setBodyNames(bodyNames);
                     }
                     else
                     {
-                        bodyNames << loadCatalogFile(fileName, catalog, requireDepth);
+                        CatalogContents* catalogContents = loadCatalogFile(fileName, catalog, requireDepth);
+                        contents->appendContents(catalogContents);
+                        delete catalogContents;
                     }
                 }
             }
@@ -4229,17 +4237,36 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
         }
     }
 
-    if (!contents.contains("items"))
+    if (!contentsMap.contains("items"))
     {
-        return bodyNames;
+        return contents;
     }
 
-    if (contents["items"].type() != QVariant::List)
+    if (contentsMap["items"].type() != QVariant::List)
     {
         errorMessage("items is not a list.");
-        return bodyNames;
+        return contents;
     }
-    QVariantList items = contents["items"].toList();
+    QVariantList items = contentsMap["items"].toList();
+
+    if (contentsMap.contains("spiceKernels"))
+    {
+        QVariant kernelsVar = contentsMap["spiceKernels"];
+        if (kernelsVar.type() != QVariant::List)
+        {
+            errorMessage("spiceKernels is not a list.");
+            return contents;
+        }
+
+        QVariantList kernelList = kernelsVar.toList();
+        QStringList resolvedKernelFileList = resolveSpiceKernelList(kernelList);
+        foreach (QString kernelFile, resolvedKernelFileList)
+        {
+            contents->appendSpiceKernel(kernelFile);
+        }
+
+        loadSpiceKernels(resolvedKernelFileList);
+    }
 
     foreach (QVariant itemVar, items)
     {
@@ -4378,7 +4405,7 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
                         body->chronology()->addArc(arc.ptr());
                     }
 
-                    bodyNames << bodyName;
+                    contents->appendBody(bodyName);
                 }
                 else
                 {
@@ -4460,9 +4487,54 @@ UniverseLoader::loadCatalogItems(const QVariantMap& contents,
         }
     }
 
-    return bodyNames;
+    return contents;
 }
 
+
+void
+UniverseLoader::loadSpiceKernels(const QStringList& kernelList)
+{
+#ifdef SPICE_ENABLED
+    foreach (QString kernel, kernelList)
+    {
+        furnsh_c(kernel.toLatin1().data());
+    }
+#endif
+}
+
+
+QStringList
+UniverseLoader::resolveSpiceKernelList(const QVariantList& kernelList)
+{
+    QStringList resolvedKernelFilePaths;
+    foreach (QVariant kernel, kernelList)
+    {
+        if (kernel.type() == QVariant::String)
+        {
+            QString kernelFileName = kernel.toString();
+            resolvedKernelFilePaths << dataFileName(kernelFileName);
+        }
+        else
+        {
+            errorMessage("Spice kernel list contains non-string value.");
+        }
+    }
+
+    return resolvedKernelFilePaths;
+}
+
+
+void
+UniverseLoader::unloadSpiceKernels(const QStringList& kernelList)
+{
+#ifdef SPICE_ENABLED
+    for (int i = kernelList.length() - 1; i >= 0; --i)
+    {
+        QString kernel = kernelList.at(i);
+        unload_c(kernel.toLatin1().data());
+    }
+#endif
+}
 
 void
 UniverseLoader::addBuiltinOrbit(const QString& name, vesta::Trajectory* trajectory)

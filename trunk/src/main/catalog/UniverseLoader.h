@@ -44,14 +44,54 @@ class Viewpoint;
 class TwoVectorFrameDirection;
 class PathRelativeTextureLoader;
 
+class CatalogContents
+{
+public:
+    CatalogContents()
+    {
+    }
+
+    CatalogContents(const QStringList& bodyNames, const QStringList& spiceKernels) :
+        m_bodyNames(bodyNames),
+        m_spiceKernels(spiceKernels)
+    {
+    }
+
+    ~CatalogContents() {}
+
+    QStringList bodyNames() const { return m_bodyNames; }
+    QStringList spiceKernels() const { return m_spiceKernels; }
+    void setBodyNames(const QStringList& bodyNames) { m_bodyNames = bodyNames; }
+    void setSpiceKernels(const QStringList& spiceKernels) { m_spiceKernels = spiceKernels; }
+    void appendContents(const CatalogContents* contents)
+    {
+        m_bodyNames << contents->bodyNames();
+        m_spiceKernels << contents->spiceKernels();
+    }
+
+    void appendBody(const QString& bodyName)
+    {
+        m_bodyNames << bodyName;
+    }
+
+    void appendSpiceKernel(const QString& spiceKernel)
+    {
+        m_spiceKernels << spiceKernel;
+    }
+
+private:
+    QStringList m_bodyNames;
+    QStringList m_spiceKernels;
+};
+
 class UniverseLoader
 {
 public:
     UniverseLoader();
     ~UniverseLoader();
 
-    QStringList loadCatalogItems(const QVariantMap& contents,
-                                 UniverseCatalog* catalog);
+    CatalogContents* loadCatalogItems(const QVariantMap& contents,
+                                      UniverseCatalog* catalog);
 
     vesta::TextureMapLoader* textureLoader() const;
 
@@ -80,8 +120,10 @@ public:
         m_texturesInModelDirectory = enable;
     }
 
-    QStringList loadCatalogFile(const QString& fileName,
-                                UniverseCatalog* catalog);
+    CatalogContents* loadCatalogFile(const QString& fileName,
+                                     UniverseCatalog* catalog);
+    void unloadSpiceKernels(const QStringList& kernelList);
+
     void clearMessageLog();
     QString messageLog();
 
@@ -149,9 +191,9 @@ private:
 
     BodyInfo* loadBodyInfo(const QVariantMap& item);
 
-    QStringList loadCatalogItems(const QVariantMap& contents,
-                                 UniverseCatalog* catalog,
-                                 unsigned int requireDepth);
+    CatalogContents* loadCatalogItems(const QVariantMap& contents,
+                                      UniverseCatalog* catalog,
+                                      unsigned int requireDepth);
 
 private:
     QString dataFileName(const QString& fileName);
@@ -160,12 +202,15 @@ private:
     void cleanGeometryCache();
     vesta::Geometry* loadMeshFile(const QString& fileName);
 
-    QStringList loadCatalogFile(const QString& fileName,
-                                UniverseCatalog* catalog,
-                                unsigned int requireDepth);
+    CatalogContents* loadCatalogFile(const QString& fileName,
+                                     UniverseCatalog* catalog,
+                                     unsigned int requireDepth);
     QStringList loadSSC(const QString& fileName,
                         UniverseCatalog* catalog,
                         unsigned int requireDepth);
+    void loadSpiceKernels(const QStringList &kernelList);
+    QStringList resolveSpiceKernelList(const QVariantList &kernelList);
+
     void errorMessage(const QString& message);
     void warningMessage(const QString& message);
 

@@ -49,10 +49,21 @@ public:
 
     void addObject(const QString& objectName);
 
+    QStringList spiceKernels() const
+    {
+        return m_spiceKernels;
+    }
+
+    void setSpiceKernels(const QStringList& spiceKernels)
+    {
+        m_spiceKernels = spiceKernels;
+    }
+
 private:
     QString m_source;
     QString m_title;
     QStringList m_objects;
+    QStringList m_spiceKernels;
 };
 
 #endif // _ADDON_H_

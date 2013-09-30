@@ -1306,6 +1306,8 @@ Cosmographia::unloadLastCatalog()
             removeBody(objectName);
         }
 
+        m_loader->unloadSpiceKernels(addOn->spiceKernels());
+
         // Delete the addOn
         m_loadedAddOns.removeLast();
         delete addOn;
@@ -1528,7 +1530,8 @@ Cosmographia::loadCatalogFile(const QString& fileName)
     }
 
     m_loader->clearMessageLog();
-    QStringList bodyNames = m_loader->loadCatalogFile(info.fileName(), m_catalog);
+    CatalogContents* contents = m_loader->loadCatalogFile(info.fileName(), m_catalog);
+    QStringList bodyNames = contents->bodyNames();
     QString errorMessages = m_loader->messageLog();
     if (!errorMessages.isEmpty())
     {
@@ -1539,6 +1542,8 @@ Cosmographia::loadCatalogFile(const QString& fileName)
         AddOn* addOn = new AddOn();
         addOn->setSource(info.absoluteFilePath());
         addOn->setTitle(info.fileName());
+
+        addOn->setSpiceKernels(contents->spiceKernels());
         foreach (QString name, bodyNames)
         {
             addOn->addObject(name);

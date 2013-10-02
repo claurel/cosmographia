@@ -1565,13 +1565,31 @@ UniverseLoader::loadFixedEulerRotationModel(const QVariantMap& map)
 
 
 vesta::RotationModel*
-UniverseLoader::loadSpiceRotationModel(const QVariantMap &info)
+UniverseLoader::loadSpiceRotationModel(const QVariantMap &map)
 {
 #ifndef SPICE_ENABLED
     errorMessage("SPICE support unavailable in this version of Cosmographia.");
     return NULL;
 #else
-    return NULL;
+    QVariant fromFrameVar = map.value("fromFrame");
+    QVariant toFrameVar = map.value("toFrame");
+
+    if (fromFrameVar.isNull())
+    {
+        errorMessage("fromFrame missing in SPICE rotation model.");
+        return NULL;
+    }
+
+    QString fromFrame = fromFrameVar.toString();
+    QString toFrame = "J2000";
+    if (!toFrameVar.isNull())
+    {
+        toFrame = toFrameVar.toString();
+    }
+
+    SpiceRotationModel* rotationModel = new SpiceRotationModel(fromFrame.toLatin1().data(), toFrame.toLatin1().data());
+
+    return rotationModel;
 #endif
 }
 

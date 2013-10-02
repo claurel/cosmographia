@@ -12,6 +12,20 @@ At the current time, SPICE support is disabled in the default build. It can be t
 CONFIG += spice
 }}}
 
+= SPICE Kernels =
+
+The spiceKernels property lists all the kernels required by objects in a Cosmographia catalog file.
+
+Example:
+{{{
+"spiceKernels" :
+[
+     "de421.bsp",
+     "sat341.bsp",
+     "pck00010.tpc"
+]
+}}}
+
 = SPICE Trajectories =
 
 A Cosmographia trajectory may be linked to the position of a SPICE object.
@@ -32,4 +46,13 @@ A Cosmographia trajectory may be linked to the position of a SPICE object.
 
 = SPICE Rotation Model = 
 
-A Cosmographia rotation model may be linked to a named SPICE frame.
+A Cosmographia rotation model may be linked to a named SPICE frame. At a given instant, the SPICE rotation model will give the rotation that transforms coordinates from _fromFrame_ to _toFrame_. In general, the toFrame should match whatever the body frame of the object is. toFrame defaults to "J2000", which is the same as the default body frame.
+
+{{{
+"rotationModel" :
+{
+    "type" : "Spice",
+    "fromFrame" : "IAU_SATURN",
+    "toFrame" : "ECLIPJ2000"
+}
+}}}

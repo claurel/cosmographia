@@ -104,7 +104,7 @@ The default values for arc properties are:
 {
      "type" : "Mesh",
       "size" : "4.2 km",
-      "source" : "models/asteroid.3ds"
+      "source" : "models/asteroid.3ds",
       "meshRotation" : [ 1, 0, 0, 0 ]
 }
 }}}

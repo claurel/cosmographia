@@ -105,10 +105,13 @@ The default values for arc properties are:
      "type" : "Mesh",
       "size" : "4.2 km",
       "source" : "models/asteroid.3ds"
+      "meshRotation" : [ 1, 0, 0, 0 ]
 }
 }}}
 
 The size of the mesh can be specified in two ways. If the _size_ property is present, the mesh will be scaled to fit into a sphere of that radius. Otherwise, the size of the mesh is determined by the coordinates of the vertices in the mesh file. If the _scale_ property is present, the mesh's coordinates will be scaled by that factor. If the units of the mesh file are meters, the value of _scale_ should be 0.001.
+
+meshRotation can be used to orient a mesh with respect to its coordinate system. The value of the meshRotation is a quaternion, given as an array of four numbers in the order w, x, y, z. In the above example, the meshRotation is the default value, identity, indicating no rotation.
 
 == Globe ==
 

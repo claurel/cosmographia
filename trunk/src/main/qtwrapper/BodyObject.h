@@ -30,9 +30,11 @@ class BodyObject : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QString name READ name)
+    Q_PROPERTY(bool isEllipsoid READ isEllipsoid)
     Q_PROPERTY(bool bodyAxes READ bodyAxes WRITE setBodyAxes)
     Q_PROPERTY(bool frameAxes READ frameAxes WRITE setFrameAxes)
     Q_PROPERTY(bool velocityArrow READ velocityArrow WRITE setVelocityArrow)
+    Q_PROPERTY(bool longLatGrid READ longLatGrid WRITE setLongLatGrid)
 
 public:
     Q_INVOKABLE bool hasVisualizer(const QString& name) const;
@@ -51,6 +53,7 @@ public:
     }
 
     QString name() const;
+    bool isEllipsoid() const;
 
     bool bodyAxes() const;
     void setBodyAxes(bool enabled);
@@ -58,6 +61,8 @@ public:
     void setFrameAxes(bool enabled);
     bool velocityArrow() const;
     void setVelocityArrow(bool enabled);
+    bool longLatGrid() const;
+    void setLongLatGrid(bool enabled);
 
 private:
     float visualizerSize() const;

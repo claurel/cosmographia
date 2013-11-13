@@ -67,6 +67,10 @@ Item
         menuModel.append({ action: "none",        labelText: " ", checked: false, type: "camera" });
 
         menuModel.append({ action: "plot",        labelText: "Plot Trajectory", checked: universeView.hasTrajectoryPlots(body), type: "camera" });
+        if (body.isEllipsoid)
+        {       
+            menuModel.append({ action: "grid",        labelText: "Long/Lat Grid", checked: body.longLatGrid, type: "camera" });
+        }
 
         menuModel.append({ action: "bodyaxes",    labelText: "Body Axes", checked: body.bodyAxes, type: "vectors" });
         menuModel.append({ action: "frameaxes",   labelText: "Frame Axes", checked: body.frameAxes, type: "vectors" });
@@ -139,6 +143,10 @@ Item
         else if (item.action == "velocity")
         {
             selection.velocityArrow = !selection.velocityArrow;
+        }
+        else if (item.action == "grid")
+        {
+            selection.longLatGrid = !selection.longLatGrid;
         }
         else if (item.action == "sun")
         {

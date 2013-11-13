@@ -19,6 +19,8 @@
 #include "vesta/AxesVisualizer.h"
 #include "vesta/VelocityVisualizer.h"
 #include "vesta/Arc.h"
+#include "vesta/WorldGeometry.h"
+#include "vesta/PlanetGridLayer.h"
 #include <QDebug>
 
 using namespace vesta;
@@ -48,6 +50,13 @@ BodyObject::name() const
     {
         return "";
     }
+}
+
+
+bool
+BodyObject::isEllipsoid() const
+{
+    return (m_body.isValid() && m_body->geometry() != NULL && m_body->geometry()->isEllipsoidal());
 }
 
 
@@ -123,6 +132,36 @@ BodyObject::setVelocityArrow(bool enabled)
     else
     {
         m_body->removeVisualizer("velocity direction");
+    }
+}
+
+
+bool
+BodyObject::longLatGrid() const
+{
+    WorldGeometry* world = dynamic_cast<WorldGeometry*>(m_body->geometry());
+    return world != NULL && world->layer("long lat grid") != NULL;
+}
+
+
+void
+BodyObject::setLongLatGrid(bool enabled)
+{
+    WorldGeometry* world = dynamic_cast<WorldGeometry*>(m_body->geometry());
+    std::cerr << "setLongLatGrid\n";
+    if (enabled)
+    {
+        if (world != NULL)
+        {
+            std::cerr << "world != NULL\n";
+            PlanetGridLayer* grid = new PlanetGridLayer();
+            grid->setVisibility(true);
+            world->setLayer("long lat grid", grid);
+        }
+    }
+    else
+    {
+        world->removeLayer("long lat grid");
     }
 }
 

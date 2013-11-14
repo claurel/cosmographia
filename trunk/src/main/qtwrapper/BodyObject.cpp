@@ -148,12 +148,10 @@ void
 BodyObject::setLongLatGrid(bool enabled)
 {
     WorldGeometry* world = dynamic_cast<WorldGeometry*>(m_body->geometry());
-    std::cerr << "setLongLatGrid\n";
     if (enabled)
     {
         if (world != NULL)
         {
-            std::cerr << "world != NULL\n";
             PlanetGridLayer* grid = new PlanetGridLayer();
             grid->setVisibility(true);
             world->setLayer("long lat grid", grid);

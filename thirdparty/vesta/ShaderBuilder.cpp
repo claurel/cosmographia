@@ -527,30 +527,38 @@ static void generateUnlitShader(ostream& vertex, ostream& fragment, const Shader
 }
 
 
-static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const ShaderInfo& shaderInfo)
+static void generateStandardShader(ostream& vertex, ostream& fragment, const ShaderInfo& shaderInfo)
 {
+    // True when the surface normal is defined
+    bool hasSurface = true;
+    bool hasPhaseFunction = false;
+    if (shaderInfo.reflectanceModel() == ShaderInfo::Particulate ||
+        shaderInfo.reflectanceModel() == ShaderInfo::RingParticles)
+    {
+        hasSurface = false;
+        hasPhaseFunction = true;
+    }
+
     bool phong = shaderInfo.reflectanceModel() == ShaderInfo::BlinnPhong;
-    bool hasTangents = shaderInfo.hasTexture(ShaderInfo::NormalTexture);
+    bool hasTangents = hasSurface && shaderInfo.hasTexture(ShaderInfo::NormalTexture);
     bool hasLocalLightSources = shaderInfo.pointLightCount() > 0;
-    bool hasEnvironmentMap = shaderInfo.hasTexture(ShaderInfo::ReflectionTexture);
+    bool hasEnvironmentMap = hasSurface && shaderInfo.hasTexture(ShaderInfo::ReflectionTexture);
 
     // View dependent is set to true when atmospheric scattering is enabled or
     // when the reflectance model is view-dependent (i.e. almost anything but
     // a purely Lambertian surface.)
-    bool isViewDependent = false;
-    if (shaderInfo.reflectanceModel() == ShaderInfo::BlinnPhong ||
-        hasEnvironmentMap ||
-        shaderInfo.hasScattering())
-    {
-        isViewDependent = true;
-    }
+    bool isViewDependent = shaderInfo.isViewDependent();
 
     bool usesPosition = isViewDependent || hasLocalLightSources;
 
     declareTransformations(vertex);
 
     // Interpolated variables
-    declareVarying(vertex, fragment, "vec3", "normal", MediumPrec);   // surface normal
+    if (hasSurface)
+    {
+        declareVarying(vertex, fragment, "vec3", "normal", MediumPrec);   // surface normal
+    }
+
     if (usesPosition)
     {
         declareVarying(vertex, fragment, "vec3", "position"); // position in local space
@@ -664,11 +672,14 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     {
         vertex << "    vertexColor = gl_Color;" << endl;
     }
-    if (hasTangents)
+    if (hasSurface)
     {
-        vertex << "    tangent = " << ShaderBuilder::TangentAttribute << ";" << endl;
+        if (hasTangents)
+        {
+            vertex << "    tangent = " << ShaderBuilder::TangentAttribute << ";" << endl;
+        }
+        vertex << "    normal = " << ShaderBuilder::NormalAttribute << ";" << endl;
     }
-    vertex << "    normal = " << ShaderBuilder::NormalAttribute << ";" << endl;
     if (usesPosition)
     {
         // Note that this is the model space position
@@ -744,7 +755,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         // Map the normal from surface local space to model space
         fragment << "    vec3 N = m.x * T + m.y * B + m.z * Ngeom;" << endl;
     }
-    else
+    else if (hasSurface)
     {
         fragment << "    vec3 N = normalize(normal);" << endl;
     }
@@ -752,7 +763,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     fragment << "    vec3 diffLight = ambientLight;" << endl;
     if (isViewDependent)
     {
-        fragment << "   vec3 V = normalize(eyePosition - " << position(shaderInfo) << ");" << endl;
+        fragment << "    vec3 V = normalize(eyePosition - " << position(shaderInfo) << ");" << endl;
     }
     if (phong)
     {
@@ -774,6 +785,18 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
             fragment << "vec3 sc = vec3(0.0, 0.0, 0.0);" << endl;  // scattering
             fragment << "vec3 sunAttenuation = vec3(1.0, 1.0, 1.0);" << endl;  // extinction
             fragment << "vec3 eyeAttenuation = vec3(1.0, 1.0, 1.0);" << endl;  // extinction
+        }
+    }
+
+    if (shaderInfo.reflectanceModel() == ShaderInfo::RingParticles)
+    {
+        if (shaderInfo.hasTexture(ShaderInfo::DiffuseTexture))
+        {
+            fragment << "    float tau = texture2D(diffuseTex, texCoord).a;" << endl;
+        }
+        else
+        {
+            fragment << "    float tau = 1.0;" << endl;
         }
     }
 
@@ -803,7 +826,14 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
             fragment << "        float lightIntensity = 1.0 / max(1.0, dist2 * " << arrayIndex("lightAttenuation", light) << ");" << endl;
         }
 
-        fragment << "        float d = max(0.0, dot(N, " << lightDirection << "));" << endl;
+        if (hasSurface)
+        {
+            fragment << "        float d = max(0.0, dot(N, " << lightDirection << "));" << endl;
+        }
+        else
+        {
+            fragment << "        float d = 1.0;" << endl;
+        }
 
         // Presently, a maximum of one directional shadow, three omnidirectional shadows, and seven eclipse shadows are supported.
         if (!isPointLight && (shaderInfo.shadowCount() != 0 || shaderInfo.eclipseShadowCount() != 0 || shaderInfo.hasRingShadows()))
@@ -857,6 +887,21 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
         if (isPointLight)
         {
             fragment << "        shadow *= lightIntensity;" << endl;
+        }
+
+        if (hasPhaseFunction)
+        {
+            // Henyey-Greenstein phase function, factor of 1/2 used instead of correct normalization factor of 1/4 in
+            // order to prevent particles from appearing too dark.
+            fragment << "        float cosLV = dot(" << lightPosition << ", V);\n";
+            fragment << "        float phaseG = 0.3;\n";
+            fragment << "        d *= 0.5 * (1.0 - phaseG * phaseG) * pow(1.0 + phaseG * phaseG - 2.0 * phaseG * cosLV, -1.5);" << endl;
+        }
+
+        if (shaderInfo.reflectanceModel() == ShaderInfo::RingParticles)
+        {
+            fragment << "        float lit = 1.0 - step(0.0, " << lightPosition << ".z * V.z);" << endl;
+            fragment << "        d *= mix(d, d * (1.0 - tau), lit);" << endl;
         }
 
         string lightColor = arrayIndex("lightColor", light);
@@ -965,7 +1010,7 @@ static void generateBlinnPhongShader(ostream& vertex, ostream& fragment, const S
     string alphaSum = "diffuse.a";
     if (shaderInfo.hasScattering())
     {
-        colorSum = "(" + colorSum + ") * eyeAttenuation * 1.0 + sc * 2.0";
+        colorSum = "(" + colorSum + ") * eyeAttenuation + sc * 3.0";
         alphaSum = "diffuse.a + (1.0 - eyeAttenuation.g)";
     }
 
@@ -1185,7 +1230,7 @@ static void generateParticulateShader(ostream& vertex, ostream& fragment, const 
     string alphaSum = "diffuse.a";
     if (shaderInfo.hasScattering())
     {
-        colorSum = "(" + colorSum + ") * eyeAttenuation * 1.0 + sc * 2.0";
+        colorSum = "(" + colorSum + ") * eyeAttenuation * 1.0 + sc * 4.0";
         alphaSum = "diffuse.a + (1.0 - eyeAttenuation.g)";
     }
 
@@ -1539,13 +1584,9 @@ ShaderBuilder::generateShader(const ShaderInfo& shaderInfo) const
         {
             generateUnlitShader(vertex, fragment, shaderInfo);
         }
-        else if (shaderInfo.reflectanceModel() == ShaderInfo::Particulate)
-        {
-            generateParticulateShader(vertex, fragment, shaderInfo);
-        }
         else
         {
-            generateBlinnPhongShader(vertex, fragment, shaderInfo);
+            generateStandardShader(vertex, fragment, shaderInfo);
         }
     }
 

@@ -26,10 +26,11 @@ class ShaderInfo
 public:
     enum ReflectanceModel
     {
-        Emissive    = 0,
-        Lambert     = 1,
-        BlinnPhong  = 2,
-        Particulate = 3,
+        Emissive      = 0,
+        Lambert       = 1,
+        BlinnPhong    = 2,
+        Particulate   = 3,
+        RingParticles = 4
     };
 
     enum
@@ -39,7 +40,7 @@ public:
         SpecularTexture   = 0x02,
         NormalTexture     = 0x04,
         EmissiveTexture   = 0x08,
-        ReflectionTexture = 0x10,
+        ReflectionTexture = 0x10
     };
 
     enum
@@ -262,6 +263,25 @@ public:
     void setCompressedNormalMap(bool enable)
     {
         m_data = (m_data & ~CompressedNormalMapMask) | (enable ? CompressedNormalMapMask : 0x0);
+    }
+
+    bool isViewDependent() const
+    {
+        // The shader depends on the viewer's position when atmospheric scattering
+        // is enabled or when the reflectance model is view dependent (i.e. almost
+        // anything but a purely Lambertian surface.)
+        if (reflectanceModel() == ShaderInfo::Emissive)
+        {
+            return false;
+        }
+        else if (reflectanceModel() == ShaderInfo::Lambert)
+        {
+            return hasTexture(ShaderInfo::ReflectionTexture) || hasScattering();
+        }
+        else
+        {
+            return true;
+        }
     }
 
 private:

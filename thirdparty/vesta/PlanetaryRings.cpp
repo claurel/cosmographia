@@ -40,7 +40,7 @@ PlanetaryRings::render(RenderContext& rc,
     if (rc.pass() == RenderContext::TranslucentPass)
     {
         Material material;
-        material.setBrdf(Material::ParticulateVolume);
+        material.setBrdf(Material::RingParticles);
         material.setDiffuse(Spectrum::Flat(1.0f));
         material.setOpacity(0.99f);
         material.setBlendMode(Material::AlphaBlend);

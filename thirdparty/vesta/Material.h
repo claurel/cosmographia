@@ -44,6 +44,7 @@ public:
         BlinnPhong,
         BlinnPhongReflective,
         ParticulateVolume,
+        RingParticles
     };
 
     Material() :

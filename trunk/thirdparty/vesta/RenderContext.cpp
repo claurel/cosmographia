@@ -967,6 +967,10 @@ computeShaderInfo(const Material* material,
     {
         shaderInfo.setReflectanceModel(ShaderInfo::Particulate);
     }
+    else if (material->brdf() == Material::RingParticles)
+    {
+        shaderInfo.setReflectanceModel(ShaderInfo::RingParticles);
+    }
     else if (!vertexInfo->hasNormals)
     {
         // Only very limited lighting models are available when we don't have
@@ -1122,12 +1126,7 @@ RenderContext::setShaderMaterial(const Material* material)
     m_currentShader = shader;
 
     ShaderInfo::ReflectanceModel model = shaderInfo.reflectanceModel();
-    bool isViewDependent = false;
-    if (model == ShaderInfo::BlinnPhong || model == ShaderInfo::Particulate ||
-        shaderInfo.hasScattering() || shaderInfo.hasTexture(ShaderInfo::ReflectionTexture))
-    {
-        isViewDependent = true;
-    }
+    bool isViewDependent = shaderInfo.isViewDependent();
 
     if (model == ShaderInfo::Emissive)
     {

@@ -54,7 +54,7 @@ Dates may be specified as Julian day numbers or as ISO 8601 date and time string
  * 2451545.0 _(Julian day number representing the above date)_
  * "2011-03-11" _(time may be omitted indicating midnight on the given date)_
 
-Dates are always interpreted in the TDB time system; as of 2011, this is 66 seconds ahead of UTC.
+Dates are by default interpreted in the TDB time system; as of 2014, this is 67 seconds ahead of UTC. To specify a date in UTC, the date string may be suffixed with 'UTC', e.g. "2014-01-21 10:12:00 UTC". The suffix 'TDB' is also valid in a date string; while it doesn't alter the default behavior, it may be added to clarify that that the time system in use is TDB.
 
 = Catalog File Properties =
 

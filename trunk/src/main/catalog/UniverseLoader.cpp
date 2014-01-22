@@ -770,7 +770,18 @@ static double dateValue(QVariant v, bool* ok)
 
     if (v.type() == QVariant::String)
     {
-        QString dateString = v.toString();
+        QString dateString = v.toString().trimmed();
+
+        bool dateIsUtc = false;
+        if (dateString.endsWith("UTC",Qt::CaseInsensitive)) {
+            dateString.chop(3);
+            dateString = dateString.trimmed();
+            dateIsUtc = true;
+        }
+        else if (dateString.endsWith("TDB",Qt::CaseInsensitive)) {
+            dateString.chop(3);
+            dateString = dateString.trimmed();
+        }
 
         // Try different methods of date parsing. The ISODate format requires the seconds field to be present
         // in the time, otherwise the time is silently ignored. This results in 2011-11-19 14:00 getting
@@ -785,9 +796,17 @@ static double dateValue(QVariant v, bool* ok)
         if (d.isValid())
         {
             *ok = true;
-            GregorianDate date(d.date().year(), d.date().month(), d.date().day(),
-                               d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
-                               TimeScale_TDB);
+            GregorianDate date;
+            if (dateIsUtc) {
+                date = GregorianDate(d.date().year(), d.date().month(), d.date().day(),
+                                   d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
+                                   TimeScale_UTC);
+            }
+            else {
+                date = GregorianDate(d.date().year(), d.date().month(), d.date().day(),
+                                   d.time().hour(), d.time().minute(), d.time().second(), d.time().msec() * 1000,
+                                   TimeScale_TDB);
+            }
             tsec = date.toTDBSec();
         }
         else
